@@ -234,7 +234,7 @@ app.post('/api/register', async (req, res) => {
 
     const pending = await User.findOne({ phone });
     if (!pending)
-      return res.status(400).json({ error: 'Aucune demande pour ce numéro — demandez un code d'abord' });
+      return res.status(400).json({ error: "Aucune demande pour ce numéro — demandez un code d'abord" });
     if (pending.verified)
       return res.status(400).json({ error: 'Ce numéro est déjà inscrit' });
     if (pending.verifyCode !== code)
@@ -265,16 +265,16 @@ app.post('/api/login', async (req, res) => {
   try {
     const { identifier, password } = req.body;
     if (!identifier || !password)
-      return res.status(400).json({ error: 'Identifiant et mot de passe requis' });
+      return res.status(400).json({ error: "Identifiant et mot de passe requis" });
 
     // Recherche par téléphone OU par email
     const user = await User.findOne({
       $or: [{ phone: identifier }, { email: identifier.toLowerCase() }]
     });
     if (!user)
-      return res.status(400).json({ error: 'Compte introuvable — vérifiez votre numéro ou email' });
+      return res.status(400).json({ error: "Compte introuvable — vérifiez votre numéro ou email" });
     if (!user.verified)
-      return res.status(400).json({ error: 'Compte non vérifié — confirmez votre SMS ou email' });
+      return res.status(400).json({ error: "Compte non vérifié — confirmez votre SMS ou email" });
 
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(400).json({ error: 'Mot de passe incorrect' });
@@ -633,4 +633,3 @@ app.listen(PORT, () => {
   console.log(`🚀 YouGouYou API démarrée sur le port ${PORT}`);
   console.log(`📋 Endpoints admin : /api/admin/users | /api/admin/ads | /api/admin/payments`);
 });
-
