@@ -1,1 +1,1499 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YouGouYou — Le marché de la Guinée</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Instrument+Serif:ital@0;1&family=Righteous&display=swap" rel="stylesheet">
+<style>
+:root{
+  --or:#FF5C00;--or2:#C94A00;--orl:#FFF3EE;--orm:#FFB899;
+  --ink:#0E0E0E;--ink2:#2A2A2A;
+  --muted:#767676;--subtle:#A8A8A8;
+  --bg:#F5F2EE;--wh:#FFFFFF;
+  --br:#E2DDD7;--brl:#F0EDE9;
+  --gr:#00A550;--re:#D92D20;
+  --rad:18px;--rads:10px;
+  --sh:0 1px 3px rgba(14,14,14,.06),0 1px 2px rgba(14,14,14,.04);
+  --shm:0 4px 16px rgba(14,14,14,.08);
+  --shl:0 24px 48px rgba(14,14,14,.12);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Cabinet Grotesk',sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+.page{display:none}.page.active{display:block}
 
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+@keyframes pulse{0%,100%{opacity:.4;transform:scale(.75)}50%{opacity:1;transform:scale(1)}}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes modalIn{from{opacity:0;transform:translateY(32px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes tickPop{0%{transform:scale(0) rotate(-20deg)}70%{transform:scale(1.2) rotate(5deg)}100%{transform:scale(1) rotate(0)}}
+
+.fade-up{animation:fadeUp .6s cubic-bezier(.22,1,.36,1) both}
+.fade-up-2{animation:fadeUp .6s .12s cubic-bezier(.22,1,.36,1) both}
+.fade-up-3{animation:fadeUp .6s .24s cubic-bezier(.22,1,.36,1) both}
+
+/* ── NAV 2 LIGNES ── */
+nav{background:rgba(245,242,238,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--br);position:sticky;top:0;z-index:500}
+.nav-top{max-width:1320px;margin:0 auto;padding:0 28px;height:62px;display:flex;align-items:center;gap:14px}
+.logo{display:flex;align-items:center;gap:10px;cursor:pointer;text-decoration:none;flex-shrink:0}
+.logo-mark{width:36px;height:36px;background:var(--ink);border-radius:9px;display:grid;place-items:center;position:relative;overflow:hidden}
+.logo-mark::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,92,0,.6),transparent)}
+.logo-mark span{color:#fff;font-weight:900;font-size:12px;letter-spacing:-0.5px;position:relative;z-index:1}
+.logo-tx{font-family:'Righteous',sans-serif;font-size:22px;color:var(--ink);letter-spacing:0px;line-height:1}
+.logo-tx .Y{color:var(--or);font-size:26px;line-height:1}
+.logo-tx em{color:var(--muted);font-style:normal;font-size:18px}
+.nav-sc{flex:1;max-width:420px;display:flex;align-items:center;gap:10px;background:var(--wh);border:1.5px solid var(--br);border-radius:50px;padding:8px 18px;transition:all .2s}
+.nav-sc:focus-within{border-color:var(--or);box-shadow:0 0 0 3px rgba(255,92,0,.1)}
+.nav-sc input{border:none;background:transparent;font-family:'Cabinet Grotesk',sans-serif;font-size:14px;color:var(--ink);width:100%;outline:none}
+.nav-sc input::placeholder{color:var(--subtle)}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+/* barre catégories dans la nav */
+.nav-cats{border-top:1px solid var(--br);background:var(--wh)}
+.nav-cats-in{max-width:1320px;margin:0 auto;padding:0 28px;display:flex;align-items:stretch;overflow-x:auto;scrollbar-width:none}
+.nav-cats-in::-webkit-scrollbar{display:none}
+.ncat{display:flex;align-items:center;gap:7px;padding:10px 18px;cursor:pointer;border-bottom:2px solid transparent;font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap;flex-shrink:0;transition:all .18s;border-right:1px solid var(--br)}
+.ncat:hover,.ncat.active{color:var(--or);border-bottom-color:var(--or);background:var(--orl)}
+.ncat .em{font-size:15px}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 22px;border-radius:50px;font-family:'Cabinet Grotesk',sans-serif;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:all .22s;text-decoration:none;white-space:nowrap;letter-spacing:-.1px}
+.btn-ink{background:var(--ink);color:#fff}.btn-ink:hover{background:var(--ink2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(14,14,14,.2)}
+.btn-or{background:var(--or);color:#fff;box-shadow:0 2px 12px rgba(255,92,0,.3)}.btn-or:hover{background:var(--or2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,92,0,.4)}
+.btn-ghost{background:transparent;color:var(--ink);border:1.5px solid var(--br)}.btn-ghost:hover{border-color:var(--ink);background:var(--wh)}
+.btn-full{width:100%;justify-content:center;padding:14px}
+.btn-om{background:linear-gradient(135deg,#FF6A00,#FF5C00);color:#fff;box-shadow:0 3px 14px rgba(255,92,0,.35)}.btn-om:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,92,0,.45)}
+
+/* ── HERO ── */
+.hero{max-width:1320px;margin:0 auto;padding:72px 28px 56px;display:grid;grid-template-columns:1fr 480px;gap:80px;align-items:center}
+.hero-kicker{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#fff;font-size:12px;font-weight:700;padding:6px 14px;border-radius:50px;margin-bottom:24px;letter-spacing:.4px;text-transform:uppercase}
+.hero-kicker .dot{width:6px;height:6px;background:var(--or);border-radius:50%;animation:pulse 2s ease-in-out infinite}
+.hero h1{font-family:'Instrument Serif',serif;font-size:clamp(40px,5vw,68px);line-height:1.05;letter-spacing:-1.5px;color:var(--ink);margin-bottom:20px;font-weight:400}
+.hero h1 strong{font-weight:400;color:var(--or);font-style:italic}
+.hero-sub{font-size:17px;color:var(--muted);line-height:1.7;margin-bottom:36px;max-width:460px}
+.hero-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.hero-trust{display:flex;align-items:center;gap:12px;margin-top:32px;padding-top:28px;border-top:1px solid var(--br)}
+.trust-av{display:flex}
+.trust-av .av{width:30px;height:30px;border-radius:50%;border:2px solid var(--bg);background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-left:-8px}
+.trust-av .av:first-child{margin-left:0}
+.trust-txt{font-size:13px;color:var(--muted)}.trust-txt strong{color:var(--ink)}
+
+/* HERO SEARCH CARD */
+.hero-card{background:var(--wh);border-radius:24px;border:1px solid var(--br);box-shadow:var(--shl);padding:32px;position:relative;overflow:hidden}
+.hero-card::before{content:'';position:absolute;top:-60px;right:-60px;width:180px;height:180px;background:radial-gradient(circle,rgba(255,92,0,.08) 0%,transparent 70%);pointer-events:none}
+.hero-card-tt{font-family:'Instrument Serif',serif;font-size:22px;margin-bottom:24px;color:var(--ink);display:flex;align-items:center;gap:10px}
+.inp-grp{margin-bottom:16px}
+.inp-grp label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px}
+.inp-grp input,.inp-grp select{width:100%;padding:12px 16px;border:1.5px solid var(--br);border-radius:var(--rads);font-family:'Cabinet Grotesk',sans-serif;font-size:14px;color:var(--ink);background:var(--wh);outline:none;transition:all .2s;-webkit-appearance:none}
+.inp-grp input:focus,.inp-grp select:focus{border-color:var(--or);box-shadow:0 0 0 3px rgba(255,92,0,.08)}
+.inp-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.inp-price-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* strip removed - cats now in nav */
+
+/* ── SECTIONS ── */
+.sec{max-width:1320px;margin:0 auto;padding:56px 28px}
+.sec-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:28px}
+.sec-tt{font-family:'Instrument Serif',serif;font-size:30px;font-weight:400;color:var(--ink);letter-spacing:-.5px}
+.sec-sub{font-size:14px;color:var(--muted);margin-top:3px}
+.see-all-btn{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;border:1.5px solid var(--br);padding:8px 18px;border-radius:50px;transition:all .2s;background:var(--wh)}
+.see-all-btn:hover{border-color:var(--ink);background:var(--ink);color:#fff}
+
+/* ── AD CARDS ── */
+.ads-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+.ad-card{background:var(--wh);border-radius:var(--rad);overflow:hidden;cursor:pointer;transition:all .25s;border:1px solid var(--br);position:relative}
+.ad-card:hover{box-shadow:var(--shl);transform:translateY(-5px);border-color:transparent}
+.ad-img{width:100%;height:210px;display:flex;align-items:center;justify-content:center;font-size:68px;position:relative;overflow:hidden}
+.ad-img::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 60%,rgba(14,14,14,.06) 100%)}
+.ad-badge{position:absolute;top:14px;left:14px;background:var(--ink);color:#fff;font-size:10px;font-weight:800;padding:4px 10px;border-radius:50px;letter-spacing:.4px;text-transform:uppercase;z-index:1}
+.ad-badge-new{background:var(--gr)}
+.ad-fav{position:absolute;top:14px;right:14px;background:rgba(255,255,255,.9);backdrop-filter:blur(8px);border:none;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;box-shadow:var(--shm);transition:transform .22s;z-index:1}
+.ad-fav:hover{transform:scale(1.18)}
+.ad-body{padding:18px}
+.ad-price{font-family:'Instrument Serif',serif;font-size:22px;color:var(--or);margin-bottom:5px;letter-spacing:-.5px;font-style:italic}
+.ad-title{font-weight:700;font-size:14px;color:var(--ink);margin-bottom:12px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ad-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ad-tag{background:var(--brl);color:var(--muted);font-size:11px;font-weight:700;padding:3px 9px;border-radius:50px;letter-spacing:.2px}
+
+/* ── MAP ── */
+#guinee-map{width:100%;height:540px;border-radius:var(--rad);border:1px solid var(--br);box-shadow:var(--shm)}
+.map-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.map-tb-btn{padding:8px 18px;border-radius:50px;border:1.5px solid var(--br);background:var(--wh);font-family:'Cabinet Grotesk',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;color:var(--muted)}
+.map-tb-btn:hover,.map-tb-btn.active{border-color:var(--ink);background:var(--ink);color:#fff}
+.map-filter-info{background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:14px 20px;margin-top:14px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--sh)}
+.map-filter-info.hidden{display:none}
+.mfi-txt{font-size:14px;color:var(--ink)}.mfi-txt strong{color:var(--or)}
+.mfi-clear{font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;transition:color .2s}.mfi-clear:hover{color:var(--re)}
+.map-legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:9px;margin-top:14px}
+.map-leg-item{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;background:var(--wh);border:1px solid var(--br);border-radius:var(--rads);padding:9px 13px;box-shadow:var(--sh)}
+.map-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+
+/* ── STATS BAND ── */
+.stats-band{background:var(--ink);border-radius:var(--rad);padding:32px 40px;display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:18px;position:relative;overflow:hidden}
+.stats-band::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(255,92,0,.15) 0%,transparent 70%);pointer-events:none}
+.sband{text-align:center;padding:0 20px;position:relative}
+.sband+.sband::before{content:'';position:absolute;left:0;top:10%;height:80%;width:1px;background:rgba(255,255,255,.12)}
+.sband-n{font-family:'Instrument Serif',serif;font-size:36px;font-weight:400;color:var(--or);margin-bottom:4px;font-style:italic}
+.sband-l{font-size:13px;color:rgba(255,255,255,.55);font-weight:600;letter-spacing:.2px}
+
+/* ── APP BANNER ── */
+.app-banner{background:var(--wh);border-radius:24px;border:1px solid var(--br);padding:40px 48px;display:grid;grid-template-columns:1fr auto;gap:48px;align-items:center;box-shadow:var(--shm);position:relative;overflow:hidden}
+.app-banner::after{content:'';position:absolute;bottom:-60px;right:180px;width:200px;height:200px;background:radial-gradient(circle,rgba(255,92,0,.06) 0%,transparent 70%);pointer-events:none}
+.app-banner-tag{display:inline-flex;align-items:center;gap:7px;background:var(--orl);color:var(--or2);font-size:11px;font-weight:800;padding:5px 13px;border-radius:50px;margin-bottom:14px;text-transform:uppercase;letter-spacing:.5px}
+.app-banner h2{font-family:'Instrument Serif',serif;font-size:32px;font-weight:400;margin-bottom:10px;letter-spacing:-.5px;line-height:1.2}
+.app-banner p{font-size:15px;color:var(--muted);margin-bottom:24px;line-height:1.7;max-width:460px}
+.store-btns{display:flex;gap:12px}
+.store-btn{display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:#fff;padding:12px 22px;border-radius:14px;font-weight:700;font-size:14px;cursor:pointer;border:none;transition:all .2s}
+.store-btn:hover{background:var(--ink2);transform:translateY(-1px)}
+.app-phone{background:linear-gradient(160deg,var(--orl) 0%,var(--brl) 100%);border-radius:20px;padding:28px 32px;text-align:center;min-width:180px;border:1px solid var(--br)}
+.app-phone .icon{font-size:36px;display:block;margin-bottom:14px}
+.app-stats{display:flex;gap:24px;justify-content:center}
+.astat .n{font-family:'Instrument Serif',serif;font-size:28px;color:var(--ink);font-style:italic}
+.astat .l{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+
+/* ── FOOTER ── */
+footer{background:var(--ink);margin-top:96px}
+.ft{max-width:1320px;margin:0 auto;padding:64px 28px 40px;display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:48px}
+.ft-brand .logo-mark{background:rgba(255,255,255,.1)}
+.ft-brand p{font-size:14px;line-height:1.8;color:rgba(255,255,255,.45);margin:16px 0 22px}
+.soc{display:flex;gap:8px}
+.soc-btn{width:36px;height:36px;background:rgba(255,255,255,.07);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;transition:background .2s}
+.soc-btn:hover{background:var(--or)}
+.ft-col h4{font-size:11px;font-weight:800;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:18px}
+.ft-col ul{list-style:none}
+.ft-col li{margin-bottom:11px}
+.ft-col a{color:rgba(255,255,255,.5);text-decoration:none;font-size:14px;cursor:pointer;transition:color .2s}
+.ft-col a:hover{color:var(--or)}
+.ft-bottom{border-top:1px solid rgba(255,255,255,.07);padding:18px 28px}
+.ft-bottom-in{max-width:1320px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;font-size:13px;color:rgba(255,255,255,.25);flex-wrap:wrap;gap:8px}
+.ft-gn{background:rgba(255,92,0,.15);color:var(--or);padding:5px 13px;border-radius:50px;font-size:12px;font-weight:700}
+
+/* ── OVERLAYS ── */
+.overlay{position:fixed;inset:0;background:rgba(14,14,14,.6);z-index:1000;display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px)}
+.overlay.open{display:flex}
+.modal{background:var(--wh);border-radius:24px;width:100%;max-width:500px;box-shadow:var(--shl);animation:modalIn .3s cubic-bezier(.22,1,.36,1);max-height:94vh;overflow-y:auto}
+.m-head{padding:24px 24px 0;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--wh);z-index:2;border-bottom:1px solid var(--br);padding-bottom:18px}
+.m-title{font-family:'Instrument Serif',serif;font-size:24px;letter-spacing:-.5px}
+.m-close{background:var(--brl);border:1px solid var(--br);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.m-close:hover{background:var(--br)}
+.m-tabs{display:flex;background:var(--brl);border-radius:50px;margin:18px 24px 0;padding:4px}
+.m-tab{flex:1;padding:10px;text-align:center;font-weight:700;font-size:14px;cursor:pointer;color:var(--muted);border-radius:50px;transition:all .22s}
+.m-tab.active{background:var(--wh);color:var(--ink);box-shadow:var(--sh)}
+.m-body{padding:24px}
+
+/* ── FORM ── */
+.fg{margin-bottom:16px}
+.fg label{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:7px}
+.fg input,.fg select,.fg textarea{width:100%;padding:13px 16px;border:1.5px solid var(--br);border-radius:var(--rads);font-family:'Cabinet Grotesk',sans-serif;font-size:14px;color:var(--ink);background:var(--wh);outline:none;transition:all .2s;-webkit-appearance:none}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--or);box-shadow:0 0 0 3px rgba(255,92,0,.08)}
+.fg textarea{resize:vertical;min-height:90px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.f-hint{font-size:12px;color:var(--subtle);margin-top:5px}
+.or-sep{display:flex;align-items:center;gap:10px;margin:14px 0;font-size:13px;font-weight:600;color:var(--subtle)}
+.or-sep::before,.or-sep::after{content:'';flex:1;height:1px;background:var(--br)}
+.g-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:13px;border:1.5px solid var(--br);border-radius:var(--rads);font-family:'Cabinet Grotesk',sans-serif;font-size:14px;font-weight:700;cursor:pointer;background:var(--wh);color:var(--ink);transition:all .2s;margin-bottom:4px}
+.g-btn:hover{border-color:var(--ink)}
+.ph-row{display:flex;align-items:center;gap:8px}
+.ph-pfx{background:var(--brl);border:1.5px solid var(--br);border-radius:var(--rads);padding:13px 14px;font-size:14px;font-weight:700;color:var(--muted);white-space:nowrap;flex-shrink:0}
+
+/* ── SMS BOX ── */
+.sms-wrap{background:var(--orl);border:1.5px solid var(--orm);border-radius:var(--rad);padding:20px;margin-top:16px;text-align:center}
+.sms-wrap .sw-title{font-weight:800;font-size:15px;color:var(--or2);margin-bottom:4px}
+.sms-wrap .sw-sub{font-size:13px;color:var(--muted);margin-bottom:16px}
+.sms-digits{display:flex;gap:10px;justify-content:center;margin-bottom:14px}
+.sms-digits input{width:48px;height:56px;text-align:center;font-size:22px;font-weight:800;border:2px solid var(--orm);border-radius:12px;outline:none;font-family:'Cabinet Grotesk',sans-serif;background:#fff;color:var(--ink);transition:all .2s}
+.sms-digits input:focus{border-color:var(--or);box-shadow:0 0 0 3px rgba(255,92,0,.1)}
+.sms-resend{font-size:12px;color:var(--muted)}.sms-resend a{color:var(--or);cursor:pointer;font-weight:700}
+
+/* ── ORANGE MONEY ── */
+.om-header{background:linear-gradient(160deg,#FF6A00 0%,#FF5C00 100%);padding:28px 24px;text-align:center;border-radius:24px 24px 0 0;position:relative;overflow:hidden}
+.om-header::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(255,255,255,.07);border-radius:50%}
+.om-header .og{font-size:48px;display:block;margin-bottom:6px}
+.om-header h2{font-family:'Instrument Serif',serif;font-size:22px;color:#fff;font-weight:400}
+.om-header p{font-size:13px;color:rgba(255,255,255,.8);margin-top:3px}
+.om-body{padding:24px}
+.om-amount-box{background:var(--orl);border:1.5px solid var(--orm);border-radius:14px;padding:16px;text-align:center;margin-bottom:20px}
+.om-amount-box .lbl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:5px}
+.om-amount-box .val{font-family:'Instrument Serif',serif;font-size:34px;color:var(--or);font-style:italic}
+.om-amount-box .item{font-size:13px;color:var(--muted);margin-top:2px}
+.om-steps-list{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.om-step{display:flex;align-items:center;gap:12px;background:var(--brl);border-radius:var(--rads);padding:12px;border:1px solid var(--br)}
+.om-sn{width:28px;height:28px;background:var(--or);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
+.om-st .title{font-weight:700;font-size:14px;color:var(--ink)}
+.om-st .sub{font-size:12px;color:var(--muted)}
+.pin-wrap{display:flex;gap:10px;justify-content:center;margin:16px 0}
+.pin-wrap input{width:50px;height:56px;text-align:center;font-size:24px;font-weight:800;border:2px solid var(--br);border-radius:12px;outline:none;font-family:'Cabinet Grotesk',sans-serif;transition:all .2s}
+.pin-wrap input:focus{border-color:var(--or);box-shadow:0 0 0 3px rgba(255,92,0,.1)}
+.om-secure{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--subtle);margin-top:10px}
+.om-proc{padding:48px 24px;text-align:center}
+.om-proc .spinner{width:52px;height:52px;border:4px solid var(--br);border-top-color:var(--or);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px}
+.om-proc h3{font-family:'Instrument Serif',serif;font-size:22px;font-weight:400;margin-bottom:8px}
+.om-proc p{font-size:14px;color:var(--muted)}
+.om-success{padding:40px 24px;text-align:center}
+.om-success .tick{font-size:68px;display:block;animation:tickPop .6s cubic-bezier(.34,1.56,.64,1);margin-bottom:16px}
+.om-success h3{font-family:'Instrument Serif',serif;font-size:26px;font-weight:400;color:var(--gr);margin-bottom:8px}
+.om-success p{font-size:14px;color:var(--muted);margin-bottom:4px}
+.om-ref-box{background:var(--brl);border-radius:var(--rads);padding:10px 16px;font-size:13px;font-weight:700;margin:14px 0;font-family:monospace;color:var(--ink);border:1px solid var(--br)}
+
+/* ── POST PAGE ── */
+.post-wrap{max-width:720px;margin:0 auto;padding:36px 28px}
+.post-step{background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:28px;margin-bottom:16px;box-shadow:var(--sh)}
+.post-step h3{font-family:'Instrument Serif',serif;font-size:20px;font-weight:400;margin-bottom:20px;display:flex;align-items:center;gap:10px;color:var(--ink)}
+.step-badge{width:28px;height:28px;background:var(--or);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0}
+.cats-pick{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.cat-opt{border:1.5px solid var(--br);border-radius:var(--rads);padding:12px 8px;text-align:center;cursor:pointer;font-size:13px;font-weight:700;transition:all .2s;background:var(--wh)}
+.cat-opt:hover,.cat-opt.sel{border-color:var(--or);background:var(--orl);color:var(--or2)}
+.cat-opt .em{font-size:24px;display:block;margin-bottom:5px}
+.upload-zone{border:2px dashed var(--br);border-radius:var(--rad);padding:40px;text-align:center;cursor:pointer;transition:all .2s;background:var(--brl)}
+.upload-zone:hover{border-color:var(--or);background:var(--orl)}
+.upload-zone .icon{font-size:36px;margin-bottom:10px;display:block}
+
+/* ── DETAIL PAGE ── */
+.det-wrap{max-width:1200px;margin:0 auto;padding:28px 28px;display:grid;grid-template-columns:1fr 360px;gap:24px}
+.det-gallery{background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);overflow:hidden;box-shadow:var(--sh)}
+.det-main-img{width:100%;height:380px;display:flex;align-items:center;justify-content:center;font-size:100px}
+.det-thumbs{display:flex;gap:9px;padding:12px}
+.det-thumb{width:72px;height:72px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;border:2px solid transparent;flex-shrink:0;background:var(--brl);transition:border-color .2s}
+.det-thumb.active{border-color:var(--or)}
+.det-info{background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:24px;box-shadow:var(--sh)}
+.det-price{font-family:'Instrument Serif',serif;font-size:36px;color:var(--or);margin-bottom:6px;font-style:italic}
+.det-title-txt{font-size:18px;font-weight:800;margin-bottom:16px;line-height:1.35}
+.det-grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:16px 0;border-top:1px solid var(--br);border-bottom:1px solid var(--br);margin:16px 0}
+.det-meta .lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:3px}
+.det-meta .val{font-size:14px;font-weight:700}
+.seller-box{background:var(--brl);border-radius:var(--rad);padding:16px;margin-bottom:12px;border:1px solid var(--br)}
+.seller-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.seller-av{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--or),var(--or2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px;flex-shrink:0}
+.tag-chip{background:var(--orl);color:var(--or2);font-size:11px;font-weight:800;padding:4px 10px;border-radius:50px;display:inline-block;letter-spacing:.2px}
+
+/* ── DASHBOARD ── */
+.dash-layout{display:grid;grid-template-columns:256px 1fr;min-height:calc(100vh - 66px)}
+.dash-side{background:var(--wh);border-right:1px solid var(--br);padding:24px 16px}
+.dash-user{text-align:center;padding-bottom:22px;border-bottom:1px solid var(--br);margin-bottom:16px}
+.dash-avatar{width:66px;height:66px;border-radius:50%;background:linear-gradient(135deg,var(--or),var(--or2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:24px;margin:0 auto 12px;box-shadow:0 4px 16px rgba(255,92,0,.25)}
+.dash-name{font-weight:800;font-size:15px;letter-spacing:-.2px}
+.dash-phone{font-size:13px;color:var(--muted);margin-top:3px}
+.dash-nav a{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:12px;font-size:14px;font-weight:700;color:var(--muted);cursor:pointer;margin-bottom:4px;transition:all .2s;text-decoration:none}
+.dash-nav a:hover,.dash-nav a.active{background:var(--orl);color:var(--or2)}
+.dash-main{padding:32px;background:var(--brl)}
+.stat-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:28px}
+.stat-card{background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:22px;box-shadow:var(--sh)}
+.stat-card .n{font-family:'Instrument Serif',serif;font-size:32px;color:var(--or);font-style:italic}
+.stat-card .l{font-size:13px;color:var(--muted);font-weight:600;margin-top:3px}
+.dash-ad-row{background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:18px;display:flex;align-items:center;gap:14px;margin-bottom:10px;box-shadow:var(--sh);transition:box-shadow .2s}
+.dash-ad-row:hover{box-shadow:var(--shm)}
+.badge{font-size:11px;font-weight:800;padding:4px 10px;border-radius:50px;letter-spacing:.2px}
+.badge-g{background:#D1FAE5;color:#065F46}
+
+/* ── BREADCRUMB ── */
+.bc{background:var(--wh);border-bottom:1px solid var(--br);padding:13px 28px}
+.bc-in{max-width:1320px;margin:0 auto;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.bc-in a{color:var(--or);cursor:pointer;font-weight:600;text-decoration:none}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;padding:14px 22px;border-radius:50px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:10px;z-index:9999;transform:translateY(100px);opacity:0;transition:all .38s cubic-bezier(.22,1,.36,1);box-shadow:var(--shl)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{background:var(--gr)}
+.toast.err{background:var(--re)}
+</style>
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<nav>
+<div class="nav-top">
+  <a class="logo" onclick="goTo('home')">
+    <div class="logo-mark"><span>YY</span></div>
+    <span class="logo-tx"><span class="Y">Y</span>ougou<span class="Y">Y</span>ougou</span>
+  </a>
+  <div class="nav-sc">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A8A8A8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input type="text" placeholder="Toyota, iPhone, Appartement, Emploi...">
+  </div>
+  <div class="nav-right">
+    <button class="btn btn-or" onclick="goTo('app-download')" style="background:var(--ink);font-size:13px;padding:9px 16px">📲 App mobile</button>
+    <button class="btn btn-or" onclick="goTo('post')" style="font-size:13px;padding:9px 18px">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Déposer une annonce
+    </button>
+    <button class="btn btn-ghost" id="nav-auth-btn" onclick="openModal('auth')" style="font-size:13px;padding:9px 16px">👤 Connexion</button>
+  </div>
+</div>
+<!-- BARRE CATÉGORIES -->
+<div class="nav-cats">
+  <div class="nav-cats-in" id="nav-cats-bar"></div>
+</div>
+</nav>
+
+<!-- ══ PAGE HOME ══ -->
+<div id="page-home" class="page active">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="fade-up">
+      <div class="hero-kicker"><span class="dot"></span> Marketplace N°1 de Guinée</div>
+      <h1>Le marché de<br>toute la <strong>Guinée</strong>,<br>en un clic.</h1>
+      <p class="hero-sub">Des milliers d'annonces dans vos 38 préfectures. Achetez, vendez et payez avec Orange Money — simple et sécurisé.</p>
+      <div class="hero-actions">
+        <button class="btn btn-or" style="font-size:15px;padding:14px 30px" onclick="goTo('post')">Déposer gratuitement</button>
+        <button class="btn btn-ghost" style="font-size:15px;padding:14px 24px" onclick="scrollToAds()">Voir les annonces →</button>
+      </div>
+      <div class="hero-trust">
+        <div class="trust-av">
+          <div class="av" style="background:#F97316">M</div>
+          <div class="av" style="background:#3B82F6">A</div>
+          <div class="av" style="background:#22C55E">F</div>
+          <div class="av" style="background:#8B5CF6">I</div>
+        </div>
+        <div class="trust-txt"><strong>+12 400</strong> Guinéens font confiance à YouGouYou</div>
+      </div>
+    </div>
+    <div class="hero-card fade-up-2">
+      <div class="hero-card-tt">🔍 Trouver une annonce</div>
+      <div class="inp-grp">
+        <label>Que recherchez-vous ?</label>
+        <input type="text" placeholder="Toyota, iPhone, Appartement, Emploi...">
+      </div>
+      <div class="inp-row">
+        <div class="inp-grp">
+          <label>Catégorie</label>
+          <select>
+            <option>Toutes catégories</option>
+            <option>Véhicules</option><option>Immobilier</option><option>Électronique</option>
+            <option>Mode</option><option>Emploi</option><option>Services</option>
+            <option>Maison & Jardin</option><option>Loisirs</option>
+          </select>
+        </div>
+        <div class="inp-grp">
+          <label>Préfecture / Ville</label>
+          <select id="hero-city-sel"><option value="">Toutes les villes</option></select>
+        </div>
+      </div>
+      <div class="inp-price-row" style="margin-bottom:16px">
+        <div class="inp-grp"><label>Prix min (GNF)</label><input type="number" placeholder="0"></div>
+        <div class="inp-grp"><label>Prix max (GNF)</label><input type="number" placeholder="100 000 000"></div>
+      </div>
+      <button class="btn btn-ink btn-full" style="border-radius:12px;font-size:15px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        Rechercher
+      </button>
+    </div>
+  </section>
+
+  <!-- cats now in nav -->
+
+  <!-- FEATURED ADS -->
+  <section class="sec" id="ads-section">
+    <div class="sec-head">
+      <div><h2 class="sec-tt">À la une</h2><div class="sec-sub">Annonces mises en avant par nos vendeurs</div></div>
+      <button class="see-all-btn">Tout voir →</button>
+    </div>
+    <div class="ads-grid" id="featured-grid"></div>
+  </section>
+
+  <!-- RECENT ADS -->
+  <section class="sec" style="padding-top:0">
+    <div class="sec-head">
+      <div><h2 class="sec-tt">Annonces récentes</h2><div class="sec-sub">Publiées ces dernières heures</div></div>
+      <button class="see-all-btn">Tout voir →</button>
+    </div>
+    <div class="ads-grid" id="recent-grid"></div>
+  </section>
+
+  <!-- MAP -->
+  <section class="sec" style="padding-top:0">
+    <div class="sec-head">
+      <div><h2 class="sec-tt">Carte de la Guinée</h2><div class="sec-sub">Cliquez sur une préfecture pour filtrer les annonces</div></div>
+    </div>
+    <div class="map-toolbar">
+      <button class="map-tb-btn active" id="btn-reg" onclick="showLayer('regions')">8 Régions</button>
+      <button class="map-tb-btn" id="btn-pref" onclick="showLayer('prefectures')">38 Préfectures</button>
+    </div>
+    <div id="guinee-map"></div>
+    <div class="map-filter-info hidden" id="map-filter-info">
+      <div class="mfi-txt">Annonces filtrées : <strong id="mfi-zone">-</strong> — <span id="mfi-count">0</span> annonce(s)</div>
+      <span class="mfi-clear" onclick="clearMapFilter()">✕ Effacer le filtre</span>
+    </div>
+    <div class="map-legend" id="map-legend"></div>
+    <div class="stats-band">
+      <div class="sband"><div class="sband-n" id="sb-ads">1 679</div><div class="sband-l">Annonces actives</div></div>
+      <div class="sband"><div class="sband-n">8</div><div class="sband-l">Régions couvertes</div></div>
+      <div class="sband"><div class="sband-n">12 400+</div><div class="sband-l">Utilisateurs inscrits</div></div>
+      <div class="sband"><div class="sband-n">Gratuit</div><div class="sband-l">Pour déposer</div></div>
+    </div>
+  </section>
+
+  <!-- APP BANNER -->
+  <section class="sec" style="padding-top:0">
+    <div class="app-banner">
+      <div>
+        <div class="app-banner-tag">📲 Bientôt disponible</div>
+        <h2>YouGouYou sur<br>votre smartphone</h2>
+        <p>Notifications instantanées, messagerie intégrée, paiement Orange Money en un tap. Disponible iOS & Android.</p>
+        <div class="store-btns">
+          <button class="store-btn" onclick="toast('🍎 Bientôt sur App Store !')">🍎 App Store</button>
+          <button class="store-btn" onclick="toast('▶️ Bientôt sur Google Play !')">▶️ Google Play</button>
+        </div>
+      </div>
+      <div class="app-phone">
+        <span class="icon">📲</span>
+        <div class="app-stats">
+          <div class="astat"><div class="n">4.8</div><div class="l">Note</div></div>
+          <div class="astat"><div class="n">10K+</div><div class="l">Téléch.</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ══ PAGE DETAIL ══ -->
+<div id="page-detail" class="page">
+  <div class="bc"><div class="bc-in"><a onclick="goTo('home')">Accueil</a> › <span id="bc-cat">Catégorie</span> › <span id="bc-title" style="color:var(--subtle)">Annonce</span></div></div>
+  <div class="det-wrap">
+    <div>
+      <div class="det-gallery">
+        <div class="det-main-img" id="det-emoji" style="background:linear-gradient(135deg,#FFF3EE,#FFB899)">📱</div>
+        <div class="det-thumbs"><div class="det-thumb active">📱</div><div class="det-thumb">📦</div><div class="det-thumb">🔌</div></div>
+      </div>
+      <div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:24px;margin-top:16px;box-shadow:var(--sh)">
+        <h3 style="font-family:'Instrument Serif',serif;font-size:20px;font-weight:400;margin-bottom:14px">Description</h3>
+        <p id="det-desc" style="font-size:15px;color:var(--muted);line-height:1.9"></p>
+        <div style="margin-top:14px;display:flex;gap:7px;flex-wrap:wrap" id="det-tags"></div>
+      </div>
+    </div>
+    <div>
+      <div class="det-info">
+        <div class="det-price" id="det-price"></div>
+        <div class="det-title-txt" id="det-title"></div>
+        <div class="det-grid2">
+          <div class="det-meta"><div class="lbl">📍 Ville</div><div class="val" id="dm-city"></div></div>
+          <div class="det-meta"><div class="lbl">🗂️ Catégorie</div><div class="val" id="dm-cat"></div></div>
+          <div class="det-meta"><div class="lbl">🕐 Publié</div><div class="val" id="dm-date"></div></div>
+          <div class="det-meta"><div class="lbl">👁️ Vues</div><div class="val" id="dm-views"></div></div>
+        </div>
+        <div class="seller-box">
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:12px">Vendeur</div>
+          <div class="seller-row">
+            <div class="seller-av" id="det-av">A</div>
+            <div><div style="font-weight:800;font-size:15px" id="det-seller"></div><div style="font-size:12px;color:var(--gr);font-weight:700;margin-top:2px">✅ Vendeur vérifié</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <button class="btn" style="background:#00A550;color:#fff;border-radius:12px;justify-content:center;padding:13px;font-size:14px;width:100%" onclick="openCommission()">📞 Voir le numéro (commission 10%)</button>
+            <button class="btn btn-or btn-full" style="border-radius:12px;font-size:14px" onclick="toast('💬 Message envoyé !','ok')">💬 Envoyer un message</button>
+            <button class="btn btn-om btn-full" style="border-radius:12px;font-size:14px" onclick="openOM()">🟠 Payer via Orange Money</button>
+          </div>
+        </div>
+        <button class="btn btn-ghost btn-full" style="border-radius:12px" onclick="addFav()">🤍 Ajouter aux favoris</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE POST ══ -->
+<div id="page-post" class="page">
+  <div class="bc"><div class="bc-in"><a onclick="goTo('home')">Accueil</a> › Déposer une annonce</div></div>
+  <div class="post-wrap">
+    <div style="margin-bottom:32px"><h1 style="font-family:'Instrument Serif',serif;font-size:36px;font-weight:400;letter-spacing:-.5px;margin-bottom:7px">Déposez votre annonce</h1><p style="color:var(--muted);font-size:15px">Gratuit — visible partout en Guinée en quelques minutes</p></div>
+    <div class="post-step">
+      <h3><div class="step-badge">1</div>Catégorie</h3>
+      <div class="cats-pick" id="post-cats"></div>
+    </div>
+    <div class="post-step">
+      <h3><div class="step-badge">2</div>Photos</h3>
+      <div class="upload-zone" onclick="toast('📸 Disponible en production')">
+        <span class="icon">📸</span>
+        <p style="font-weight:700;margin-bottom:5px">Cliquez pour ajouter des photos</p>
+        <p style="font-size:13px;color:var(--muted)">JPG, PNG — max 8 photos (5 Mo chacune)</p>
+      </div>
+    </div>
+    <div class="post-step">
+      <h3><div class="step-badge">3</div>Informations</h3>
+      <div class="fg"><label>Titre *</label><input type="text" id="pt" placeholder="Ex : Toyota Corolla 2019, excellent état"></div>
+      <div class="fg"><label>Description *</label><textarea id="pd" placeholder="Décrivez votre article : état, caractéristiques, raison de vente..."></textarea></div>
+      <div class="frow">
+        <div class="fg"><label>Prix (GNF) *</label><input type="number" id="pp" placeholder="5 000 000"></div>
+        <div class="fg"><label>État</label><select id="pe"><option>Neuf</option><option>Très bon état</option><option>Bon état</option><option>État correct</option><option>Pour pièces</option></select></div>
+      </div>
+    </div>
+    <div class="post-step">
+      <h3><div class="step-badge">4</div>Localisation</h3>
+      <div class="frow">
+        <div class="fg"><label>Préfecture / Ville *</label><select id="pc"></select></div>
+        <div class="fg"><label>Quartier / Commune</label><input type="text" id="pq" placeholder="Ex : Ratoma, Dixinn..."></div>
+      </div>
+    </div>
+    <div class="post-step">
+      <h3><div class="step-badge">5</div>Coordonnées</h3>
+      <div class="frow">
+        <div class="fg"><label>Nom complet *</label><input type="text" id="pn" placeholder="Prénom Nom"></div>
+        <div class="fg"><label>Téléphone *</label>
+          <div class="ph-row"><span class="ph-pfx">🇬🇳 +224</span><input type="tel" id="ptel" placeholder="620 00 00 00" maxlength="9" style="flex:1"></div>
+        </div>
+      </div>
+      <div class="fg"><label>Email (optionnel)</label><input type="email" id="pem" placeholder="votre@email.com"></div>
+    </div>
+    <button class="btn btn-or btn-full" style="font-size:15px;border-radius:14px;padding:16px" onclick="submitAd()">🚀 Publier mon annonce gratuitement</button>
+    <p style="text-align:center;font-size:12px;color:var(--subtle);margin-top:10px">En publiant vous acceptez nos <a style="color:var(--or);cursor:pointer">conditions d'utilisation</a></p>
+  </div>
+</div>
+
+<!-- ══ PAGE DASHBOARD ══ -->
+<div id="page-dashboard" class="page">
+  <div class="dash-layout">
+    <div class="dash-side">
+      <div class="dash-user">
+        <div class="dash-avatar" id="d-av">MD</div>
+        <div class="dash-name" id="d-nm">Mohamed Diallo</div>
+        <div class="dash-phone" id="d-ph">+224 620 000 000</div>
+      </div>
+      <nav class="dash-nav">
+        <a class="active" onclick="showTab('overview')">📊 Tableau de bord</a>
+        <a onclick="showTab('ads')">📋 Mes annonces</a>
+        <a onclick="showTab('messages')">💬 Messages</a>
+        <a onclick="showTab('payments')">🟠 Paiements Orange Money</a>
+        <a onclick="showTab('favs')">❤️ Mes favoris</a>
+        <a onclick="goTo('post')" style="margin-top:18px;border-top:1px solid var(--br);padding-top:18px;color:var(--or)!important">➕ Nouvelle annonce</a>
+        <a onclick="goAdmin()" style="color:#2563EB!important">⚙️ Administration</a>
+        <a onclick="logout()" style="color:var(--re)!important">🚪 Déconnexion</a>
+      </nav>
+    </div>
+    <div class="dash-main">
+      <div id="tab-overview">
+        <h2 style="font-family:'Instrument Serif',serif;font-size:28px;font-weight:400;margin-bottom:22px;letter-spacing:-.5px">Bonjour, <span id="d-greet">Mohamed</span> 👋</h2>
+        <div class="stat-cards">
+          <div class="stat-card"><div class="n" id="dc-ads">0</div><div class="l">Annonces actives</div></div>
+          <div class="stat-card"><div class="n">142</div><div class="l">Vues ce mois</div></div>
+          <div class="stat-card"><div class="n">7</div><div class="l">Messages reçus</div></div>
+          <div class="stat-card"><div class="n" id="dc-pay">0</div><div class="l">Paiements OM</div></div>
+        </div>
+        <h3 style="font-size:16px;font-weight:800;margin-bottom:14px">Dernières annonces</h3>
+        <div id="d-ads-prev"></div>
+      </div>
+      <div id="tab-ads" style="display:none"><h2 style="font-family:'Instrument Serif',serif;font-size:28px;font-weight:400;margin-bottom:22px">📋 Mes annonces</h2><div id="d-ads-full"></div></div>
+      <div id="tab-messages" style="display:none"><h2 style="font-family:'Instrument Serif',serif;font-size:28px;font-weight:400;margin-bottom:22px">💬 Messages</h2><div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:48px;text-align:center;color:var(--muted);box-shadow:var(--sh)"><div style="font-size:56px;margin-bottom:16px">💬</div><p style="font-weight:800;font-size:16px;margin-bottom:6px">Aucun message</p><p style="font-size:14px">Les messages de vos acheteurs apparaîtront ici</p></div></div>
+      <div id="tab-payments" style="display:none"><h2 style="font-family:'Instrument Serif',serif;font-size:28px;font-weight:400;margin-bottom:22px">🟠 Paiements Orange Money</h2><div id="d-pay-list"></div></div>
+      <div id="tab-favs" style="display:none"><h2 style="font-family:'Instrument Serif',serif;font-size:28px;font-weight:400;margin-bottom:22px">❤️ Mes favoris</h2><div class="ads-grid" id="d-favs"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL AUTH ══ -->
+<div class="overlay" id="overlay-auth" onclick="maybeClose(event,'auth')">
+  <div class="modal">
+    <div class="m-head"><div class="m-title" id="auth-tt">Connexion</div><button class="m-close" onclick="closeModal('auth')">✕</button></div>
+    <div class="m-tabs"><div class="m-tab active" id="mtab-login" onclick="authTab('login')">Connexion</div><div class="m-tab" id="mtab-reg" onclick="authTab('reg')">Inscription</div></div>
+    <div class="m-body" id="auth-body"></div>
+  </div>
+</div>
+
+<!-- ══ MODAL ORANGE MONEY ══ -->
+<div class="overlay" id="overlay-om" onclick="maybeClose(event,'om')">
+  <div class="modal" style="max-width:430px">
+    <div id="om-form">
+      <div class="om-header"><span class="og">🟠</span><h2>Orange Money</h2><p>Paiement sécurisé — Guinée</p></div>
+      <div class="om-body">
+        <div class="om-amount-box">
+          <div class="lbl">Montant à payer</div>
+          <div class="val" id="om-val">0 GNF</div>
+          <div class="item" id="om-item">Article</div>
+        </div>
+        <div class="om-steps-list">
+          <div class="om-step"><div class="om-sn">1</div><div class="om-st"><div class="title">Numéro Orange Money</div><div class="sub">Votre numéro +224</div></div></div>
+          <div class="om-step"><div class="om-sn">2</div><div class="om-st"><div class="title">Code PIN à 4 chiffres</div><div class="sub">Votre code secret Orange Money</div></div></div>
+          <div class="om-step"><div class="om-sn">3</div><div class="om-st"><div class="title">SMS de confirmation</div><div class="sub">Transaction instantanée et sécurisée</div></div></div>
+        </div>
+        <div class="fg"><label>Numéro Orange Money *</label>
+          <div class="ph-row"><span class="ph-pfx">🇬🇳 +224</span><input type="tel" id="om-phone" placeholder="620 00 00 00" maxlength="9" style="flex:1"></div>
+        </div>
+        <label style="display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Code PIN (4 chiffres)</label>
+        <div class="pin-wrap">
+          <input type="password" maxlength="1" id="p1" oninput="movPin(this,'p2')">
+          <input type="password" maxlength="1" id="p2" oninput="movPin(this,'p3')">
+          <input type="password" maxlength="1" id="p3" oninput="movPin(this,'p4')">
+          <input type="password" maxlength="1" id="p4">
+        </div>
+        <button class="btn btn-om btn-full" style="border-radius:12px;font-size:15px;margin-top:4px" onclick="processPayment()">🔐 Confirmer le paiement</button>
+        <div class="om-secure">🔒 Paiement sécurisé SSL — Orange Guinée</div>
+        <button class="btn btn-ghost btn-full" style="margin-top:10px;border-radius:12px" onclick="closeModal('om')">Annuler</button>
+      </div>
+    </div>
+    <div id="om-processing" style="display:none" class="om-proc">
+      <div class="spinner"></div>
+      <h3>Traitement en cours...</h3>
+      <p>Vérification de votre paiement Orange Money</p>
+    </div>
+    <div id="om-success" style="display:none" class="om-success">
+      <span class="tick">✅</span>
+      <h3>Paiement réussi !</h3>
+      <p>Votre transaction a été traitée avec succès</p>
+      <div class="om-amount-box" style="margin:16px 0"><div class="lbl">Montant payé</div><div class="val" id="om-ok-val">0 GNF</div></div>
+      <div class="om-ref-box" id="om-ref">Référence : OM00000000</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px" id="om-ok-phone">SMS de confirmation envoyé</p>
+      <button class="btn btn-or btn-full" style="border-radius:12px" onclick="closeModal('om');toast('✅ Paiement enregistré !','ok')">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL COMMISSION (voir numéro) ══ -->
+<div class="overlay" id="overlay-commission" onclick="maybeClose(event,'commission')">
+  <div class="modal" style="max-width:420px">
+    <div class="m-head">
+      <div class="m-title">📞 Voir le numéro</div>
+      <button class="m-close" onclick="closeModal('commission')">✕</button>
+    </div>
+    <div class="m-body">
+      <div style="background:var(--orl);border:1.5px solid var(--orm);border-radius:var(--rad);padding:20px;text-align:center;margin-bottom:20px">
+        <div style="font-size:40px;margin-bottom:10px">🔒</div>
+        <div style="font-family:'Instrument Serif',serif;font-size:20px;font-weight:400;margin-bottom:6px;color:var(--ink)">Accès au numéro de l'annonceur</div>
+        <div style="font-size:14px;color:var(--muted);line-height:1.7">Pour protéger les vendeurs et garantir des transactions sécurisées, l'accès au numéro de téléphone nécessite le paiement d'une <strong>commission de 10%</strong> du prix de l'annonce.</div>
+      </div>
+      <div style="background:var(--brl);border:1px solid var(--br);border-radius:var(--rad);padding:16px;margin-bottom:18px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:14px">
+          <span style="color:var(--muted)">Prix de l'annonce</span>
+          <strong id="com-price">0 GNF</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:14px">
+          <span style="color:var(--muted)">Commission YouGouYou (10%)</span>
+          <strong style="color:var(--or)" id="com-fee">0 GNF</strong>
+        </div>
+        <div style="border-top:1px solid var(--br);padding-top:10px;display:flex;justify-content:space-between;font-size:15px;font-weight:800">
+          <span>Total à payer</span>
+          <span style="color:var(--or)" id="com-total">0 GNF</span>
+        </div>
+      </div>
+      <div style="background:var(--brl);border:1px solid var(--br);border-radius:var(--rads);padding:14px;margin-bottom:18px;display:flex;align-items:center;gap:12px">
+        <div style="font-size:28px">🟠</div>
+        <div>
+          <div style="font-weight:800;font-size:14px">Payer via Orange Money</div>
+          <div style="font-size:12px;color:var(--muted)">Paiement instantané et sécurisé</div>
+        </div>
+      </div>
+      <div class="fg">
+        <label>Votre numéro Orange Money</label>
+        <div class="ph-row"><span class="ph-pfx">🇬🇳 +224</span><input type="tel" id="com-phone" placeholder="620 00 00 00" maxlength="9" style="flex:1"></div>
+      </div>
+      <label style="display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Code PIN Orange Money</label>
+      <div class="pin-wrap" style="margin-bottom:16px">
+        <input type="password" maxlength="1" id="cp1" oninput="movPin(this,'cp2')">
+        <input type="password" maxlength="1" id="cp2" oninput="movPin(this,'cp3')">
+        <input type="password" maxlength="1" id="cp3" oninput="movPin(this,'cp4')">
+        <input type="password" maxlength="1" id="cp4">
+      </div>
+      <button class="btn btn-om btn-full" style="border-radius:12px;font-size:15px" onclick="payCommission()">🔐 Payer et voir le numéro</button>
+      <div style="text-align:center;font-size:12px;color:var(--subtle);margin-top:10px">🔒 Transaction sécurisée Orange Guinée</div>
+    </div>
+    <!-- Succès commission -->
+    <div id="com-success" style="display:none;padding:36px 24px;text-align:center">
+      <div style="font-size:64px;margin-bottom:14px;animation:tickPop .6s cubic-bezier(.34,1.56,.64,1)">✅</div>
+      <h3 style="font-family:'Instrument Serif',serif;font-size:22px;font-weight:400;color:var(--gr);margin-bottom:8px">Paiement validé !</h3>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:20px">Voici le numéro de l'annonceur :</p>
+      <div style="background:var(--ink);color:#fff;border-radius:var(--rad);padding:20px;font-family:'Instrument Serif',serif;font-size:32px;font-style:italic;letter-spacing:2px;margin-bottom:16px" id="com-revealed-phone">+224 620 000 000</div>
+      <button class="btn btn-or btn-full" style="border-radius:12px" onclick="copyPhone()">📋 Copier le numéro</button>
+      <button class="btn btn-ghost btn-full" style="border-radius:12px;margin-top:10px" onclick="closeModal('commission')">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE APP DOWNLOAD ══ -->
+<div id="page-app-download" class="page">
+  <div style="background:linear-gradient(160deg,var(--ink) 0%,#1a1a2e 100%);min-height:100vh;padding:80px 28px">
+    <div style="max-width:900px;margin:0 auto;text-align:center">
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,92,0,.2);color:var(--or);font-size:12px;font-weight:800;padding:6px 16px;border-radius:50px;margin-bottom:28px;text-transform:uppercase;letter-spacing:.6px">📲 Applications mobiles</div>
+      <h1 style="font-family:'Instrument Serif',serif;font-size:clamp(36px,5vw,64px);color:#fff;font-weight:400;letter-spacing:-1.5px;margin-bottom:16px;line-height:1.1">YouGouYou<br><em style="color:var(--or)">dans votre poche</em></h1>
+      <p style="font-size:17px;color:rgba(255,255,255,.6);margin-bottom:56px;line-height:1.7;max-width:560px;margin-left:auto;margin-right:auto">Achetez, vendez et payez avec Orange Money directement depuis votre smartphone. Disponible sur Android et iOS.</p>
+
+      <!-- APP CARDS -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:56px">
+        <!-- Android -->
+        <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:36px 28px;text-align:center;transition:all .25s;cursor:pointer" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='rgba(255,255,255,.05)'" onclick="showAppQR('android')">
+          <div style="font-size:64px;margin-bottom:20px">🤖</div>
+          <div style="font-size:22px;font-weight:800;color:#fff;margin-bottom:6px">Android</div>
+          <div style="font-size:14px;color:rgba(255,255,255,.5);margin-bottom:24px">Google Play Store<br>Version 1.0.0 • 24 Mo</div>
+          <div style="background:#01875f;color:#fff;border:none;padding:14px 28px;border-radius:50px;font-size:15px;font-weight:800;cursor:pointer;width:100%;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px" onclick="showAppQR('android')">
+            ▶️ Télécharger sur Google Play
+          </div>
+          <div style="margin-top:16px;font-size:12px;color:rgba(255,255,255,.3)">Prochainement disponible</div>
+        </div>
+        <!-- iOS -->
+        <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:36px 28px;text-align:center;transition:all .25s;cursor:pointer" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='rgba(255,255,255,.05)'" onclick="showAppQR('ios')">
+          <div style="font-size:64px;margin-bottom:20px">🍎</div>
+          <div style="font-size:22px;font-weight:800;color:#fff;margin-bottom:6px">iPhone / iPad</div>
+          <div style="font-size:14px;color:rgba(255,255,255,.5);margin-bottom:24px">Apple App Store<br>Version 1.0.0 • 31 Mo</div>
+          <div style="background:#007AFF;color:#fff;border:none;padding:14px 28px;border-radius:50px;font-size:15px;font-weight:800;cursor:pointer;width:100%;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px" onclick="showAppQR('ios')">
+            🍎 Télécharger sur App Store
+          </div>
+          <div style="margin-top:16px;font-size:12px;color:rgba(255,255,255,.3)">Prochainement disponible</div>
+        </div>
+      </div>
+
+      <!-- QR CODE ZONE -->
+      <div id="app-qr-zone" style="display:none;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:36px;margin-bottom:40px">
+        <div style="font-size:14px;color:rgba(255,255,255,.5);margin-bottom:16px">Scannez ce QR code avec votre téléphone</div>
+        <div id="app-qr-box" style="width:140px;height:140px;background:#fff;border-radius:16px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#767676;text-align:center;padding:10px">QR Code<br>(disponible bientôt)</div>
+        <div style="font-size:15px;font-weight:700;color:#fff" id="app-qr-label">Google Play</div>
+      </div>
+
+      <!-- FEATURES -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;text-align:left">
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--rad);padding:22px">
+          <div style="font-size:28px;margin-bottom:12px">🔔</div>
+          <div style="font-weight:800;color:#fff;margin-bottom:6px;font-size:15px">Notifications instantanées</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.45);line-height:1.7">Soyez alerté dès qu'un acheteur s'intéresse à votre annonce</div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--rad);padding:22px">
+          <div style="font-size:28px;margin-bottom:12px">🟠</div>
+          <div style="font-weight:800;color:#fff;margin-bottom:6px;font-size:15px">Orange Money intégré</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.45);line-height:1.7">Payez et recevez de l'argent directement dans l'app</div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--rad);padding:22px">
+          <div style="font-size:28px;margin-bottom:12px">🗺️</div>
+          <div style="font-weight:800;color:#fff;margin-bottom:6px;font-size:15px">Carte interactive</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.45);line-height:1.7">Trouvez des annonces autour de vous dans toute la Guinée</div>
+        </div>
+      </div>
+
+      <button class="btn btn-ghost" style="margin-top:40px;color:#fff;border-color:rgba(255,255,255,.2);font-size:15px;padding:13px 28px" onclick="goTo('home')">← Retour au site</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE ADMIN ══ -->
+<div id="page-admin" class="page">
+  <div style="background:var(--ink);padding:28px;position:sticky;top:0;z-index:10">
+    <div style="max-width:1320px;margin:0 auto;display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="background:var(--or);width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px">⚙️</div>
+        <div><div style="font-weight:800;font-size:16px;color:#fff">Admin — YouGouYou</div><div style="font-size:12px;color:rgba(255,255,255,.4)">Tableau de bord administrateur</div></div>
+      </div>
+      <button class="btn btn-ghost" style="color:#fff;border-color:rgba(255,255,255,.2)" onclick="goTo('home')">← Retour au site</button>
+    </div>
+  </div>
+  <div style="max-width:1320px;margin:0 auto;padding:32px 28px">
+    <!-- STATS -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:36px" id="admin-stats"></div>
+    <!-- USERS TABLE -->
+    <div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);box-shadow:var(--sh);overflow:hidden;margin-bottom:24px">
+      <div style="padding:20px 24px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between">
+        <h3 style="font-family:'Instrument Serif',serif;font-size:20px;font-weight:400">👥 Utilisateurs inscrits</h3>
+        <span style="background:var(--orl);color:var(--or2);font-size:12px;font-weight:800;padding:4px 12px;border-radius:50px" id="admin-user-count">0 utilisateurs</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse" id="admin-users-table">
+          <thead><tr style="background:var(--brl)">
+            <th style="padding:12px 20px;text-align:left;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">#</th>
+            <th style="padding:12px 20px;text-align:left;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Nom</th>
+            <th style="padding:12px 20px;text-align:left;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Téléphone</th>
+            <th style="padding:12px 20px;text-align:left;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Ville</th>
+            <th style="padding:12px 20px;text-align:left;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Email</th>
+            <th style="padding:12px 20px;text-align:left;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Statut</th>
+          </tr></thead>
+          <tbody id="admin-users-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <!-- PAYMENTS TABLE -->
+    <div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);box-shadow:var(--sh);overflow:hidden">
+      <div style="padding:20px 24px;border-bottom:1px solid var(--br)">
+        <h3 style="font-family:'Instrument Serif',serif;font-size:20px;font-weight:400">🟠 Transactions Orange Money</h3>
+      </div>
+      <div id="admin-payments-body" style="padding:20px"></div>
+    </div>
+  </div>
+</div>
+<footer>
+  <div class="ft">
+    <div class="ft-brand">
+      <div class="logo" style="margin-bottom:14px">
+        <div class="logo-mark"><span>YY</span></div>
+        <span class="logo-tx" style="color:#fff"><span class="Y">Y</span>ougou<span class="Y" style="color:var(--or)">Y</span>ougou</span>
+      </div>
+      <p>Le premier marketplace de petites annonces dédié à la Guinée. Simple, rapide et gratuit.</p>
+      <div class="soc"><div class="soc-btn">📘</div><div class="soc-btn">📸</div><div class="soc-btn">🐦</div><div class="soc-btn">▶️</div><div class="soc-btn">💬</div></div>
+    </div>
+    <div class="ft-col"><h4>Navigation</h4><ul>
+      <li><a onclick="goTo('home')">Accueil</a></li><li><a>Toutes les annonces</a></li>
+      <li><a>Catégories</a></li><li><a>Carte interactive</a></li><li><a onclick="goTo('post')">Déposer une annonce</a></li>
+    </ul></div>
+    <div class="ft-col"><h4>Aide</h4><ul>
+      <li><a>Centre d'aide</a></li><li><a>Comment ça marche</a></li><li><a>Conseils sécurité</a></li><li><a>Signaler une annonce</a></li><li><a>Nous contacter</a></li>
+    </ul></div>
+    <div class="ft-col"><h4>À propos</h4><ul>
+      <li><a>Qui sommes-nous</a></li><li><a>CGU</a></li><li><a>Confidentialité</a></li><li><a>Orange Money</a></li><li><a>Recrutement</a></li>
+    </ul></div>
+  </div>
+  <div class="ft-bottom"><div class="ft-bottom-in">
+    <span>© 2025 YouGouYou — Tous droits réservés</span>
+    <span class="ft-gn">🇬🇳 Fait pour la Guinée</span>
+    <div style="display:flex;gap:16px"><a style="color:rgba(255,255,255,.25);cursor:pointer">CGU</a><a style="color:rgba(255,255,255,.25);cursor:pointer">Confidentialité</a></div>
+  </div></div>
+</footer>
+
+<div class="toast" id="toast-el"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ══════════════════════════════════════════
+//  DONNÉES
+// ══════════════════════════════════════════
+var ALL_CITIES=['Beyla','Boké','Boffa','Conakry','Coyah','Dabola','Dalaba','Dinguiraye','Dubréka','Faranah','Forécariah','Fria','Gaoual','Guéckédou','Kankan','Kérouané','Kindia','Kissidougou','Koubia','Koundara','Kouroussa','Labé','Lélouma','Lola','Macenta','Mali','Mamou','Mandiana','N\'Zérékoré','Pita','Siguiri','Télimélé','Tougué','Yomou'];
+
+var REGIONS=[
+  {n:'Conakry',lat:9.6412,lng:-13.5784,col:'#FF5C00',ads:456,pop:'2.5M'},
+  {n:'Boké',lat:10.9328,lng:-14.2896,col:'#16A34A',ads:89,pop:'1.1M'},
+  {n:'Kindia',lat:10.0573,lng:-12.8658,col:'#2563EB',ads:134,pop:'1.6M'},
+  {n:'Mamou',lat:10.3762,lng:-12.0825,col:'#7C3AED',ads:76,pop:'940K'},
+  {n:'Labé',lat:11.3241,lng:-12.2833,col:'#DB2777',ads:98,pop:'1.0M'},
+  {n:'Faranah',lat:10.0418,lng:-10.7469,col:'#D97706',ads:54,pop:'950K'},
+  {n:'Kankan',lat:10.3839,lng:-9.3028,col:'#DC2626',ads:112,pop:'1.8M'},
+  {n:"N'Zérékoré",lat:7.7562,lng:-8.8195,col:'#0891B2',ads:87,pop:'1.7M'},
+];
+
+var PREFS=[
+  {n:'Conakry',lat:9.641,lng:-13.578,r:'Conakry',ads:456},
+  {n:'Boké',lat:10.933,lng:-14.290,r:'Boké',ads:45},{n:'Boffa',lat:10.183,lng:-14.033,r:'Boké',ads:18},
+  {n:'Fria',lat:10.367,lng:-13.550,r:'Boké',ads:12},{n:'Gaoual',lat:11.750,lng:-13.200,r:'Boké',ads:7},
+  {n:'Koundara',lat:12.483,lng:-13.300,r:'Boké',ads:5},{n:'Télimélé',lat:10.900,lng:-13.033,r:'Boké',ads:8},
+  {n:'Kindia',lat:10.057,lng:-12.866,r:'Kindia',ads:78},{n:'Coyah',lat:9.700,lng:-13.383,r:'Kindia',ads:32},
+  {n:'Dubréka',lat:9.790,lng:-13.513,r:'Kindia',ads:15},{n:'Forécariah',lat:9.433,lng:-13.100,r:'Kindia',ads:9},
+  {n:'Mamou',lat:10.376,lng:-12.083,r:'Mamou',ads:48},{n:'Dalaba',lat:10.687,lng:-12.250,r:'Mamou',ads:17},
+  {n:'Pita',lat:11.067,lng:-12.400,r:'Mamou',ads:11},
+  {n:'Labé',lat:11.324,lng:-12.283,r:'Labé',ads:62},{n:'Mali',lat:12.083,lng:-12.300,r:'Labé',ads:8},
+  {n:'Koubia',lat:11.583,lng:-11.883,r:'Labé',ads:6},{n:'Lélouma',lat:11.350,lng:-12.500,r:'Labé',ads:9},
+  {n:'Tougué',lat:11.450,lng:-11.667,r:'Labé',ads:5},
+  {n:'Faranah',lat:10.042,lng:-10.747,r:'Faranah',ads:28},{n:'Dabola',lat:10.750,lng:-11.117,r:'Faranah',ads:12},
+  {n:'Dinguiraye',lat:11.300,lng:-10.717,r:'Faranah',ads:8},{n:'Kissidougou',lat:9.183,lng:-10.100,r:'Faranah',ads:6},
+  {n:'Kankan',lat:10.384,lng:-9.303,r:'Kankan',ads:67},{n:'Siguiri',lat:11.417,lng:-9.167,r:'Kankan',ads:22},
+  {n:'Kouroussa',lat:10.650,lng:-9.883,r:'Kankan',ads:11},{n:'Mandiana',lat:10.617,lng:-8.667,r:'Kankan',ads:8},
+  {n:"Kérouané",lat:9.267,lng:-9.017,r:'Kankan',ads:4},
+  {n:"N'Zérékoré",lat:7.756,lng:-8.820,r:"N'Zérékoré",ads:52},{n:'Beyla',lat:8.683,lng:-8.633,r:"N'Zérékoré",ads:11},
+  {n:'Guéckédou',lat:8.550,lng:-10.133,r:"N'Zérékoré",ads:9},{n:'Lola',lat:7.817,lng:-8.533,r:"N'Zérékoré",ads:7},
+  {n:'Macenta',lat:8.467,lng:-9.467,r:"N'Zérékoré",ads:6},{n:'Yomou',lat:7.567,lng:-9.250,r:"N'Zérékoré",ads:2},
+];
+
+var CATS=[
+  {n:'Véhicules',e:'🚗',c:234},{n:'Immobilier',e:'🏠',c:189},{n:'Emploi',e:'💼',c:156},
+  {n:'Électronique',e:'📱',c:312},{n:'Mode',e:'👗',c:278},{n:'Maison & Jardin',e:'🛋️',c:145},
+  {n:'Services',e:'🔧',c:198},{n:'Loisirs',e:'🎮',c:167},
+  {n:'Vacances & Tourisme',e:'✈️',c:43},
+  {n:'Cuisine & Traiteur',e:'🍽️',c:89},
+  {n:'Aide à domicile',e:'🤝',c:64},
+  {n:'Autres',e:'📦',c:97}
+];
+
+var DEMO_ADS=[
+  {id:1,e:'🚗',t:'Toyota Land Cruiser V8 2019 — Excellent état',p:45000000,city:'Conakry',cat:'Véhicules',date:'Il y a 2h',views:312,feat:true,seller:'Mamadou Diallo',desc:'Faible kilométrage, toutes options. Documents à jour. Garantie valide. Disponible à Conakry.',tags:['Toyota','V8','4x4'],bg:'linear-gradient(135deg,#FFF3EE,#FFB899)'},
+  {id:2,e:'🏠',t:'Villa 5 pièces avec piscine — Ratoma',p:250000000,city:'Conakry',cat:'Immobilier',date:'Il y a 5h',views:178,feat:true,seller:'Alpha Baldé',desc:'5 chambres, 3 salles de bain, piscine, garage double. Quartier sécurisé de Ratoma.',tags:['Villa','Piscine','Luxe'],bg:'linear-gradient(135deg,#EFF6FF,#BFDBFE)'},
+  {id:3,e:'📱',t:'iPhone 15 Pro Max 256GB Neuf sous blister',p:8500000,city:'Conakry',cat:'Électronique',date:'Il y a 1j',views:247,feat:true,seller:'Amadou Camara',desc:'Neuf sous blister. Acheté à Dubai en oct. 2024. Garantie Apple valide 1 an.',tags:['iPhone','Apple','Neuf'],bg:'linear-gradient(135deg,#F0FDF4,#BBF7D0)'},
+  {id:4,e:'💻',t:'MacBook Pro M3 14" 18GB RAM 512GB SSD',p:12000000,city:'Labé',cat:'Électronique',date:'Il y a 2j',views:189,feat:true,seller:'Fatoumata Sow',desc:'Utilisé 3 mois. Comme neuf. Chargeur USB-C inclus. Facture disponible.',tags:['MacBook','Apple','M3'],bg:'linear-gradient(135deg,#FFF7ED,#FED7AA)'},
+  {id:5,e:'👗',t:'Robe traditionnelle Fula brodée — Taille M',p:350000,city:'Labé',cat:'Mode',date:'Il y a 3h',views:89,feat:false,seller:'Mariama Barry',desc:'Robe en tissu wax de qualité supérieure. Taille M. Jamais portée.',tags:['Mode','Fula','Wax'],bg:'linear-gradient(135deg,#FDF4FF,#E9D5FF)'},
+  {id:6,e:'🛵',t:'Moto Bajaj Boxer 125cc 2022 — Peu utilisée',p:6500000,city:'Kankan',cat:'Véhicules',date:'Il y a 4h',views:156,feat:false,seller:'Ibrahima Kouyaté',desc:'Très bon état. Documents à jour. Révision faite. Prête à rouler.',tags:['Moto','Bajaj','125cc'],bg:'linear-gradient(135deg,#ECFEFF,#A5F3FC)'},
+  {id:7,e:'📺',t:'TV Samsung 55" QLED 4K Smart TV 2023',p:3200000,city:'Conakry',cat:'Électronique',date:'Il y a 6h',views:203,feat:false,seller:'Ousmane Condé',desc:'Smart TV 55 pouces QLED 4K. Wi-Fi, Netflix, YouTube intégrés. Télécommande incluse.',tags:['Samsung','4K','Smart'],bg:'linear-gradient(135deg,#FFF1F2,#FECDD3)'},
+  {id:8,e:'🏗️',t:'Terrain 500m² viabilisé — Centre Kindia',p:15000000,city:'Kindia',cat:'Immobilier',date:'Il y a 8h',views:134,feat:false,seller:'Sékou Touré',desc:'Titre foncier disponible. Eau et électricité. Idéal pour construction.',tags:['Terrain','Foncier','Kindia'],bg:'linear-gradient(135deg,#F0FDF4,#D1FAE5)'},
+];
+
+// ══════════════════════════════════════════
+//  DB
+// ══════════════════════════════════════════
+var DB={
+  _d:{users:[],ads:DEMO_ADS.slice(),payments:[],favs:[],user:null},
+  load:function(){try{var s=localStorage.getItem('ygy5');if(s)this._d=Object.assign(this._d,JSON.parse(s));}catch(e){}},
+  save:function(){try{localStorage.setItem('ygy5',JSON.stringify(this._d));}catch(e){}},
+  ads:function(){return this._d.ads||DEMO_ADS;},
+  addAd:function(a){this._d.ads.unshift(a);this.save();},
+  user:function(){return this._d.user;},
+  login:function(u){this._d.user=u;this.save();},
+  logout:function(){this._d.user=null;this.save();},
+  addUser:function(u){this._d.users.push(u);this.save();},
+  payments:function(){return this._d.payments||[];},
+  addPayment:function(p){this._d.payments.unshift(p);this.save();},
+  favs:function(){return this._d.favs||[];},
+  addFav:function(id){if(!this._d.favs)this._d.favs=[];if(!this._d.favs.includes(id)){this._d.favs.push(id);this.save();}}
+};
+
+// ══════════════════════════════════════════
+//  ROUTING
+// ══════════════════════════════════════════
+function goTo(page){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  var el=document.getElementById('page-'+page);
+  if(el){el.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+  if(page==='dashboard')loadDash();
+}
+function scrollToAds(){document.getElementById('ads-section').scrollIntoView({behavior:'smooth'});}
+
+// ══════════════════════════════════════════
+//  POPULATE
+// ══════════════════════════════════════════
+function populateCities(){
+  var ids=['hero-city-sel','pc'];
+  ids.forEach(function(id){
+    var el=document.getElementById(id);if(!el)return;
+    var o='<option value="">Toutes les villes</option>';
+    ALL_CITIES.forEach(function(c){o+='<option>'+c+'</option>';});
+    el.innerHTML=o;
+  });
+}
+
+function renderNavCats(){
+  var el=document.getElementById('nav-cats-bar');if(!el)return;
+  var all=[{n:'Tout',e:'🔍'}].concat(CATS);
+  el.innerHTML=all.map(function(c,i){
+    return '<div class="ncat'+(i===0?' active':'')+'" onclick="filterCat(this,\''+c.n+'\')" >'+'<span class="em">'+c.e+'</span>'+c.n+'</div>';
+  }).join('');
+}
+function filterCat(el,name){
+  document.querySelectorAll('.ncat').forEach(function(n){n.classList.remove('active');});
+  el.classList.add('active');
+  var ads=DB.ads();
+  var filtered=(name==='Tout')?ads:ads.filter(function(a){return a.cat===name;});
+  var fg=document.getElementById('featured-grid');
+  var rg=document.getElementById('recent-grid');
+  if(fg)fg.innerHTML=filtered.filter(function(a){return a.feat;}).slice(0,4).map(function(a){return adCard(a,true);}).join('')||filtered.slice(0,4).map(function(a){return adCard(a,false);}).join('');
+  if(rg)rg.innerHTML=filtered.filter(function(a){return !a.feat;}).slice(0,8).map(function(a){return adCard(a,false);}).join('');
+  if(name!=='Tout')toast('🔍 '+name+' — '+filtered.length+' annonce(s)');
+  document.getElementById('ads-section').scrollIntoView({behavior:'smooth'});
+}
+
+function renderAds(){
+  var ads=DB.ads();
+  var fg=document.getElementById('featured-grid');
+  var rg=document.getElementById('recent-grid');
+  var sbEl=document.getElementById('sb-ads');
+  if(sbEl)sbEl.textContent=ads.length.toLocaleString('fr-FR');
+  if(fg)fg.innerHTML=ads.filter(function(a){return a.feat;}).slice(0,4).map(function(a){return adCard(a,true);}).join('');
+  if(rg)rg.innerHTML=ads.filter(function(a){return !a.feat;}).slice(0,8).map(function(a){return adCard(a,false);}).join('');
+}
+
+function adCard(a,feat){
+  return '<div class="ad-card" onclick="viewAd('+a.id+')">'+
+    '<div class="ad-img" style="background:'+a.bg+'"><span>'+a.e+'</span>'+
+    (feat?'<span class="ad-badge">⭐ À la une</span>':'')+
+    '<button class="ad-fav" onclick="event.stopPropagation();favAd('+a.id+')">🤍</button></div>'+
+    '<div class="ad-body"><div class="ad-price">'+a.p.toLocaleString('fr-FR')+' GNF</div>'+
+    '<div class="ad-title">'+a.t+'</div>'+
+    '<div class="ad-meta"><span class="ad-tag">📍 '+a.city+'</span><span class="ad-tag">🕐 '+a.date+'</span></div></div></div>';
+}
+
+function renderPostCats(){
+  var el=document.getElementById('post-cats');if(!el)return;
+  el.innerHTML=CATS.map(function(c){
+    return '<div class="cat-opt" onclick="pickCat(this,\''+c.n+'\')"><span class="em">'+c.e+'</span>'+c.n+'</div>';
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+//  MAP — GUINÉE + FILTRAGE ANNONCES
+// ══════════════════════════════════════════
+var mapObj=null,lyrReg=null,lyrPref=null,mapFilter=null;
+
+function initMap(){
+  var el=document.getElementById('guinee-map');if(!el||mapObj)return;
+  var bounds=L.latLngBounds([[7.0,-15.3],[12.9,-7.4]]);
+  mapObj=L.map('guinee-map',{center:[10.2,-11.2],zoom:7,maxBounds:bounds,maxBoundsViscosity:1,minZoom:6,maxZoom:14});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:18}).addTo(mapObj);
+  // Masquer hors Guinée
+  L.polygon([[[90,-180],[90,180],[-90,180],[-90,-180]],[[7.0,-15.3],[7.0,-7.4],[12.9,-7.4],[12.9,-15.3]]],
+    {color:'transparent',fillColor:'#F5F2EE',fillOpacity:0.72,interactive:false}).addTo(mapObj);
+
+  lyrReg=L.layerGroup();
+  lyrPref=L.layerGroup();
+
+  // Régions — gros marqueurs
+  REGIONS.forEach(function(r){
+    var sz=Math.min(28,16+Math.floor(r.ads/60));
+    var icon=L.divIcon({className:'',
+      html:'<div style="background:'+r.col+';width:'+sz+'px;height:'+sz+'px;border-radius:50%;border:3px solid #fff;box-shadow:0 3px 12px rgba(0,0,0,.3);cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:'+(sz<22?'8':'10')+'px;font-weight:800;font-family:Cabinet Grotesk,sans-serif">'+r.ads+'</div>',
+      iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]});
+    var m=L.marker([r.lat,r.lng],{icon:icon});
+    m.bindPopup(
+      '<div style="font-family:Cabinet Grotesk,sans-serif;min-width:180px;padding:4px">'+
+      '<div style="background:'+r.col+';color:#fff;font-size:10px;font-weight:800;padding:3px 10px;border-radius:50px;display:inline-block;margin-bottom:9px;text-transform:uppercase;letter-spacing:.5px">Région</div>'+
+      '<div style="font-size:18px;font-weight:800;margin-bottom:6px;color:#0E0E0E">'+r.n+'</div>'+
+      '<div style="font-size:13px;color:#767676;line-height:1.9">👥 Population : '+r.pop+'<br>📋 <strong style="color:'+r.col+'">'+r.ads+'</strong> annonces actives</div>'+
+      '<button onclick="filterByZone(\''+r.n+'\')" style="margin-top:10px;background:'+r.col+';color:#fff;border:none;padding:9px 16px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;width:100%;font-family:inherit">Voir les annonces →</button>'+
+      '</div>',{maxWidth:220});
+    m.addTo(lyrReg);
+  });
+
+  // Préfectures — marqueurs avec compteur
+  PREFS.forEach(function(p){
+    var reg=REGIONS.find(function(r){return r.n===p.r;});
+    var col=reg?reg.col:'#767676';
+    var icon=L.divIcon({className:'',
+      html:'<div style="background:'+col+';width:14px;height:14px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.25);cursor:pointer"></div>',
+      iconSize:[14,14],iconAnchor:[7,7]});
+    var m=L.marker([p.lat,p.lng],{icon:icon});
+    m.bindPopup(
+      '<div style="font-family:Cabinet Grotesk,sans-serif">'+
+      '<div style="font-weight:800;font-size:15px;margin-bottom:4px;color:#0E0E0E">'+p.n+'</div>'+
+      '<div style="font-size:13px;color:#767676;margin-bottom:10px">Région de '+p.r+' · <strong style="color:'+col+'">'+p.ads+'</strong> annonces</div>'+
+      '<button onclick="filterByZone(\''+p.n+'\')" style="background:'+col+';color:#fff;border:none;padding:7px 14px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;width:100%;font-family:inherit">Filtrer les annonces</button>'+
+      '</div>');
+    m.addTo(lyrPref);
+  });
+
+  lyrReg.addTo(mapObj);
+
+  // Légende
+  var leg=document.getElementById('map-legend');
+  if(leg){
+    leg.innerHTML=REGIONS.map(function(r){
+      return '<div class="map-leg-item"><div class="map-dot" style="background:'+r.col+'"></div><span><strong>'+r.n+'</strong> — '+r.ads+' ann.</span></div>';
+    }).join('');
+  }
+  setTimeout(function(){mapObj.invalidateSize();},200);
+}
+
+function showLayer(l){
+  if(!mapObj)return;
+  document.getElementById('btn-reg').classList.toggle('active',l==='regions');
+  document.getElementById('btn-pref').classList.toggle('active',l==='prefectures');
+  if(l==='regions'){mapObj.removeLayer(lyrPref);lyrReg.addTo(mapObj);}
+  else{mapObj.removeLayer(lyrReg);lyrPref.addTo(mapObj);}
+  if(mapObj)mapObj.closePopup();
+}
+
+function filterByZone(zone){
+  mapFilter=zone;
+  var filtered=DB.ads().filter(function(a){return a.city===zone||a.cat===zone;});
+  if(filtered.length===0)filtered=DB.ads().slice(0,3); // fallback demo
+  var fg=document.getElementById('featured-grid');
+  var rg=document.getElementById('recent-grid');
+  if(fg)fg.innerHTML=filtered.slice(0,4).map(function(a){return adCard(a,false);}).join('');
+  if(rg)rg.innerHTML=filtered.slice(0,8).map(function(a){return adCard(a,false);}).join('');
+  var info=document.getElementById('map-filter-info');
+  if(info){info.classList.remove('hidden');document.getElementById('mfi-zone').textContent=zone;document.getElementById('mfi-count').textContent=DB.ads().length;}
+  mapObj.closePopup();
+  document.getElementById('ads-section').scrollIntoView({behavior:'smooth'});
+  toast('🔍 '+zone+' — '+filtered.length+' annonce(s) trouvée(s)');
+}
+
+function clearMapFilter(){
+  mapFilter=null;
+  renderAds();
+  var info=document.getElementById('map-filter-info');
+  if(info)info.classList.add('hidden');
+  toast('✓ Filtre effacé');
+}
+
+// ══════════════════════════════════════════
+//  VIEW AD
+// ══════════════════════════════════════════
+var curAd=null;
+function viewAd(id){
+  var ad=DB.ads().find(function(a){return a.id===id;});if(!ad)return;
+  curAd=ad;
+  document.getElementById('det-emoji').textContent=ad.e;
+  document.getElementById('det-emoji').style.background=ad.bg;
+  document.getElementById('bc-cat').textContent=ad.cat;
+  document.getElementById('bc-title').textContent=ad.t.substring(0,40)+'...';
+  document.getElementById('det-price').textContent=ad.p.toLocaleString('fr-FR')+' GNF';
+  document.getElementById('det-title').textContent=ad.t;
+  document.getElementById('det-desc').textContent=ad.desc;
+  document.getElementById('dm-city').textContent=ad.city;
+  document.getElementById('dm-cat').textContent=ad.cat;
+  document.getElementById('dm-date').textContent=ad.date;
+  document.getElementById('dm-views').textContent=(ad.views||0)+' vues';
+  document.getElementById('det-tags').innerHTML=(ad.tags||[]).map(function(t){return '<span class="tag-chip">'+t+'</span>';}).join(' ');
+  document.getElementById('det-seller').textContent=ad.seller;
+  document.getElementById('det-av').textContent=ad.seller?ad.seller.charAt(0).toUpperCase():'?';
+  document.getElementById('om-val').textContent=ad.p.toLocaleString('fr-FR')+' GNF';
+  document.getElementById('om-item').textContent=ad.t;
+  goTo('detail');
+}
+function favAd(id){DB.addFav(id);toast('❤️ Ajouté aux favoris !','ok');}
+function addFav(){if(curAd){DB.addFav(curAd.id);toast('❤️ Ajouté aux favoris !','ok');}}
+
+// ══════════════════════════════════════════
+//  POST AD
+// ══════════════════════════════════════════
+var selCat='';
+function pickCat(el,name){document.querySelectorAll('.cat-opt').forEach(function(c){c.classList.remove('sel');});el.classList.add('sel');selCat=name;}
+function submitAd(){
+  var title=(document.getElementById('pt').value||'').trim();
+  var price=(document.getElementById('pp').value||'').trim();
+  var city=document.getElementById('pc').value;
+  var name=(document.getElementById('pn').value||'').trim();
+  if(!title||!price){toast('⚠️ Remplissez le titre et le prix','err');return;}
+  var cat=CATS.find(function(c){return c.n===selCat;});
+  DB.addAd({id:Date.now(),e:cat?cat.e:'📦',t:title,p:parseInt(price)||0,city:city||'Conakry',cat:selCat||'Autres',date:'À l\'instant',views:0,feat:false,seller:name||'Vendeur',desc:(document.getElementById('pd').value||''),tags:[selCat||'Autres'],bg:'linear-gradient(135deg,#FFF3EE,#FFB899)'});
+  renderAds();toast('🎉 Annonce publiée !','ok');
+  setTimeout(function(){goTo('home');},1200);
+}
+
+// ══════════════════════════════════════════
+//  AUTH + SMS
+// ══════════════════════════════════════════
+var pendingUser=null,smsCode='';
+function authTab(tab){
+  var isL=(tab==='login');
+  document.getElementById('mtab-login').classList.toggle('active',isL);
+  document.getElementById('mtab-reg').classList.toggle('active',!isL);
+  document.getElementById('auth-tt').textContent=isL?'Connexion':'Inscription';
+  renderAuthForm(tab);
+}
+
+function renderAuthForm(tab){
+  var body=document.getElementById('auth-body');
+  var gBtn='<button class="g-btn" onclick="toast(\'🔄 Redirection Google...\')"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Continuer avec Google</button><div class="or-sep">ou</div>';
+
+  if(tab==='login'){
+    body.innerHTML=gBtn+
+      // Toggle : connexion par téléphone OU email
+      '<div style="display:flex;background:var(--brl);border-radius:50px;padding:3px;margin-bottom:16px" id="login-toggle">'+
+        '<div id="lt-phone" style="flex:1;text-align:center;padding:8px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;background:var(--wh);box-shadow:var(--sh);color:var(--ink)" onclick="loginToggle(\'phone\')">📱 Téléphone</div>'+
+        '<div id="lt-email" style="flex:1;text-align:center;padding:8px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted)" onclick="loginToggle(\'email\')">📧 Email</div>'+
+      '</div>'+
+      '<div id="li-phone-wrap" class="fg"><label>Téléphone</label><div class="ph-row"><span class="ph-pfx">🇬🇳 +224</span><input type="tel" id="li-phone" placeholder="620 00 00 00" style="flex:1"></div></div>'+
+      '<div id="li-email-wrap" class="fg" style="display:none"><label>Adresse email</label><input type="email" id="li-email" placeholder="votre@email.com"></div>'+
+      '<div class="fg"><label>Mot de passe</label><input type="password" id="lp" placeholder="••••••••"></div>'+
+      '<button class="btn btn-ink btn-full" style="border-radius:12px" onclick="doLogin()">Se connecter →</button>'+
+      '<p style="text-align:center;font-size:13px;color:var(--muted);margin-top:14px">Pas de compte ? <a style="color:var(--or);cursor:pointer;font-weight:700" onclick="authTab(\'reg\')">S\'inscrire gratuitement</a></p>';
+
+  } else {
+    // INSCRIPTION
+    var opts='<option value="">Choisir votre préfecture...</option>';
+    ALL_CITIES.forEach(function(c){opts+='<option>'+c+'</option>';});
+    body.innerHTML=gBtn+
+      '<div class="frow"><div class="fg"><label>Prénom *</label><input type="text" id="rfn" placeholder="Prénom"></div><div class="fg"><label>Nom *</label><input type="text" id="rln" placeholder="Nom"></div></div>'+
+      '<div class="fg"><label>Téléphone Orange *</label><div class="ph-row"><span class="ph-pfx">🇬🇳 +224</span><input type="tel" id="rph" placeholder="620 00 00 00" maxlength="9" style="flex:1"></div></div>'+
+      '<div class="fg"><label>Email</label><input type="email" id="rem" placeholder="votre@email.com"></div>'+
+      '<div class="fg"><label>Mot de passe *</label><input type="password" id="rpw" placeholder="8 caractères minimum"></div>'+
+      '<div class="fg"><label>Votre préfecture / ville *</label><select id="rct">'+opts+'</select></div>'+
+      // Choix méthode de vérification
+      '<div style="margin-bottom:16px">'+
+        '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:9px">Vérification du compte via :</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+          '<div id="vm-sms" class="verify-method active" onclick="pickVerifyMethod(\'sms\')" style="border:2px solid var(--or);border-radius:var(--rads);padding:12px;text-align:center;cursor:pointer;background:var(--orl);transition:all .2s">'+
+            '<div style="font-size:22px;margin-bottom:5px">📱</div>'+
+            '<div style="font-size:13px;font-weight:800;color:var(--or2)">SMS</div>'+
+            '<div style="font-size:11px;color:var(--muted)">Code sur votre téléphone</div>'+
+          '</div>'+
+          '<div id="vm-email" class="verify-method" onclick="pickVerifyMethod(\'email\')" style="border:2px solid var(--br);border-radius:var(--rads);padding:12px;text-align:center;cursor:pointer;background:var(--wh);transition:all .2s">'+
+            '<div style="font-size:22px;margin-bottom:5px">📧</div>'+
+            '<div style="font-size:13px;font-weight:800;color:var(--muted)">Email</div>'+
+            '<div style="font-size:11px;color:var(--muted)">Code dans votre boite mail</div>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      '<button class="btn btn-or btn-full" style="border-radius:12px" id="btn-sendcode" onclick="sendVerifCode()">📱 Recevoir le code SMS →</button>'+
+      '<p style="text-align:center;font-size:13px;color:var(--muted);margin-top:14px">Déjà un compte ? <a style="color:var(--or);cursor:pointer;font-weight:700" onclick="authTab(\'login\')">Se connecter</a></p>';
+  }
+}
+
+var verifyMethod='sms';
+function pickVerifyMethod(m){
+  verifyMethod=m;
+  var smsEl=document.getElementById('vm-sms');
+  var emEl=document.getElementById('vm-email');
+  var btn=document.getElementById('btn-sendcode');
+  if(smsEl){smsEl.style.border='2px solid '+(m==='sms'?'var(--or)':'var(--br)');smsEl.style.background=m==='sms'?'var(--orl)':'var(--wh)';smsEl.querySelector('div:nth-child(2)').style.color=m==='sms'?'var(--or2)':'var(--muted)';}
+  if(emEl){emEl.style.border='2px solid '+(m==='email'?'var(--or)':'var(--br)');emEl.style.background=m==='email'?'var(--orl)':'var(--wh)';emEl.querySelector('div:nth-child(2)').style.color=m==='email'?'var(--or2)':'var(--muted)';}
+  if(btn)btn.textContent=m==='sms'?'📱 Recevoir le code SMS →':'📧 Recevoir le code par email →';
+}
+
+var loginMode='phone';
+function loginToggle(mode){
+  loginMode=mode;
+  var pw=document.getElementById('li-phone-wrap');
+  var ew=document.getElementById('li-email-wrap');
+  var ltp=document.getElementById('lt-phone');
+  var lte=document.getElementById('lt-email');
+  var active={background:'var(--wh)',boxShadow:'var(--sh)',color:'var(--ink)'};
+  var inactive={background:'transparent',boxShadow:'none',color:'var(--muted)'};
+  if(pw)pw.style.display=mode==='phone'?'':'none';
+  if(ew)ew.style.display=mode==='email'?'':'none';
+  if(ltp)Object.assign(ltp.style,mode==='phone'?active:inactive);
+  if(lte)Object.assign(lte.style,mode==='email'?active:inactive);
+}
+
+function sendVerifCode(){
+  var fn=(document.getElementById('rfn')||{value:''}).value.trim();
+  var ph=(document.getElementById('rph')||{value:''}).value.trim();
+  var em=(document.getElementById('rem')||{value:''}).value.trim();
+  var pw=(document.getElementById('rpw')||{value:''}).value.trim();
+  if(!fn){toast('⚠️ Remplissez votre prénom','err');return;}
+  if(!ph||ph.length<8){toast('⚠️ Téléphone invalide (8 chiffres min)','err');return;}
+  if(verifyMethod==='email'&&!em){toast('⚠️ Email requis pour la vérification par email','err');return;}
+  if(!pw||pw.length<6){toast('⚠️ Mot de passe trop court (6 caractères min)','err');return;}
+
+  smsCode=Math.floor(1000+Math.random()*9000).toString();
+  pendingUser={prenom:fn,nom:(document.getElementById('rln')||{value:''}).value.trim(),
+    phone:'+224'+ph,email:em,password:pw,
+    city:(document.getElementById('rct')||{value:''}).value,
+    method:verifyMethod,
+    initials:(fn.charAt(0)+((document.getElementById('rln')||{value:''}).value.trim().charAt(0)||'')).toUpperCase()};
+
+  var dest=verifyMethod==='email'?em:'+224 '+ph;
+  var icon=verifyMethod==='email'?'📧':'📱';
+  var body=document.getElementById('auth-body');
+  // Affichage de la zone de code
+  body.innerHTML+=
+    '<div class="sms-wrap" id="code-box">'+
+      '<div class="sw-title">'+icon+' Code envoyé !</div>'+
+      '<div class="sw-sub">Code de vérification envoyé à<br><strong>'+dest+'</strong>'+
+        (verifyMethod!=='email'?'<br><span style="font-size:11px;opacity:.7">(Simulation : <strong>'+smsCode+'</strong>)</span>':'')+
+      '</div>'+
+      '<div class="sms-digits">'+
+        '<input type="text" maxlength="1" id="s1" oninput="movSms(this,\'s2\')" autocomplete="one-time-code">'+
+        '<input type="text" maxlength="1" id="s2" oninput="movSms(this,\'s3\')">'+
+        '<input type="text" maxlength="1" id="s3" oninput="movSms(this,\'s4\')">'+
+        '<input type="text" maxlength="1" id="s4">'+
+      '</div>'+
+      '<button class="btn btn-or btn-full" style="border-radius:12px;margin-bottom:10px" onclick="verifyCode()">✅ Confirmer et créer mon compte</button>'+
+      '<div class="sms-resend">Pas reçu ? <a onclick="resendCode()">Renvoyer le code</a></div>'+
+    '</div>';
+
+  toast(icon+' Code '+(verifyMethod==='email'?'email':'SMS')+' envoyé à '+dest,'ok');
+  var s1=document.getElementById('s1');if(s1)s1.focus();
+}
+
+function movSms(el,nid){if(el.value.length>=1){var n=document.getElementById(nid);if(n)n.focus();}}
+
+function resendCode(){
+  smsCode=Math.floor(1000+Math.random()*9000).toString();
+  toast('🔄 Nouveau code envoyé !','ok');
+  // En prod : appel /api/auth/resend-code
+}
+
+function verifyCode(){
+  var entered=['s1','s2','s3','s4'].map(function(id){return(document.getElementById(id)||{value:''}).value;}).join('');
+  if(entered!==smsCode){toast('❌ Code incorrect — réessayez','err');return;}
+  var u=Object.assign({name:pendingUser.prenom+(pendingUser.nom?' '+pendingUser.nom:'')},pendingUser);
+  DB.addUser(u);DB.login(u);updateNav();closeModal('auth');
+  toast('🎉 Bienvenue '+pendingUser.prenom+' ! Compte créé 🇬🇳','ok');
+  pendingUser=null;smsCode='';
+}
+
+function doLogin(){
+  var id='';
+  if(loginMode==='phone'){id=(document.getElementById('li-phone')||{value:''}).value.trim();}
+  else{id=(document.getElementById('li-email')||{value:''}).value.trim();}
+  var pw=(document.getElementById('lp')||{value:''}).value.trim();
+  if(!id){toast('⚠️ Remplissez votre '+(loginMode==='phone'?'téléphone':'email'),'err');return;}
+  if(!pw){toast('⚠️ Entrez votre mot de passe','err');return;}
+  var initials=id.substring(0,2).toUpperCase();
+  DB.login({name:'Utilisateur YouGouYou',phone:loginMode==='phone'?'+224 '+id:'',email:loginMode==='email'?id:'',initials:initials});
+  updateNav();closeModal('auth');toast('✅ Connexion réussie !','ok');
+}
+function logout(){DB.logout();updateNav();goTo('home');toast('👋 Déconnecté');}
+function updateNav(){
+  var btn=document.getElementById('nav-auth-btn');if(!btn)return;
+  var u=DB.user();
+  if(u){btn.textContent='👤 '+u.name.split(' ')[0];btn.onclick=function(){loadDash();goTo('dashboard');};}
+  else{btn.textContent='👤 Connexion';btn.onclick=function(){openModal('auth');};}
+}
+
+// ══════════════════════════════════════════
+//  DASHBOARD
+// ══════════════════════════════════════════
+function loadDash(){
+  var u=DB.user();if(!u){openModal('auth');return;}
+  document.getElementById('d-av').textContent=u.initials||'U';
+  document.getElementById('d-nm').textContent=u.name;
+  document.getElementById('d-ph').textContent=u.phone||'';
+  document.getElementById('d-greet').textContent=u.name.split(' ')[0];
+  var ads=DB.ads();
+  document.getElementById('dc-ads').textContent=ads.length;
+  document.getElementById('dc-pay').textContent=DB.payments().length;
+  var prev=document.getElementById('d-ads-prev');if(prev)prev.innerHTML=ads.slice(0,3).map(dashRow).join('');
+  var full=document.getElementById('d-ads-full');if(full)full.innerHTML=ads.map(dashRow).join('');
+  var pays=DB.payments();var pl=document.getElementById('d-pay-list');
+  if(pl){if(!pays.length){pl.innerHTML='<div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:48px;text-align:center;color:var(--muted);box-shadow:var(--sh)"><div style="font-size:52px;margin-bottom:14px">🟠</div><p style="font-weight:800;font-size:16px;margin-bottom:6px">Aucun paiement</p><p style="font-size:14px">Vos transactions Orange Money apparaîtront ici</p></div>';}
+  else pl.innerHTML=pays.map(function(p){return '<div class="dash-ad-row"><div style="font-size:30px">🟠</div><div style="flex:1"><div style="font-weight:800;font-size:14px">'+p.item+'</div><div style="font-size:12px;color:var(--muted)">📅 '+p.date+' · 🔑 '+p.ref+'</div></div><div style="text-align:right"><div style="font-weight:800;font-size:16px;color:var(--or)">'+parseInt(p.amount).toLocaleString('fr-FR')+' GNF</div><span class="badge badge-g">✅ Payé</span></div></div>';}).join('');}
+  var favIds=DB.favs();var favAds=DB.ads().filter(function(a){return favIds.includes(a.id);});
+  var df=document.getElementById('d-favs');
+  if(df)df.innerHTML=favAds.length?favAds.map(function(a){return adCard(a,false);}).join(''):'<div style="grid-column:1/-1;background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:48px;text-align:center;color:var(--muted);box-shadow:var(--sh)"><div style="font-size:52px;margin-bottom:14px">❤️</div><p>Aucun favori</p></div>';
+}
+function dashRow(a){
+  return '<div class="dash-ad-row"><div style="font-size:30px">'+a.e+'</div><div style="flex:1"><div style="font-weight:800;font-size:14px">'+a.t+'</div><div style="font-size:12px;color:var(--muted)">📍 '+a.city+' · 👁️ '+a.views+' vues · '+a.date+'</div></div><div style="text-align:right"><div style="font-weight:800;font-size:16px;color:var(--or)">'+a.p.toLocaleString('fr-FR')+' GNF</div><span class="badge badge-g">✅ Active</span></div></div>';
+}
+function showTab(tab){
+  ['overview','ads','messages','payments','favs'].forEach(function(t){var el=document.getElementById('tab-'+t);if(el)el.style.display=(t===tab?'block':'none');});
+  document.querySelectorAll('.dash-nav a').forEach(function(a,i){a.classList.toggle('active',i===(['overview','ads','messages','payments','favs'].indexOf(tab)));});
+}
+
+// ══════════════════════════════════════════
+//  ORANGE MONEY
+// ══════════════════════════════════════════
+function openOM(){
+  document.getElementById('om-form').style.display='block';
+  document.getElementById('om-processing').style.display='none';
+  document.getElementById('om-success').style.display='none';
+  var ph=document.getElementById('om-phone');if(ph)ph.value='';
+  ['p1','p2','p3','p4'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+  openModal('om');
+}
+function movPin(el,nid){if(el.value.length>=1){var n=document.getElementById(nid);if(n)n.focus();}}
+function processPayment(){
+  var phone=(document.getElementById('om-phone')||{value:''}).value.trim();
+  var pin=['p1','p2','p3','p4'].map(function(id){return(document.getElementById(id)||{value:''}).value;}).join('');
+  if(!phone||phone.length<8){toast('⚠️ Numéro Orange invalide','err');return;}
+  if(pin.length<4){toast('⚠️ Code PIN incomplet','err');return;}
+  document.getElementById('om-form').style.display='none';
+  document.getElementById('om-processing').style.display='block';
+  setTimeout(function(){
+    var ref='OM'+Date.now().toString(36).toUpperCase().slice(-9);
+    var amt=curAd?curAd.p:0;var item=curAd?curAd.t:'Article';
+    DB.addPayment({ref:ref,amount:amt,item:item,date:new Date().toLocaleDateString('fr-FR'),phone:'+224 '+phone});
+    document.getElementById('om-ok-val').textContent=amt.toLocaleString('fr-FR')+' GNF';
+    document.getElementById('om-ref').textContent='Référence : '+ref;
+    document.getElementById('om-ok-phone').textContent='SMS de confirmation envoyé au +224 '+phone;
+    document.getElementById('om-processing').style.display='none';
+    document.getElementById('om-success').style.display='block';
+    if(DB.user())loadDash();
+  },3000);
+}
+
+// ══════════════════════════════════════════
+//  MODALS
+// ══════════════════════════════════════════
+function openModal(id){var el=document.getElementById('overlay-'+id);if(el){el.classList.add('open');document.body.style.overflow='hidden';}if(id==='auth')renderAuthForm('login');}
+function closeModal(id){var el=document.getElementById('overlay-'+id);if(el){el.classList.remove('open');document.body.style.overflow='';}}
+function maybeClose(e,id){if(e.target===e.currentTarget)closeModal(id);}
+
+// ══════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════
+var tt;
+function toast(msg,type){
+  var el=document.getElementById('toast-el');
+  el.textContent=msg;el.className='toast show'+(type?' '+type:'');
+  clearTimeout(tt);tt=setTimeout(function(){el.className='toast';},3600);
+}
+
+// ══════════════════════════════════════════
+//  COMMISSION — VOIR NUMÉRO ANNONCEUR
+// ══════════════════════════════════════════
+function openCommission(){
+  if(!curAd){return;}
+  var price=curAd.p;
+  var fee=Math.round(price*0.1);
+  document.getElementById('com-price').textContent=price.toLocaleString('fr-FR')+' GNF';
+  document.getElementById('com-fee').textContent=fee.toLocaleString('fr-FR')+' GNF';
+  document.getElementById('com-total').textContent=fee.toLocaleString('fr-FR')+' GNF';
+  document.getElementById('com-success').style.display='none';
+  document.getElementById('com-phone').value='';
+  ['cp1','cp2','cp3','cp4'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+  // Reaffiche le formulaire
+  document.querySelector('#overlay-commission .m-body').style.display='';
+  openModal('commission');
+}
+function payCommission(){
+  var phone=(document.getElementById('com-phone')||{value:''}).value.trim();
+  var pin=['cp1','cp2','cp3','cp4'].map(function(id){return(document.getElementById(id)||{value:''}).value;}).join('');
+  if(!phone||phone.length<8){toast('⚠️ Numéro Orange invalide','err');return;}
+  if(pin.length<4){toast('⚠️ Code PIN incomplet','err');return;}
+  // Simulation : révéler un faux numéro (en prod = appel API backend)
+  var fakeNumbers=['+224 622 45 78 90','+224 664 12 34 56','+224 655 98 76 54','+224 628 00 11 22'];
+  var revealed=fakeNumbers[Math.floor(Math.random()*fakeNumbers.length)];
+  var fee=curAd?Math.round(curAd.p*0.1):0;
+  DB.addPayment({ref:'COM'+Date.now().toString(36).toUpperCase().slice(-8),amount:fee,item:'Commission — '+(curAd?curAd.t:''),date:new Date().toLocaleDateString('fr-FR'),phone:'+224 '+phone});
+  document.querySelector('#overlay-commission .m-body').style.display='none';
+  document.getElementById('com-revealed-phone').textContent=revealed;
+  document.getElementById('com-success').style.display='block';
+  toast('✅ Numéro révélé !','ok');
+}
+function copyPhone(){
+  var txt=document.getElementById('com-revealed-phone').textContent;
+  navigator.clipboard.writeText(txt).then(function(){toast('📋 Numéro copié !','ok');}).catch(function(){toast('📋 '+txt);});
+}
+
+// ══════════════════════════════════════════
+//  APP MOBILE QR
+// ══════════════════════════════════════════
+function showAppQR(platform){
+  var zone=document.getElementById('app-qr-zone');
+  var label=document.getElementById('app-qr-label');
+  if(zone)zone.style.display='block';
+  if(label)label.textContent=platform==='android'?'▶️ Google Play Store — yougouyougou':'🍎 Apple App Store — yougouyougou';
+  toast('📲 App '+(platform==='android'?'Android':'iOS')+' — bientôt disponible !');
+  zone.scrollIntoView({behavior:'smooth'});
+}
+
+// ══════════════════════════════════════════
+//  ADMIN — VOIR UTILISATEURS
+// ══════════════════════════════════════════
+function goAdmin(){
+  var u=DB.user();
+  // En prod = vérifier rôle admin. Ici on laisse accès direct pour démo
+  goTo('admin');
+  loadAdmin();
+}
+function loadAdmin(){
+  var users=DB._d.users||[];
+  var pays=DB.payments();
+  var ads=DB.ads();
+  // Stats
+  var stats=document.getElementById('admin-stats');
+  if(stats){
+    var cards=[
+      {n:users.length,l:'Utilisateurs inscrits',e:'👥',c:'var(--or)'},
+      {n:ads.length,l:'Annonces publiées',e:'📋',c:'var(--gr)'},
+      {n:pays.length,l:'Paiements Orange Money',e:'🟠',c:'#FF6A00'},
+      {n:pays.reduce(function(s,p){return s+parseInt(p.amount||0);},0).toLocaleString('fr-FR')+' GNF',l:'Total transactions',e:'💰',c:'#2563EB'},
+    ];
+    stats.innerHTML=cards.map(function(c){
+      return '<div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:22px;box-shadow:var(--sh)">'+
+        '<div style="font-size:28px;margin-bottom:8px">'+c.e+'</div>'+
+        '<div style="font-family:\'Instrument Serif\',serif;font-size:28px;color:'+c.c+';font-style:italic;margin-bottom:4px">'+c.n+'</div>'+
+        '<div style="font-size:13px;color:var(--muted);font-weight:600">'+c.l+'</div></div>';
+    }).join('');
+  }
+  // Users table
+  var uc=document.getElementById('admin-user-count');
+  if(uc)uc.textContent=users.length+' utilisateur'+(users.length>1?'s':'');
+  var tbody=document.getElementById('admin-users-body');
+  if(tbody){
+    if(!users.length){
+      tbody.innerHTML='<tr><td colspan="6" style="padding:40px;text-align:center;color:var(--muted);font-size:14px">Aucun utilisateur inscrit pour le moment.<br>Les inscriptions apparaîtront ici en temps réel.</td></tr>';
+    } else {
+      tbody.innerHTML=users.map(function(u,i){
+        return '<tr style="border-top:1px solid var(--br)">'+
+          '<td style="padding:14px 20px;font-size:13px;color:var(--muted)">'+(i+1)+'</td>'+
+          '<td style="padding:14px 20px"><div style="font-weight:800;font-size:14px">'+(u.name||u.prenom||'—')+'</div><div style="font-size:12px;color:var(--muted)">'+(u.initials||'')+'</div></td>'+
+          '<td style="padding:14px 20px;font-size:14px;font-weight:600">'+(u.phone||'—')+'</td>'+
+          '<td style="padding:14px 20px;font-size:14px">'+(u.city||'—')+'</td>'+
+          '<td style="padding:14px 20px;font-size:13px;color:var(--muted)">'+(u.email||'—')+'</td>'+
+          '<td style="padding:14px 20px"><span style="background:#D1FAE5;color:#065F46;font-size:11px;font-weight:800;padding:4px 10px;border-radius:50px">✅ Vérifié SMS</span></td>'+
+          '</tr>';
+      }).join('');
+    }
+  }
+  // Payments
+  var pb=document.getElementById('admin-payments-body');
+  if(pb){
+    if(!pays.length){pb.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);font-size:14px">Aucune transaction enregistrée.</div>';}
+    else{
+      pb.innerHTML=pays.map(function(p){
+        return '<div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--br)">'+
+          '<div style="font-size:26px">🟠</div>'+
+          '<div style="flex:1"><div style="font-weight:800;font-size:14px">'+p.item+'</div><div style="font-size:12px;color:var(--muted)">📅 '+p.date+' · 📞 '+p.phone+' · 🔑 '+p.ref+'</div></div>'+
+          '<div style="font-weight:800;color:var(--or)">'+parseInt(p.amount||0).toLocaleString('fr-FR')+' GNF</div>'+
+          '</div>';
+      }).join('');
+    }
+  }
+}
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){document.querySelectorAll('.overlay.open').forEach(function(o){o.classList.remove('open');});document.body.style.overflow='';}
+});
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',function(){
+  DB.load();
+  populateCities();
+  renderNavCats();
+  renderAds();
+  renderPostCats();
+  updateNav();
+  setTimeout(initMap,400);
+});
+</script>
+</body>
+</html>
