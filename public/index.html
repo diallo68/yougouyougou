@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouGouYou — Le marché de la Guinée</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Instrument+Serif:ital@0;1&family=Righteous&display=swap" rel="stylesheet">
     <style>
     :root {
         --or: #FF5C00;
@@ -141,9 +141,9 @@
 
     .fade-up-3 {
         animation: fadeUp .6s .24s cubic-bezier(.22, 1, .36, 1) both
-    }/* ── NAV ── */
+    }/* ── NAV 2 LIGNES ── */
     nav {
-        background: rgba(245, 242, 238, .9);
+        background: rgba(245, 242, 238, .96);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
         border-bottom: 1px solid var(--br);
@@ -152,14 +152,14 @@
         z-index: 500
     }
 
-    .nav-in {
+    .nav-top {
         max-width: 1320px;
         margin: 0 auto;
         padding: 0 28px;
-        height: 66px;
+        height: 62px;
         display: flex;
         align-items: center;
-        gap: 16px
+        gap: 14px
     }
 
     .logo {
@@ -172,10 +172,10 @@
     }
 
     .logo-mark {
-        width: 38px;
-        height: 38px;
+        width: 36px;
+        height: 36px;
         background: var(--ink);
-        border-radius: 10px;
+        border-radius: 9px;
         display: grid;
         place-items: center;
         position: relative;
@@ -192,34 +192,42 @@
     .logo-mark span {
         color: #fff;
         font-weight: 900;
-        font-size: 13px;
+        font-size: 12px;
         letter-spacing: -0.5px;
         position: relative;
         z-index: 1
     }
 
     .logo-tx {
-        font-weight: 800;
-        font-size: 17px;
+        font-family: 'Righteous', sans-serif;
+        font-size: 22px;
         color: var(--ink);
-        letter-spacing: -0.5px
+        letter-spacing: 0px;
+        line-height: 1
+    }
+
+    .logo-tx .Y {
+        color: var(--or);
+        font-size: 26px;
+        line-height: 1
     }
 
     .logo-tx em {
-        color: var(--or);
-        font-style: normal
+        color: var(--muted);
+        font-style: normal;
+        font-size: 18px
     }
 
     .nav-sc {
         flex: 1;
-        max-width: 400px;
+        max-width: 420px;
         display: flex;
         align-items: center;
         gap: 10px;
         background: var(--wh);
         border: 1.5px solid var(--br);
         border-radius: 50px;
-        padding: 9px 18px;
+        padding: 8px 18px;
         transition: all .2s
     }
 
@@ -247,6 +255,51 @@
         display: flex;
         align-items: center;
         gap: 10px
+    }/* barre catégories dans la nav */
+
+    .nav-cats {
+        border-top: 1px solid var(--br);
+        background: var(--wh)
+    }
+
+    .nav-cats-in {
+        max-width: 1320px;
+        margin: 0 auto;
+        padding: 0 28px;
+        display: flex;
+        align-items: stretch;
+        overflow-x: auto;
+        scrollbar-width: none
+    }
+
+    .nav-cats-in::-webkit-scrollbar {
+        display: none
+    }
+
+    .ncat {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 10px 18px;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--muted);
+        white-space: nowrap;
+        flex-shrink: 0;
+        transition: all .18s;
+        border-right: 1px solid var(--br)
+    }
+
+    .ncat:hover, .ncat.active {
+        color: var(--or);
+        border-bottom-color: var(--or);
+        background: var(--orl)
+    }
+
+    .ncat .em {
+        font-size: 15px
     }
 
     .btn {
@@ -494,54 +547,9 @@
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 10px
-    }/* ── STRIP NAV ── */
-    .strip {
-        background: var(--wh);
-        border-top: 1px solid var(--br);
-        border-bottom: 1px solid var(--br);
-        overflow: hidden
-    }
+    }/* strip removed - cats now in nav */
 
-    .strip-in {
-        max-width: 1320px;
-        margin: 0 auto;
-        padding: 0 28px;
-        display: flex;
-        align-items: stretch;
-        gap: 0;
-        overflow-x: auto;
-        scrollbar-width: none
-    }
-
-    .strip-in::-webkit-scrollbar {
-        display: none
-    }
-
-    .strip-cat {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 14px 20px;
-        cursor: pointer;
-        border-right: 1px solid var(--br);
-        font-size: 13px;
-        font-weight: 700;
-        color: var(--muted);
-        transition: all .2s;
-        white-space: nowrap;
-        flex-shrink: 0;
-        border-bottom: 2px solid transparent
-    }
-
-    .strip-cat:hover, .strip-cat.active {
-        color: var(--or);
-        border-bottom-color: var(--or);
-        background: var(--orl)
-    }
-
-    .strip-cat .em {
-        font-size: 16px
-    }/* ── SECTIONS ── */
+    /* ── SECTIONS ── */
     .sec {
         max-width: 1320px;
         margin: 0 auto;
@@ -1973,15 +1981,16 @@
 
     <!-- ══ NAV ══ -->
     <nav>
-        <div class="nav-in">
+        <div class="nav-top">
             <a class="logo" onclick="goTo('home')">
                 <div class="logo-mark">
                     <span>YY</span>
                 </div>
                 <span class="logo-tx">
-                    yougou
-                    <em>you</em>
-                    gou
+                    <span class="Y">Y</span>
+                    ougou
+                    <span class="Y">Y</span>
+                    ougou
                 </span>
             </a>
             <div class="nav-sc">
@@ -1989,11 +1998,12 @@
                     <circle cx="11" cy="11" r="8"/>
                     <path d="M21 21l-4.35-4.35"/>
                 </svg>
-                <input type="text" placeholder="Rechercher une annonce...">
+                <input type="text" placeholder="Toyota, iPhone, Appartement, Emploi...">
             </div>
             <div class="nav-right">
-                <button class="btn btn-or" onclick="goTo('post')">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <button class="btn btn-or" onclick="goTo('app-download')" style="background:var(--ink);font-size:13px;padding:9px 16px">📲 App mobile</button>
+                <button class="btn btn-or" onclick="goTo('post')" style="font-size:13px;padding:9px 18px">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                         <line x1="12" y1="5" x2="12" y2="19"/>
                         <line x1="5" y1="12" x2="19" y2="12"/>
                     </svg>
@@ -2001,8 +2011,12 @@
                           Déposer une annonce
                         
                 </button>
-                <button class="btn btn-ghost" id="nav-auth-btn" onclick="openModal('auth')">👤 Connexion</button>
+                <button class="btn btn-ghost" id="nav-auth-btn" onclick="openModal('auth')" style="font-size:13px;padding:9px 16px">👤 Connexion</button>
             </div>
+        </div>
+        <!-- BARRE CATÉGORIES -->
+        <div class="nav-cats">
+            <div class="nav-cats-in" id="nav-cats-bar"></div>
         </div>
     </nav>
 
@@ -2093,8 +2107,7 @@
             </div>
         </section>
 
-        <!-- CATEGORY STRIP -->
-        <div class="strip" id="cats-strip-el"></div>
+        <!-- cats now in nav -->
 
         <!-- FEATURED ADS -->
         <section class="sec" id="ads-section">
@@ -2256,7 +2269,7 @@
                             </div>
                         </div>
                         <div style="display:flex;flex-direction:column;gap:9px">
-                            <button class="btn" style="background:#00A550;color:#fff;border-radius:12px;justify-content:center;padding:13px;font-size:14px" onclick="toast('📞 Numéro copié !','ok')">📞 Appeler le vendeur</button>
+                            <button class="btn" style="background:#00A550;color:#fff;border-radius:12px;justify-content:center;padding:13px;font-size:14px;width:100%" onclick="openCommission()">📞 Voir le numéro (commission 10%)</button>
                             <button class="btn btn-or btn-full" style="border-radius:12px;font-size:14px" onclick="toast('💬 Message envoyé !','ok')">💬 Envoyer un message</button>
                             <button class="btn btn-om btn-full" style="border-radius:12px;font-size:14px" onclick="openOM()">🟠 Payer via Orange Money</button>
                         </div>
@@ -2391,6 +2404,7 @@
                     <a onclick="showTab('payments')">🟠 Paiements Orange Money</a>
                     <a onclick="showTab('favs')">❤️ Mes favoris</a>
                     <a onclick="goTo('post')" style="margin-top:18px;border-top:1px solid var(--br);padding-top:18px;color:var(--or)!important">➕ Nouvelle annonce</a>
+                    <a onclick="goAdmin()" style="color:#2563EB!important">⚙️ Administration</a>
                     <a onclick="logout()" style="color:var(--re)!important">🚪 Déconnexion</a>
                 </nav>
             </div>
@@ -2538,7 +2552,200 @@
         </div>
     </div>
 
-    <!-- ══ FOOTER ══ -->
+    <!-- ══ MODAL COMMISSION (voir numéro) ══ -->
+    <div class="overlay" id="overlay-commission" onclick="maybeClose(event,'commission')">
+        <div class="modal" style="max-width:420px">
+            <div class="m-head">
+                <div class="m-title">📞 Voir le numéro</div>
+                <button class="m-close" onclick="closeModal('commission')">✕</button>
+            </div>
+            <div class="m-body">
+                <div style="background:var(--orl);border:1.5px solid var(--orm);border-radius:var(--rad);padding:20px;text-align:center;margin-bottom:20px">
+                    <div style="font-size:40px;margin-bottom:10px">🔒</div>
+                    <div style="font-family:'Instrument Serif',serif;font-size:20px;font-weight:400;margin-bottom:6px;color:var(--ink)">Accès au numéro de l'annonceur</div>
+                    <div style="font-size:14px;color:var(--muted);line-height:1.7">
+                        Pour protéger les vendeurs et garantir des transactions sécurisées, l'accès au numéro de téléphone nécessite le paiement d'une 
+                        <strong>commission de 10%</strong>
+                         du prix de l'annonce.
+                    </div>
+                </div>
+                <div style="background:var(--brl);border:1px solid var(--br);border-radius:var(--rad);padding:16px;margin-bottom:18px">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:14px">
+                        <span style="color:var(--muted)">Prix de l'annonce</span>
+                        <strong id="com-price">0 GNF</strong>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:14px">
+                        <span style="color:var(--muted)">Commission YouGouYou (10%)</span>
+                        <strong style="color:var(--or)" id="com-fee">0 GNF</strong>
+                    </div>
+                    <div style="border-top:1px solid var(--br);padding-top:10px;display:flex;justify-content:space-between;font-size:15px;font-weight:800">
+                        <span>Total à payer</span>
+                        <span style="color:var(--or)" id="com-total">0 GNF</span>
+                    </div>
+                </div>
+                <div style="background:var(--brl);border:1px solid var(--br);border-radius:var(--rads);padding:14px;margin-bottom:18px;display:flex;align-items:center;gap:12px">
+                    <div style="font-size:28px">🟠</div>
+                    <div>
+                        <div style="font-weight:800;font-size:14px">Payer via Orange Money</div>
+                        <div style="font-size:12px;color:var(--muted)">Paiement instantané et sécurisé</div>
+                    </div>
+                </div>
+                <div class="fg">
+                    <label>Votre numéro Orange Money</label>
+                    <div class="ph-row">
+                        <span class="ph-pfx">🇬🇳 +224</span>
+                        <input type="tel" id="com-phone" placeholder="620 00 00 00" maxlength="9" style="flex:1">
+                    </div>
+                </div>
+                <label style="display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Code PIN Orange Money</label>
+                <div class="pin-wrap" style="margin-bottom:16px">
+                    <input type="password" maxlength="1" id="cp1" oninput="movPin(this,'cp2')">
+                    <input type="password" maxlength="1" id="cp2" oninput="movPin(this,'cp3')">
+                    <input type="password" maxlength="1" id="cp3" oninput="movPin(this,'cp4')">
+                    <input type="password" maxlength="1" id="cp4">
+                </div>
+                <button class="btn btn-om btn-full" style="border-radius:12px;font-size:15px" onclick="payCommission()">🔐 Payer et voir le numéro</button>
+                <div style="text-align:center;font-size:12px;color:var(--subtle);margin-top:10px">🔒 Transaction sécurisée Orange Guinée</div>
+            </div>
+            <!-- Succès commission -->
+            <div id="com-success" style="display:none;padding:36px 24px;text-align:center">
+                <div style="font-size:64px;margin-bottom:14px;animation:tickPop .6s cubic-bezier(.34,1.56,.64,1)">✅</div>
+                <h3 style="font-family:'Instrument Serif',serif;font-size:22px;font-weight:400;color:var(--gr);margin-bottom:8px">Paiement validé !</h3>
+                <p style="font-size:14px;color:var(--muted);margin-bottom:20px">Voici le numéro de l'annonceur :</p>
+                <div style="background:var(--ink);color:#fff;border-radius:var(--rad);padding:20px;font-family:'Instrument Serif',serif;font-size:32px;font-style:italic;letter-spacing:2px;margin-bottom:16px" id="com-revealed-phone">+224 620 000 000</div>
+                <button class="btn btn-or btn-full" style="border-radius:12px" onclick="copyPhone()">📋 Copier le numéro</button>
+                <button class="btn btn-ghost btn-full" style="border-radius:12px;margin-top:10px" onclick="closeModal('commission')">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ PAGE APP DOWNLOAD ══ -->
+    <div id="page-app-download" class="page">
+        <div style="background:linear-gradient(160deg,var(--ink) 0%,#1a1a2e 100%);min-height:100vh;padding:80px 28px">
+            <div style="max-width:900px;margin:0 auto;text-align:center">
+                <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,92,0,.2);color:var(--or);font-size:12px;font-weight:800;padding:6px 16px;border-radius:50px;margin-bottom:28px;text-transform:uppercase;letter-spacing:.6px">📲 Applications mobiles</div>
+                <h1 style="font-family:'Instrument Serif',serif;font-size:clamp(36px,5vw,64px);color:#fff;font-weight:400;letter-spacing:-1.5px;margin-bottom:16px;line-height:1.1">
+                    YouGouYou
+                    <br>
+                    <em style="color:var(--or)">dans votre poche</em>
+                </h1>
+                <p style="font-size:17px;color:rgba(255,255,255,.6);margin-bottom:56px;line-height:1.7;max-width:560px;margin-left:auto;margin-right:auto">Achetez, vendez et payez avec Orange Money directement depuis votre smartphone. Disponible sur Android et iOS.</p>
+
+                <!-- APP CARDS -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:56px">
+                    <!-- Android -->
+                    <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:36px 28px;text-align:center;transition:all .25s;cursor:pointer" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='rgba(255,255,255,.05)'" onclick="showAppQR('android')">
+                        <div style="font-size:64px;margin-bottom:20px">🤖</div>
+                        <div style="font-size:22px;font-weight:800;color:#fff;margin-bottom:6px">Android</div>
+                        <div style="font-size:14px;color:rgba(255,255,255,.5);margin-bottom:24px">
+                            Google Play Store
+                            <br>
+                            Version 1.0.0 • 24 Mo
+                        </div>
+                        <div style="background:#01875f;color:#fff;border:none;padding:14px 28px;border-radius:50px;font-size:15px;font-weight:800;cursor:pointer;width:100%;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px" onclick="showAppQR('android')">
+                                    ▶️ Télécharger sur Google Play
+                                  </div>
+                        <div style="margin-top:16px;font-size:12px;color:rgba(255,255,255,.3)">Prochainement disponible</div>
+                    </div>
+                    <!-- iOS -->
+                    <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:36px 28px;text-align:center;transition:all .25s;cursor:pointer" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='rgba(255,255,255,.05)'" onclick="showAppQR('ios')">
+                        <div style="font-size:64px;margin-bottom:20px">🍎</div>
+                        <div style="font-size:22px;font-weight:800;color:#fff;margin-bottom:6px">iPhone / iPad</div>
+                        <div style="font-size:14px;color:rgba(255,255,255,.5);margin-bottom:24px">
+                            Apple App Store
+                            <br>
+                            Version 1.0.0 • 31 Mo
+                        </div>
+                        <div style="background:#007AFF;color:#fff;border:none;padding:14px 28px;border-radius:50px;font-size:15px;font-weight:800;cursor:pointer;width:100%;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px" onclick="showAppQR('ios')">
+                                    🍎 Télécharger sur App Store
+                                  </div>
+                        <div style="margin-top:16px;font-size:12px;color:rgba(255,255,255,.3)">Prochainement disponible</div>
+                    </div>
+                </div>
+
+                <!-- QR CODE ZONE -->
+                <div id="app-qr-zone" style="display:none;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:36px;margin-bottom:40px">
+                    <div style="font-size:14px;color:rgba(255,255,255,.5);margin-bottom:16px">Scannez ce QR code avec votre téléphone</div>
+                    <div id="app-qr-box" style="width:140px;height:140px;background:#fff;border-radius:16px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#767676;text-align:center;padding:10px">
+                        QR Code
+                        <br>
+                        (disponible bientôt)
+                    </div>
+                    <div style="font-size:15px;font-weight:700;color:#fff" id="app-qr-label">Google Play</div>
+                </div>
+
+                <!-- FEATURES -->
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;text-align:left">
+                    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--rad);padding:22px">
+                        <div style="font-size:28px;margin-bottom:12px">🔔</div>
+                        <div style="font-weight:800;color:#fff;margin-bottom:6px;font-size:15px">Notifications instantanées</div>
+                        <div style="font-size:13px;color:rgba(255,255,255,.45);line-height:1.7">Soyez alerté dès qu'un acheteur s'intéresse à votre annonce</div>
+                    </div>
+                    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--rad);padding:22px">
+                        <div style="font-size:28px;margin-bottom:12px">🟠</div>
+                        <div style="font-weight:800;color:#fff;margin-bottom:6px;font-size:15px">Orange Money intégré</div>
+                        <div style="font-size:13px;color:rgba(255,255,255,.45);line-height:1.7">Payez et recevez de l'argent directement dans l'app</div>
+                    </div>
+                    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--rad);padding:22px">
+                        <div style="font-size:28px;margin-bottom:12px">🗺️</div>
+                        <div style="font-weight:800;color:#fff;margin-bottom:6px;font-size:15px">Carte interactive</div>
+                        <div style="font-size:13px;color:rgba(255,255,255,.45);line-height:1.7">Trouvez des annonces autour de vous dans toute la Guinée</div>
+                    </div>
+                </div>
+
+                <button class="btn btn-ghost" style="margin-top:40px;color:#fff;border-color:rgba(255,255,255,.2);font-size:15px;padding:13px 28px" onclick="goTo('home')">← Retour au site</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ PAGE ADMIN ══ -->
+    <div id="page-admin" class="page">
+        <div style="background:var(--ink);padding:28px;position:sticky;top:0;z-index:10">
+            <div style="max-width:1320px;margin:0 auto;display:flex;align-items:center;justify-content:space-between">
+                <div style="display:flex;align-items:center;gap:12px">
+                    <div style="background:var(--or);width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px">⚙️</div>
+                    <div>
+                        <div style="font-weight:800;font-size:16px;color:#fff">Admin — YouGouYou</div>
+                        <div style="font-size:12px;color:rgba(255,255,255,.4)">Tableau de bord administrateur</div>
+                    </div>
+                </div>
+                <button class="btn btn-ghost" style="color:#fff;border-color:rgba(255,255,255,.2)" onclick="goTo('home')">← Retour au site</button>
+            </div>
+        </div>
+        <div style="max-width:1320px;margin:0 auto;padding:32px 28px">
+            <!-- STATS -->
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:36px" id="admin-stats"></div>
+            <!-- USERS TABLE -->
+            <div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);box-shadow:var(--sh);overflow:hidden;margin-bottom:24px">
+                <div style="padding:20px 24px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between">
+                    <h3 style="font-family:'Instrument Serif',serif;font-size:20px;font-weight:400">👥 Utilisateurs inscrits</h3>
+                    <span style="background:var(--orl);color:var(--or2);font-size:12px;font-weight:800;padding:4px 12px;border-radius:50px" id="admin-user-count">0 utilisateurs</span>
+                </div>
+                <div style="overflow-x:auto">
+                    <table style="width:100%;border-collapse:collapse" id="admin-users-table">
+                        <thead>
+                            <tr style="background:var(--brl)">
+                                <th style="padding:12px 20px;text-align:left;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">#</th>
+                                <th style="padding:12px 20px;text-align:left;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Nom</th>
+                                <th style="padding:12px 20px;text-align:left;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Téléphone</th>
+                                <th style="padding:12px 20px;text-align:left;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Ville</th>
+                                <th style="padding:12px 20px;text-align:left;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Email</th>
+                                <th style="padding:12px 20px;text-align:left;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-users-body"></tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- PAYMENTS TABLE -->
+            <div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);box-shadow:var(--sh);overflow:hidden">
+                <div style="padding:20px 24px;border-bottom:1px solid var(--br)">
+                    <h3 style="font-family:'Instrument Serif',serif;font-size:20px;font-weight:400">🟠 Transactions Orange Money</h3>
+                </div>
+                <div id="admin-payments-body" style="padding:20px"></div>
+            </div>
+        </div>
+    </div>
     <footer>
         <div class="ft">
             <div class="ft-brand">
@@ -2547,9 +2754,10 @@
                         <span>YY</span>
                     </div>
                     <span class="logo-tx" style="color:#fff">
-                        yougou
-                        <em>you</em>
-                        gou
+                        <span class="Y">Y</span>
+                        ougou
+                        <span class="Y" style="color:var(--or)">Y</span>
+                        ougou
                     </span>
                 </div>
                 <p>Le premier marketplace de petites annonces dédié à la Guinée. Simple, rapide et gratuit.</p>
@@ -2971,7 +3179,23 @@
         n: 'Loisirs',
         e: '🎮',
         c: 167
-    }, {
+    },
+    {
+        n: 'Vacances & Tourisme',
+        e: '✈️',
+        c: 43
+    },
+    {
+        n: 'Cuisine & Traiteur',
+        e: '🍽️',
+        c: 89
+    },
+    {
+        n: 'Aide à domicile',
+        e: '🤝',
+        c: 64
+    },
+    {
         n: 'Autres',
         e: '📦',
         c: 97
@@ -3207,14 +3431,48 @@
         });
     }
 
-    function renderStrip() {
-        var el = document.getElementById('cats-strip-el');
+    function renderNavCats() {
+        var el = document.getElementById('nav-cats-bar');
         if (!el)
             return;
-        el.innerHTML = '<div class="strip-in">' +
-        ['Tout', 'Véhicules', 'Immobilier', 'Électronique', 'Mode', 'Emploi', 'Services', 'Maison', 'Loisirs'].map(function(c, i) {
-            return '<div class="strip-cat' + (i === 0 ? ' active' : '') + '"><span class="em">' + (CATS[i - 1] ? CATS[i - 1].e : '🔍') + '</span>' + c + '</div>';
-        }).join('') + '</div>';
+        var all = [{
+            n: 'Tout',
+            e: '🔍'
+        }].concat(CATS);
+        el.innerHTML = all.map(function(c, i) {
+            return '<div class="ncat' + (i === 0 ? ' active' : '') + '" onclick="filterCat(this,\'' + c.n + '\')" >' + '<span class="em">' + c.e + '</span>' + c.n + '</div>';
+        }).join('');
+    }
+    function filterCat(el, name) {
+        document.querySelectorAll('.ncat').forEach(function(n) {
+            n.classList.remove('active');
+        });
+        el.classList.add('active');
+        var ads = DB.ads();
+        var filtered = (name === 'Tout') ? ads : ads.filter(function(a) {
+            return a.cat === name;
+        });
+        var fg = document.getElementById('featured-grid');
+        var rg = document.getElementById('recent-grid');
+        if (fg)
+            fg.innerHTML = filtered.filter(function(a) {
+                return a.feat;
+            }).slice(0, 4).map(function(a) {
+                return adCard(a, true);
+            }).join('') || filtered.slice(0, 4).map(function(a) {
+                return adCard(a, false);
+            }).join('');
+        if (rg)
+            rg.innerHTML = filtered.filter(function(a) {
+                return !a.feat;
+            }).slice(0, 8).map(function(a) {
+                return adCard(a, false);
+            }).join('');
+        if (name !== 'Tout')
+            toast('🔍 ' + name + ' — ' + filtered.length + ' annonce(s)');
+        document.getElementById('ads-section').scrollIntoView({
+            behavior: 'smooth'
+        });
     }
 
     function renderAds() {
@@ -3813,6 +4071,177 @@
         }, 3600);
     }
 
+    // ══════════════════════════════════════════
+    //  COMMISSION — VOIR NUMÉRO ANNONCEUR
+    // ══════════════════════════════════════════
+    function openCommission() {
+        if (!curAd) {
+            return;
+        }
+        var price = curAd.p;
+        var fee = Math.round(price * 0.1);
+        document.getElementById('com-price').textContent = price.toLocaleString('fr-FR') + ' GNF';
+        document.getElementById('com-fee').textContent = fee.toLocaleString('fr-FR') + ' GNF';
+        document.getElementById('com-total').textContent = fee.toLocaleString('fr-FR') + ' GNF';
+        document.getElementById('com-success').style.display = 'none';
+        document.getElementById('com-phone').value = '';
+        ['cp1', 'cp2', 'cp3', 'cp4'].forEach(function(id) {
+            var e = document.getElementById(id);
+            if (e)
+                e.value = '';
+        });
+        // Reaffiche le formulaire
+        document.querySelector('#overlay-commission .m-body').style.display = '';
+        openModal('commission');
+    }
+    function payCommission() {
+        var phone = (document.getElementById('com-phone') || {
+            value: ''
+        }).value.trim();
+        var pin = ['cp1', 'cp2', 'cp3', 'cp4'].map(function(id) {
+            return (document.getElementById(id) || {
+                value: ''
+            }).value;
+        }).join('');
+        if (!phone || phone.length < 8) {
+            toast('⚠️ Numéro Orange invalide', 'err');
+            return;
+        }
+        if (pin.length < 4) {
+            toast('⚠️ Code PIN incomplet', 'err');
+            return;
+        }
+        // Simulation : révéler un faux numéro (en prod = appel API backend)
+        var fakeNumbers = ['+224 622 45 78 90', '+224 664 12 34 56', '+224 655 98 76 54', '+224 628 00 11 22'];
+        var revealed = fakeNumbers[Math.floor(Math.random() * fakeNumbers.length)];
+        var fee = curAd ? Math.round(curAd.p * 0.1) : 0;
+        DB.addPayment({
+            ref: 'COM' + Date.now().toString(36).toUpperCase().slice(-8),
+            amount: fee,
+            item: 'Commission — ' + (curAd ? curAd.t : ''),
+            date: new Date().toLocaleDateString('fr-FR'),
+            phone: '+224 ' + phone
+        });
+        document.querySelector('#overlay-commission .m-body').style.display = 'none';
+        document.getElementById('com-revealed-phone').textContent = revealed;
+        document.getElementById('com-success').style.display = 'block';
+        toast('✅ Numéro révélé !', 'ok');
+    }
+    function copyPhone() {
+        var txt = document.getElementById('com-revealed-phone').textContent;
+        navigator.clipboard.writeText(txt).then(function() {
+            toast('📋 Numéro copié !', 'ok');
+        }).catch(function() {
+            toast('📋 ' + txt);
+        });
+    }
+
+    // ══════════════════════════════════════════
+    //  APP MOBILE QR
+    // ══════════════════════════════════════════
+    function showAppQR(platform) {
+        var zone = document.getElementById('app-qr-zone');
+        var label = document.getElementById('app-qr-label');
+        if (zone)
+            zone.style.display = 'block';
+        if (label)
+            label.textContent = platform === 'android' ? '▶️ Google Play Store — yougouyougou' : '🍎 Apple App Store — yougouyougou';
+        toast('📲 App ' + (platform === 'android' ? 'Android' : 'iOS') + ' — bientôt disponible !');
+        zone.scrollIntoView({
+            behavior: 'smooth'
+        });
+    }
+
+    // ══════════════════════════════════════════
+    //  ADMIN — VOIR UTILISATEURS
+    // ══════════════════════════════════════════
+    function goAdmin() {
+        var u = DB.user();
+        // En prod = vérifier rôle admin. Ici on laisse accès direct pour démo
+        goTo('admin');
+        loadAdmin();
+    }
+    function loadAdmin() {
+        var users = DB._d.users || [];
+        var pays = DB.payments();
+        var ads = DB.ads();
+        // Stats
+        var stats = document.getElementById('admin-stats');
+        if (stats) {
+            var cards = [
+            {
+                n: users.length,
+                l: 'Utilisateurs inscrits',
+                e: '👥',
+                c: 'var(--or)'
+            },
+            {
+                n: ads.length,
+                l: 'Annonces publiées',
+                e: '📋',
+                c: 'var(--gr)'
+            },
+            {
+                n: pays.length,
+                l: 'Paiements Orange Money',
+                e: '🟠',
+                c: '#FF6A00'
+            },
+            {
+                n: pays.reduce(function(s, p) {
+                    return s + parseInt(p.amount || 0);
+                }, 0).toLocaleString('fr-FR') + ' GNF',
+                l: 'Total transactions',
+                e: '💰',
+                c: '#2563EB'
+            },
+            ];
+            stats.innerHTML = cards.map(function(c) {
+                return '<div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:22px;box-shadow:var(--sh)">' +
+                '<div style="font-size:28px;margin-bottom:8px">' + c.e + '</div>' +
+                '<div style="font-family:\'Instrument Serif\',serif;font-size:28px;color:' + c.c + ';font-style:italic;margin-bottom:4px">' + c.n + '</div>' +
+                '<div style="font-size:13px;color:var(--muted);font-weight:600">' + c.l + '</div></div>';
+            }).join('');
+        }
+        // Users table
+        var uc = document.getElementById('admin-user-count');
+        if (uc)
+            uc.textContent = users.length + ' utilisateur' + (users.length > 1 ? 's' : '');
+        var tbody = document.getElementById('admin-users-body');
+        if (tbody) {
+            if (!users.length) {
+                tbody.innerHTML = '<tr><td colspan="6" style="padding:40px;text-align:center;color:var(--muted);font-size:14px">Aucun utilisateur inscrit pour le moment.<br>Les inscriptions apparaîtront ici en temps réel.</td></tr>';
+            } else {
+                tbody.innerHTML = users.map(function(u, i) {
+                    return '<tr style="border-top:1px solid var(--br)">' +
+                    '<td style="padding:14px 20px;font-size:13px;color:var(--muted)">' + (i + 1) + '</td>' +
+                    '<td style="padding:14px 20px"><div style="font-weight:800;font-size:14px">' + (u.name || u.prenom || '—') + '</div><div style="font-size:12px;color:var(--muted)">' + (u.initials || '') + '</div></td>' +
+                    '<td style="padding:14px 20px;font-size:14px;font-weight:600">' + (u.phone || '—') + '</td>' +
+                    '<td style="padding:14px 20px;font-size:14px">' + (u.city || '—') + '</td>' +
+                    '<td style="padding:14px 20px;font-size:13px;color:var(--muted)">' + (u.email || '—') + '</td>' +
+                    '<td style="padding:14px 20px"><span style="background:#D1FAE5;color:#065F46;font-size:11px;font-weight:800;padding:4px 10px;border-radius:50px">✅ Vérifié SMS</span></td>' +
+                    '</tr>';
+                }).join('');
+            }
+        }
+        // Payments
+        var pb = document.getElementById('admin-payments-body');
+        if (pb) {
+            if (!pays.length) {
+                pb.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:14px">Aucune transaction enregistrée.</div>';
+            }
+            else {
+                pb.innerHTML = pays.map(function(p) {
+                    return '<div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--br)">' +
+                    '<div style="font-size:26px">🟠</div>' +
+                    '<div style="flex:1"><div style="font-weight:800;font-size:14px">' + p.item + '</div><div style="font-size:12px;color:var(--muted)">📅 ' + p.date + ' · 📞 ' + p.phone + ' · 🔑 ' + p.ref + '</div></div>' +
+                    '<div style="font-weight:800;color:var(--or)">' + parseInt(p.amount || 0).toLocaleString('fr-FR') + ' GNF</div>' +
+                    '</div>';
+                }).join('');
+            }
+        }
+    }
+
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             document.querySelectorAll('.overlay.open').forEach(function(o) {
@@ -3828,7 +4257,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         DB.load();
         populateCities();
-        renderStrip();
+        renderNavCats();
         renderAds();
         renderPostCats();
         updateNav();
