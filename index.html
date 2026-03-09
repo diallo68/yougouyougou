@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YouGouYou — Achetez et Vendez en Guinée</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --or:#F97316;--or2:#EA580C;--orl:#FFF7ED;
+  --bg:#FAFAF9;--wh:#FFFFFF;--tx:#1C1917;--txm:#78716C;--txl:#A8A29E;
+  --br:#E7E5E4;--brl:#F5F5F4;
+  --gr:#22C55E;--re:#EF4444;--bl:#3B82F6;
+  --rad:14px;--rads:8px;
+  --sh:0 2px 16px rgba(0,0,0,.07);--shl:0 8px 40px rgba(0,0,0,.12);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--tx);line-height:1.6}
+.page{display:none}.page.active{display:block}
+
+/* NAV */
+nav{background:var(--wh);border-bottom:1px solid var(--br);position:sticky;top:0;z-index:500;box-shadow:0 1px 8px rgba(0,0,0,.06)}
+.nav-in{max-width:1200px;margin:0 auto;padding:0 20px;height:64px;display:flex;align-items:center;gap:12px}
+.logo{display:flex;align-items:center;gap:9px;cursor:pointer;flex-shrink:0;text-decoration:none}
+.logo-ic{width:38px;height:38px;background:linear-gradient(135deg,#F97316,#EA580C);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Syne',sans-serif;font-weight:800;font-size:14px}
+.logo-tx{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;color:var(--tx)}
+.nav-sr{flex:1;max-width:300px;display:flex;align-items:center;gap:8px;background:var(--brl);border:1px solid var(--br);border-radius:10px;padding:8px 13px}
+.nav-sr input{border:none;background:transparent;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:var(--tx);width:100%;outline:none}
+.nav-city{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--txm);cursor:pointer;padding:6px 9px;border-radius:8px;border:1px solid var(--br);background:var(--wh);white-space:nowrap}
+.nav-acts{margin-left:auto;display:flex;align-items:center;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 15px;border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .18s;text-decoration:none}
+.btn-p{background:var(--or);color:#fff}.btn-p:hover{background:var(--or2);transform:translateY(-1px)}
+.btn-o{background:transparent;color:var(--tx);border:1.5px solid var(--br)}.btn-o:hover{border-color:var(--or);color:var(--or)}
+.btn-g{background:var(--gr);color:#fff}.btn-g:hover{background:#16A34A}
+.btn-full{width:100%;justify-content:center;padding:12px;font-size:14px}
+
+/* HERO */
+.hero{background:linear-gradient(160deg,#FFF7ED 0%,#FAFAF9 60%);padding:52px 20px 44px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-80px;right:-80px;width:380px;height:380px;background:radial-gradient(circle,rgba(249,115,22,.12) 0%,transparent 70%);border-radius:50%;pointer-events:none}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(26px,5vw,50px);font-weight:800;margin-bottom:10px}
+.hero h1 span{color:var(--or)}
+.hero p{font-size:15px;color:var(--txm);margin-bottom:28px}
+.sc{background:var(--wh);border-radius:var(--rad);box-shadow:var(--shl);padding:22px;max-width:740px;margin:0 auto 24px;position:relative;z-index:1}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.sf{display:flex;flex-direction:column;gap:4px}.sf.full{grid-column:1/-1}
+.sf label{font-size:11px;font-weight:700;color:var(--txm);text-transform:uppercase;letter-spacing:.4px}
+.sf input,.sf select{padding:10px 12px;border:1.5px solid var(--br);border-radius:var(--rads);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:var(--tx);background:var(--wh);outline:none;transition:border-color .15s}
+.sf input:focus,.sf select:focus{border-color:var(--or)}
+.pr{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+
+/* STATS */
+.stats-bar{background:var(--wh);border-top:1px solid var(--br);border-bottom:1px solid var(--br);padding:13px 20px}
+.stats-in{max-width:1200px;margin:0 auto;display:flex;justify-content:center;gap:44px;flex-wrap:wrap}
+.stat{text-align:center}
+.stat-n{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;color:var(--or)}
+.stat-l{font-size:12px;color:var(--txm)}
+
+/* SECTIONS */
+.sec{max-width:1200px;margin:0 auto;padding:40px 20px}
+.sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.sec-tt{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;display:flex;align-items:center;gap:8px}
+.see-all{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:var(--or);cursor:pointer;border:1.5px solid var(--br);padding:6px 11px;border-radius:8px;transition:all .15s}
+.see-all:hover{border-color:var(--or);background:var(--orl)}
+
+/* CATS */
+.cats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:11px}
+.cat-card{background:var(--wh);border:1.5px solid var(--br);border-radius:var(--rad);padding:17px 13px;text-align:center;cursor:pointer;transition:all .2s}
+.cat-card:hover{border-color:var(--or);box-shadow:0 4px 18px rgba(249,115,22,.12);transform:translateY(-2px)}
+.cat-ic{width:48px;height:48px;background:var(--orl);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 9px;font-size:22px}
+.cat-nm{font-weight:700;font-size:13px;color:var(--tx);margin-bottom:3px}
+.cat-ct{font-size:11px;color:var(--txm)}
+
+/* LISTING CARDS */
+.lg{display:grid;grid-template-columns:repeat(auto-fill,minmax(225px,1fr));gap:15px}
+.lc{background:var(--wh);border:1.5px solid var(--br);border-radius:var(--rad);overflow:hidden;cursor:pointer;transition:all .2s}
+.lc:hover{box-shadow:var(--shl);transform:translateY(-3px);border-color:transparent}
+.li{width:100%;height:170px;display:flex;align-items:center;justify-content:center;font-size:54px;position:relative}
+.lbadge{position:absolute;top:9px;left:9px;background:var(--or);color:#fff;font-size:10px;font-weight:700;padding:3px 7px;border-radius:5px}
+.lfav{position:absolute;top:9px;right:9px;background:#fff;border:none;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+.lb{padding:12px}
+.lp{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:var(--or);margin-bottom:3px}
+.lt{font-weight:600;font-size:13px;color:var(--tx);margin-bottom:6px;line-height:1.4}
+.lm{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--txm)}
+
+/* MAP */
+#guinee-map{width:100%;height:500px;border-radius:var(--rad);border:1.5px solid var(--br)}
+.map-leg{background:var(--wh);border:1.5px solid var(--br);border-radius:var(--rad);padding:14px;margin-top:12px}
+.map-leg-tt{font-weight:700;font-size:13px;margin-bottom:10px}
+.map-leg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:7px}
+.map-leg-item{display:flex;align-items:center;gap:7px;font-size:12px}
+.map-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+
+/* APP BANNER */
+.app-bn{background:linear-gradient(135deg,#F97316,#DC2626);border-radius:18px;padding:30px 34px;display:flex;align-items:center;gap:32px;position:relative;overflow:hidden}
+.app-bn::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:rgba(255,255,255,.07);border-radius:50%;pointer-events:none}
+.app-tx{flex:1}
+.app-tg{display:inline-block;background:rgba(255,255,255,.2);color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:18px;margin-bottom:9px;text-transform:uppercase;letter-spacing:.4px}
+.app-bn h2{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:7px}
+.app-bn p{color:rgba(255,255,255,.85);font-size:13px;margin-bottom:16px}
+.app-box{background:rgba(255,255,255,.15);border-radius:13px;padding:20px 26px;text-align:center;color:#fff;min-width:190px}
+
+/* FOOTER */
+footer{background:var(--tx);color:rgba(255,255,255,.85);margin-top:60px}
+.ft{max-width:1200px;margin:0 auto;padding:48px 20px 34px;display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:32px}
+.fb p{font-size:13px;line-height:1.7;color:rgba(255,255,255,.55);margin:11px 0 16px}
+.sls{display:flex;gap:7px}
+.sl{width:32px;height:32px;background:rgba(255,255,255,.1);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:background .15s}
+.sl:hover{background:var(--or)}
+.fc h4{font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:#fff;margin-bottom:13px;text-transform:uppercase;letter-spacing:.5px}
+.fc ul{list-style:none}
+.fc ul li{margin-bottom:8px}
+.fc ul li a{color:rgba(255,255,255,.55);text-decoration:none;font-size:13px;cursor:pointer;transition:color .15s}
+.fc ul li a:hover{color:var(--or)}
+.fb2{border-top:1px solid rgba(255,255,255,.1);padding:16px 20px}
+.fb2-in{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.35);flex-wrap:wrap;gap:8px}
+
+/* OVERLAY / MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:1000;display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
+.overlay.open{display:flex}
+.modal{background:var(--wh);border-radius:18px;width:100%;max-width:490px;box-shadow:var(--shl);animation:sUp .22s ease;max-height:94vh;overflow-y:auto}
+@keyframes sUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.mhd{padding:20px 20px 0;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--wh);z-index:2;border-bottom:1px solid var(--br);padding-bottom:13px}
+.mtt{font-family:'Syne',sans-serif;font-size:19px;font-weight:800}
+.mcl{background:var(--brl);border:none;width:29px;height:29px;border-radius:7px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.mtabs{display:flex;border-bottom:1.5px solid var(--br);margin:0 20px}
+.mtab{flex:1;padding:10px;text-align:center;font-weight:600;font-size:13px;cursor:pointer;color:var(--txm);border-bottom:2px solid transparent;margin-bottom:-1.5px;transition:all .15s}
+.mtab.active{color:var(--or);border-bottom-color:var(--or)}
+.mbd{padding:20px}
+
+/* FORMS */
+.fg{margin-bottom:15px}
+.fg label{display:block;font-size:13px;font-weight:600;margin-bottom:5px}
+.fg input,.fg select,.fg textarea{width:100%;padding:10px 12px;border:1.5px solid var(--br);border-radius:var(--rads);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:var(--tx);background:var(--wh);outline:none;transition:border-color .15s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--or)}
+.fg textarea{resize:vertical;min-height:88px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.fhint{font-size:11px;color:var(--txm);margin-top:3px}
+.or-div{display:flex;align-items:center;gap:9px;margin:12px 0;color:var(--txm);font-size:13px}
+.or-div::before,.or-div::after{content:'';flex:1;height:1px;background:var(--br)}
+
+/* PAGE NAV */
+.pnav{background:var(--wh);border-bottom:1px solid var(--br);padding:10px 20px}
+.pnav-in{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--txm)}
+.pnav-in a{color:var(--or);cursor:pointer;text-decoration:none}
+
+/* DETAIL */
+.det-grid{max-width:1100px;margin:0 auto;padding:26px 20px;display:grid;grid-template-columns:1fr 310px;gap:22px}
+.det-img{background:var(--wh);border:1.5px solid var(--br);border-radius:var(--rad);overflow:hidden}
+.det-mi{width:100%;height:340px;display:flex;align-items:center;justify-content:center;font-size:90px}
+.det-ths{display:flex;gap:7px;padding:9px}
+.det-th{width:64px;height:64px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;border:2px solid transparent;flex-shrink:0;transition:border-color .15s}
+.det-th.active{border-color:var(--or)}
+.det-ic{background:var(--wh);border:1.5px solid var(--br);border-radius:var(--rad);padding:20px}
+.det-pr{font-family:'Syne',sans-serif;font-size:27px;font-weight:800;color:var(--or);margin-bottom:5px}
+.det-tt{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;margin-bottom:11px}
+.tag{background:var(--orl);color:var(--or2);font-size:11px;font-weight:700;padding:3px 8px;border-radius:18px;display:inline-block}
+.det-mg{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:13px 0;border-top:1px solid var(--br);border-bottom:1px solid var(--br);margin:12px 0}
+.mi .lbl{font-size:11px;color:var(--txm);font-weight:700;text-transform:uppercase}
+.mi .val{font-size:13px;font-weight:600}
+.sell-card{background:var(--brl);border-radius:var(--rad);padding:14px;margin-bottom:11px}
+.sell-row{display:flex;align-items:center;gap:10px;margin-bottom:11px}
+.sell-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--or),var(--or2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:15px}
+
+/* POST */
+.post-con{max-width:670px;margin:0 auto;padding:26px 20px}
+.post-card{background:var(--wh);border:1.5px solid var(--br);border-radius:var(--rad);padding:20px;margin-bottom:13px}
+.post-card h3{font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.snum{width:23px;height:23px;background:var(--or);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.upz{border:2px dashed var(--br);border-radius:var(--rad);padding:30px;text-align:center;cursor:pointer;transition:all .15s}
+.upz:hover{border-color:var(--or);background:var(--orl)}
+.pcats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pcat{border:1.5px solid var(--br);border-radius:var(--rads);padding:10px 7px;text-align:center;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s}
+.pcat:hover,.pcat.sel{border-color:var(--or);background:var(--orl);color:var(--or2)}
+.pcat .em{font-size:19px;display:block;margin-bottom:3px}
+
+/* ORANGE MONEY */
+.om-hd{background:linear-gradient(135deg,#FF7900,#F97316);padding:20px;text-align:center;color:#fff}
+.om-lg{font-size:40px;display:block;margin-bottom:5px}
+.om-hd h2{font-family:'Syne',sans-serif;font-size:17px;font-weight:800}
+.om-hd p{font-size:13px;opacity:.9;margin-top:2px}
+.om-bd{padding:20px}
+.om-amt{background:var(--orl);border-radius:var(--rad);padding:14px;text-align:center;margin-bottom:16px}
+.om-amt .lbl{font-size:11px;color:var(--txm);font-weight:700;text-transform:uppercase;margin-bottom:3px}
+.om-amt .val{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--or)}
+.om-steps{display:flex;flex-direction:column;gap:9px;margin-bottom:16px}
+.om-step{display:flex;align-items:center;gap:11px;background:var(--brl);border-radius:var(--rads);padding:11px}
+.om-sn{width:24px;height:24px;background:var(--or);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.om-st{font-size:12px;color:var(--tx)}
+.om-st strong{display:block;font-weight:700;font-size:13px}
+.om-pin{display:flex;gap:9px;justify-content:center;margin:14px 0}
+.om-pin input{width:42px;height:48px;text-align:center;font-size:20px;font-weight:800;border:2px solid var(--br);border-radius:9px;outline:none;font-family:'Plus Jakarta Sans',sans-serif;transition:border-color .15s}
+.om-pin input:focus{border-color:var(--or)}
+.om-sec{display:flex;align-items:center;justify-content:center;gap:5px;font-size:11px;color:var(--txm);margin-top:9px}
+.om-ok{text-align:center;padding:30px 20px}
+.om-ok .ck{font-size:60px;display:block;margin-bottom:12px}
+.om-ok h3{font-family:'Syne',sans-serif;font-size:19px;font-weight:800;margin-bottom:7px;color:var(--gr)}
+.om-ok p{font-size:13px;color:var(--txm)}
+.om-ref{background:var(--brl);border-radius:7px;padding:9px;font-size:12px;font-weight:700;margin:12px 0;font-family:monospace;color:var(--tx)}
+
+/* DASHBOARD */
+.dash-grid{display:grid;grid-template-columns:230px 1fr;min-height:calc(100vh - 64px)}
+.dash-sb{background:var(--wh);border-right:1px solid var(--br);padding:20px 14px}
+.dash-usr{text-align:center;padding-bottom:18px;border-bottom:1px solid var(--br);margin-bottom:14px}
+.dash-av{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--or),var(--or2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:20px;margin:0 auto 9px}
+.dash-nm{font-weight:700;font-size:14px}
+.dash-su{font-size:12px;color:var(--txm)}
+.dash-nav a{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:var(--rads);font-size:13px;font-weight:600;color:var(--txm);cursor:pointer;margin-bottom:3px;transition:all .15s;text-decoration:none}
+.dash-nav a:hover,.dash-nav a.active{background:var(--orl);color:var(--or2)}
+.dash-ct{padding:26px}
+.ds-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px;margin-bottom:24px}
+.ds-card{background:var(--wh);border:1.5px solid var(--br);border-radius:var(--rad);padding:16px}
+.ds-card .n{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--or)}
+.ds-card .l{font-size:12px;color:var(--txm);margin-top:3px}
+.dash-ad{background:var(--wh);border:1.5px solid var(--br);border-radius:var(--rad);padding:14px;display:flex;align-items:center;gap:13px;margin-bottom:10px}
+.badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 7px;border-radius:18px}
+.badge-g{background:#DCFCE7;color:#16A34A}
+.badge-o{background:var(--orl);color:var(--or2)}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--tx);color:#fff;padding:12px 17px;border-radius:11px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s;box-shadow:var(--shl)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{background:#16A34A}
+.toast.err{background:var(--re)}
+</style>
+</head>
+<body>
+
+<!-- ═══════ NAV ═══════ -->
+<nav>
+<div class="nav-in">
+  <a class="logo" onclick="goTo('home')">
+    <div class="logo-ic">YY</div>
+    <span class="logo-tx">yougouyougou</span>
+  </a>
+  <div class="nav-sr">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input type="text" placeholder="Rechercher...">
+  </div>
+  <div class="nav-city">📍 Toutes les villes ▾</div>
+  <div class="nav-acts">
+    <button class="btn btn-p" onclick="goTo('post')">+ Déposer une annonce</button>
+    <button class="btn btn-o" id="nav-auth-btn" onclick="openModal('auth')">👤 Connexion</button>
+  </div>
+</div>
+</nav>
+
+<!-- ═══════ PAGE HOME ═══════ -->
+<div id="page-home" class="page active">
+
+  <section class="hero">
+    <h1>Achetez et Vendez en <span>Guinée</span></h1>
+    <p>Des milliers d'annonces à découvrir près de chez vous</p>
+    <div class="sc">
+      <div class="sg">
+        <div class="sf full">
+          <label>🔍 Que recherchez-vous ?</label>
+          <input type="text" placeholder="Toyota, iPhone, Appartement...">
+        </div>
+        <div class="sf">
+          <label>🏷️ Catégorie</label>
+          <select><option>Toutes catégories</option><option>Véhicules</option><option>Immobilier</option><option>Électronique</option><option>Mode</option><option>Emploi</option><option>Services</option><option>Maison &amp; Jardin</option><option>Loisirs</option></select>
+        </div>
+        <div class="sf">
+          <label>📍 Ville</label>
+          <select><option>Toutes les villes</option><option>Conakry</option><option>Labé</option><option>Kankan</option><option>Kindia</option><option>Boké</option><option>Faranah</option><option>Mamou</option><option>N'Zérékoré</option></select>
+        </div>
+      </div>
+      <div class="pr">
+        <div class="sf"><label>💰 Prix min (GNF)</label><input type="number" placeholder="100 000"></div>
+        <div class="sf"><label>💰 Prix max (GNF)</label><input type="number" placeholder="10 000 000"></div>
+      </div>
+      <button class="btn btn-p btn-full" style="font-size:15px">🔍 Rechercher</button>
+    </div>
+    <button class="btn btn-p" style="font-size:14px;padding:12px 26px" onclick="goTo('post')">Déposer une annonce →</button>
+  </section>
+
+  <section class="sec">
+    <div class="sec-hd"><h2 class="sec-tt">🗂️ Catégories</h2></div>
+    <div class="cats-grid" id="cats-grid"></div>
+  </section>
+
+  <section class="sec" style="padding-top:0">
+    <div class="sec-hd"><h2 class="sec-tt">📈 À la une</h2><a class="see-all">Voir tout →</a></div>
+    <div class="lg" id="featured-grid"></div>
+  </section>
+
+  <section class="sec" style="padding-top:0">
+    <div class="sec-hd"><h2 class="sec-tt">🕐 Annonces récentes</h2><a class="see-all">Voir tout →</a></div>
+    <div class="lg" id="recent-grid"></div>
+  </section>
+
+  <!-- MAP SECTION -->
+  <section class="sec" style="padding-top:0">
+    <div class="sec-hd">
+      <h2 class="sec-tt">🗺️ Carte interactive de la Guinée</h2>
+      <button class="btn btn-o" id="toggle-map-btn" onclick="toggleMapMarkers()">Masquer les villes</button>
+    </div>
+    <p style="color:var(--txm);font-size:14px;margin-bottom:14px">Cliquez sur un marqueur pour voir les annonces par région</p>
+    <div id="guinee-map"></div>
+    <div class="map-leg">
+      <div class="map-leg-tt">🏛️ Régions et chefs-lieux</div>
+      <div class="map-leg-grid" id="map-legend"></div>
+    </div>
+
+    <!-- STATS BAR sous la carte -->
+    <div class="stats-bar" style="border-radius:var(--rad);margin-top:14px;border:1.5px solid var(--br)">
+      <div class="stats-in" style="padding:6px 0">
+        <div class="stat"><div class="stat-n">1 679</div><div class="stat-l">Annonces actives</div></div>
+        <div class="stat"><div class="stat-n">8 Régions</div><div class="stat-l">Couverture Guinée</div></div>
+        <div class="stat"><div class="stat-n">12 400+</div><div class="stat-l">Utilisateurs</div></div>
+        <div class="stat"><div class="stat-n">Gratuit</div><div class="stat-l">Pour déposer</div></div>
+      </div>
+    </div>
+  </section>
+
+  <div style="padding:0 20px 44px;max-width:1200px;margin:0 auto">
+    <div class="app-bn">
+      <div class="app-tx">
+        <span class="app-tg">Bientôt disponible</span>
+        <h2>Téléchargez l'application yougouyougou</h2>
+        <p>Achetez et vendez depuis votre smartphone, partout en Guinée.</p>
+        <div style="display:flex;gap:9px;flex-wrap:wrap">
+          <button class="btn" style="background:#fff;color:var(--or);font-weight:700">🍎 App Store</button>
+          <button class="btn" style="background:#fff;color:var(--or);font-weight:700">▶️ Google Play</button>
+        </div>
+      </div>
+      <div class="app-box">
+        <div style="font-size:26px;margin-bottom:11px">📲</div>
+        <div style="color:#fff;font-size:12px;margin-bottom:13px">iOS &amp; Android</div>
+        <div style="display:flex;gap:26px;justify-content:center">
+          <div><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800">4.8</div><div style="font-size:11px;opacity:.8">Note</div></div>
+          <div><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800">10K+</div><div style="font-size:11px;opacity:.8">Téléch.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ PAGE DETAIL ═══════ -->
+<div id="page-detail" class="page">
+  <div class="pnav"><div class="pnav-in">
+    <a onclick="goTo('home')">Accueil</a> ›
+    <span id="db-cat">Catégorie</span> ›
+    <span id="db-title">Annonce</span>
+  </div></div>
+  <div class="det-grid">
+    <div>
+      <div class="det-img">
+        <div class="det-mi" id="det-emoji" style="background:linear-gradient(135deg,#FFF7ED,#FDBA74)">📱</div>
+        <div class="det-ths">
+          <div class="det-th active">📱</div>
+          <div class="det-th">📦</div>
+          <div class="det-th">🔌</div>
+          <div class="det-th">📋</div>
+        </div>
+      </div>
+      <div style="background:var(--wh);border:1.5px solid var(--br);border-radius:var(--rad);padding:20px;margin-top:13px">
+        <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin-bottom:11px">Description</h3>
+        <p id="det-desc" style="font-size:14px;color:var(--txm);line-height:1.8"></p>
+        <div style="margin-top:11px;display:flex;gap:6px;flex-wrap:wrap" id="det-tags"></div>
+      </div>
+    </div>
+    <div>
+      <div class="det-ic">
+        <div class="det-pr" id="det-price"></div>
+        <div class="det-tt" id="det-title"></div>
+        <div class="det-mg">
+          <div class="mi"><div class="lbl">📍 Ville</div><div class="val" id="dm-city"></div></div>
+          <div class="mi"><div class="lbl">🗂️ Catégorie</div><div class="val" id="dm-cat"></div></div>
+          <div class="mi"><div class="lbl">🕐 Publié</div><div class="val" id="dm-date"></div></div>
+          <div class="mi"><div class="lbl">👁️ Vues</div><div class="val" id="dm-views"></div></div>
+        </div>
+        <div class="sell-card">
+          <div style="font-size:11px;font-weight:700;color:var(--txm);text-transform:uppercase;margin-bottom:9px">Vendeur</div>
+          <div class="sell-row">
+            <div class="sell-av" id="det-av"></div>
+            <div>
+              <div style="font-weight:700;font-size:14px" id="det-seller"></div>
+              <div style="font-size:12px;color:var(--gr);font-weight:600">✅ Vendeur vérifié</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <button class="btn btn-g btn-full" onclick="toast('📞 Numéro copié !','ok')">📞 Appeler</button>
+            <button class="btn btn-p btn-full" onclick="toast('💬 Message envoyé !','ok')">💬 Message</button>
+            <button class="btn btn-full" style="background:linear-gradient(135deg,#FF7900,#F97316);color:#fff;font-weight:700" onclick="openOM()">🟠 Payer via Orange Money</button>
+          </div>
+        </div>
+        <button class="btn btn-o btn-full" onclick="addFav()">🤍 Ajouter aux favoris</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ PAGE POST ═══════ -->
+<div id="page-post" class="page">
+  <div class="pnav"><div class="pnav-in"><a onclick="goTo('home')">Accueil</a> › Déposer une annonce</div></div>
+  <div class="post-con">
+    <div style="margin-bottom:22px">
+      <h1 style="font-family:'Syne',sans-serif;font-size:23px;font-weight:800;margin-bottom:5px">📝 Déposer une annonce</h1>
+      <p style="color:var(--txm);font-size:13px">Gratuit et rapide — visible en quelques minutes</p>
+    </div>
+    <div class="post-card">
+      <h3><div class="snum">1</div>Choisissez une catégorie</h3>
+      <div class="pcats" id="post-cats-grid"></div>
+    </div>
+    <div class="post-card">
+      <h3><div class="snum">2</div>Ajoutez des photos</h3>
+      <div class="upz" onclick="toast('📸 Disponible en production')">
+        <div style="font-size:34px;margin-bottom:7px">📸</div>
+        <p style="font-weight:700;margin-bottom:3px">Cliquez pour ajouter des photos</p>
+        <p style="font-size:12px;color:var(--txm)">JPG, PNG — max 8 photos</p>
+      </div>
+    </div>
+    <div class="post-card">
+      <h3><div class="snum">3</div>Informations</h3>
+      <div class="fg"><label>Titre *</label><input type="text" id="pt" placeholder="Ex: Toyota Corolla 2018"></div>
+      <div class="fg"><label>Description *</label><textarea id="pd" placeholder="Décrivez votre article..."></textarea></div>
+      <div class="frow">
+        <div class="fg"><label>Prix (GNF) *</label><input type="number" id="pp" placeholder="5 000 000"></div>
+        <div class="fg"><label>État</label><select id="pe"><option>Neuf</option><option>Très bon état</option><option>Bon état</option><option>État correct</option></select></div>
+      </div>
+    </div>
+    <div class="post-card">
+      <h3><div class="snum">4</div>Localisation</h3>
+      <div class="frow">
+        <div class="fg"><label>Ville *</label><select id="pc"><option>Conakry</option><option>Labé</option><option>Kankan</option><option>Kindia</option><option>Boké</option><option>Faranah</option><option>Mamou</option><option>N'Zérékoré</option></select></div>
+        <div class="fg"><label>Quartier</label><input type="text" id="pq" placeholder="Ex: Ratoma..."></div>
+      </div>
+    </div>
+    <div class="post-card">
+      <h3><div class="snum">5</div>Coordonnées</h3>
+      <div class="frow">
+        <div class="fg"><label>Nom *</label><input type="text" id="pn" placeholder="Nom complet"></div>
+        <div class="fg"><label>Téléphone *</label><input type="tel" id="ptel" placeholder="+224 6XX XXX XXX"></div>
+      </div>
+      <div class="fg"><label>Email</label><input type="email" id="pem" placeholder="votre@email.com"></div>
+    </div>
+    <button class="btn btn-p btn-full" style="font-size:15px" onclick="submitAd()">🚀 Publier gratuitement</button>
+    <p style="text-align:center;font-size:12px;color:var(--txm);margin-top:9px">En publiant, vous acceptez nos <a style="color:var(--or);cursor:pointer">CGU</a></p>
+  </div>
+</div>
+
+<!-- ═══════ PAGE DASHBOARD ═══════ -->
+<div id="page-dashboard" class="page">
+  <div class="dash-grid">
+    <div class="dash-sb">
+      <div class="dash-usr">
+        <div class="dash-av" id="d-av">AM</div>
+        <div class="dash-nm" id="d-nm">Mohamed Diallo</div>
+        <div class="dash-su" id="d-ph">+224 620 000 000</div>
+      </div>
+      <nav class="dash-nav">
+        <a class="active" onclick="showTab('overview')">📊 Tableau de bord</a>
+        <a onclick="showTab('ads')">📋 Mes annonces</a>
+        <a onclick="showTab('messages')">💬 Messages</a>
+        <a onclick="showTab('payments')">💳 Paiements</a>
+        <a onclick="showTab('favs')">❤️ Favoris</a>
+        <a onclick="goTo('post')" style="margin-top:15px;border-top:1px solid var(--br);padding-top:15px">➕ Nouvelle annonce</a>
+        <a onclick="logout()" style="color:var(--re)!important">🚪 Déconnexion</a>
+      </nav>
+    </div>
+    <div class="dash-ct">
+      <div id="tab-overview">
+        <h2 style="font-family:'Syne',sans-serif;font-size:19px;font-weight:800;margin-bottom:18px">Bonjour, <span id="d-greet">Mohamed</span> 👋</h2>
+        <div class="ds-cards">
+          <div class="ds-card"><div class="n" id="dc-ads">0</div><div class="l">Annonces actives</div></div>
+          <div class="ds-card"><div class="n">142</div><div class="l">Vues ce mois</div></div>
+          <div class="ds-card"><div class="n">7</div><div class="l">Messages reçus</div></div>
+          <div class="ds-card"><div class="n" id="dc-pay">0</div><div class="l">Paiements</div></div>
+        </div>
+        <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin-bottom:13px">Dernières annonces publiées</h3>
+        <div id="d-ads-prev"></div>
+      </div>
+      <div id="tab-ads" style="display:none">
+        <h2 style="font-family:'Syne',sans-serif;font-size:19px;font-weight:800;margin-bottom:18px">📋 Mes annonces</h2>
+        <div id="d-ads-full"></div>
+      </div>
+      <div id="tab-messages" style="display:none">
+        <h2 style="font-family:'Syne',sans-serif;font-size:19px;font-weight:800;margin-bottom:18px">💬 Messages</h2>
+        <div style="background:var(--wh);border:1.5px solid var(--br);border-radius:var(--rad);padding:30px;text-align:center;color:var(--txm)">
+          <div style="font-size:46px;margin-bottom:11px">💬</div>
+          <p>Aucun message pour le moment.</p>
+        </div>
+      </div>
+      <div id="tab-payments" style="display:none">
+        <h2 style="font-family:'Syne',sans-serif;font-size:19px;font-weight:800;margin-bottom:18px">💳 Historique paiements</h2>
+        <div id="d-pay-list"></div>
+      </div>
+      <div id="tab-favs" style="display:none">
+        <h2 style="font-family:'Syne',sans-serif;font-size:19px;font-weight:800;margin-bottom:18px">❤️ Mes favoris</h2>
+        <div class="lg" id="d-favs"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ MODAL AUTH ═══════ -->
+<div class="overlay" id="overlay-auth" onclick="maybeClose(event,'auth')">
+  <div class="modal">
+    <div class="mhd">
+      <div class="mtt" id="auth-tt">Connexion</div>
+      <button class="mcl" onclick="closeModal('auth')">✕</button>
+    </div>
+    <div class="mtabs">
+      <div class="mtab active" id="mtab-login" onclick="authTab('login')">Connexion</div>
+      <div class="mtab" id="mtab-reg" onclick="authTab('reg')">Inscription</div>
+    </div>
+    <div class="mbd" id="auth-body">
+      <!-- filled by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ MODAL ORANGE MONEY ═══════ -->
+<div class="overlay" id="overlay-om" onclick="maybeClose(event,'om')">
+  <div class="modal" style="max-width:410px">
+    <!-- STEP 1: Form -->
+    <div id="om-form">
+      <div class="om-hd">
+        <span class="om-lg">🟠</span>
+        <h2>Orange Money</h2>
+        <p>Paiement sécurisé — Guinée</p>
+      </div>
+      <div class="om-bd">
+        <div class="om-amt">
+          <div class="lbl">Montant à payer</div>
+          <div class="val" id="om-val">0 GNF</div>
+          <div style="font-size:12px;color:var(--txm);margin-top:3px" id="om-item-name">Article</div>
+        </div>
+        <div class="om-steps">
+          <div class="om-step"><div class="om-sn">1</div><div class="om-st"><strong>Entrez votre numéro Orange Money</strong>Votre numéro +224</div></div>
+          <div class="om-step"><div class="om-sn">2</div><div class="om-st"><strong>Saisissez votre code PIN</strong>4 chiffres</div></div>
+          <div class="om-step"><div class="om-sn">3</div><div class="om-st"><strong>Confirmez</strong>SMS de confirmation envoyé</div></div>
+        </div>
+        <div class="fg">
+          <label>Numéro Orange Money *</label>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="background:var(--brl);border:1.5px solid var(--br);border-radius:var(--rads);padding:10px 12px;font-size:13px;font-weight:700;white-space:nowrap">🇬🇳 +224</span>
+            <input type="tel" id="om-phone" placeholder="620 00 00 00" maxlength="9">
+          </div>
+        </div>
+        <label style="display:block;font-size:13px;font-weight:600;margin-bottom:7px">Code PIN (4 chiffres)</label>
+        <div class="om-pin">
+          <input type="password" maxlength="1" id="p1" oninput="movPin(this,'p2')">
+          <input type="password" maxlength="1" id="p2" oninput="movPin(this,'p3')">
+          <input type="password" maxlength="1" id="p3" oninput="movPin(this,'p4')">
+          <input type="password" maxlength="1" id="p4">
+        </div>
+        <button class="btn btn-full" style="background:linear-gradient(135deg,#FF7900,#F97316);color:#fff;font-weight:700;font-size:14px;margin-top:4px" onclick="processPayment()">
+          🔐 Confirmer le paiement
+        </button>
+        <div class="om-sec">🔒 Paiement sécurisé SSL — Orange Guinée</div>
+        <button class="btn btn-o btn-full" style="margin-top:9px" onclick="closeModal('om')">Annuler</button>
+      </div>
+    </div>
+    <!-- STEP 2: Processing (hidden) -->
+    <div id="om-processing" style="display:none;padding:38px;text-align:center">
+      <div style="font-size:48px;margin-bottom:14px" id="om-spinner">⏳</div>
+      <h3 style="font-family:'Syne',sans-serif;font-weight:800;margin-bottom:7px">Traitement en cours...</h3>
+      <p style="font-size:13px;color:var(--txm)">Vérification de votre paiement Orange Money</p>
+    </div>
+    <!-- STEP 3: Success (hidden) -->
+    <div id="om-success" style="display:none">
+      <div class="om-ok">
+        <span class="ck">✅</span>
+        <h3>Paiement réussi !</h3>
+        <p>Votre transaction a été traitée avec succès</p>
+        <div class="om-amt" style="margin:13px 0">
+          <div class="lbl">Montant payé</div>
+          <div class="val" id="om-ok-val">0 GNF</div>
+        </div>
+        <div class="om-ref" id="om-ref">Référence : OM00000000</div>
+        <p style="font-size:12px;color:var(--txm)" id="om-ok-phone">SMS envoyé au +224 ...</p>
+        <button class="btn btn-p btn-full" style="margin-top:16px" onclick="closeModal('om');toast('✅ Paiement enregistré !','ok')">
+          Fermer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ FOOTER ═══════ -->
+<footer>
+  <div class="ft">
+    <div class="fb">
+      <div class="logo" style="margin-bottom:9px">
+        <div class="logo-ic">YY</div>
+        <span class="logo-tx" style="color:#fff">yougouyougou</span>
+      </div>
+      <p>Le premier marketplace de petites annonces dédié à la Guinée. Achetez, vendez et échangez facilement partout en Guinée.</p>
+      <div class="sls">
+        <div class="sl">📘</div><div class="sl">📸</div><div class="sl">🐦</div><div class="sl">▶️</div><div class="sl">💬</div>
+      </div>
+    </div>
+    <div class="fc">
+      <h4>Navigation</h4>
+      <ul>
+        <li><a onclick="goTo('home')">Accueil</a></li>
+        <li><a>Toutes les annonces</a></li>
+        <li><a>Catégories</a></li>
+        <li><a>Carte interactive</a></li>
+        <li><a onclick="goTo('post')">Déposer une annonce</a></li>
+      </ul>
+    </div>
+    <div class="fc">
+      <h4>Aide</h4>
+      <ul>
+        <li><a>Centre d'aide</a></li>
+        <li><a>Comment ça marche</a></li>
+        <li><a>Conseils sécurité</a></li>
+        <li><a>Signaler une annonce</a></li>
+        <li><a>Nous contacter</a></li>
+      </ul>
+    </div>
+    <div class="fc">
+      <h4>À propos</h4>
+      <ul>
+        <li><a>Qui sommes-nous</a></li>
+        <li><a>CGU</a></li>
+        <li><a>Confidentialité</a></li>
+        <li><a>Cookies</a></li>
+        <li><a>Recrutement</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="fb2">
+    <div class="fb2-in">
+      <span>© 2025 YouGouYou — Tous droits réservés</span>
+      <div style="background:rgba(255,255,255,.07);padding:5px 11px;border-radius:18px;font-size:12px">🇬🇳 Fait avec <span style="color:var(--or)">❤️</span> pour la Guinée</div>
+      <div style="display:flex;gap:13px">
+        <a style="color:rgba(255,255,255,.35);cursor:pointer">CGU</a>
+        <a style="color:rgba(255,255,255,.35);cursor:pointer">Confidentialité</a>
+        <a style="color:rgba(255,255,255,.35);cursor:pointer">Contact</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast-el"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ══════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════
+var CATS = [
+  {n:'Véhicules',e:'🚗',c:234},{n:'Immobilier',e:'🏠',c:189},{n:'Emploi',e:'💼',c:156},
+  {n:'Électronique',e:'📱',c:312},{n:'Mode',e:'👗',c:278},{n:'Maison & Jardin',e:'🛋️',c:145},
+  {n:'Services',e:'🔧',c:198},{n:'Loisirs',e:'🎮',c:167},{n:'Autres',e:'📦',c:97}
+];
+
+var DEMO_ADS = [
+  {id:1,e:'🚗',t:'Toyota Land Cruiser V8 2019',p:45000000,city:'Conakry',cat:'Véhicules',date:'Il y a 2h',views:312,feat:true,seller:'Mamadou Diallo',desc:'Excellent état, faible kilométrage. Toutes options. Documents à jour. Garantie valide.',tags:['Neuf','Toyota','V8'],bg:'linear-gradient(135deg,#FFF7ED,#FDBA74)'},
+  {id:2,e:'🏠',t:'Villa 5 pièces avec piscine — Ratoma',p:250000000,city:'Conakry',cat:'Immobilier',date:'Il y a 5h',views:178,feat:true,seller:'Alpha Baldé',desc:'Magnifique villa, 5 chambres, 3 salles de bain, piscine, garage double. Quartier sécurisé.',tags:['Villa','Piscine','Conakry'],bg:'linear-gradient(135deg,#EFF6FF,#BFDBFE)'},
+  {id:3,e:'📱',t:'iPhone 15 Pro Max 256GB — Neuf',p:8500000,city:'Conakry',cat:'Électronique',date:'Il y a 1j',views:247,feat:true,seller:'Amadou Camara',desc:'Neuf sous blister. Acheté à Dubai en octobre 2024. Garantie Apple valide. Câble USB-C inclus.',tags:['Neuf','iPhone','Apple'],bg:'linear-gradient(135deg,#F0FDF4,#BBF7D0)'},
+  {id:4,e:'💻',t:'MacBook Pro M3 14" — Très bon état',p:12000000,city:'Labé',cat:'Électronique',date:'Il y a 2j',views:189,feat:true,seller:'Fatoumata Sow',desc:'MacBook Pro M3 Pro, 18GB RAM, 512GB SSD. Utilisé 3 mois seulement. Comme neuf.',tags:['MacBook','Apple','M3'],bg:'linear-gradient(135deg,#FFF7ED,#FED7AA)'},
+  {id:5,e:'👗',t:'Robe traditionnelle Fula — Neuve',p:350000,city:'Labé',cat:'Mode',date:'Il y a 3h',views:89,feat:false,seller:'Mariama Barry',desc:'Robe en tissu wax de qualité. Taille M. Jamais portée. Couture locale.',tags:['Mode','Fula','Traditionnel'],bg:'linear-gradient(135deg,#FDF4FF,#E9D5FF)'},
+  {id:6,e:'🛵',t:'Moto Bajaj 125cc 2022',p:6500000,city:'Kankan',cat:'Véhicules',date:'Il y a 4h',views:156,feat:false,seller:'Ibrahima Kouyaté',desc:'Moto en très bon état. Peu utilisée. Documents à jour. Prête à rouler.',tags:['Moto','Bajaj','125cc'],bg:'linear-gradient(135deg,#ECFEFF,#A5F3FC)'},
+  {id:7,e:'📺',t:'TV Samsung 55" QLED 4K Smart',p:3200000,city:'Conakry',cat:'Électronique',date:'Il y a 6h',views:203,feat:false,seller:'Ousmane Condé',desc:'Smart TV 55 pouces QLED 4K. Wi-Fi, Netflix, YouTube intégrés. Télécommande incluse.',tags:['Samsung','4K','Smart TV'],bg:'linear-gradient(135deg,#FFF1F2,#FECDD3)'},
+  {id:8,e:'🏗️',t:'Terrain 500m² viabilisé — Kindia',p:15000000,city:'Kindia',cat:'Immobilier',date:'Il y a 8h',views:134,feat:false,seller:'Sékou Touré',desc:'Terrain en plein centre-ville. Titre foncier disponible. Idéal construction maison ou commerce.',tags:['Terrain','Kindia','Foncier'],bg:'linear-gradient(135deg,#F0FDF4,#D1FAE5)'},
+];
+
+var REGIONS = [
+  {n:'Conakry',lat:9.6412,lng:-13.5784,col:'#F97316',ads:456,pop:'2.5M'},
+  {n:'Boké',lat:10.9328,lng:-14.2896,col:'#22C55E',ads:89,pop:'1.1M'},
+  {n:'Kindia',lat:10.0573,lng:-12.8658,col:'#3B82F6',ads:134,pop:'1.6M'},
+  {n:'Mamou',lat:10.3762,lng:-12.0825,col:'#8B5CF6',ads:76,pop:'940K'},
+  {n:'Labé',lat:11.3241,lng:-12.2833,col:'#EC4899',ads:98,pop:'1.0M'},
+  {n:'Faranah',lat:10.0418,lng:-10.7469,col:'#F59E0B',ads:54,pop:'950K'},
+  {n:'Kankan',lat:10.3839,lng:-9.3028,col:'#EF4444',ads:112,pop:'1.8M'},
+  {n:"N'Zérékoré",lat:7.7562,lng:-8.8195,col:'#06B6D4',ads:87,pop:'1.7M'},
+];
+
+var SECONDARY = [
+  {n:'Coyah',lat:9.700,lng:-13.383,r:'Kindia'},{n:'Dubréka',lat:9.790,lng:-13.513,r:'Conakry'},
+  {n:'Fria',lat:10.367,lng:-13.550,r:'Boké'},{n:'Télimélé',lat:10.900,lng:-13.033,r:'Kindia'},
+  {n:'Pita',lat:11.067,lng:-12.400,r:'Labé'},{n:'Dalaba',lat:10.687,lng:-12.250,r:'Mamou'},
+  {n:'Dinguiraye',lat:11.300,lng:-10.717,r:'Faranah'},{n:'Kouroussa',lat:10.650,lng:-9.883,r:'Kankan'},
+  {n:'Siguiri',lat:11.417,lng:-9.167,r:'Kankan'},{n:'Guéckédou',lat:8.550,lng:-10.133,r:"N'Zérékoré"},
+  {n:'Macenta',lat:8.467,lng:-9.467,r:"N'Zérékoré"},{n:'Beyla',lat:8.683,lng:-8.633,r:"N'Zérékoré"},
+  {n:'Kissidougou',lat:9.183,lng:-10.100,r:'Faranah'},{n:'Boffa',lat:10.183,lng:-14.033,r:'Boké'},
+  {n:'Kamsar',lat:10.650,lng:-14.600,r:'Boké'},
+];
+
+// ══════════════════════════════════════════════
+//  SIMPLE IN-MEMORY DB (+ localStorage backup)
+// ══════════════════════════════════════════════
+var DB = {
+  _d: { users:[], ads: DEMO_ADS.slice(), payments:[], favs:[], user:null },
+  load: function() {
+    try {
+      var s = localStorage.getItem('ygy_db');
+      if (s) { var p = JSON.parse(s); this._d = Object.assign(this._d, p); }
+    } catch(e) {}
+  },
+  save: function() {
+    try { localStorage.setItem('ygy_db', JSON.stringify(this._d)); } catch(e) {}
+  },
+  ads: function() { return this._d.ads || DEMO_ADS; },
+  addAd: function(a) { this._d.ads.unshift(a); this.save(); },
+  user: function() { return this._d.user; },
+  login: function(u) { this._d.user = u; this.save(); },
+  logout: function() { this._d.user = null; this.save(); },
+  addUser: function(u) { this._d.users.push(u); this.save(); },
+  payments: function() { return this._d.payments || []; },
+  addPayment: function(p) { this._d.payments.unshift(p); this.save(); },
+  favs: function() { return this._d.favs || []; },
+  addFav: function(id) { if (!this._d.favs) this._d.favs=[]; if (!this._d.favs.includes(id)) { this._d.favs.push(id); this.save(); } }
+};
+
+// ══════════════════════════════════════════════
+//  ROUTING
+// ══════════════════════════════════════════════
+function goTo(page) {
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  var el = document.getElementById('page-' + page);
+  if (el) { el.classList.add('active'); window.scrollTo({top:0,behavior:'smooth'}); }
+  if (page === 'dashboard') { loadDash(); }
+}
+
+// ══════════════════════════════════════════════
+//  RENDER CATS + ADS
+// ══════════════════════════════════════════════
+function renderCats() {
+  var g = document.getElementById('cats-grid');
+  if (!g) return;
+  g.innerHTML = CATS.map(function(c) {
+    return '<div class="cat-card" onclick="toast(\'🔍 Filtrage : '+c.n+'\')">'+
+      '<div class="cat-ic">'+c.e+'</div>'+
+      '<div class="cat-nm">'+c.n+'</div>'+
+      '<div class="cat-ct">'+c.c+' annonces</div>'+
+      '</div>';
+  }).join('');
+}
+
+function adCard(a, feat) {
+  return '<div class="lc" onclick="viewAd('+a.id+')">'+
+    '<div class="li" style="background:'+a.bg+'">'+
+      '<span>'+a.e+'</span>'+
+      (feat ? '<span class="lbadge">⭐ À la une</span>' : '')+
+      '<button class="lfav" onclick="event.stopPropagation();favAd('+a.id+')">🤍</button>'+
+    '</div>'+
+    '<div class="lb">'+
+      '<div class="lp">'+a.p.toLocaleString('fr-FR')+' GNF</div>'+
+      '<div class="lt">'+a.t+'</div>'+
+      '<div class="lm"><span>📍 '+a.city+'</span><span>🕐 '+a.date+'</span></div>'+
+    '</div>'+
+    '</div>';
+}
+
+function renderAds() {
+  var ads = DB.ads();
+  var fg = document.getElementById('featured-grid');
+  var rg = document.getElementById('recent-grid');
+  if (fg) fg.innerHTML = ads.filter(function(a){return a.feat;}).slice(0,4).map(function(a){return adCard(a,true);}).join('');
+  if (rg) rg.innerHTML = ads.filter(function(a){return !a.feat;}).slice(0,8).map(function(a){return adCard(a,false);}).join('');
+}
+
+// ══════════════════════════════════════════════
+//  VIEW AD
+// ══════════════════════════════════════════════
+var curAd = null;
+function viewAd(id) {
+  var ad = DB.ads().find(function(a){return a.id===id;});
+  if (!ad) return;
+  curAd = ad;
+  document.getElementById('det-emoji').textContent = ad.e;
+  document.getElementById('det-emoji').style.background = ad.bg;
+  document.getElementById('db-cat').textContent = ad.cat;
+  document.getElementById('db-title').textContent = ad.t;
+  document.getElementById('det-price').textContent = ad.p.toLocaleString('fr-FR') + ' GNF';
+  document.getElementById('det-title').textContent = ad.t;
+  document.getElementById('det-desc').textContent = ad.desc;
+  document.getElementById('dm-city').textContent = ad.city;
+  document.getElementById('dm-cat').textContent = ad.cat;
+  document.getElementById('dm-date').textContent = ad.date;
+  document.getElementById('dm-views').textContent = (ad.views||0) + ' vues';
+  document.getElementById('det-tags').innerHTML = (ad.tags||[]).map(function(t){return '<span class="tag">'+t+'</span>';}).join(' ');
+  document.getElementById('det-seller').textContent = ad.seller;
+  document.getElementById('det-av').textContent = ad.seller ? ad.seller.charAt(0).toUpperCase() : '?';
+  // update OM fields
+  document.getElementById('om-val').textContent = ad.p.toLocaleString('fr-FR') + ' GNF';
+  document.getElementById('om-item-name').textContent = ad.t;
+  goTo('detail');
+}
+
+function favAd(id) {
+  DB.addFav(id);
+  toast('❤️ Ajouté aux favoris !', 'ok');
+}
+function addFav() {
+  if (curAd) { DB.addFav(curAd.id); toast('❤️ Ajouté aux favoris !', 'ok'); }
+}
+
+// ══════════════════════════════════════════════
+//  POST AD
+// ══════════════════════════════════════════════
+var selCat = '';
+function renderPostCats() {
+  var g = document.getElementById('post-cats-grid');
+  if (!g) return;
+  g.innerHTML = CATS.map(function(c) {
+    return '<div class="pcat" onclick="pickCat(this,\''+c.n+'\')">'+
+      '<span class="em">'+c.e+'</span>'+c.n+'</div>';
+  }).join('');
+}
+function pickCat(el, name) {
+  document.querySelectorAll('.pcat').forEach(function(c){c.classList.remove('sel');});
+  el.classList.add('sel');
+  selCat = name;
+}
+function submitAd() {
+  var title = (document.getElementById('pt').value||'').trim();
+  var price = (document.getElementById('pp').value||'').trim();
+  var city  = document.getElementById('pc').value;
+  var name  = (document.getElementById('pn').value||'').trim();
+  if (!title || !price) { toast('⚠️ Remplissez le titre et le prix', 'err'); return; }
+  var cat = CATS.find(function(c){return c.n===selCat;});
+  var newAd = {
+    id: Date.now(), e: cat?cat.e:'📦',
+    t: title, p: parseInt(price)||0,
+    city: city, cat: selCat||'Autres',
+    date: 'À l\'instant', views:0, feat:false,
+    seller: name||'Vendeur',
+    desc: (document.getElementById('pd').value||''),
+    tags: [selCat||'Autres'],
+    bg: 'linear-gradient(135deg,#FFF7ED,#FDBA74)'
+  };
+  DB.addAd(newAd);
+  renderAds();
+  toast('🎉 Annonce publiée !', 'ok');
+  setTimeout(function(){ goTo('home'); }, 1200);
+}
+
+// ══════════════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════════════
+function authTab(tab) {
+  var isLogin = (tab === 'login');
+  document.getElementById('mtab-login').classList.toggle('active', isLogin);
+  document.getElementById('mtab-reg').classList.toggle('active', !isLogin);
+  document.getElementById('auth-tt').textContent = isLogin ? 'Connexion' : 'Inscription';
+  var body = document.getElementById('auth-body');
+  if (isLogin) {
+    body.innerHTML =
+      '<button class="btn btn-o btn-full" style="margin-bottom:13px" onclick="toast(\'🔄 Redirection Google...\')">'+
+        '<svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>'+
+        ' Continuer avec Google</button>'+
+      '<div class="or-div">ou</div>'+
+      '<div class="fg"><label>Téléphone ou Email</label><input type="text" id="li" placeholder="+224 6XX XXX XXX"></div>'+
+      '<div class="fg"><label>Mot de passe</label><input type="password" id="lp" placeholder="••••••••"></div>'+
+      '<button class="btn btn-p btn-full" onclick="doLogin()">Se connecter</button>'+
+      '<p style="text-align:center;font-size:12px;color:var(--txm);margin-top:11px">Pas encore de compte ? '+
+        '<a style="color:var(--or);cursor:pointer;font-weight:600" onclick="authTab(\'reg\')">S\'inscrire</a></p>';
+  } else {
+    body.innerHTML =
+      '<button class="btn btn-o btn-full" style="margin-bottom:13px" onclick="toast(\'🔄 Redirection Google...\')">'+
+        '<svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>'+
+        ' Continuer avec Google</button>'+
+      '<div class="or-div">ou</div>'+
+      '<div class="frow">'+
+        '<div class="fg"><label>Prénom *</label><input type="text" id="rfn" placeholder="Prénom"></div>'+
+        '<div class="fg"><label>Nom *</label><input type="text" id="rln" placeholder="Nom"></div>'+
+      '</div>'+
+      '<div class="fg"><label>Téléphone *</label><input type="tel" id="rph" placeholder="+224 6XX XXX XXX"></div>'+
+      '<div class="fg"><label>Email</label><input type="email" id="rem" placeholder="email@..."></div>'+
+      '<div class="fg"><label>Mot de passe *</label><input type="password" id="rpw" placeholder="8 caractères minimum"></div>'+
+      '<div class="fg"><label>Ville</label><select id="rct"><option>Conakry</option><option>Labé</option><option>Kankan</option><option>Kindia</option><option>Boké</option><option>Faranah</option><option>Mamou</option><option>N\'Zérékoré</option></select></div>'+
+      '<button class="btn btn-p btn-full" onclick="doReg()">Créer mon compte gratuit</button>'+
+      '<p style="text-align:center;font-size:12px;color:var(--txm);margin-top:11px">Déjà un compte ? '+
+        '<a style="color:var(--or);cursor:pointer;font-weight:600" onclick="authTab(\'login\')">Se connecter</a></p>';
+  }
+}
+
+function doLogin() {
+  var id = (document.getElementById('li')||{value:''}).value.trim();
+  if (!id) { toast('⚠️ Entrez votre identifiant', 'err'); return; }
+  var u = { name: 'Mohamed Diallo', phone: id, initials: 'MD' };
+  DB.login(u);
+  updateNav();
+  closeModal('auth');
+  toast('✅ Connexion réussie ! Bienvenue Mohamed', 'ok');
+}
+
+function doReg() {
+  var fn = (document.getElementById('rfn')||{value:''}).value.trim();
+  var ln = (document.getElementById('rln')||{value:''}).value.trim();
+  var ph = (document.getElementById('rph')||{value:''}).value.trim();
+  if (!fn || !ph) { toast('⚠️ Remplissez les champs obligatoires', 'err'); return; }
+  var init = (fn.charAt(0) + (ln.charAt(0)||'')).toUpperCase();
+  var u = { name: fn + (ln?' '+ln:''), phone: ph, initials: init };
+  DB.addUser(u); DB.login(u);
+  updateNav();
+  closeModal('auth');
+  toast('🎉 Compte créé ! Bienvenue sur YouGouYou', 'ok');
+}
+
+function logout() {
+  DB.logout();
+  updateNav();
+  goTo('home');
+  toast('👋 Déconnecté');
+}
+
+function updateNav() {
+  var btn = document.getElementById('nav-auth-btn');
+  if (!btn) return;
+  var u = DB.user();
+  if (u) {
+    btn.textContent = '👤 ' + u.name.split(' ')[0];
+    btn.onclick = function(){ loadDash(); goTo('dashboard'); };
+  } else {
+    btn.textContent = '👤 Connexion';
+    btn.onclick = function(){ openModal('auth'); };
+  }
+}
+
+// ══════════════════════════════════════════════
+//  DASHBOARD
+// ══════════════════════════════════════════════
+function loadDash() {
+  var u = DB.user();
+  if (!u) { openModal('auth'); return; }
+  document.getElementById('d-av').textContent = u.initials || 'U';
+  document.getElementById('d-nm').textContent = u.name;
+  document.getElementById('d-ph').textContent = u.phone;
+  document.getElementById('d-greet').textContent = u.name.split(' ')[0];
+  var ads = DB.ads();
+  document.getElementById('dc-ads').textContent = ads.length;
+  var pays = DB.payments();
+  document.getElementById('dc-pay').textContent = pays.length;
+  // preview
+  var prev = document.getElementById('d-ads-prev');
+  if (prev) prev.innerHTML = ads.slice(0,3).map(dashAdRow).join('');
+  var full = document.getElementById('d-ads-full');
+  if (full) full.innerHTML = ads.map(dashAdRow).join('');
+  // payments
+  var pl = document.getElementById('d-pay-list');
+  if (pl) {
+    if (!pays.length) {
+      pl.innerHTML = '<div style="background:var(--wh);border:1.5px solid var(--br);border-radius:var(--rad);padding:30px;text-align:center;color:var(--txm)"><div style="font-size:44px;margin-bottom:10px">💳</div><p>Aucun paiement enregistré.</p></div>';
+    } else {
+      pl.innerHTML = pays.map(function(p){
+        return '<div class="dash-ad" style="margin-bottom:10px">'+
+          '<div style="font-size:30px">🟠</div>'+
+          '<div style="flex:1"><div style="font-weight:700;font-size:14px">'+p.item+'</div>'+
+          '<div style="font-size:12px;color:var(--txm)">📅 '+p.date+' &nbsp;·&nbsp; 🔑 '+p.ref+'</div></div>'+
+          '<div style="text-align:right"><div style="font-family:\'Syne\',sans-serif;font-weight:800;font-size:16px;color:var(--or)">'+
+          parseInt(p.amount).toLocaleString('fr-FR')+' GNF</div>'+
+          '<span class="badge badge-g">✅ Payé</span></div></div>';
+      }).join('');
+    }
+  }
+  // favs
+  var favIds = DB.favs();
+  var favAds = DB.ads().filter(function(a){return favIds.includes(a.id);});
+  var df = document.getElementById('d-favs');
+  if (df) {
+    df.innerHTML = favAds.length
+      ? favAds.map(function(a){return adCard(a,false);}).join('')
+      : '<div style="grid-column:1/-1;background:var(--wh);border:1.5px solid var(--br);border-radius:var(--rad);padding:30px;text-align:center;color:var(--txm)"><div style="font-size:44px;margin-bottom:10px">❤️</div><p>Aucun favori enregistré.</p></div>';
+  }
+}
+
+function dashAdRow(a) {
+  return '<div class="dash-ad">'+
+    '<div style="font-size:30px">'+a.e+'</div>'+
+    '<div style="flex:1"><div style="font-weight:700;font-size:14px">'+a.t+'</div>'+
+    '<div style="font-size:12px;color:var(--txm)">📍 '+a.city+' · 👁️ '+a.views+' vues · '+a.date+'</div></div>'+
+    '<div style="text-align:right"><div style="font-family:\'Syne\',sans-serif;font-weight:800;font-size:15px;color:var(--or)">'+
+    a.p.toLocaleString('fr-FR')+' GNF</div>'+
+    '<span class="badge badge-g">✅ Active</span></div></div>';
+}
+
+function showTab(tab) {
+  var tabs = ['overview','ads','messages','payments','favs'];
+  tabs.forEach(function(t){
+    var el = document.getElementById('tab-'+t);
+    if (el) el.style.display = (t===tab)?'block':'none';
+  });
+  document.querySelectorAll('.dash-nav a').forEach(function(a,i){
+    a.classList.toggle('active', i === tabs.indexOf(tab));
+  });
+}
+
+// ══════════════════════════════════════════════
+//  MAP
+// ══════════════════════════════════════════════
+var mapObj = null;
+var markersGroup = null;
+
+function initMap() {
+  var mapEl = document.getElementById('guinee-map');
+  if (!mapEl || mapObj) return;
+
+  mapObj = L.map('guinee-map').setView([10.5, -11.5], 7);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 18
+  }).addTo(mapObj);
+
+  markersGroup = L.layerGroup().addTo(mapObj);
+
+  // Regional capitals — big markers
+  REGIONS.forEach(function(r) {
+    var icon = L.divIcon({
+      className: '',
+      html: '<div style="background:'+r.col+';width:20px;height:20px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35);cursor:pointer;"></div>',
+      iconSize: [20, 20],
+      iconAnchor: [10, 10]
+    });
+    var m = L.marker([r.lat, r.lng], {icon: icon});
+    m.bindPopup(
+      '<div style="font-family:\'Plus Jakarta Sans\',sans-serif;min-width:155px;padding:2px">'+
+      '<div style="background:'+r.col+';color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;display:inline-block;margin-bottom:7px">CHEF-LIEU</div>'+
+      '<div style="font-weight:800;font-size:15px;margin-bottom:5px">'+r.n+'</div>'+
+      '<div style="font-size:12px;color:#78716C;line-height:1.8">'+
+        '👥 Population : '+r.pop+'<br>'+
+        '📋 '+r.ads+' annonces actives'+
+      '</div>'+
+      '<button onclick="toast(\'🔍 Filtre : '+r.n+'\')" '+
+        'style="margin-top:8px;background:'+r.col+';color:#fff;border:none;padding:6px 11px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;width:100%;font-family:inherit">'+
+        'Voir les annonces →</button>'+
+      '</div>',
+      {maxWidth: 210}
+    );
+    m.addTo(markersGroup);
+  });
+
+  // Secondary cities — small markers
+  SECONDARY.forEach(function(c) {
+    var reg = REGIONS.find(function(r){ return r.n === c.r; });
+    var col = reg ? reg.col : '#999999';
+    var icon = L.divIcon({
+      className: '',
+      html: '<div style="background:'+col+';opacity:0.75;width:11px;height:11px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.2);"></div>',
+      iconSize: [11, 11],
+      iconAnchor: [5, 5]
+    });
+    var m = L.marker([c.lat, c.lng], {icon: icon});
+    m.bindPopup(
+      '<div style="font-family:\'Plus Jakarta Sans\',sans-serif">'+
+      '<div style="font-weight:700;font-size:13px">'+c.n+'</div>'+
+      '<div style="font-size:12px;color:#78716C">Région de '+c.r+'</div>'+
+      '</div>'
+    );
+    m.addTo(markersGroup);
+  });
+
+  // Legend
+  var leg = document.getElementById('map-legend');
+  if (leg) {
+    leg.innerHTML = REGIONS.map(function(r) {
+      return '<div class="map-leg-item">'+
+        '<div class="map-dot" style="background:'+r.col+'"></div>'+
+        '<span><strong>'+r.n+'</strong></span>'+
+        '</div>';
+    }).join('');
+  }
+
+  // Force map to redraw correctly after display
+  setTimeout(function(){ mapObj.invalidateSize(); }, 100);
+}
+
+var mapMarkersVisible = true;
+function toggleMapMarkers() {
+  if (!mapObj || !markersGroup) return;
+  mapMarkersVisible = !mapMarkersVisible;
+  if (mapMarkersVisible) {
+    markersGroup.addTo(mapObj);
+    document.getElementById('toggle-map-btn').textContent = 'Masquer les villes';
+  } else {
+    mapObj.removeLayer(markersGroup);
+    document.getElementById('toggle-map-btn').textContent = 'Afficher les villes';
+  }
+}
+
+// ══════════════════════════════════════════════
+//  ORANGE MONEY
+// ══════════════════════════════════════════════
+function openOM() {
+  // Reset all 3 steps
+  document.getElementById('om-form').style.display = 'block';
+  document.getElementById('om-processing').style.display = 'none';
+  document.getElementById('om-success').style.display = 'none';
+  // Clear inputs
+  var ph = document.getElementById('om-phone');
+  if (ph) ph.value = '';
+  ['p1','p2','p3','p4'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  openModal('om');
+}
+
+function movPin(el, nextId) {
+  if (el.value.length >= 1) {
+    var next = document.getElementById(nextId);
+    if (next) next.focus();
+  }
+}
+
+function processPayment() {
+  var phone = (document.getElementById('om-phone')||{value:''}).value.trim();
+  var pin = ['p1','p2','p3','p4'].map(function(id){
+    return (document.getElementById(id)||{value:''}).value;
+  }).join('');
+
+  if (!phone || phone.length < 8) { toast('⚠️ Entrez un numéro Orange valide (8 chiffres)', 'err'); return; }
+  if (pin.length < 4) { toast('⚠️ Entrez votre code PIN complet (4 chiffres)', 'err'); return; }
+
+  // Show processing
+  document.getElementById('om-form').style.display = 'none';
+  document.getElementById('om-processing').style.display = 'block';
+  document.getElementById('om-success').style.display = 'none';
+
+  setTimeout(function() {
+    var ref = 'OM' + Date.now().toString().slice(-8).toUpperCase();
+    var amount = curAd ? curAd.p : 0;
+    var item = curAd ? curAd.t : 'Article';
+    var payDate = new Date().toLocaleDateString('fr-FR');
+
+    DB.addPayment({ ref: ref, amount: amount, item: item, date: payDate, phone: '+224 ' + phone });
+
+    document.getElementById('om-ok-val').textContent = amount.toLocaleString('fr-FR') + ' GNF';
+    document.getElementById('om-ref').textContent = 'Référence : ' + ref;
+    document.getElementById('om-ok-phone').textContent = 'SMS de confirmation envoyé au +224 ' + phone;
+
+    document.getElementById('om-processing').style.display = 'none';
+    document.getElementById('om-success').style.display = 'block';
+
+    if (DB.user()) { loadDash(); }
+  }, 2500);
+}
+
+// ══════════════════════════════════════════════
+//  MODAL HELPERS
+// ══════════════════════════════════════════════
+function openModal(id) {
+  var el = document.getElementById('overlay-' + id);
+  if (el) { el.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  if (id === 'auth') { authTab('login'); }
+}
+function closeModal(id) {
+  var el = document.getElementById('overlay-' + id);
+  if (el) { el.classList.remove('open'); document.body.style.overflow = ''; }
+}
+function maybeClose(e, id) {
+  if (e.target === e.currentTarget) closeModal(id);
+}
+
+// ══════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════
+var toastTimer;
+function toast(msg, type) {
+  var el = document.getElementById('toast-el');
+  el.textContent = msg;
+  el.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ el.className = 'toast'; }, 3200);
+}
+
+// ══════════════════════════════════════════════
+//  KEYBOARD
+// ══════════════════════════════════════════════
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.overlay.open').forEach(function(o) {
+      o.classList.remove('open');
+    });
+    document.body.style.overflow = '';
+  }
+});
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', function() {
+  DB.load();
+  renderCats();
+  renderAds();
+  renderPostCats();
+  updateNav();
+  // Init map with delay to ensure container is visible
+  setTimeout(initMap, 400);
+});
+</script>
+</body>
+</html>
