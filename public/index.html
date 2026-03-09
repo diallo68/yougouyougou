@@ -1976,6 +1976,9 @@
         background: var(--re)
     }
     </style>
+    <!-- Google Identity Services (OAuth) -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <meta name="google-signin-client_id" content="VOTRE_CLIENT_ID.apps.googleusercontent.com">
 </head>
 <body>
 
@@ -3777,7 +3780,7 @@
 
     function renderAuthForm(tab) {
         var body = document.getElementById('auth-body');
-        var gBtn = '<button class="g-btn" onclick="toast(\'🔄 Redirection Google...\')"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Continuer avec Google</button><div class="or-sep">ou</div>';
+        var gBtn = '<button class="g-btn" onclick="loginWithGoogle()"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Continuer avec Google</button><div class="or-sep">ou</div>';
 
         if (tab === 'login') {
             body.innerHTML = gBtn + // Toggle : connexion par téléphone OU email
@@ -3892,11 +3895,11 @@
             return;
         }
         if (verifyMethod === 'email' && !em) {
-            toast('⚠️ Email requis pour la vérification par email', 'err');
+            toast('⚠️ Entrez votre adresse email', 'err');
             return;
         }
         if (!pw || pw.length < 6) {
-            toast('⚠️ Mot de passe trop court (6 caractères min)', 'err');
+            toast('⚠️ Mot de passe trop court (6 min)', 'err');
             return;
         }
 
@@ -3920,28 +3923,79 @@
 
         var dest = verifyMethod === 'email' ? em : '+224 ' + ph;
         var icon = verifyMethod === 'email' ? '📧' : '📱';
+
+        // Tentative envoi via API backend
+        if (verifyMethod === 'email' && em) {
+            fetch('/api/auth/send-code', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    phone: '+224' + ph,
+                    email: em,
+                    method: 'email',
+                    prenom: fn
+                })
+            }).then(function(r) {
+                return r.json();
+            }).then(function(data) {
+                if (data.debug_code)
+                    smsCode = data.debug_code; // dev mode
+            }).catch(function() {});
+        }
+
         var body = document.getElementById('auth-body');
-        // Affichage de la zone de code
+        // ⚠️ Affiche TOUJOURS le code à l'écran (mode actuel sans SMS réel)
+        var codeHint = verifyMethod === 'email'
+        ? '<div style="background:#FFF3EE;border:1.5px solid var(--orm);border-radius:10px;padding:12px;margin-bottom:10px;text-align:center">' +
+        '<div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">📧 Votre code de vérification</div>' +
+        '<div style="font-size:32px;font-weight:900;letter-spacing:8px;color:var(--or)">' + smsCode + '</div>' +
+        '<div style="font-size:11px;color:var(--muted);margin-top:4px">(En attente config email — copiez ce code)</div>' +
+        '</div>'
+        : '<div style="background:#FFF3EE;border:1.5px solid var(--orm);border-radius:10px;padding:12px;margin-bottom:10px;text-align:center">' +
+        '<div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">📱 Votre code SMS</div>' +
+        '<div style="font-size:32px;font-weight:900;letter-spacing:8px;color:var(--or)">' + smsCode + '</div>' +
+        '<div style="font-size:11px;color:var(--muted);margin-top:4px">(Mode simulation — copiez ce code)</div>' +
+        '</div>';
+
         body.innerHTML +=
         '<div class="sms-wrap" id="code-box">' +
-        '<div class="sw-title">' + icon + ' Code envoyé !</div>' +
-        '<div class="sw-sub">Code de vérification envoyé à<br><strong>' + dest + '</strong>' +
-        (verifyMethod !== 'email' ? '<br><span style="font-size:11px;opacity:.7">(Simulation : <strong>' + smsCode + '</strong>)</span>' : '') +
-        '</div>' +
+        '<div class="sw-title">' + icon + ' Code de vérification</div>' +
+        '<div class="sw-sub" style="margin-bottom:12px">Destinataire : <strong>' + dest + '</strong></div>' +
+        codeHint +
         '<div class="sms-digits">' +
         '<input type="text" maxlength="1" id="s1" oninput="movSms(this,\'s2\')" autocomplete="one-time-code">' +
         '<input type="text" maxlength="1" id="s2" oninput="movSms(this,\'s3\')">' +
         '<input type="text" maxlength="1" id="s3" oninput="movSms(this,\'s4\')">' +
-        '<input type="text" maxlength="1" id="s4">' +
+        '<input type="text" maxlength="1" id="s4" oninput="autoVerify()">' +
         '</div>' +
         '<button class="btn btn-or btn-full" style="border-radius:12px;margin-bottom:10px" onclick="verifyCode()">✅ Confirmer et créer mon compte</button>' +
-        '<div class="sms-resend">Pas reçu ? <a onclick="resendCode()">Renvoyer le code</a></div>' +
+        '<div class="sms-resend">Code oublié ? <a onclick="resendCode()">Générer un nouveau code</a></div>' +
         '</div>';
 
-        toast(icon + ' Code ' + (verifyMethod === 'email' ? 'email' : 'SMS') + ' envoyé à ' + dest, 'ok');
         var s1 = document.getElementById('s1');
         if (s1)
             s1.focus();
+        // Pré-remplir les cases automatiquement pour faciliter le test
+        setTimeout(function() {
+            var digits = smsCode.split('');
+            ['s1', 's2', 's3', 's4'].forEach(function(id, i) {
+                var el = document.getElementById(id);
+                if (el && !el.value)
+                    el.value = digits[i] || '';
+            });
+        }, 800);
+    }
+
+    function autoVerify() {
+        var entered = ['s1', 's2', 's3', 's4'].map(function(id) {
+            return (document.getElementById(id) || {
+                value: ''
+            }).value;
+        }).join('');
+        if (entered.length === 4)
+            verifyCode();
     }
 
     function movSms(el, nid) {
@@ -3954,10 +4008,28 @@
 
     function resendCode() {
         smsCode = Math.floor(1000 + Math.random() * 9000).toString();
-        toast('🔄 Nouveau code envoyé !', 'ok');
-
+        // Mettre à jour l'affichage du code
+        var codeBox = document.getElementById('code-box');
+        if (codeBox) {
+            var orDiv = codeBox.querySelector('[style*="letter-spacing:8px"]');
+            if (orDiv)
+                orDiv.textContent = smsCode;
+        }
+        ['s1', 's2', 's3', 's4'].forEach(function(id) {
+            var e = document.getElementById(id);
+            if (e)
+                e.value = '';
+        });
+        setTimeout(function() {
+            var digits = smsCode.split('');
+            ['s1', 's2', 's3', 's4'].forEach(function(id, i) {
+                var el = document.getElementById(id);
+                if (el)
+                    el.value = digits[i] || '';
+            });
+        }, 600);
+        toast('🔄 Nouveau code généré !', 'ok');
     }
-    // En prod : appel /api/auth/resend-code
 
     function verifyCode() {
         var entered = ['s1', 's2', 's3', 's4'].map(function(id) {
@@ -3965,6 +4037,10 @@
                 value: ''
             }).value;
         }).join('');
+        if (entered.length < 4) {
+            toast('⚠️ Entrez les 4 chiffres du code', 'err');
+            return;
+        }
         if (entered !== smsCode) {
             toast('❌ Code incorrect — réessayez', 'err');
             return;
@@ -3980,6 +4056,108 @@
         pendingUser = null;
         smsCode = '';
     }
+
+    // ══════════════════════════════════════════
+    //  GOOGLE OAUTH (One Tap + bouton)
+    // ══════════════════════════════════════════
+    var GOOGLE_CLIENT_ID = 'VOTRE_CLIENT_ID.apps.googleusercontent.com';
+
+    function initGoogleAuth() {
+        if (typeof google === 'undefined' || !google.accounts)
+            return;
+        google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleGoogleLogin,
+            auto_select: false,
+            cancel_on_tap_outside: true,
+        });
+    }
+
+    function loginWithGoogle() {
+        if (typeof google === 'undefined' || !google.accounts) {
+            // Google OAuth pas encore configuré → mode démo
+            var demoUser = {
+                name: 'Mohamed Diallo',
+                email: 'utilisateur@gmail.com',
+                phone: '',
+                initials: 'MD',
+                method: 'google'
+            };
+            DB.addUser(demoUser);
+            DB.login(demoUser);
+            updateNav();
+            closeModal('auth');
+            toast('✅ Connecté via Google (mode démo) 🇬🇳', 'ok');
+            return;
+        }
+        google.accounts.id.prompt(function(notification) {
+            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                // Fallback : ouvrir popup OAuth
+                google.accounts.oauth2.initTokenClient({
+                    client_id: GOOGLE_CLIENT_ID,
+                    scope: 'email profile',
+                    callback: function(resp) {
+                        if (resp.access_token)
+                            fetchGoogleProfile(resp.access_token);
+                    }
+                }).requestAccessToken();
+            }
+        });
+    }
+
+    function handleGoogleLogin(response) {
+        // Décoder le JWT Google
+        try {
+            var payload = JSON.parse(atob(response.credential.split('.')[1]));
+            var u = {
+                name: payload.name || 'Utilisateur Google',
+                email: payload.email || '',
+                phone: '',
+                initials: (payload.given_name || 'G').charAt(0) + (payload.family_name || '').charAt(0),
+                avatar: payload.picture || '',
+                method: 'google'
+            };
+            DB.addUser(u);
+            DB.login(u);
+            updateNav();
+            closeModal('auth');
+            toast('✅ Bienvenue ' + u.name.split(' ')[0] + ' ! Connecté via Google 🇬🇳', 'ok');
+        } catch (e) {
+            toast('⚠️ Connexion Google échouée', 'err');
+        }
+    }
+
+    function fetchGoogleProfile(token) {
+        fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: {
+                Authorization: 'Bearer ' + token
+            }
+        })
+        .then(function(r) {
+            return r.json();
+        })
+        .then(function(p) {
+            var u = {
+                name: (p.given_name || '') + ' ' + (p.family_name || ''),
+                email: p.email || '',
+                phone: '',
+                initials: ((p.given_name || 'G').charAt(0) + (p.family_name || '').charAt(0)).toUpperCase(),
+                method: 'google'
+            };
+            DB.addUser(u);
+            DB.login(u);
+            updateNav();
+            closeModal('auth');
+            toast('✅ Connecté via Google !', 'ok');
+        }).catch(function() {
+            toast('⚠️ Erreur profil Google', 'err');
+        });
+    }
+
+    // Init Google au chargement
+    window.addEventListener('load', function() {
+        setTimeout(initGoogleAuth, 1000);
+    });
 
     function doLogin() {
         var id = '';
