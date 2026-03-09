@@ -1853,6 +1853,10 @@
         text-decoration: none
     }
 
+    .dash-nav a[hidden] {
+        display: none !important
+    }
+
     .dash-nav a:hover, .dash-nav a.active {
         background: var(--orl);
         color: var(--or2)
@@ -2425,10 +2429,11 @@
                     <div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:32px;margin-bottom:20px;box-shadow:var(--sh)">
                         <div style="display:flex;align-items:center;gap:20px;margin-bottom:28px">
                             <div style="width:72px;height:72px;border-radius:50%;background:var(--or);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;color:#fff;flex-shrink:0" id="p-avatar">MD</div>
-                            <div>
+                            <div style="flex:1">
                                 <div style="font-size:22px;font-weight:800;color:var(--ink)" id="p-name">—</div>
                                 <div style="font-size:13px;color:var(--muted);margin-top:4px" id="p-role-badge"></div>
                             </div>
+                            <button onclick="openEditProfile()" style="background:var(--ink);color:#fff;border:none;border-radius:50px;padding:10px 20px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit">✏️ Modifier mon profil</button>
                         </div>
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
                             <div style="background:var(--brl);border-radius:12px;padding:16px">
@@ -2507,6 +2512,73 @@
                 <div class="m-tab" id="mtab-reg" onclick="authTab('reg')">Inscription</div>
             </div>
             <div class="m-body" id="auth-body"></div>
+        </div>
+    </div>
+
+    <!-- ══ MODAL MODIFIER PROFIL ══ -->
+    <div class="overlay" id="overlay-editprofile" onclick="maybeClose(event,'editprofile')">
+        <div class="modal" style="max-width:480px">
+            <div class="m-head">
+                <div class="m-title">✏️ Modifier mon profil</div>
+                <button class="m-close" onclick="closeModal('editprofile')">✕</button>
+            </div>
+            <div style="padding:24px;display:flex;flex-direction:column;gap:16px">
+                <div>
+                    <label style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);display:block;margin-bottom:7px">Prénom</label>
+                    <input id="ep-prenom" type="text" placeholder="Votre prénom" style="width:100%;border:1.5px solid var(--br);border-radius:10px;padding:12px 14px;font-size:15px;font-family:inherit;box-sizing:border-box">
+                </div>
+                <div>
+                    <label style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);display:block;margin-bottom:7px">Nom</label>
+                    <input id="ep-nom" type="text" placeholder="Votre nom" style="width:100%;border:1.5px solid var(--br);border-radius:10px;padding:12px 14px;font-size:15px;font-family:inherit;box-sizing:border-box">
+                </div>
+                <div>
+                    <label style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);display:block;margin-bottom:7px">📱 Téléphone</label>
+                    <div style="display:flex;gap:8px">
+                        <div style="background:var(--brl);border:1.5px solid var(--br);border-radius:10px;padding:12px 14px;font-weight:800;color:var(--or);white-space:nowrap">🇬🇳 +224</div>
+                        <input id="ep-phone" type="tel" placeholder="620 00 00 00" maxlength="9" style="flex:1;border:1.5px solid var(--br);border-radius:10px;padding:12px 14px;font-size:15px;font-family:inherit">
+                    </div>
+                </div>
+                <div>
+                    <label style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);display:block;margin-bottom:7px">📍 Ville / Préfecture</label>
+                    <select id="ep-city" style="width:100%;border:1.5px solid var(--br);border-radius:10px;padding:12px 14px;font-size:15px;font-family:inherit;background:var(--wh);box-sizing:border-box">
+                        <option value="">— Choisir une ville —</option>
+                        <option>Conakry</option>
+                        <option>Coyah</option>
+                        <option>Dubréka</option>
+                        <option>Forecariah</option>
+                        <option>Kindia</option>
+                        <option>Mamou</option>
+                        <option>Dalaba</option>
+                        <option>Pita</option>
+                        <option>Labé</option>
+                        <option>Mali</option>
+                        <option>Tougué</option>
+                        <option>Dinguiraye</option>
+                        <option>Faranah</option>
+                        <option>Kissidougou</option>
+                        <option>Kankan</option>
+                        <option>Siguiri</option>
+                        <option>Nzérékoré</option>
+                        <option>Beyla</option>
+                        <option>Lola</option>
+                        <option>Yomou</option>
+                        <option>Boké</option>
+                        <option>Fria</option>
+                        <option>Gaoual</option>
+                        <option>Koundara</option>
+                        <option>Télimélé</option>
+                        <option>Boffa</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);display:block;margin-bottom:7px">
+                        🔒 Nouveau mot de passe 
+                        <span style="font-weight:400">(laisser vide pour ne pas changer)</span>
+                    </label>
+                    <input id="ep-pw" type="password" placeholder="••••••••" style="width:100%;border:1.5px solid var(--br);border-radius:10px;padding:12px 14px;font-size:15px;font-family:inherit;box-sizing:border-box">
+                </div>
+                <button onclick="saveProfile()" style="background:var(--or);color:#fff;border:none;border-radius:50px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:4px">💾 Sauvegarder les modifications</button>
+            </div>
         </div>
     </div>
 
@@ -4290,6 +4362,67 @@
         closeModal('auth');
         toast('✅ Bienvenue ' + (found.prenom || found.name || '').split(' ')[0] + ' ! 🇬🇳', 'ok');
     }
+    function openEditProfile() {
+        var u = DB.user();
+        if (!u)
+            return;
+        var prenom = u.prenom || (u.name || '').split(' ')[0] || '';
+        var nom = u.nom || (u.name || '').split(' ').slice(1).join(' ') || '';
+        var phone = (u.phone || '').replace('+224', '').replace(/\s/g, '');
+        document.getElementById('ep-prenom').value = prenom;
+        document.getElementById('ep-nom').value = nom;
+        document.getElementById('ep-phone').value = phone;
+        document.getElementById('ep-city').value = u.city || '';
+        document.getElementById('ep-pw').value = '';
+        openModal('editprofile');
+    }
+
+    function saveProfile() {
+        var u = DB.user();
+        if (!u)
+            return;
+        var prenom = document.getElementById('ep-prenom').value.trim();
+        var nom = document.getElementById('ep-nom').value.trim();
+        var phone = document.getElementById('ep-phone').value.trim();
+        var city = document.getElementById('ep-city').value;
+        var pw = document.getElementById('ep-pw').value.trim();
+        if (!prenom) {
+            toast('⚠️ Le prénom est obligatoire', 'err');
+            return;
+        }
+        // Mettre à jour l'utilisateur
+        u.prenom = prenom;
+        u.nom = nom;
+        u.name = prenom + (nom ? ' ' + nom : '');
+        u.initials = (prenom.charAt(0) + (nom.charAt(0) || '')).toUpperCase();
+        if (phone)
+            u.phone = '+224' + phone.replace(/\s/g, '');
+        if (city)
+            u.city = city;
+        if (pw && pw.length >= 6)
+            u.password = pw;
+        else if (pw && pw.length < 6) {
+            toast('⚠️ Mot de passe trop court (6 min)', 'err');
+            return;
+        }
+        // Sauvegarder dans la session et la liste des users
+        DB.login(u);
+        var users = DB._d.users || [];
+        var idx = users.findIndex(function(x) {
+            return x.email === u.email || x.phone === u.phone;
+        });
+        if (idx >= 0)
+            users[idx] = u;
+        else
+            users.push(u);
+        DB._d.users = users;
+        DB.save();
+        closeModal('editprofile');
+        loadDash();
+        updateNav();
+        toast('✅ Profil mis à jour !', 'ok');
+    }
+
     function logout() {
         DB.logout();
         updateNav();
