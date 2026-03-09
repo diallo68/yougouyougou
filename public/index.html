@@ -2153,7 +2153,7 @@
                 <button class="map-tb-btn active" id="btn-reg" onclick="showLayer('regions')">8 Régions</button>
                 <button class="map-tb-btn" id="btn-pref" onclick="showLayer('prefectures')">38 Préfectures</button>
             </div>
-            <div id="guinee-map"></div>
+            <div id="guinee-map" style="width:100%;height:540px;background:#E8F4F0;border-radius:16px;border:1px solid var(--br)"></div>
             <div class="map-filter-info hidden" id="map-filter-info">
                 <div class="mfi-txt">
                     Annonces filtrées : 
@@ -2922,10 +2922,25 @@
     //  DB
     // ══════════════════════════════════════════
     var DB={
-      _d:{users:[],ads:DEMO_ADS.slice(),payments:[],favs:[],user:null},
-      load:function(){try{var s=localStorage.getItem('ygy5');if(s)this._d=Object.assign(this._d,JSON.parse(s));}catch(e){}},
+      _d:{users:[],ads:DEMO_ADS,payments:[],favs:[],user:null},
+      load:function(){
+        try{
+          var s=localStorage.getItem('ygy5');
+          if(s){
+            var parsed=JSON.parse(s);
+            // Ne pas écraser les ads avec un tableau vide
+            if(!parsed.ads||parsed.ads.length===0) delete parsed.ads;
+            this._d=Object.assign(this._d,parsed);
+          }
+        }catch(e){}
+      },
       save:function(){try{localStorage.setItem('ygy5',JSON.stringify(this._d));}catch(e){}},
-      ads:function(){return this._d.ads||DEMO_ADS;},
+      ads:function(){
+        var stored=this._d.ads;
+        // Si pas d'annonces stockées, retourner les démos
+        if(!stored||stored.length===0) return DEMO_ADS;
+        return stored;
+      },
       addAd:function(a){this._d.ads.unshift(a);this.save();},
       user:function(){return this._d.user;},
       login:function(u){this._d.user=u;this.save();},
@@ -2987,8 +3002,29 @@
       var rg=document.getElementById('recent-grid');
       var sbEl=document.getElementById('sb-ads');
       if(sbEl)sbEl.textContent=ads.length.toLocaleString('fr-FR');
-      if(fg)fg.innerHTML=ads.filter(function(a){return a.feat;}).slice(0,4).map(function(a){return adCard(a,true);}).join('');
-      if(rg)rg.innerHTML=ads.filter(function(a){return !a.feat;}).slice(0,8).map(function(a){return adCard(a,false);}).join('');
+
+      var featured=ads.filter(function(a){return a.feat||a.featured;});
+      var recent=ads.filter(function(a){return !a.feat&&!a.featured;});
+
+      // Si pas assez de vedettes, prendre les 4 premières
+      if(featured.length===0) featured=ads.slice(0,4);
+      // Si pas assez de récentes, prendre le reste
+      if(recent.length===0) recent=ads.slice(4);
+
+      if(fg){
+        if(featured.length>0){
+          fg.innerHTML=featured.slice(0,4).map(function(a){return adCard(a,true);}).join('');
+        } else {
+          fg.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">Aucune annonce vedette pour le moment.</div>';
+        }
+      }
+      if(rg){
+        if(recent.length>0){
+          rg.innerHTML=recent.slice(0,8).map(function(a){return adCard(a,false);}).join('');
+        } else {
+          rg.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">Aucune annonce récente.</div>';
+        }
+      }
     }
 
     function adCard(a,feat){
@@ -3017,7 +3053,14 @@
       var el=document.getElementById('guinee-map');if(!el||mapObj)return;
       var bounds=L.latLngBounds([[7.0,-15.3],[12.9,-7.4]]);
       mapObj=L.map('guinee-map',{center:[10.2,-11.2],zoom:7,maxBounds:bounds,maxBoundsViscosity:1,minZoom:6,maxZoom:14});
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:18}).addTo(mapObj);
+
+      // Tuiles OpenStreetMap — fonctionne en ligne et en local
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+        attribution:'© OpenStreetMap',
+        maxZoom:18,
+        crossOrigin:true
+      }).addTo(mapObj);
+
       // Masquer hors Guinée
       L.polygon([[[90,-180],[90,180],[-90,180],[-90,-180]],[[7.0,-15.3],[7.0,-7.4],[12.9,-7.4],[12.9,-15.3]]],
         {color:'transparent',fillColor:'#F5F2EE',fillOpacity:0.72,interactive:false}).addTo(mapObj);
@@ -3679,7 +3722,16 @@
       renderAds();
       renderPostCats();
       updateNav();
-      setTimeout(initMap,400);
+      // Carte : essayer plusieurs fois pour s'assurer que le conteneur est visible
+      setTimeout(initMap, 300);
+      setTimeout(function(){
+        if(mapObj) mapObj.invalidateSize();
+        else initMap();
+      }, 1000);
+      setTimeout(function(){
+        if(mapObj) mapObj.invalidateSize();
+        else initMap();
+      }, 2500);
     });
     </script>
 </body>
