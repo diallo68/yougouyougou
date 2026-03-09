@@ -1,6 +1,7 @@
 // ═══════════════════════════════════════════════════════════
 //  YouGouYou — server.js
 //  Stack : Node.js + Express + MongoDB Atlas + JWT
+//  Vérification : SMS (Orange) OU Email (Nodemailer)
 // ═══════════════════════════════════════════════════════════
 
 const express    = require('express');
@@ -8,6 +9,7 @@ const mongoose   = require('mongoose');
 const cors       = require('cors');
 const bcrypt     = require('bcryptjs');
 const jwt        = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 const path       = require('path');
 
 const app  = express();
@@ -26,22 +28,92 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log('✅ MongoDB Atlas connecté'))
 .catch(err => console.error('❌ MongoDB erreur :', err));
 
+// ── TRANSPORTEUR EMAIL (Nodemailer) ─────────────────────────
+// Configure avec Gmail ou SMTP de ton choix
+// Variables d'environnement à ajouter sur Render :
+//   EMAIL_HOST     = smtp.gmail.com
+//   EMAIL_PORT     = 587
+//   EMAIL_USER     = yougouyougou@gmail.com
+//   EMAIL_PASS     = (mot de passe application Gmail)
+const transporter = nodemailer.createTransport({
+  host:   process.env.EMAIL_HOST || 'smtp.gmail.com',
+  port:   parseInt(process.env.EMAIL_PORT) || 587,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_USER || '',
+    pass: process.env.EMAIL_PASS || '',
+  },
+});
+
+// Fonction d'envoi d'email de vérification
+async function sendVerificationEmail(to, code, prenom) {
+  const html = `
+  <!DOCTYPE html>
+  <html>
+  <head><meta charset="UTF-8"></head>
+  <body style="margin:0;padding:0;background:#F5F2EE;font-family:'Helvetica Neue',Arial,sans-serif">
+    <div style="max-width:520px;margin:40px auto;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.08)">
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,#FF5C00,#FF6A00);padding:36px 40px;text-align:center">
+        <div style="font-size:36px;margin-bottom:10px">🇬🇳</div>
+        <div style="font-size:26px;font-weight:900;color:#fff;letter-spacing:-0.5px">YouGouYou</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.8);margin-top:4px">Le marché de la Guinée</div>
+      </div>
+      <!-- Body -->
+      <div style="padding:36px 40px">
+        <p style="font-size:16px;color:#0E0E0E;margin-bottom:8px">Bonjour <strong>${prenom}</strong> 👋</p>
+        <p style="font-size:14px;color:#767676;line-height:1.7;margin-bottom:28px">
+          Voici votre code de vérification pour finaliser votre inscription sur <strong>YouGouYou</strong>.
+        </p>
+        <!-- Code -->
+        <div style="background:#FFF3EE;border:2px solid #FFB899;border-radius:16px;padding:28px;text-align:center;margin-bottom:28px">
+          <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#767676;margin-bottom:10px">Votre code de vérification</div>
+          <div style="font-size:48px;font-weight:900;letter-spacing:12px;color:#FF5C00">${code}</div>
+          <div style="font-size:12px;color:#767676;margin-top:10px">⏱️ Ce code expire dans <strong>15 minutes</strong></div>
+        </div>
+        <p style="font-size:13px;color:#A8A8A8;line-height:1.7">
+          Si vous n'avez pas créé de compte sur YouGouYou, ignorez cet email.<br>
+          Ne partagez jamais ce code avec quelqu'un d'autre.
+        </p>
+      </div>
+      <!-- Footer -->
+      <div style="background:#F5F2EE;padding:20px 40px;text-align:center;border-top:1px solid #E2DDD7">
+        <div style="font-size:12px;color:#A8A8A8">
+          © 2025 YouGouYou · Conakry, Guinée<br>
+          <a href="https://yougouyougou.net" style="color:#FF5C00;text-decoration:none">yougouyougou.net</a>
+        </div>
+      </div>
+    </div>
+  </body>
+  </html>`;
+
+  await transporter.sendMail({
+    from:    `"YouGouYou 🇬🇳" <${process.env.EMAIL_USER}>`,
+    to,
+    subject: `${code} — Votre code de vérification YouGouYou`,
+    html,
+    text: `Bonjour ${prenom},\n\nVotre code de vérification YouGouYou est : ${code}\n\nCe code expire dans 15 minutes.\n\n© YouGouYou — yougouyougou.net`,
+  });
+}
+
 // ═══════════════════════════════════════════════════════════
 //  SCHÉMAS MONGOOSE
 // ═══════════════════════════════════════════════════════════
 
 // ── Utilisateur ─────────────────────────────────────────────
 const UserSchema = new mongoose.Schema({
-  prenom:       { type: String, required: true, trim: true },
-  nom:          { type: String, trim: true },
-  phone:        { type: String, required: true, unique: true },
-  email:        { type: String, trim: true, lowercase: true },
-  password:     { type: String, required: true },
-  city:         { type: String },
-  role:         { type: String, enum: ['user', 'admin'], default: 'user' },
-  verified:     { type: Boolean, default: false },
-  smsCode:      { type: String },                // code SMS temporaire
-  createdAt:    { type: Date, default: Date.now },
+  prenom:        { type: String, required: true, trim: true },
+  nom:           { type: String, trim: true },
+  phone:         { type: String, required: true, unique: true },
+  email:         { type: String, trim: true, lowercase: true },
+  password:      { type: String, required: true },
+  city:          { type: String },
+  role:          { type: String, enum: ['user', 'admin'], default: 'user' },
+  verified:      { type: Boolean, default: false },
+  verifyMethod:  { type: String, enum: ['sms', 'email'], default: 'sms' },
+  verifyCode:    { type: String },    // code 4 chiffres (SMS ou email)
+  codeExpiry:    { type: Date },      // expire dans 15 min
+  createdAt:     { type: Date, default: Date.now },
 });
 const User = mongoose.model('User', UserSchema);
 
@@ -109,89 +181,131 @@ function adminOnly(req, res, next) {
 }
 
 // ═══════════════════════════════════════════════════════════
-//  AUTH — INSCRIPTION / CONNEXION / SMS
+//  AUTH — INSCRIPTION / CONNEXION
+//  Vérification : SMS (numéro Orange) OU Email (4 chiffres)
 // ═══════════════════════════════════════════════════════════
 
-// Étape 1 : envoyer le code SMS (simulé — intégrer Orange SMS API en prod)
-app.post('/api/auth/send-sms', async (req, res) => {
+// ── Étape 1 : Envoyer le code de vérification ──────────────
+// method = "sms"   → envoie le code par SMS Orange
+// method = "email" → envoie le code par email (nodemailer)
+app.post('/api/auth/send-code', async (req, res) => {
   try {
-    const { phone } = req.body;
-    if (!phone) return res.status(400).json({ error: 'Numéro requis' });
+    const { phone, email, method = 'sms', prenom = 'Utilisateur' } = req.body;
 
-    const code = Math.floor(1000 + Math.random() * 9000).toString();
+    if (method === 'sms'   && !phone) return res.status(400).json({ error: 'Numéro requis pour SMS' });
+    if (method === 'email' && !email) return res.status(400).json({ error: 'Email requis' });
 
-    // Sauvegarder le code temporairement (ou en mémoire/Redis en prod)
+    const code   = Math.floor(1000 + Math.random() * 9000).toString();
+    const expiry = new Date(Date.now() + 15 * 60 * 1000); // 15 min
+
     await User.findOneAndUpdate(
       { phone },
-      { smsCode: code },
-      { upsert: false }
+      { verifyCode: code, codeExpiry: expiry, verifyMethod: method },
+      { upsert: true, new: true }
     );
 
-    // En prod : appeler l'API SMS d'Orange Guinée ici
-    console.log(`📱 Code SMS pour ${phone} : ${code}`);
+    if (method === 'sms') {
+      // 🔧 En prod : appeler l'API SMS Orange Guinée ici
+      // await orangeSMS.send({ to: phone, message: `YouGouYou — code : ${code}` });
+      console.log(`📱 [SMS] Code pour ${phone} : ${code}`);
+    } else {
+      await sendVerificationEmail(email, code, prenom);
+      console.log(`📧 [EMAIL] Code pour ${email} : ${code}`);
+    }
 
-    // En dev on renvoie le code dans la réponse (retirer en prod !)
     res.json({
       success: true,
-      message: 'Code SMS envoyé',
-      ...(process.env.NODE_ENV !== 'production' && { debug_code: code })
+      method,
+      message: method === 'sms' ? `Code SMS envoyé au ${phone}` : `Code envoyé à ${email}`,
+      ...(process.env.NODE_ENV !== 'production' && { debug_code: code }),
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('send-code error:', err.message);
+    res.status(500).json({ error: 'Envoi du code impossible : ' + err.message });
   }
 });
 
-// Étape 2 : inscription complète avec vérification SMS
+// ── Étape 2 : Vérifier le code et créer le compte ──────────
 app.post('/api/register', async (req, res) => {
   try {
-    const { prenom, nom, phone, email, password, city, smsCode } = req.body;
-    if (!prenom || !phone || !password) return res.status(400).json({ error: 'Champs requis manquants' });
+    const { prenom, nom, phone, email, password, city, code, method = 'sms' } = req.body;
+    if (!prenom || !phone || !password || !code)
+      return res.status(400).json({ error: 'Champs requis : prenom, phone, password, code' });
 
-    // Vérifier si l'utilisateur existe déjà
-    const exists = await User.findOne({ phone });
-    if (exists && exists.verified) return res.status(400).json({ error: 'Ce numéro est déjà inscrit' });
-
-    // En prod : vérifier le code SMS reçu
-    // if (exists && exists.smsCode !== smsCode) return res.status(400).json({ error: 'Code SMS incorrect' });
+    const pending = await User.findOne({ phone });
+    if (!pending)
+      return res.status(400).json({ error: 'Aucune demande pour ce numéro — demandez un code d'abord' });
+    if (pending.verified)
+      return res.status(400).json({ error: 'Ce numéro est déjà inscrit' });
+    if (pending.verifyCode !== code)
+      return res.status(400).json({ error: 'Code incorrect — vérifiez et réessayez' });
+    if (pending.codeExpiry && new Date() > pending.codeExpiry)
+      return res.status(400).json({ error: 'Code expiré (15 min) — demandez un nouveau code' });
 
     const hashed = await bcrypt.hash(password, 10);
     const user = await User.findOneAndUpdate(
       { phone },
-      { prenom, nom, phone, email, password: hashed, city, verified: true, smsCode: null },
+      { prenom, nom, phone, email: email || '', password: hashed, city,
+        verified: true, verifyMethod: method, verifyCode: null, codeExpiry: null },
       { upsert: true, new: true }
     );
 
     const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '30d' });
     res.json({
-      success: true,
-      token,
-      user: { id: user._id, name: `${prenom} ${nom||''}`.trim(), phone, city, role: user.role }
+      success: true, token,
+      user: { id: user._id, name: `${prenom} ${nom||''}`.trim(), phone, email, city, role: user.role },
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Connexion
+// ── Connexion : téléphone OU email ──────────────────────────
 app.post('/api/login', async (req, res) => {
   try {
-    const { phone, password } = req.body;
-    const user = await User.findOne({ phone });
-    if (!user) return res.status(400).json({ error: 'Numéro introuvable' });
+    const { identifier, password } = req.body;
+    if (!identifier || !password)
+      return res.status(400).json({ error: 'Identifiant et mot de passe requis' });
+
+    // Recherche par téléphone OU par email
+    const user = await User.findOne({
+      $or: [{ phone: identifier }, { email: identifier.toLowerCase() }]
+    });
+    if (!user)
+      return res.status(400).json({ error: 'Compte introuvable — vérifiez votre numéro ou email' });
+    if (!user.verified)
+      return res.status(400).json({ error: 'Compte non vérifié — confirmez votre SMS ou email' });
 
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(400).json({ error: 'Mot de passe incorrect' });
 
     const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '30d' });
     res.json({
-      success: true,
-      token,
-      user: { id: user._id, name: `${user.prenom} ${user.nom||''}`.trim(), phone: user.phone, city: user.city, role: user.role }
+      success: true, token,
+      user: { id: user._id, name: `${user.prenom} ${user.nom||''}`.trim(),
+              phone: user.phone, email: user.email, city: user.city, role: user.role },
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
+// ── Renvoyer un code ────────────────────────────────────────
+app.post('/api/auth/resend-code', async (req, res) => {
+  try {
+    const { phone, email, method = 'sms', prenom = 'Utilisateur' } = req.body;
+    const code   = Math.floor(1000 + Math.random() * 9000).toString();
+    const expiry = new Date(Date.now() + 15 * 60 * 1000);
+    await User.findOneAndUpdate({ phone }, { verifyCode: code, codeExpiry: expiry }, { upsert: true });
+    if (method === 'email' && email) await sendVerificationEmail(email, code, prenom);
+    else console.log(`📱 [RESEND] Code pour ${phone} : ${code}`);
+    res.json({ success: true, message: 'Nouveau code envoyé',
+      ...(process.env.NODE_ENV !== 'production' && { debug_code: code }) });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 // ═══════════════════════════════════════════════════════════
 //  ANNONCES
