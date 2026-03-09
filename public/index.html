@@ -2412,7 +2412,7 @@
                     <a onclick="showTab('payments')">🟠 Paiements Orange Money</a>
                     <a onclick="showTab('favs')">❤️ Mes favoris</a>
                     <a onclick="goTo('post')" style="margin-top:18px;border-top:1px solid var(--br);padding-top:18px;color:var(--or)!important">➕ Nouvelle annonce</a>
-                    <a onclick="goAdmin()" id="nav-admin-link" style="color:#2563EB!important;display:none">⚙️ Administration</a>
+                    <a onclick="goAdmin()" id="nav-admin-link" hidden style="color:#2563EB!important">⚙️ Administration</a>
                     <a onclick="logout()" style="color:var(--re)!important">🚪 Déconnexion</a>
                 </nav>
             </div>
@@ -4287,23 +4287,30 @@
 
         // Afficher le lien Admin UNIQUEMENT pour les admins
         var adminLink = document.getElementById('nav-admin-link');
-        if (adminLink)
-            adminLink.style.display = (u.role === 'admin' ? 'block' : 'none');
+        if (adminLink) {
+            if (u.role === 'admin')
+                adminLink.removeAttribute('hidden');
+            else
+                adminLink.setAttribute('hidden', '');
+        }
 
-        var ads = DB.ads();
-        var myAds = ads.filter(function(a) {
-            return a.seller === u.name || a.uid === u.id;
+        var allAds = DB._d.ads || [];
+        // N'afficher QUE les annonces de cet utilisateur (pas les démos)
+        var myAds = allAds.filter(function(a) {
+            return a.uid === u.id || a.uid === u.email || a.seller === u.name || a.sellerEmail === u.email;
         });
-        if (!myAds.length)
-            myAds = []; // n'afficher que ses propres annonces, pas les démos
         document.getElementById('dc-ads').textContent = myAds.length;
         document.getElementById('dc-pay').textContent = DB.payments().length;
         var prev = document.getElementById('d-ads-prev');
         if (prev)
-            prev.innerHTML = myAds.length ? myAds.slice(0, 3).map(dashRow).join('') : '<div style="padding:32px;text-align:center;color:var(--muted)">Aucune annonce publiée — <a onclick="goTo(\'post\')" style="color:var(--or);font-weight:800;cursor:pointer">Déposer ma première annonce →</a></div>';
+            prev.innerHTML = myAds.length
+            ? myAds.slice(0, 3).map(dashRow).join('')
+            : '<div style="padding:32px;text-align:center;color:var(--muted)">Aucune annonce publiée — <a onclick="goTo(\'post\')" style="color:var(--or);font-weight:800;cursor:pointer">Déposer ma première annonce →</a></div>';
         var full = document.getElementById('d-ads-full');
         if (full)
-            full.innerHTML = myAds.length ? myAds.map(dashRow).join('') : '<div style="padding:32px;text-align:center;color:var(--muted)">Aucune annonce</div>';
+            full.innerHTML = myAds.length
+            ? myAds.map(dashRow).join('')
+            : '<div style="padding:32px;text-align:center;color:var(--muted)">Aucune annonce publiée.</div>';
         var pays = DB.payments();
         var pl = document.getElementById('d-pay-list');
         if (pl) {
