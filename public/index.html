@@ -2406,10 +2406,9 @@
                     <div class="dash-phone" id="d-ph">+224 620 000 000</div>
                 </div>
                 <nav class="dash-nav">
-                    <a class="active" onclick="showTab('overview')">📊 Tableau de bord</a>
+                    <a class="active" onclick="showTab('profil')">👤 Mon profil</a>
                     <a onclick="showTab('ads')">📋 Mes annonces</a>
-                    <a onclick="showTab('messages')">💬 Messages</a>
-                    <a onclick="showTab('payments')">🟠 Paiements Orange Money</a>
+                    <a onclick="showTab('payments')">🟠 Mes paiements</a>
                     <a onclick="showTab('favs')">❤️ Mes favoris</a>
                     <a onclick="goTo('post')" style="margin-top:18px;border-top:1px solid var(--br);padding-top:18px;color:var(--or)!important">➕ Nouvelle annonce</a>
                     <a onclick="goAdmin()" id="nav-admin-link" hidden style="color:#2563EB!important">⚙️ Administration</a>
@@ -2417,53 +2416,81 @@
                 </nav>
             </div>
             <div class="dash-main">
-                <div id="tab-overview">
-                    <h2 style="font-family:'Instrument Serif',serif;font-size:28px;font-weight:400;margin-bottom:22px;letter-spacing:-.5px">
-                        Bonjour, 
-                        <span id="d-greet">Mohamed</span>
-                         👋
-                    </h2>
-                    <div class="stat-cards">
-                        <div class="stat-card">
-                            <div class="n" id="dc-ads">0</div>
-                            <div class="l">Annonces actives</div>
+
+                <!-- ── ONGLET PROFIL ── -->
+                <div id="tab-profil">
+                    <h2 style="font-family:'Instrument Serif',serif;font-size:28px;font-weight:400;margin-bottom:22px">👤 Mon profil</h2>
+
+                    <!-- Carte infos personnelles -->
+                    <div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:32px;margin-bottom:20px;box-shadow:var(--sh)">
+                        <div style="display:flex;align-items:center;gap:20px;margin-bottom:28px">
+                            <div style="width:72px;height:72px;border-radius:50%;background:var(--or);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;color:#fff;flex-shrink:0" id="p-avatar">MD</div>
+                            <div>
+                                <div style="font-size:22px;font-weight:800;color:var(--ink)" id="p-name">—</div>
+                                <div style="font-size:13px;color:var(--muted);margin-top:4px" id="p-role-badge"></div>
+                            </div>
                         </div>
-                        <div class="stat-card">
-                            <div class="n">142</div>
-                            <div class="l">Vues ce mois</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="n">7</div>
-                            <div class="l">Messages reçus</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="n" id="dc-pay">0</div>
-                            <div class="l">Paiements OM</div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                            <div style="background:var(--brl);border-radius:12px;padding:16px">
+                                <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:6px">📱 Téléphone</div>
+                                <div style="font-weight:700;font-size:15px;color:var(--ink)" id="p-phone">—</div>
+                            </div>
+                            <div style="background:var(--brl);border-radius:12px;padding:16px">
+                                <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:6px">📧 Email</div>
+                                <div style="font-weight:700;font-size:15px;color:var(--ink);word-break:break-all" id="p-email">—</div>
+                            </div>
+                            <div style="background:var(--brl);border-radius:12px;padding:16px">
+                                <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:6px">📍 Ville</div>
+                                <div style="font-weight:700;font-size:15px;color:var(--ink)" id="p-city">—</div>
+                            </div>
+                            <div style="background:var(--brl);border-radius:12px;padding:16px">
+                                <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:6px">✅ Vérification</div>
+                                <div style="font-weight:700;font-size:15px;color:var(--ink)" id="p-verif">—</div>
+                            </div>
                         </div>
                     </div>
-                    <h3 style="font-size:16px;font-weight:800;margin-bottom:14px">Dernières annonces</h3>
-                    <div id="d-ads-prev"></div>
+
+                    <!-- Stats rapides -->
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+                        <div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:20px;text-align:center;box-shadow:var(--sh)">
+                            <div style="font-size:28px;font-weight:900;color:var(--or);font-style:italic" id="p-count-ads">0</div>
+                            <div style="font-size:12px;color:var(--muted);font-weight:700;margin-top:4px">Annonces publiées</div>
+                        </div>
+                        <div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:20px;text-align:center;box-shadow:var(--sh)">
+                            <div style="font-size:28px;font-weight:900;color:var(--or);font-style:italic" id="p-count-pay">0</div>
+                            <div style="font-size:12px;color:var(--muted);font-weight:700;margin-top:4px">Paiements OM</div>
+                        </div>
+                        <div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:20px;text-align:center;box-shadow:var(--sh)">
+                            <div style="font-size:28px;font-weight:900;color:var(--or);font-style:italic" id="p-count-favs">0</div>
+                            <div style="font-size:12px;color:var(--muted);font-weight:700;margin-top:4px">Favoris</div>
+                        </div>
+                    </div>
+
+                    <!-- Historique navigation -->
+                    <div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:24px;box-shadow:var(--sh)">
+                        <h3 style="font-size:16px;font-weight:800;margin-bottom:16px">🕐 Historique de navigation</h3>
+                        <div id="p-history"></div>
+                    </div>
                 </div>
+
+                <!-- ── ONGLET MES ANNONCES ── -->
                 <div id="tab-ads" style="display:none">
                     <h2 style="font-family:'Instrument Serif',serif;font-size:28px;font-weight:400;margin-bottom:22px">📋 Mes annonces</h2>
                     <div id="d-ads-full"></div>
                 </div>
-                <div id="tab-messages" style="display:none">
-                    <h2 style="font-family:'Instrument Serif',serif;font-size:28px;font-weight:400;margin-bottom:22px">💬 Messages</h2>
-                    <div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:48px;text-align:center;color:var(--muted);box-shadow:var(--sh)">
-                        <div style="font-size:56px;margin-bottom:16px">💬</div>
-                        <p style="font-weight:800;font-size:16px;margin-bottom:6px">Aucun message</p>
-                        <p style="font-size:14px">Les messages de vos acheteurs apparaîtront ici</p>
-                    </div>
-                </div>
+
+                <!-- ── ONGLET PAIEMENTS ── -->
                 <div id="tab-payments" style="display:none">
-                    <h2 style="font-family:'Instrument Serif',serif;font-size:28px;font-weight:400;margin-bottom:22px">🟠 Paiements Orange Money</h2>
+                    <h2 style="font-family:'Instrument Serif',serif;font-size:28px;font-weight:400;margin-bottom:22px">🟠 Mes paiements Orange Money</h2>
                     <div id="d-pay-list"></div>
                 </div>
+
+                <!-- ── ONGLET FAVORIS ── -->
                 <div id="tab-favs" style="display:none">
                     <h2 style="font-family:'Instrument Serif',serif;font-size:28px;font-weight:400;margin-bottom:22px">❤️ Mes favoris</h2>
                     <div class="ads-grid" id="d-favs"></div>
                 </div>
+
             </div>
         </div>
     </div>
@@ -3728,6 +3755,24 @@
         if (!ad)
             return;
         curAd = ad;
+
+        // Enregistrer dans l'historique de navigation
+        if (!DB._d.history)
+            DB._d.history = [];
+        DB._d.history = DB._d.history.filter(function(h) {
+            return h.id !== id;
+        }); // éviter doublons
+        DB._d.history.unshift({
+            id: ad.id,
+            e: ad.e,
+            t: ad.t,
+            p: ad.p,
+            city: ad.city,
+            date: 'À l\'instant'
+        });
+        if (DB._d.history.length > 20)
+            DB._d.history = DB._d.history.slice(0, 20);
+        DB.save();
         document.getElementById('det-emoji').textContent = ad.e;
         document.getElementById('det-emoji').style.background = ad.bg;
         document.getElementById('bc-cat').textContent = ad.cat;
@@ -4280,12 +4325,14 @@
             openModal('auth');
             return;
         }
-        document.getElementById('d-av').textContent = u.initials || u.name.charAt(0).toUpperCase() || 'U';
-        document.getElementById('d-nm').textContent = u.name;
-        document.getElementById('d-ph').textContent = u.phone || u.email || '';
-        document.getElementById('d-greet').textContent = (u.prenom || u.name || '').split(' ')[0];
 
-        // Afficher le lien Admin UNIQUEMENT pour les admins
+        // Sidebar
+        var initials = (u.prenom || u.name || 'U').charAt(0).toUpperCase() + ((u.nom || '').charAt(0) || '').toUpperCase();
+        document.getElementById('d-av').textContent = initials || 'U';
+        document.getElementById('d-nm').textContent = u.name || u.prenom || 'Utilisateur';
+        document.getElementById('d-ph').textContent = u.phone || u.email || '';
+
+        // Lien Admin visible seulement pour admin
         var adminLink = document.getElementById('nav-admin-link');
         if (adminLink) {
             if (u.role === 'admin')
@@ -4294,55 +4341,118 @@
                 adminLink.setAttribute('hidden', '');
         }
 
+        // Onglet Profil — infos personnelles
+        var av = document.getElementById('p-avatar');
+        if (av)
+            av.textContent = initials || 'U';
+        var pn = document.getElementById('p-name');
+        if (pn)
+            pn.textContent = u.name || u.prenom || '—';
+        var rb = document.getElementById('p-role-badge');
+        if (rb)
+            rb.innerHTML = u.role === 'admin'
+            ? '<span style="background:#EFF6FF;color:#1D4ED8;font-size:11px;font-weight:800;padding:3px 10px;border-radius:50px">👑 Administrateur</span>'
+            : '<span style="background:#D1FAE5;color:#065F46;font-size:11px;font-weight:800;padding:3px 10px;border-radius:50px">✅ Membre vérifié</span>';
+        var pp = document.getElementById('p-phone');
+        if (pp)
+            pp.textContent = u.phone || 'Non renseigné';
+        var pe = document.getElementById('p-email');
+        if (pe)
+            pe.textContent = u.email || 'Non renseigné';
+        var pc = document.getElementById('p-city');
+        if (pc)
+            pc.textContent = u.city || 'Non renseignée';
+        var pv = document.getElementById('p-verif');
+        if (pv)
+            pv.textContent = (u.method === 'email' ? '📧 Email' : '📱 SMS') + ' — Vérifié';
+
+        // Mes annonces (seulement les siennes, pas les démos)
         var allAds = DB._d.ads || [];
-        // N'afficher QUE les annonces de cet utilisateur (pas les démos)
         var myAds = allAds.filter(function(a) {
-            return a.uid === u.id || a.uid === u.email || a.seller === u.name || a.sellerEmail === u.email;
+            return !a.isDemo && (a.uid === u.id || a.uid === u.email || a.sellerEmail === u.email || a.seller === u.name);
         });
-        document.getElementById('dc-ads').textContent = myAds.length;
-        document.getElementById('dc-pay').textContent = DB.payments().length;
-        var prev = document.getElementById('d-ads-prev');
-        if (prev)
-            prev.innerHTML = myAds.length
-            ? myAds.slice(0, 3).map(dashRow).join('')
-            : '<div style="padding:32px;text-align:center;color:var(--muted)">Aucune annonce publiée — <a onclick="goTo(\'post\')" style="color:var(--or);font-weight:800;cursor:pointer">Déposer ma première annonce →</a></div>';
+
+        // Stats
+        var pays = DB.payments();
+        var favIds = DB.favs();
+        var pca = document.getElementById('p-count-ads');
+        if (pca)
+            pca.textContent = myAds.length;
+        var pcp = document.getElementById('p-count-pay');
+        if (pcp)
+            pcp.textContent = pays.length;
+        var pcf = document.getElementById('p-count-favs');
+        if (pcf)
+            pcf.textContent = favIds.length;
+
+        // Historique de navigation (annonces consultées)
+        var hist = DB._d.history || [];
+        var ph = document.getElementById('p-history');
+        if (ph) {
+            if (!hist.length) {
+                ph.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted)">' +
+                '<div style="font-size:48px;margin-bottom:12px">🔍</div>' +
+                '<p style="font-weight:700">Aucune annonce consultée récemment</p>' +
+                '<p style="font-size:13px;margin-top:6px">Les annonces que vous visitez apparaîtront ici</p>' +
+                '</div>';
+            } else {
+                ph.innerHTML = hist.slice(0, 10).map(function(a) {
+                    return '<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--brl)">' +
+                    '<span style="font-size:28px">' + a.e + '</span>' +
+                    '<div style="flex:1"><div style="font-weight:700;font-size:14px">' + a.t + '</div>' +
+                    '<div style="font-size:12px;color:var(--muted)">📍 ' + a.city + ' · ' + a.date + '</div></div>' +
+                    '<div style="font-weight:800;color:var(--or);font-size:14px">' + a.p.toLocaleString('fr-FR') + ' GNF</div>' +
+                    '</div>';
+                }).join('');
+            }
+        }
+
+        // Onglet Mes annonces
         var full = document.getElementById('d-ads-full');
         if (full)
             full.innerHTML = myAds.length
             ? myAds.map(dashRow).join('')
-            : '<div style="padding:32px;text-align:center;color:var(--muted)">Aucune annonce publiée.</div>';
-        var pays = DB.payments();
+            : '<div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:48px;text-align:center;color:var(--muted);box-shadow:var(--sh)">' +
+            '<div style="font-size:52px;margin-bottom:14px">📋</div>' +
+            '<p style="font-weight:800;font-size:16px;margin-bottom:8px">Aucune annonce publiée</p>' +
+            '<a onclick="goTo(\'post\')" style="color:var(--or);font-weight:800;cursor:pointer;font-size:14px">➕ Déposer ma première annonce →</a>' +
+            '</div>';
+
+        // Onglet Paiements
         var pl = document.getElementById('d-pay-list');
         if (pl) {
             if (!pays.length) {
                 pl.innerHTML = '<div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:48px;text-align:center;color:var(--muted);box-shadow:var(--sh)"><div style="font-size:52px;margin-bottom:14px">🟠</div><p style="font-weight:800;font-size:16px;margin-bottom:6px">Aucun paiement</p><p style="font-size:14px">Vos transactions Orange Money apparaîtront ici</p></div>';
-            }
-            else
+            } else {
                 pl.innerHTML = pays.map(function(p) {
                     return '<div class="dash-ad-row"><div style="font-size:30px">🟠</div><div style="flex:1"><div style="font-weight:800;font-size:14px">' + p.item + '</div><div style="font-size:12px;color:var(--muted)">📅 ' + p.date + ' · 🔑 ' + p.ref + '</div></div><div style="text-align:right"><div style="font-weight:800;font-size:16px;color:var(--or)">' + parseInt(p.amount).toLocaleString('fr-FR') + ' GNF</div><span class="badge badge-g">✅ Payé</span></div></div>';
                 }).join('');
+            }
         }
-        var favIds = DB.favs();
+
+        // Onglet Favoris
         var favAds = DB.ads().filter(function(a) {
             return favIds.includes(a.id);
         });
         var df = document.getElementById('d-favs');
         if (df)
-            df.innerHTML = favAds.length ? favAds.map(function(a) {
+            df.innerHTML = favAds.length
+            ? favAds.map(function(a) {
                 return adCard(a, false);
-            }).join('') : '<div style="grid-column:1/-1;background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:48px;text-align:center;color:var(--muted);box-shadow:var(--sh)"><div style="font-size:52px;margin-bottom:14px">❤️</div><p>Aucun favori</p></div>';
+            }).join('')
+            : '<div style="grid-column:1/-1;background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:48px;text-align:center;color:var(--muted);box-shadow:var(--sh)"><div style="font-size:52px;margin-bottom:14px">❤️</div><p>Aucun favori</p></div>';
     }
     function dashRow(a) {
         return '<div class="dash-ad-row"><div style="font-size:30px">' + a.e + '</div><div style="flex:1"><div style="font-weight:800;font-size:14px">' + a.t + '</div><div style="font-size:12px;color:var(--muted)">📍 ' + a.city + ' · 👁️ ' + a.views + ' vues · ' + a.date + '</div></div><div style="text-align:right"><div style="font-weight:800;font-size:16px;color:var(--or)">' + a.p.toLocaleString('fr-FR') + ' GNF</div><span class="badge badge-g">✅ Active</span></div></div>';
     }
     function showTab(tab) {
-        ['overview', 'ads', 'messages', 'payments', 'favs'].forEach(function(t) {
+        ['profil', 'ads', 'payments', 'favs'].forEach(function(t) {
             var el = document.getElementById('tab-' + t);
             if (el)
                 el.style.display = (t === tab ? 'block' : 'none');
         });
         document.querySelectorAll('.dash-nav a').forEach(function(a, i) {
-            a.classList.toggle('active', i === (['overview', 'ads', 'messages', 'payments', 'favs'].indexOf(tab)));
+            a.classList.toggle('active', i === (['profil', 'ads', 'payments', 'favs'].indexOf(tab)));
         });
     }
 
