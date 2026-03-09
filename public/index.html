@@ -3353,6 +3353,10 @@
                     // Ne pas écraser les ads avec un tableau vide
                     if (!parsed.ads || parsed.ads.length === 0)
                         delete parsed.ads;
+                    // Nettoyer les sessions "Utilisateur YouGouYou" fantômes
+                    if (parsed.user && (parsed.user.name === 'Utilisateur YouGouYou' || !parsed.user.name)) {
+                        parsed.user = null;
+                    }
                     this._d = Object.assign(this._d, parsed);
                 }
             } catch (e) {}
@@ -4217,16 +4221,29 @@
             toast('⚠️ Entrez votre mot de passe', 'err');
             return;
         }
-        var initials = id.substring(0, 2).toUpperCase();
-        DB.login({
-            name: 'Utilisateur YouGouYou',
-            phone: loginMode === 'phone' ? '+224 ' + id : '',
-            email: loginMode === 'email' ? id : '',
-            initials: initials
+
+        // Chercher l'utilisateur dans la base locale
+        var users = DB._d.users || [];
+        var fullId = loginMode === 'phone' ? ('+224' + id.replace(/\s/g, '')) : id.toLowerCase();
+        var found = users.find(function(u) {
+            var phoneMatch = u.phone && u.phone.replace(/\s/g, '') === fullId.replace(/\s/g, '');
+            var emailMatch = u.email && u.email.toLowerCase() === fullId;
+            return phoneMatch || emailMatch;
         });
+
+        if (!found) {
+            toast('❌ Compte introuvable — inscrivez-vous d\'abord', 'err');
+            return;
+        }
+        if (found.password && found.password !== pw) {
+            toast('❌ Mot de passe incorrect', 'err');
+            return;
+        }
+
+        DB.login(found);
         updateNav();
         closeModal('auth');
-        toast('✅ Connexion réussie !', 'ok');
+        toast('✅ Bienvenue ' + (found.prenom || found.name || '').split(' ')[0] + ' ! 🇬🇳', 'ok');
     }
     function logout() {
         DB.logout();
