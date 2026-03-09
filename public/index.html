@@ -3769,78 +3769,176 @@
         document.getElementById('auth-tt').textContent = isL ? 'Connexion' : 'Inscription';
         renderAuthForm(tab);
     }
+
     function renderAuthForm(tab) {
         var body = document.getElementById('auth-body');
         var gBtn = '<button class="g-btn" onclick="toast(\'🔄 Redirection Google...\')"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Continuer avec Google</button><div class="or-sep">ou</div>';
+
         if (tab === 'login') {
-            body.innerHTML = gBtn +
-            '<div class="fg"><label>Téléphone</label><div class="ph-row"><span class="ph-pfx">🇬🇳 +224</span><input type="tel" id="li" placeholder="620 00 00 00" style="flex:1"></div></div>' +
+            body.innerHTML = gBtn + // Toggle : connexion par téléphone OU email
+            '<div style="display:flex;background:var(--brl);border-radius:50px;padding:3px;margin-bottom:16px" id="login-toggle">' +
+            '<div id="lt-phone" style="flex:1;text-align:center;padding:8px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;background:var(--wh);box-shadow:var(--sh);color:var(--ink)" onclick="loginToggle(\'phone\')">📱 Téléphone</div>' +
+            '<div id="lt-email" style="flex:1;text-align:center;padding:8px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted)" onclick="loginToggle(\'email\')">📧 Email</div>' +
+            '</div>' +
+            '<div id="li-phone-wrap" class="fg"><label>Téléphone</label><div class="ph-row"><span class="ph-pfx">🇬🇳 +224</span><input type="tel" id="li-phone" placeholder="620 00 00 00" style="flex:1"></div></div>' +
+            '<div id="li-email-wrap" class="fg" style="display:none"><label>Adresse email</label><input type="email" id="li-email" placeholder="votre@email.com"></div>' +
             '<div class="fg"><label>Mot de passe</label><input type="password" id="lp" placeholder="••••••••"></div>' +
-            '<button class="btn btn-ink btn-full" style="border-radius:12px" onclick="doLogin()">Se connecter</button>' +
+            '<button class="btn btn-ink btn-full" style="border-radius:12px" onclick="doLogin()">Se connecter →</button>' +
             '<p style="text-align:center;font-size:13px;color:var(--muted);margin-top:14px">Pas de compte ? <a style="color:var(--or);cursor:pointer;font-weight:700" onclick="authTab(\'reg\')">S\'inscrire gratuitement</a></p>';
+
         } else {
+            // INSCRIPTION
             var opts = '<option value="">Choisir votre préfecture...</option>';
             ALL_CITIES.forEach(function(c) {
                 opts += '<option>' + c + '</option>';
             });
             body.innerHTML = gBtn +
             '<div class="frow"><div class="fg"><label>Prénom *</label><input type="text" id="rfn" placeholder="Prénom"></div><div class="fg"><label>Nom *</label><input type="text" id="rln" placeholder="Nom"></div></div>' +
-            '<div class="fg"><label>Téléphone Orange * <span style="color:var(--or);font-weight:800">(reçoit le SMS)</span></label>' +
-            '<div class="ph-row"><span class="ph-pfx">🇬🇳 +224</span><input type="tel" id="rph" placeholder="620 00 00 00" maxlength="9" style="flex:1"></div>' +
-            '<div class="f-hint">💡 Un code SMS de vérification sera envoyé à ce numéro</div></div>' +
-            '<div class="fg"><label>Email (optionnel)</label><input type="email" id="rem" placeholder="email@..."></div>' +
+            '<div class="fg"><label>Téléphone Orange *</label><div class="ph-row"><span class="ph-pfx">🇬🇳 +224</span><input type="tel" id="rph" placeholder="620 00 00 00" maxlength="9" style="flex:1"></div></div>' +
+            '<div class="fg"><label>Email</label><input type="email" id="rem" placeholder="votre@email.com"></div>' +
             '<div class="fg"><label>Mot de passe *</label><input type="password" id="rpw" placeholder="8 caractères minimum"></div>' +
-            '<div class="fg"><label>Votre préfecture / ville *</label><select id="rct">' + opts + '</select></div>' +
-            '<button class="btn btn-or btn-full" style="border-radius:12px" onclick="sendSMS()">📱 Recevoir mon code SMS →</button>' +
+            '<div class="fg"><label>Votre préfecture / ville *</label><select id="rct">' + opts + '</select></div>' + // Choix méthode de vérification
+            '<div style="margin-bottom:16px">' +
+            '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:9px">Vérification du compte via :</div>' +
+            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
+            '<div id="vm-sms" class="verify-method active" onclick="pickVerifyMethod(\'sms\')" style="border:2px solid var(--or);border-radius:var(--rads);padding:12px;text-align:center;cursor:pointer;background:var(--orl);transition:all .2s">' +
+            '<div style="font-size:22px;margin-bottom:5px">📱</div>' +
+            '<div style="font-size:13px;font-weight:800;color:var(--or2)">SMS</div>' +
+            '<div style="font-size:11px;color:var(--muted)">Code sur votre téléphone</div>' +
+            '</div>' +
+            '<div id="vm-email" class="verify-method" onclick="pickVerifyMethod(\'email\')" style="border:2px solid var(--br);border-radius:var(--rads);padding:12px;text-align:center;cursor:pointer;background:var(--wh);transition:all .2s">' +
+            '<div style="font-size:22px;margin-bottom:5px">📧</div>' +
+            '<div style="font-size:13px;font-weight:800;color:var(--muted)">Email</div>' +
+            '<div style="font-size:11px;color:var(--muted)">Code dans votre boite mail</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '<button class="btn btn-or btn-full" style="border-radius:12px" id="btn-sendcode" onclick="sendVerifCode()">📱 Recevoir le code SMS →</button>' +
             '<p style="text-align:center;font-size:13px;color:var(--muted);margin-top:14px">Déjà un compte ? <a style="color:var(--or);cursor:pointer;font-weight:700" onclick="authTab(\'login\')">Se connecter</a></p>';
         }
     }
-    function sendSMS() {
+
+    var verifyMethod = 'sms';
+    function pickVerifyMethod(m) {
+        verifyMethod = m;
+        var smsEl = document.getElementById('vm-sms');
+        var emEl = document.getElementById('vm-email');
+        var btn = document.getElementById('btn-sendcode');
+        if (smsEl) {
+            smsEl.style.border = '2px solid ' + (m === 'sms' ? 'var(--or)' : 'var(--br)');
+            smsEl.style.background = m === 'sms' ? 'var(--orl)' : 'var(--wh)';
+            smsEl.querySelector('div:nth-child(2)').style.color = m === 'sms' ? 'var(--or2)' : 'var(--muted)';
+        }
+        if (emEl) {
+            emEl.style.border = '2px solid ' + (m === 'email' ? 'var(--or)' : 'var(--br)');
+            emEl.style.background = m === 'email' ? 'var(--orl)' : 'var(--wh)';
+            emEl.querySelector('div:nth-child(2)').style.color = m === 'email' ? 'var(--or2)' : 'var(--muted)';
+        }
+        if (btn)
+            btn.textContent = m === 'sms' ? '📱 Recevoir le code SMS →' : '📧 Recevoir le code par email →';
+    }
+
+    var loginMode = 'phone';
+    function loginToggle(mode) {
+        loginMode = mode;
+        var pw = document.getElementById('li-phone-wrap');
+        var ew = document.getElementById('li-email-wrap');
+        var ltp = document.getElementById('lt-phone');
+        var lte = document.getElementById('lt-email');
+        var active = {
+            background: 'var(--wh)',
+            boxShadow: 'var(--sh)',
+            color: 'var(--ink)'
+        };
+        var inactive = {
+            background: 'transparent',
+            boxShadow: 'none',
+            color: 'var(--muted)'
+        };
+        if (pw)
+            pw.style.display = mode === 'phone' ? '' : 'none';
+        if (ew)
+            ew.style.display = mode === 'email' ? '' : 'none';
+        if (ltp)
+            Object.assign(ltp.style, mode === 'phone' ? active : inactive);
+        if (lte)
+            Object.assign(lte.style, mode === 'email' ? active : inactive);
+    }
+
+    function sendVerifCode() {
         var fn = (document.getElementById('rfn') || {
             value: ''
         }).value.trim();
         var ph = (document.getElementById('rph') || {
             value: ''
         }).value.trim();
+        var em = (document.getElementById('rem') || {
+            value: ''
+        }).value.trim();
         var pw = (document.getElementById('rpw') || {
             value: ''
         }).value.trim();
-        if (!fn || !ph || ph.length < 8) {
-            toast('⚠️ Remplissez prénom et téléphone (8 chiffres)', 'err');
+        if (!fn) {
+            toast('⚠️ Remplissez votre prénom', 'err');
+            return;
+        }
+        if (!ph || ph.length < 8) {
+            toast('⚠️ Téléphone invalide (8 chiffres min)', 'err');
+            return;
+        }
+        if (verifyMethod === 'email' && !em) {
+            toast('⚠️ Email requis pour la vérification par email', 'err');
             return;
         }
         if (!pw || pw.length < 6) {
-            toast('⚠️ Mot de passe trop court', 'err');
+            toast('⚠️ Mot de passe trop court (6 caractères min)', 'err');
             return;
         }
+
         smsCode = Math.floor(1000 + Math.random() * 9000).toString();
         pendingUser = {
             prenom: fn,
             nom: (document.getElementById('rln') || {
                 value: ''
             }).value.trim(),
-            phone: '+224 ' + ph,
-            email: (document.getElementById('rem') || {
-                value: ''
-            }).value,
+            phone: '+224' + ph,
+            email: em,
             password: pw,
             city: (document.getElementById('rct') || {
                 value: ''
             }).value,
+            method: verifyMethod,
             initials: (fn.charAt(0) + ((document.getElementById('rln') || {
                 value: ''
             }).value.trim().charAt(0) || '')).toUpperCase()
         };
+
+        var dest = verifyMethod === 'email' ? em : '+224 ' + ph;
+        var icon = verifyMethod === 'email' ? '📧' : '📱';
         var body = document.getElementById('auth-body');
-        body.innerHTML += '<div class="sms-wrap"><div class="sw-title">📱 Code envoyé !</div><div class="sw-sub">Numéro +224 ' + ph + ' — Code : <strong>' + smsCode + '</strong></div>' +
-        '<div class="sms-digits"><input type="text" maxlength="1" id="s1" oninput="movSms(this,\'s2\')"><input type="text" maxlength="1" id="s2" oninput="movSms(this,\'s3\')"><input type="text" maxlength="1" id="s3" oninput="movSms(this,\'s4\')"><input type="text" maxlength="1" id="s4"></div>' +
-        '<button class="btn btn-or btn-full" style="border-radius:12px;margin-bottom:10px" onclick="verifySMS()">✅ Vérifier et créer mon compte</button>' +
-        '<div class="sms-resend">Pas reçu ? <a onclick="toast(\'📱 Nouveau code envoyé !\',\'ok\')">Renvoyer</a></div></div>';
-        toast('📱 Code SMS (simulation) : ' + smsCode, 'ok');
+        // Affichage de la zone de code
+        body.innerHTML +=
+        '<div class="sms-wrap" id="code-box">' +
+        '<div class="sw-title">' + icon + ' Code envoyé !</div>' +
+        '<div class="sw-sub">Code de vérification envoyé à<br><strong>' + dest + '</strong>' +
+        (verifyMethod !== 'email' ? '<br><span style="font-size:11px;opacity:.7">(Simulation : <strong>' + smsCode + '</strong>)</span>' : '') +
+        '</div>' +
+        '<div class="sms-digits">' +
+        '<input type="text" maxlength="1" id="s1" oninput="movSms(this,\'s2\')" autocomplete="one-time-code">' +
+        '<input type="text" maxlength="1" id="s2" oninput="movSms(this,\'s3\')">' +
+        '<input type="text" maxlength="1" id="s3" oninput="movSms(this,\'s4\')">' +
+        '<input type="text" maxlength="1" id="s4">' +
+        '</div>' +
+        '<button class="btn btn-or btn-full" style="border-radius:12px;margin-bottom:10px" onclick="verifyCode()">✅ Confirmer et créer mon compte</button>' +
+        '<div class="sms-resend">Pas reçu ? <a onclick="resendCode()">Renvoyer le code</a></div>' +
+        '</div>';
+
+        toast(icon + ' Code ' + (verifyMethod === 'email' ? 'email' : 'SMS') + ' envoyé à ' + dest, 'ok');
         var s1 = document.getElementById('s1');
         if (s1)
             s1.focus();
     }
+
     function movSms(el, nid) {
         if (el.value.length >= 1) {
             var n = document.getElementById(nid);
@@ -3848,14 +3946,22 @@
                 n.focus();
         }
     }
-    function verifySMS() {
+
+    function resendCode() {
+        smsCode = Math.floor(1000 + Math.random() * 9000).toString();
+        toast('🔄 Nouveau code envoyé !', 'ok');
+
+    }
+    // En prod : appel /api/auth/resend-code
+
+    function verifyCode() {
         var entered = ['s1', 's2', 's3', 's4'].map(function(id) {
             return (document.getElementById(id) || {
                 value: ''
             }).value;
         }).join('');
         if (entered !== smsCode) {
-            toast('❌ Code incorrect', 'err');
+            toast('❌ Code incorrect — réessayez', 'err');
             return;
         }
         var u = Object.assign({
@@ -3865,22 +3971,40 @@
         DB.login(u);
         updateNav();
         closeModal('auth');
-        toast('🎉 Compte créé ! Bienvenue ' + pendingUser.prenom + ' 🇬🇳', 'ok');
+        toast('🎉 Bienvenue ' + pendingUser.prenom + ' ! Compte créé 🇬🇳', 'ok');
         pendingUser = null;
         smsCode = '';
     }
+
     function doLogin() {
-        var id = (document.getElementById('li') || {
+        var id = '';
+        if (loginMode === 'phone') {
+            id = (document.getElementById('li-phone') || {
+                value: ''
+            }).value.trim();
+        }
+        else {
+            id = (document.getElementById('li-email') || {
+                value: ''
+            }).value.trim();
+        }
+        var pw = (document.getElementById('lp') || {
             value: ''
         }).value.trim();
         if (!id) {
-            toast('⚠️ Entrez votre téléphone', 'err');
+            toast('⚠️ Remplissez votre ' + (loginMode === 'phone' ? 'téléphone' : 'email'), 'err');
             return;
         }
+        if (!pw) {
+            toast('⚠️ Entrez votre mot de passe', 'err');
+            return;
+        }
+        var initials = id.substring(0, 2).toUpperCase();
         DB.login({
-            name: 'Mohamed Diallo',
-            phone: '+224 ' + id,
-            initials: 'MD'
+            name: 'Utilisateur YouGouYou',
+            phone: loginMode === 'phone' ? '+224 ' + id : '',
+            email: loginMode === 'email' ? id : '',
+            initials: initials
         });
         updateNav();
         closeModal('auth');
