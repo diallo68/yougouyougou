@@ -4339,28 +4339,70 @@
             return;
         }
 
-        // Chercher l'utilisateur dans la base locale
-        var users = DB._d.users || [];
-        var fullId = loginMode === 'phone' ? ('+224' + id.replace(/\s/g, '')) : id.toLowerCase();
-        var found = users.find(function(u) {
-            var phoneMatch = u.phone && u.phone.replace(/\s/g, '') === fullId.replace(/\s/g, '');
-            var emailMatch = u.email && u.email.toLowerCase() === fullId;
-            return phoneMatch || emailMatch;
+        // Appel API → MongoDB
+        var btn = document.querySelector('#auth-body button[onclick="doLogin()"]');
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = '⏳ Connexion...';
+        }
+
+        fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                identifier: id,
+                password: pw
+            })
+        })
+        .then(function(r) {
+            return r.json();
+        })
+        .then(function(data) {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = 'Se connecter';
+            }
+            if (data.error || !data.user) {
+                toast('❌ ' + (data.error || 'Identifiants incorrects'), 'err');
+                return;
+            }
+            // Connecter avec les vraies données MongoDB (incluant role)
+            var u = data.user;
+            u.initials = ((u.prenom || u.name || 'U').charAt(0) + ((u.nom || '').charAt(0) || '')).toUpperCase();
+            DB.login(u);
+            // Sauvegarder aussi le token JWT si présent
+            if (data.token)
+                localStorage.setItem('ygy_token', data.token);
+            updateNav();
+            closeModal('auth');
+            toast('✅ Bienvenue ' + (u.prenom || u.name || '').split(' ')[0] + ' ! 🇬🇳', 'ok');
+        })
+        .catch(function() {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = 'Se connecter';
+            }
+            // Fallback localStorage si pas de réseau
+            var users = DB._d.users || [];
+            var fullId = loginMode === 'phone' ? ('+224' + id.replace(/\s/g, '')) : id.toLowerCase();
+            var found = users.find(function(u) {
+                return (u.phone && u.phone.replace(/\s/g, '') === fullId.replace(/\s/g, '')) || (u.email && u.email.toLowerCase() === fullId);
+            });
+            if (!found) {
+                toast('❌ Serveur indisponible — compte introuvable', 'err');
+                return;
+            }
+            if (found.password && found.password !== pw) {
+                toast('❌ Mot de passe incorrect', 'err');
+                return;
+            }
+            DB.login(found);
+            updateNav();
+            closeModal('auth');
+            toast('✅ Bienvenue ' + (found.prenom || found.name || '').split(' ')[0] + ' !', 'ok');
         });
-
-        if (!found) {
-            toast('❌ Compte introuvable — inscrivez-vous d\'abord', 'err');
-            return;
-        }
-        if (found.password && found.password !== pw) {
-            toast('❌ Mot de passe incorrect', 'err');
-            return;
-        }
-
-        DB.login(found);
-        updateNav();
-        closeModal('auth');
-        toast('✅ Bienvenue ' + (found.prenom || found.name || '').split(' ')[0] + ' ! 🇬🇳', 'ok');
     }
     function openEditProfile() {
         var u = DB.user();
