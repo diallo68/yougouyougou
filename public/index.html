@@ -4088,7 +4088,6 @@
             return;
         }
 
-        smsCode = Math.floor(1000 + Math.random() * 9000).toString();
         pendingUser = {
             prenom: fn,
             nom: (document.getElementById('rln') || {
@@ -4106,44 +4105,58 @@
             }).value.trim().charAt(0) || '')).toUpperCase()
         };
 
-        var dest = verifyMethod === 'email' ? em : '+224 ' + ph;
-        var icon = verifyMethod === 'email' ? '📧' : '📱';
-
-        // Tentative envoi via API backend
-        if (verifyMethod === 'email' && em) {
-            fetch('/api/auth/send-code', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    phone: '+224' + ph,
-                    email: em,
-                    method: 'email',
-                    prenom: fn
-                })
-            }).then(function(r) {
-                return r.json();
-            }).then(function(data) {
-                if (data.debug_code)
-                    smsCode = data.debug_code; // dev mode
-            }).catch(function() {});
+        // Désactiver le bouton pendant l'appel
+        var sendBtn = document.getElementById('btn-sendcode');
+        if (sendBtn) {
+            sendBtn.disabled = true;
+            sendBtn.textContent = '⏳ Envoi en cours...';
         }
 
-        var body = document.getElementById('auth-body');
-        // ⚠️ Affiche TOUJOURS le code à l'écran (mode actuel sans SMS réel)
-        var codeHint = verifyMethod === 'email'
-        ? '<div style="background:#FFF3EE;border:1.5px solid var(--orm);border-radius:10px;padding:12px;margin-bottom:10px;text-align:center">' +
-        '<div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">📧 Votre code de vérification</div>' +
-        '<div style="font-size:32px;font-weight:900;letter-spacing:8px;color:var(--or)">' + smsCode + '</div>' +
-        '<div style="font-size:11px;color:var(--muted);margin-top:4px">(En attente config email — copiez ce code)</div>' +
-        '</div>'
-        : '<div style="background:#FFF3EE;border:1.5px solid var(--orm);border-radius:10px;padding:12px;margin-bottom:10px;text-align:center">' +
-        '<div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">📱 Votre code SMS</div>' +
-        '<div style="font-size:32px;font-weight:900;letter-spacing:8px;color:var(--or)">' + smsCode + '</div>' +
-        '<div style="font-size:11px;color:var(--muted);margin-top:4px">(Mode simulation — copiez ce code)</div>' +
-        '</div>';
+        // Appel API → génère le code dans MongoDB
+        fetch('/api/auth/send-code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                phone: '+224' + ph,
+                email: em,
+                method: verifyMethod,
+                prenom: fn
+            })
+        })
+        .then(function(r) {
+            return r.json();
+        })
+        .then(function(data) {
+            if (sendBtn) {
+                sendBtn.disabled = false;
+            }
+            if (data.error) {
+                toast('❌ ' + data.error, 'err');
+                return;
+            }
+            // Utiliser le code du serveur (debug_code en mode dev, sinon code local affiché)
+            smsCode = data.debug_code || Math.floor(1000 + Math.random() * 9000).toString();
+            showCodeForm(verifyMethod === 'email' ? em : '+224 ' + ph, verifyMethod === 'email' ? '📧' : '📱');
+        })
+        .catch(function() {
+            if (sendBtn) {
+                sendBtn.disabled = false;
+            }
+            // Fallback : code local si pas de réseau
+            smsCode = Math.floor(1000 + Math.random() * 9000).toString();
+            showCodeForm(verifyMethod === 'email' ? em : '+224 ' + ph, verifyMethod === 'email' ? '📧' : '📱');
+        });
+    }
 
+    function showCodeForm(dest, icon) {
+        var body = document.getElementById('auth-body');
+        var codeHint = '<div style="background:#FFF3EE;border:1.5px solid var(--orm);border-radius:10px;padding:12px;margin-bottom:10px;text-align:center">' +
+        '<div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">' + icon + ' VOTRE CODE DE VÉRIFICATION</div>' +
+        '<div id="code-display" style="font-size:32px;font-weight:900;letter-spacing:8px;color:var(--or)">' + smsCode + '</div>' +
+        '<div style="font-size:11px;color:var(--muted);margin-top:4px">' + (icon === '📧' ? '(En attente config email — copiez ce code)' : '(Mode simulation — copiez ce code)') + '</div>' +
+        '</div>';
         body.innerHTML +=
         '<div class="sms-wrap" id="code-box">' +
         '<div class="sw-title">' + icon + ' Code de vérification</div>' +
@@ -4158,11 +4171,10 @@
         '<button class="btn btn-or btn-full" style="border-radius:12px;margin-bottom:10px" onclick="verifyCode()">✅ Confirmer et créer mon compte</button>' +
         '<div class="sms-resend">Code oublié ? <a onclick="resendCode()">Générer un nouveau code</a></div>' +
         '</div>';
-
         var s1 = document.getElementById('s1');
         if (s1)
             s1.focus();
-        // Pré-remplir les cases automatiquement pour faciliter le test
+        // Pré-remplir automatiquement
         setTimeout(function() {
             var digits = smsCode.split('');
             ['s1', 's2', 's3', 's4'].forEach(function(id, i) {
