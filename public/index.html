@@ -3965,11 +3965,11 @@
             '<div class="frow">' +
             '<div class="fg"><label>Prénom *</label><input type="text" id="rfn" placeholder="Prénom"></div>' +
             '<div class="fg"><label>Nom</label><input type="text" id="rln" placeholder="Nom"></div>' +
-            '</div>' + // Champ Téléphone (mode phone)
+            '</div>' + // Champ Téléphone (mode phone = obligatoire, mode email = optionnel)
             '<div class="fg" id="rph-wrap">' +
-            '<label>📱 Téléphone Orange *</label>' +
+            '<label id="rph-label">📱 Téléphone Orange *</label>' +
             '<div class="ph-row"><span class="ph-pfx">🇬🇳 +224</span><input type="tel" id="rph" placeholder="620 00 00 00" maxlength="9" style="flex:1"></div>' +
-            '</div>' + // Champ Email (mode email, caché par défaut)
+            '</div>' + // Champ Email (mode email = obligatoire, caché en mode phone)
             '<div class="fg" id="rem-wrap" style="display:none">' +
             '<label>📧 Adresse email *</label>' +
             '<input type="email" id="rem" placeholder="votre@email.com">' +
@@ -4013,6 +4013,7 @@
         regMode = mode;
         var phoneWrap = document.getElementById('rph-wrap');
         var emailWrap = document.getElementById('rem-wrap');
+        var phoneLabel = document.getElementById('rph-label');
         var rtPhone = document.getElementById('rt-phone');
         var rtEmail = document.getElementById('rt-email');
         var btn = document.getElementById('btn-sendcode');
@@ -4026,18 +4027,38 @@
             boxShadow: 'none',
             color: 'var(--muted)'
         };
-        if (phoneWrap)
-            phoneWrap.style.display = mode === 'phone' ? '' : 'none';
-        if (emailWrap)
-            emailWrap.style.display = mode === 'email' ? '' : 'none';
-        if (rtPhone)
-            Object.assign(rtPhone.style, mode === 'phone' ? activeStyle : inactiveStyle);
-        if (rtEmail)
-            Object.assign(rtEmail.style, mode === 'email' ? activeStyle : inactiveStyle);
-        // Synchroniser verifyMethod avec regMode
-        verifyMethod = mode === 'email' ? 'email' : 'sms';
-        if (btn)
-            btn.textContent = mode === 'email' ? '📧 Recevoir le code par email →' : '📱 Recevoir le code SMS →';
+
+        if (mode === 'phone') {
+            // Mode téléphone : téléphone obligatoire, email caché
+            if (phoneWrap)
+                phoneWrap.style.display = '';
+            if (phoneLabel)
+                phoneLabel.textContent = '📱 Téléphone Orange *';
+            if (emailWrap)
+                emailWrap.style.display = 'none';
+            if (rtPhone)
+                Object.assign(rtPhone.style, activeStyle);
+            if (rtEmail)
+                Object.assign(rtEmail.style, inactiveStyle);
+            verifyMethod = 'sms';
+            if (btn)
+                btn.textContent = '📱 Recevoir le code SMS →';
+        } else {
+            // Mode email : email obligatoire + téléphone optionnel
+            if (emailWrap)
+                emailWrap.style.display = '';
+            if (phoneWrap)
+                phoneWrap.style.display = '';
+            if (phoneLabel)
+                phoneLabel.textContent = '📱 Téléphone Orange (optionnel)';
+            if (rtPhone)
+                Object.assign(rtPhone.style, inactiveStyle);
+            if (rtEmail)
+                Object.assign(rtEmail.style, activeStyle);
+            verifyMethod = 'email';
+            if (btn)
+                btn.textContent = '📧 Recevoir le code par email →';
+        }
     }
 
     var verifyMethod = 'sms';
@@ -4141,10 +4162,8 @@
             nom: (document.getElementById('rln') || {
                 value: ''
             }).value.trim(),
-            phone: regMode === 'phone' ? '+224' + ph : '',
-            email: regMode === 'email' ? em : (document.getElementById('rem') || {
-                value: ''
-            }).value.trim(),
+            phone: ph ? '+224' + ph : '',
+            email: regMode === 'email' ? em : '',
             password: pw,
             city: city,
             method: regMode === 'email' ? 'email' : 'sms',
