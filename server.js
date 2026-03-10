@@ -198,11 +198,12 @@ app.post('/api/auth/send-code', async (req, res) => {
     const code   = Math.floor(1000 + Math.random() * 9000).toString();
     const expiry = new Date(Date.now() + 15 * 60 * 1000); // 15 min
 
-    await User.findOneAndUpdate(
-      { phone },
-      { verifyCode: code, codeExpiry: expiry, verifyMethod: method },
-      { upsert: true, new: true }
-    );
+    // Créer/mettre à jour le doc pending selon la méthode (phone OU email)
+    const query = method === 'email' && email ? { email: email.toLowerCase() } : { phone };
+    const update = { verifyCode: code, codeExpiry: expiry, method };
+    if (phone) update.phone = phone;
+    if (email) update.email = email.toLowerCase();
+    await User.findOneAndUpdate(query, update, { upsert: true, new: true });
 
     if (method === 'sms') {
       // 🔧 En prod : appeler l'API SMS Orange Guinée ici
@@ -229,10 +230,13 @@ app.post('/api/auth/send-code', async (req, res) => {
 app.post('/api/register', async (req, res) => {
   try {
     const { prenom, nom, phone, email, password, city, code, method = 'sms' } = req.body;
-    if (!prenom || !phone || !password || !code)
-      return res.status(400).json({ error: 'Champs requis : prenom, phone, password, code' });
+    if (!prenom || !password || !code)
+      return res.status(400).json({ error: 'Champs requis : prenom, password, code' });
 
-    const pending = await User.findOne({ phone });
+    // Chercher le document pending par téléphone OU email
+    let pending = null;
+    if (phone) pending = await User.findOne({ phone });
+    if (!pending && email) pending = await User.findOne({ email: email.toLowerCase() });
     if (!pending)
       return res.status(400).json({ error: "Aucune demande pour ce numéro — demandez un code d'abord" });
     if (pending.verified)
@@ -243,17 +247,21 @@ app.post('/api/register', async (req, res) => {
       return res.status(400).json({ error: 'Code expiré (15 min) — demandez un nouveau code' });
 
     const hashed = await bcrypt.hash(password, 10);
+    const query = phone ? { phone } : { email: email.toLowerCase() };
     const user = await User.findOneAndUpdate(
-      { phone },
-      { prenom, nom, phone, email: email || '', password: hashed, city,
-        verified: true, verifyMethod: method, verifyCode: null, codeExpiry: null },
+      query,
+      { prenom, nom: nom||'', phone: phone||'', email: (email||'').toLowerCase(),
+        password: hashed, city: city||'',
+        verified: true, method, verifyCode: null, codeExpiry: null },
       { upsert: true, new: true }
     );
 
     const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '30d' });
     res.json({
       success: true, token,
-      user: { id: user._id, name: `${prenom} ${nom||''}`.trim(), phone, email, city, role: user.role },
+      user: { id: user._id, name: `${prenom} ${nom||''}`.trim(),
+              prenom, nom: nom||'', phone: phone||'', email: (email||'').toLowerCase(),
+              city: city||'', role: user.role },
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -267,9 +275,13 @@ app.post('/api/login', async (req, res) => {
     if (!identifier || !password)
       return res.status(400).json({ error: "Identifiant et mot de passe requis" });
 
-    // Recherche par téléphone OU par email
+    // Recherche par téléphone OU par email (avec ou sans +224)
+    const phoneVariants = [identifier, '+224'+identifier.replace(/^\+224/,''), identifier.replace(/^\+224/,'')];
     const user = await User.findOne({
-      $or: [{ phone: identifier }, { email: identifier.toLowerCase() }]
+      $or: [
+        { phone: { $in: phoneVariants } },
+        { email: identifier.toLowerCase() }
+      ]
     });
     if (!user)
       return res.status(400).json({ error: "Compte introuvable — vérifiez votre numéro ou email" });
