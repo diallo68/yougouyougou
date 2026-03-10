@@ -3925,7 +3925,8 @@
     //  AUTH + SMS
     // ══════════════════════════════════════════
     var pendingUser = null,
-        smsCode = '';
+        smsCode = '',
+        codeFromServer = false;
     function authTab(tab) {
         var isL = (tab === 'login');
         document.getElementById('mtab-login').classList.toggle('active', isL);
@@ -3951,36 +3952,38 @@
             '<p style="text-align:center;font-size:13px;color:var(--muted);margin-top:14px">Pas de compte ? <a style="color:var(--or);cursor:pointer;font-weight:700" onclick="authTab(\'reg\')">S\'inscrire gratuitement</a></p>';
 
         } else {
-            // INSCRIPTION
+            // INSCRIPTION — 2 modes : Téléphone OU Email
             var opts = '<option value="">Choisir votre préfecture...</option>';
             ALL_CITIES.forEach(function(c) {
                 opts += '<option>' + c + '</option>';
             });
-            body.innerHTML = gBtn +
-            '<div class="frow"><div class="fg"><label>Prénom *</label><input type="text" id="rfn" placeholder="Prénom"></div><div class="fg"><label>Nom *</label><input type="text" id="rln" placeholder="Nom"></div></div>' +
-            '<div class="fg"><label>Téléphone Orange *</label><div class="ph-row"><span class="ph-pfx">🇬🇳 +224</span><input type="tel" id="rph" placeholder="620 00 00 00" maxlength="9" style="flex:1"></div></div>' +
-            '<div class="fg"><label>Email</label><input type="email" id="rem" placeholder="votre@email.com"></div>' +
+            body.innerHTML = gBtn + // Toggle mode inscription
+            '<div style="display:flex;background:var(--brl);border-radius:50px;padding:3px;margin-bottom:20px">' +
+            '<div id="rt-phone" style="flex:1;text-align:center;padding:9px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;background:var(--wh);box-shadow:var(--sh);color:var(--ink);transition:all .2s" onclick="regToggle(\'phone\')">📱 Téléphone</div>' +
+            '<div id="rt-email" style="flex:1;text-align:center;padding:9px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted);transition:all .2s" onclick="regToggle(\'email\')">📧 Email</div>' +
+            '</div>' + // Prénom + Nom
+            '<div class="frow">' +
+            '<div class="fg"><label>Prénom *</label><input type="text" id="rfn" placeholder="Prénom"></div>' +
+            '<div class="fg"><label>Nom</label><input type="text" id="rln" placeholder="Nom"></div>' +
+            '</div>' + // Champ Téléphone (mode phone)
+            '<div class="fg" id="rph-wrap">' +
+            '<label>📱 Téléphone Orange *</label>' +
+            '<div class="ph-row"><span class="ph-pfx">🇬🇳 +224</span><input type="tel" id="rph" placeholder="620 00 00 00" maxlength="9" style="flex:1"></div>' +
+            '</div>' + // Champ Email (mode email, caché par défaut)
+            '<div class="fg" id="rem-wrap" style="display:none">' +
+            '<label>📧 Adresse email *</label>' +
+            '<input type="email" id="rem" placeholder="votre@email.com">' +
+            '</div>' + // Mot de passe
             '<div class="fg"><label>Mot de passe *</label><input type="password" id="rpw" placeholder="8 caractères minimum" oninput="checkPwMatch()"></div>' +
             '<div class="fg"><label>Confirmer le mot de passe *</label><input type="password" id="rpw2" placeholder="Répétez votre mot de passe" oninput="checkPwMatch()"></div>' +
-            '<div id="pw-match-msg" style="margin-top:-10px;margin-bottom:12px;font-size:13px;font-weight:700;display:none"></div>' +
-            '<div class="fg"><label>Votre préfecture / ville *</label><select id="rct">' + opts + '</select></div>' + // Choix méthode de vérification
-            '<div style="margin-bottom:16px">' +
-            '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:9px">Vérification du compte via :</div>' +
-            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
-            '<div id="vm-sms" class="verify-method active" onclick="pickVerifyMethod(\'sms\')" style="border:2px solid var(--or);border-radius:var(--rads);padding:12px;text-align:center;cursor:pointer;background:var(--orl);transition:all .2s">' +
-            '<div style="font-size:22px;margin-bottom:5px">📱</div>' +
-            '<div style="font-size:13px;font-weight:800;color:var(--or2)">SMS</div>' +
-            '<div style="font-size:11px;color:var(--muted)">Code sur votre téléphone</div>' +
-            '</div>' +
-            '<div id="vm-email" class="verify-method" onclick="pickVerifyMethod(\'email\')" style="border:2px solid var(--br);border-radius:var(--rads);padding:12px;text-align:center;cursor:pointer;background:var(--wh);transition:all .2s">' +
-            '<div style="font-size:22px;margin-bottom:5px">📧</div>' +
-            '<div style="font-size:13px;font-weight:800;color:var(--muted)">Email</div>' +
-            '<div style="font-size:11px;color:var(--muted)">Code dans votre boite mail</div>' +
-            '</div>' +
-            '</div>' +
-            '</div>' +
+            '<div id="pw-match-msg" style="margin-top:-10px;margin-bottom:12px;font-size:13px;font-weight:700;display:none"></div>' + // Ville
+            '<div class="fg"><label>📍 Préfecture / Ville *</label><select id="rct">' + opts + '</select></div>' + // Bouton envoyer
             '<button class="btn btn-or btn-full" style="border-radius:12px" id="btn-sendcode" onclick="sendVerifCode()">📱 Recevoir le code SMS →</button>' +
             '<p style="text-align:center;font-size:13px;color:var(--muted);margin-top:14px">Déjà un compte ? <a style="color:var(--or);cursor:pointer;font-weight:700" onclick="authTab(\'login\')">Se connecter</a></p>';
+
+            // Mode actif par défaut = téléphone → vérification SMS
+            regMode = 'phone';
+            verifyMethod = 'sms';
         }
     }
 
@@ -4002,6 +4005,39 @@
             msg.textContent = '❌ Les mots de passe ne correspondent pas';
             msg.style.color = '#DC2626';
         }
+    }
+
+    var regMode = 'phone'; // 'phone' ou 'email'
+
+    function regToggle(mode) {
+        regMode = mode;
+        var phoneWrap = document.getElementById('rph-wrap');
+        var emailWrap = document.getElementById('rem-wrap');
+        var rtPhone = document.getElementById('rt-phone');
+        var rtEmail = document.getElementById('rt-email');
+        var btn = document.getElementById('btn-sendcode');
+        var activeStyle = {
+            background: 'var(--wh)',
+            boxShadow: 'var(--sh)',
+            color: 'var(--ink)'
+        };
+        var inactiveStyle = {
+            background: 'transparent',
+            boxShadow: 'none',
+            color: 'var(--muted)'
+        };
+        if (phoneWrap)
+            phoneWrap.style.display = mode === 'phone' ? '' : 'none';
+        if (emailWrap)
+            emailWrap.style.display = mode === 'email' ? '' : 'none';
+        if (rtPhone)
+            Object.assign(rtPhone.style, mode === 'phone' ? activeStyle : inactiveStyle);
+        if (rtEmail)
+            Object.assign(rtEmail.style, mode === 'email' ? activeStyle : inactiveStyle);
+        // Synchroniser verifyMethod avec regMode
+        verifyMethod = mode === 'email' ? 'email' : 'sms';
+        if (btn)
+            btn.textContent = mode === 'email' ? '📧 Recevoir le code par email →' : '📱 Recevoir le code SMS →';
     }
 
     var verifyMethod = 'sms';
@@ -4064,27 +4100,39 @@
         var pw = (document.getElementById('rpw') || {
             value: ''
         }).value.trim();
+        var pw2 = (document.getElementById('rpw2') || {
+            value: ''
+        }).value.trim();
+        var city = (document.getElementById('rct') || {
+            value: ''
+        }).value;
+
         if (!fn) {
             toast('⚠️ Remplissez votre prénom', 'err');
             return;
         }
-        if (!ph || ph.length < 8) {
-            toast('⚠️ Téléphone invalide (8 chiffres min)', 'err');
-            return;
-        }
-        if (verifyMethod === 'email' && !em) {
-            toast('⚠️ Entrez votre adresse email', 'err');
-            return;
+        // Validation selon le mode choisi
+        if (regMode === 'phone') {
+            if (!ph || ph.length < 8) {
+                toast('⚠️ Numéro de téléphone invalide (8 chiffres min)', 'err');
+                return;
+            }
+        } else {
+            if (!em || !em.includes('@')) {
+                toast('⚠️ Adresse email invalide', 'err');
+                return;
+            }
         }
         if (!pw || pw.length < 6) {
-            toast('⚠️ Mot de passe trop court (6 min)', 'err');
+            toast('⚠️ Mot de passe trop court (6 caractères min)', 'err');
             return;
         }
-        var pw2 = (document.getElementById('rpw2') || {
-            value: ''
-        }).value.trim();
         if (pw !== pw2) {
             toast('❌ Les mots de passe ne correspondent pas', 'err');
+            return;
+        }
+        if (!city) {
+            toast('⚠️ Choisissez votre ville', 'err');
             return;
         }
 
@@ -4093,13 +4141,13 @@
             nom: (document.getElementById('rln') || {
                 value: ''
             }).value.trim(),
-            phone: '+224' + ph,
-            email: em,
-            password: pw,
-            city: (document.getElementById('rct') || {
+            phone: regMode === 'phone' ? '+224' + ph : '',
+            email: regMode === 'email' ? em : (document.getElementById('rem') || {
                 value: ''
-            }).value,
-            method: verifyMethod,
+            }).value.trim(),
+            password: pw,
+            city: city,
+            method: regMode === 'email' ? 'email' : 'sms',
             initials: (fn.charAt(0) + ((document.getElementById('rln') || {
                 value: ''
             }).value.trim().charAt(0) || '')).toUpperCase()
@@ -4113,6 +4161,21 @@
         }
 
         // Appel API → génère le code dans MongoDB
+        // Appel API avec timeout de 5 secondes
+        var apiDone = false;
+        var timeout = setTimeout(function() {
+            if (!apiDone) {
+                apiDone = true;
+                if (sendBtn) {
+                    sendBtn.disabled = false;
+                    sendBtn.textContent = verifyMethod === 'sms' ? '📱 Recevoir le code SMS →' : '📧 Recevoir le code par email →';
+                }
+                smsCode = Math.floor(1000 + Math.random() * 9000).toString();
+                codeFromServer = false;
+                showCodeForm(verifyMethod === 'email' ? em : '+224 ' + ph, verifyMethod === 'email' ? '📧' : '📱');
+            }
+        }, 5000);
+
         fetch('/api/auth/send-code', {
             method: 'POST',
             headers: {
@@ -4129,6 +4192,10 @@
             return r.json();
         })
         .then(function(data) {
+            if (apiDone)
+                return;
+            apiDone = true;
+            clearTimeout(timeout);
             if (sendBtn) {
                 sendBtn.disabled = false;
                 sendBtn.textContent = verifyMethod === 'sms' ? '📱 Recevoir le code SMS →' : '📧 Recevoir le code par email →';
@@ -4137,19 +4204,22 @@
                 toast('❌ ' + data.error, 'err');
                 return;
             }
-            // Utiliser le code du serveur (toujours présent dans debug_code)
             smsCode = data.debug_code || Math.floor(1000 + Math.random() * 9000).toString();
+            codeFromServer = !!data.debug_code;
             showCodeForm(verifyMethod === 'email' ? em : '+224 ' + ph, verifyMethod === 'email' ? '📧' : '📱');
         })
         .catch(function() {
+            if (apiDone)
+                return;
+            apiDone = true;
+            clearTimeout(timeout);
             if (sendBtn) {
                 sendBtn.disabled = false;
                 sendBtn.textContent = verifyMethod === 'sms' ? '📱 Recevoir le code SMS →' : '📧 Recevoir le code par email →';
             }
-            // Fallback : code local si pas de réseau
             smsCode = Math.floor(1000 + Math.random() * 9000).toString();
+            codeFromServer = false;
             showCodeForm(verifyMethod === 'email' ? em : '+224 ' + ph, verifyMethod === 'email' ? '📧' : '📱');
-            toast('⚠️ Serveur indisponible — code local généré', 'ok');
         });
     }
 
@@ -4250,55 +4320,68 @@
             name: pendingUser.prenom + (pendingUser.nom ? ' ' + pendingUser.nom : '')
         }, pendingUser);
 
-        // Enregistrer dans MongoDB via l'API backend
-        fetch('/api/register', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                prenom: pendingUser.prenom,
-                nom: pendingUser.nom || '',
-                phone: pendingUser.phone,
-                email: pendingUser.email || '',
-                password: pendingUser.password,
-                city: pendingUser.city || '',
-                code: entered,
-                method: pendingUser.method || 'sms'
+        // Si code vient du serveur → enregistrer dans MongoDB
+        if (codeFromServer) {
+            fetch('/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    prenom: pendingUser.prenom,
+                    nom: pendingUser.nom || '',
+                    phone: pendingUser.phone,
+                    email: pendingUser.email || '',
+                    password: pendingUser.password,
+                    city: pendingUser.city || '',
+                    code: entered,
+                    method: pendingUser.method || 'sms'
+                })
             })
-        })
-        .then(function(r) {
-            return r.json();
-        })
-        .then(function(data) {
-            if (data.error) {
-                toast('❌ ' + (data.error), 'err');
-                return;
-            }
-            // Succès MongoDB : connecter avec les vraies données
-            var serverUser = data.user || u;
-            serverUser.initials = ((serverUser.prenom || u.prenom || 'U').charAt(0) + ((serverUser.nom || u.nom || '').charAt(0) || '')).toUpperCase();
-            serverUser.name = serverUser.name || (serverUser.prenom + (serverUser.nom ? ' ' + serverUser.nom : ''));
-            if (data.token)
-                localStorage.setItem('ygy_token', data.token);
-            DB.addUser(serverUser);
-            DB.login(serverUser);
+            .then(function(r) {
+                return r.json();
+            })
+            .then(function(data) {
+                if (data.error) {
+                    toast('❌ ' + (data.error), 'err');
+                    return;
+                }
+                var serverUser = data.user || u;
+                serverUser.initials = ((serverUser.prenom || u.prenom || 'U').charAt(0) + ((serverUser.nom || u.nom || '').charAt(0) || '')).toUpperCase();
+                serverUser.name = serverUser.name || (serverUser.prenom + (serverUser.nom ? ' ' + serverUser.nom : ''));
+                if (data.token)
+                    localStorage.setItem('ygy_token', data.token);
+                DB.addUser(serverUser);
+                DB.login(serverUser);
+                updateNav();
+                closeModal('auth');
+                toast('🎉 Bienvenue ' + u.prenom + ' ! Compte créé 🇬🇳', 'ok');
+                pendingUser = null;
+                smsCode = '';
+                codeFromServer = false;
+            })
+            .catch(function() {
+                DB.addUser(u);
+                DB.login(u);
+                updateNav();
+                closeModal('auth');
+                toast('🎉 Bienvenue ' + u.prenom + ' ! (mode hors-ligne)', 'ok');
+                pendingUser = null;
+                smsCode = '';
+                codeFromServer = false;
+            });
+        } else {
+            // Mode hors-ligne : sauvegarder localement seulement
+            u.initials = (u.prenom.charAt(0) + (u.nom ? u.nom.charAt(0) : '')).toUpperCase();
+            DB.addUser(u);
+            DB.login(u);
             updateNav();
             closeModal('auth');
             toast('🎉 Bienvenue ' + u.prenom + ' ! Compte créé 🇬🇳', 'ok');
             pendingUser = null;
             smsCode = '';
-        })
-        .catch(function() {
-            // Fallback localStorage si serveur indisponible
-            DB.addUser(u);
-            DB.login(u);
-            updateNav();
-            closeModal('auth');
-            toast('🎉 Bienvenue ' + u.prenom + ' ! (mode hors-ligne)', 'ok');
-            pendingUser = null;
-            smsCode = '';
-        });
+            codeFromServer = false;
+        }
     }
 
     // ══════════════════════════════════════════
