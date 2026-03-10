@@ -2033,9 +2033,15 @@
         <!-- HERO -->
         <section class="hero">
             <div class="fade-up">
-                <div class="hero-kicker">
-                    <span class="dot"></span>
-                     Marketplace N°1 de Guinée
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+                    <div class="hero-kicker">
+                        <span class="dot"></span>
+                        <span id="hero-greet">Marketplace N°1 de Guinée</span>
+                    </div>
+                    <div style="display:flex;gap:6px;align-items:center">
+                        <button onclick="setLang('fr')" id="lang-fr" style="background:var(--or);color:#fff;border:none;border-radius:50px;padding:5px 12px;font-size:11px;font-weight:800;cursor:pointer;transition:all .2s">🇫🇷 FR</button>
+                        <button onclick="setLang('en')" id="lang-en" style="background:var(--brl);color:var(--muted);border:none;border-radius:50px;padding:5px 12px;font-size:11px;font-weight:800;cursor:pointer;transition:all .2s">🇬🇧 EN</button>
+                    </div>
                 </div>
                 <h1>
                     Le marché de
@@ -2085,6 +2091,7 @@
                             <option>Vacances & Tourisme</option>
                             <option>Cuisine & Traiteur</option>
                             <option>Aide à domicile</option>
+                            <option>Services</option>
                             <option>Autres</option>
                             <option>Maison & Jardin</option>
                             <option>Loisirs</option>
@@ -2957,2270 +2964,1271 @@
     // ══════════════════════════════════════════
     //  DONNÉES
     // ══════════════════════════════════════════
-    var ALL_CITIES = ['Beyla', 'Boké', 'Boffa', 'Conakry', 'Coyah', 'Dabola', 'Dalaba', 'Dinguiraye', 'Dubréka', 'Faranah', 'Forécariah', 'Fria', 'Gaoual', 'Guéckédou', 'Kankan', 'Kérouané', 'Kindia', 'Kissidougou', 'Koubia', 'Koundara', 'Kouroussa', 'Labé', 'Lélouma', 'Lola', 'Macenta', 'Mali', 'Mamou', 'Mandiana', 'N\'Zérékoré', 'Pita', 'Siguiri', 'Télimélé', 'Tougué', 'Yomou'];
+    var ALL_CITIES=['Beyla','Boké','Boffa','Conakry','Coyah','Dabola','Dalaba','Dinguiraye','Dubréka','Faranah','Forécariah','Fria','Gaoual','Guéckédou','Kankan','Kérouané','Kindia','Kissidougou','Koubia','Koundara','Kouroussa','Labé','Lélouma','Lola','Macenta','Mali','Mamou','Mandiana','N\'Zérékoré','Pita','Siguiri','Télimélé','Tougué','Yomou'];
 
-    var REGIONS = [
-    {
-        n: 'Conakry',
-        lat: 9.6412,
-        lng: -13.5784,
-        col: '#FF5C00',
-        ads: 456,
-        pop: '2.5M'
-    },
-    {
-        n: 'Boké',
-        lat: 10.9328,
-        lng: -14.2896,
-        col: '#16A34A',
-        ads: 89,
-        pop: '1.1M'
-    },
-    {
-        n: 'Kindia',
-        lat: 10.0573,
-        lng: -12.8658,
-        col: '#2563EB',
-        ads: 134,
-        pop: '1.6M'
-    },
-    {
-        n: 'Mamou',
-        lat: 10.3762,
-        lng: -12.0825,
-        col: '#7C3AED',
-        ads: 76,
-        pop: '940K'
-    },
-    {
-        n: 'Labé',
-        lat: 11.3241,
-        lng: -12.2833,
-        col: '#DB2777',
-        ads: 98,
-        pop: '1.0M'
-    },
-    {
-        n: 'Faranah',
-        lat: 10.0418,
-        lng: -10.7469,
-        col: '#D97706',
-        ads: 54,
-        pop: '950K'
-    },
-    {
-        n: 'Kankan',
-        lat: 10.3839,
-        lng: -9.3028,
-        col: '#DC2626',
-        ads: 112,
-        pop: '1.8M'
-    },
-    {
-        n: "N'Zérékoré",
-        lat: 7.7562,
-        lng: -8.8195,
-        col: '#0891B2',
-        ads: 87,
-        pop: '1.7M'
-    },
+    var REGIONS=[
+      {n:'Conakry',lat:9.6412,lng:-13.5784,col:'#FF5C00',ads:456,pop:'2.5M'},
+      {n:'Boké',lat:10.9328,lng:-14.2896,col:'#16A34A',ads:89,pop:'1.1M'},
+      {n:'Kindia',lat:10.0573,lng:-12.8658,col:'#2563EB',ads:134,pop:'1.6M'},
+      {n:'Mamou',lat:10.3762,lng:-12.0825,col:'#7C3AED',ads:76,pop:'940K'},
+      {n:'Labé',lat:11.3241,lng:-12.2833,col:'#DB2777',ads:98,pop:'1.0M'},
+      {n:'Faranah',lat:10.0418,lng:-10.7469,col:'#D97706',ads:54,pop:'950K'},
+      {n:'Kankan',lat:10.3839,lng:-9.3028,col:'#DC2626',ads:112,pop:'1.8M'},
+      {n:"N'Zérékoré",lat:7.7562,lng:-8.8195,col:'#0891B2',ads:87,pop:'1.7M'},
     ];
 
-    var PREFS = [
-    {
-        n: 'Conakry',
-        lat: 9.641,
-        lng: -13.578,
-        r: 'Conakry',
-        ads: 456
-    },
-    {
-        n: 'Boké',
-        lat: 10.933,
-        lng: -14.290,
-        r: 'Boké',
-        ads: 45
-    }, {
-        n: 'Boffa',
-        lat: 10.183,
-        lng: -14.033,
-        r: 'Boké',
-        ads: 18
-    },
-    {
-        n: 'Fria',
-        lat: 10.367,
-        lng: -13.550,
-        r: 'Boké',
-        ads: 12
-    }, {
-        n: 'Gaoual',
-        lat: 11.750,
-        lng: -13.200,
-        r: 'Boké',
-        ads: 7
-    },
-    {
-        n: 'Koundara',
-        lat: 12.483,
-        lng: -13.300,
-        r: 'Boké',
-        ads: 5
-    }, {
-        n: 'Télimélé',
-        lat: 10.900,
-        lng: -13.033,
-        r: 'Boké',
-        ads: 8
-    },
-    {
-        n: 'Kindia',
-        lat: 10.057,
-        lng: -12.866,
-        r: 'Kindia',
-        ads: 78
-    }, {
-        n: 'Coyah',
-        lat: 9.700,
-        lng: -13.383,
-        r: 'Kindia',
-        ads: 32
-    },
-    {
-        n: 'Dubréka',
-        lat: 9.790,
-        lng: -13.513,
-        r: 'Kindia',
-        ads: 15
-    }, {
-        n: 'Forécariah',
-        lat: 9.433,
-        lng: -13.100,
-        r: 'Kindia',
-        ads: 9
-    },
-    {
-        n: 'Mamou',
-        lat: 10.376,
-        lng: -12.083,
-        r: 'Mamou',
-        ads: 48
-    }, {
-        n: 'Dalaba',
-        lat: 10.687,
-        lng: -12.250,
-        r: 'Mamou',
-        ads: 17
-    },
-    {
-        n: 'Pita',
-        lat: 11.067,
-        lng: -12.400,
-        r: 'Mamou',
-        ads: 11
-    },
-    {
-        n: 'Labé',
-        lat: 11.324,
-        lng: -12.283,
-        r: 'Labé',
-        ads: 62
-    }, {
-        n: 'Mali',
-        lat: 12.083,
-        lng: -12.300,
-        r: 'Labé',
-        ads: 8
-    },
-    {
-        n: 'Koubia',
-        lat: 11.583,
-        lng: -11.883,
-        r: 'Labé',
-        ads: 6
-    }, {
-        n: 'Lélouma',
-        lat: 11.350,
-        lng: -12.500,
-        r: 'Labé',
-        ads: 9
-    },
-    {
-        n: 'Tougué',
-        lat: 11.450,
-        lng: -11.667,
-        r: 'Labé',
-        ads: 5
-    },
-    {
-        n: 'Faranah',
-        lat: 10.042,
-        lng: -10.747,
-        r: 'Faranah',
-        ads: 28
-    }, {
-        n: 'Dabola',
-        lat: 10.750,
-        lng: -11.117,
-        r: 'Faranah',
-        ads: 12
-    },
-    {
-        n: 'Dinguiraye',
-        lat: 11.300,
-        lng: -10.717,
-        r: 'Faranah',
-        ads: 8
-    }, {
-        n: 'Kissidougou',
-        lat: 9.183,
-        lng: -10.100,
-        r: 'Faranah',
-        ads: 6
-    },
-    {
-        n: 'Kankan',
-        lat: 10.384,
-        lng: -9.303,
-        r: 'Kankan',
-        ads: 67
-    }, {
-        n: 'Siguiri',
-        lat: 11.417,
-        lng: -9.167,
-        r: 'Kankan',
-        ads: 22
-    },
-    {
-        n: 'Kouroussa',
-        lat: 10.650,
-        lng: -9.883,
-        r: 'Kankan',
-        ads: 11
-    }, {
-        n: 'Mandiana',
-        lat: 10.617,
-        lng: -8.667,
-        r: 'Kankan',
-        ads: 8
-    },
-    {
-        n: "Kérouané",
-        lat: 9.267,
-        lng: -9.017,
-        r: 'Kankan',
-        ads: 4
-    },
-    {
-        n: "N'Zérékoré",
-        lat: 7.756,
-        lng: -8.820,
-        r: "N'Zérékoré",
-        ads: 52
-    }, {
-        n: 'Beyla',
-        lat: 8.683,
-        lng: -8.633,
-        r: "N'Zérékoré",
-        ads: 11
-    },
-    {
-        n: 'Guéckédou',
-        lat: 8.550,
-        lng: -10.133,
-        r: "N'Zérékoré",
-        ads: 9
-    }, {
-        n: 'Lola',
-        lat: 7.817,
-        lng: -8.533,
-        r: "N'Zérékoré",
-        ads: 7
-    },
-    {
-        n: 'Macenta',
-        lat: 8.467,
-        lng: -9.467,
-        r: "N'Zérékoré",
-        ads: 6
-    }, {
-        n: 'Yomou',
-        lat: 7.567,
-        lng: -9.250,
-        r: "N'Zérékoré",
-        ads: 2
-    },
+    var PREFS=[
+      {n:'Conakry',lat:9.641,lng:-13.578,r:'Conakry',ads:456},
+      {n:'Boké',lat:10.933,lng:-14.290,r:'Boké',ads:45},{n:'Boffa',lat:10.183,lng:-14.033,r:'Boké',ads:18},
+      {n:'Fria',lat:10.367,lng:-13.550,r:'Boké',ads:12},{n:'Gaoual',lat:11.750,lng:-13.200,r:'Boké',ads:7},
+      {n:'Koundara',lat:12.483,lng:-13.300,r:'Boké',ads:5},{n:'Télimélé',lat:10.900,lng:-13.033,r:'Boké',ads:8},
+      {n:'Kindia',lat:10.057,lng:-12.866,r:'Kindia',ads:78},{n:'Coyah',lat:9.700,lng:-13.383,r:'Kindia',ads:32},
+      {n:'Dubréka',lat:9.790,lng:-13.513,r:'Kindia',ads:15},{n:'Forécariah',lat:9.433,lng:-13.100,r:'Kindia',ads:9},
+      {n:'Mamou',lat:10.376,lng:-12.083,r:'Mamou',ads:48},{n:'Dalaba',lat:10.687,lng:-12.250,r:'Mamou',ads:17},
+      {n:'Pita',lat:11.067,lng:-12.400,r:'Mamou',ads:11},
+      {n:'Labé',lat:11.324,lng:-12.283,r:'Labé',ads:62},{n:'Mali',lat:12.083,lng:-12.300,r:'Labé',ads:8},
+      {n:'Koubia',lat:11.583,lng:-11.883,r:'Labé',ads:6},{n:'Lélouma',lat:11.350,lng:-12.500,r:'Labé',ads:9},
+      {n:'Tougué',lat:11.450,lng:-11.667,r:'Labé',ads:5},
+      {n:'Faranah',lat:10.042,lng:-10.747,r:'Faranah',ads:28},{n:'Dabola',lat:10.750,lng:-11.117,r:'Faranah',ads:12},
+      {n:'Dinguiraye',lat:11.300,lng:-10.717,r:'Faranah',ads:8},{n:'Kissidougou',lat:9.183,lng:-10.100,r:'Faranah',ads:6},
+      {n:'Kankan',lat:10.384,lng:-9.303,r:'Kankan',ads:67},{n:'Siguiri',lat:11.417,lng:-9.167,r:'Kankan',ads:22},
+      {n:'Kouroussa',lat:10.650,lng:-9.883,r:'Kankan',ads:11},{n:'Mandiana',lat:10.617,lng:-8.667,r:'Kankan',ads:8},
+      {n:"Kérouané",lat:9.267,lng:-9.017,r:'Kankan',ads:4},
+      {n:"N'Zérékoré",lat:7.756,lng:-8.820,r:"N'Zérékoré",ads:52},{n:'Beyla',lat:8.683,lng:-8.633,r:"N'Zérékoré",ads:11},
+      {n:'Guéckédou',lat:8.550,lng:-10.133,r:"N'Zérékoré",ads:9},{n:'Lola',lat:7.817,lng:-8.533,r:"N'Zérékoré",ads:7},
+      {n:'Macenta',lat:8.467,lng:-9.467,r:"N'Zérékoré",ads:6},{n:'Yomou',lat:7.567,lng:-9.250,r:"N'Zérékoré",ads:2},
     ];
 
-    var CATS = [
-    {
-        n: 'Véhicules',
-        e: '🚗🏍️',
-        c: 234
-    },
-    {
-        n: 'Maison : Ventes & Location',
-        e: '🏠',
-        c: 189
-    },
-    {
-        n: 'Emploi',
-        e: '💼',
-        c: 156
-    },
-    {
-        n: 'Électronique',
-        e: '📱💻',
-        c: 312
-    },
-    {
-        n: 'Mode',
-        e: '👗👔👖👟',
-        c: 278
-    },
-    {
-        n: 'Maison & Jardin',
-        e: '🛋️',
-        c: 145
-    },
-    {
-        n: 'Loisirs',
-        e: '🎮',
-        c: 167
-    },
-    {
-        n: 'Vacances & Tourisme',
-        e: '✈️',
-        c: 43
-    },
-    {
-        n: 'Cuisine & Traiteur',
-        e: '🍽️',
-        c: 89
-    },
-    {
-        n: 'Aide à domicile',
-        e: '🤝',
-        c: 64
-    },
-    {
-        n: 'Autres',
-        e: '📦',
-        c: 97
-    }
+    var CATS=[
+      {n:'Véhicules',e:'🚗🏍️',c:234},
+      {n:'Maison : Ventes & Location',e:'🏠',c:189},
+      {n:'Emploi',e:'💼',c:156},
+      {n:'Électronique',e:'📱💻',c:312},
+      {n:'Mode',e:'👗👔👖👟',c:278},
+      {n:'Maison & Jardin',e:'🛋️',c:145},
+      {n:'Loisirs',e:'🎮',c:167},
+      {n:'Vacances & Tourisme',e:'✈️',c:43},
+      {n:'Cuisine & Traiteur',e:'🍽️',c:89},
+      {n:'Aide à domicile',e:'🤝',c:64},
+      {n:'Services',e:'🔧',c:112},
+      {n:'Autres',e:'📦',c:97}
     ];
 
-    var DEMO_ADS = [
-    {
-        id: 1,
-        e: '🚗',
-        t: 'Toyota Land Cruiser V8 2019 — Excellent état',
-        p: 45000000,
-        city: 'Conakry',
-        cat: 'Véhicules',
-        date: 'Il y a 2h',
-        views: 312,
-        feat: true,
-        seller: 'Mamadou Diallo',
-        desc: 'Faible kilométrage, toutes options. Documents à jour. Garantie valide. Disponible à Conakry.',
-        tags: ['Toyota', 'V8', '4x4'],
-        bg: 'linear-gradient(135deg,#FFF3EE,#FFB899)'
-    },
-    {
-        id: 2,
-        e: '🏠',
-        t: 'Villa 5 pièces avec piscine — Ratoma',
-        p: 250000000,
-        city: 'Conakry',
-        cat: 'Maison : Ventes & Location',
-        date: 'Il y a 5h',
-        views: 178,
-        feat: true,
-        seller: 'Alpha Baldé',
-        desc: '5 chambres, 3 salles de bain, piscine, garage double. Quartier sécurisé de Ratoma.',
-        tags: ['Villa', 'Piscine', 'Luxe'],
-        bg: 'linear-gradient(135deg,#EFF6FF,#BFDBFE)'
-    },
-    {
-        id: 3,
-        e: '📱',
-        t: 'iPhone 15 Pro Max 256GB Neuf sous blister',
-        p: 8500000,
-        city: 'Conakry',
-        cat: 'Électronique',
-        date: 'Il y a 1j',
-        views: 247,
-        feat: true,
-        seller: 'Amadou Camara',
-        desc: 'Neuf sous blister. Acheté à Dubai en oct. 2024. Garantie Apple valide 1 an.',
-        tags: ['iPhone', 'Apple', 'Neuf'],
-        bg: 'linear-gradient(135deg,#F0FDF4,#BBF7D0)'
-    },
-    {
-        id: 4,
-        e: '💻',
-        t: 'MacBook Pro M3 14" 18GB RAM 512GB SSD',
-        p: 12000000,
-        city: 'Labé',
-        cat: 'Électronique',
-        date: 'Il y a 2j',
-        views: 189,
-        feat: true,
-        seller: 'Fatoumata Sow',
-        desc: 'Utilisé 3 mois. Comme neuf. Chargeur USB-C inclus. Facture disponible.',
-        tags: ['MacBook', 'Apple', 'M3'],
-        bg: 'linear-gradient(135deg,#FFF7ED,#FED7AA)'
-    },
-    {
-        id: 5,
-        e: '👗',
-        t: 'Robe traditionnelle Fula brodée — Taille M',
-        p: 350000,
-        city: 'Labé',
-        cat: 'Mode',
-        date: 'Il y a 3h',
-        views: 89,
-        feat: false,
-        seller: 'Mariama Barry',
-        desc: 'Robe en tissu wax de qualité supérieure. Taille M. Jamais portée.',
-        tags: ['Mode', 'Fula', 'Wax'],
-        bg: 'linear-gradient(135deg,#FDF4FF,#E9D5FF)'
-    },
-    {
-        id: 6,
-        e: '🛵',
-        t: 'Moto Bajaj Boxer 125cc 2022 — Peu utilisée',
-        p: 6500000,
-        city: 'Kankan',
-        cat: 'Véhicules',
-        date: 'Il y a 4h',
-        views: 156,
-        feat: false,
-        seller: 'Ibrahima Kouyaté',
-        desc: 'Très bon état. Documents à jour. Révision faite. Prête à rouler.',
-        tags: ['Moto', 'Bajaj', '125cc'],
-        bg: 'linear-gradient(135deg,#ECFEFF,#A5F3FC)'
-    },
-    {
-        id: 7,
-        e: '📺',
-        t: 'TV Samsung 55" QLED 4K Smart TV 2023',
-        p: 3200000,
-        city: 'Conakry',
-        cat: 'Électronique',
-        date: 'Il y a 6h',
-        views: 203,
-        feat: false,
-        seller: 'Ousmane Condé',
-        desc: 'Smart TV 55 pouces QLED 4K. Wi-Fi, Netflix, YouTube intégrés. Télécommande incluse.',
-        tags: ['Samsung', '4K', 'Smart'],
-        bg: 'linear-gradient(135deg,#FFF1F2,#FECDD3)'
-    },
-    {
-        id: 8,
-        e: '🏗️',
-        t: 'Terrain 500m² viabilisé — Centre Kindia',
-        p: 15000000,
-        city: 'Kindia',
-        cat: 'Maison : Ventes & Location',
-        date: 'Il y a 8h',
-        views: 134,
-        feat: false,
-        seller: 'Sékou Touré',
-        desc: 'Titre foncier disponible. Eau et électricité. Idéal pour construction.',
-        tags: ['Terrain', 'Foncier', 'Kindia'],
-        bg: 'linear-gradient(135deg,#F0FDF4,#D1FAE5)'
-    },
+    var DEMO_ADS=[
+      {id:1,e:'🚗',t:'Toyota Land Cruiser V8 2019 — Excellent état',p:45000000,city:'Conakry',cat:'Véhicules',date:'Il y a 2h',views:312,feat:true,seller:'Mamadou Diallo',desc:'Faible kilométrage, toutes options. Documents à jour. Garantie valide. Disponible à Conakry.',tags:['Toyota','V8','4x4'],bg:'linear-gradient(135deg,#FFF3EE,#FFB899)'},
+      {id:2,e:'🏠',t:'Villa 5 pièces avec piscine — Ratoma',p:250000000,city:'Conakry',cat:'Maison : Ventes & Location',date:'Il y a 5h',views:178,feat:true,seller:'Alpha Baldé',desc:'5 chambres, 3 salles de bain, piscine, garage double. Quartier sécurisé de Ratoma.',tags:['Villa','Piscine','Luxe'],bg:'linear-gradient(135deg,#EFF6FF,#BFDBFE)'},
+      {id:3,e:'📱',t:'iPhone 15 Pro Max 256GB Neuf sous blister',p:8500000,city:'Conakry',cat:'Électronique',date:'Il y a 1j',views:247,feat:true,seller:'Amadou Camara',desc:'Neuf sous blister. Acheté à Dubai en oct. 2024. Garantie Apple valide 1 an.',tags:['iPhone','Apple','Neuf'],bg:'linear-gradient(135deg,#F0FDF4,#BBF7D0)'},
+      {id:4,e:'💻',t:'MacBook Pro M3 14" 18GB RAM 512GB SSD',p:12000000,city:'Labé',cat:'Électronique',date:'Il y a 2j',views:189,feat:true,seller:'Fatoumata Sow',desc:'Utilisé 3 mois. Comme neuf. Chargeur USB-C inclus. Facture disponible.',tags:['MacBook','Apple','M3'],bg:'linear-gradient(135deg,#FFF7ED,#FED7AA)'},
+      {id:5,e:'👗',t:'Robe traditionnelle Fula brodée — Taille M',p:350000,city:'Labé',cat:'Mode',date:'Il y a 3h',views:89,feat:false,seller:'Mariama Barry',desc:'Robe en tissu wax de qualité supérieure. Taille M. Jamais portée.',tags:['Mode','Fula','Wax'],bg:'linear-gradient(135deg,#FDF4FF,#E9D5FF)'},
+      {id:6,e:'🛵',t:'Moto Bajaj Boxer 125cc 2022 — Peu utilisée',p:6500000,city:'Kankan',cat:'Véhicules',date:'Il y a 4h',views:156,feat:false,seller:'Ibrahima Kouyaté',desc:'Très bon état. Documents à jour. Révision faite. Prête à rouler.',tags:['Moto','Bajaj','125cc'],bg:'linear-gradient(135deg,#ECFEFF,#A5F3FC)'},
+      {id:7,e:'📺',t:'TV Samsung 55" QLED 4K Smart TV 2023',p:3200000,city:'Conakry',cat:'Électronique',date:'Il y a 6h',views:203,feat:false,seller:'Ousmane Condé',desc:'Smart TV 55 pouces QLED 4K. Wi-Fi, Netflix, YouTube intégrés. Télécommande incluse.',tags:['Samsung','4K','Smart'],bg:'linear-gradient(135deg,#FFF1F2,#FECDD3)'},
+      {id:8,e:'🏗️',t:'Terrain 500m² viabilisé — Centre Kindia',p:15000000,city:'Kindia',cat:'Maison : Ventes & Location',date:'Il y a 8h',views:134,feat:false,seller:'Sékou Touré',desc:'Titre foncier disponible. Eau et électricité. Idéal pour construction.',tags:['Terrain','Foncier','Kindia'],bg:'linear-gradient(135deg,#F0FDF4,#D1FAE5)'},
     ];
 
     // ══════════════════════════════════════════
     //  DB
     // ══════════════════════════════════════════
-    var DB = {
-        _d: {
-            users: [],
-            ads: DEMO_ADS,
-            payments: [],
-            favs: [],
-            user: null
-        },
-        load: function() {
-            try {
-                var s = localStorage.getItem('ygy5');
-                if (s) {
-                    var parsed = JSON.parse(s);
-                    // Ne pas écraser les ads avec un tableau vide
-                    if (!parsed.ads || parsed.ads.length === 0)
-                        delete parsed.ads;
-                    // Nettoyer les sessions "Utilisateur YouGouYou" fantômes
-                    if (parsed.user && (parsed.user.name === 'Utilisateur YouGouYou' || !parsed.user.name)) {
-                        parsed.user = null;
-                    }
-                    this._d = Object.assign(this._d, parsed);
-                }
-            } catch (e) {}
-        },
-        save: function() {
-            try {
-                localStorage.setItem('ygy5', JSON.stringify(this._d));
-            } catch (e) {}
-        },
-        ads: function() {
-            var stored = this._d.ads;
-            // Si pas d'annonces stockées, retourner les démos
-            if (!stored || stored.length === 0)
-                return DEMO_ADS;
-            return stored;
-        },
-        addAd: function(a) {
-            this._d.ads.unshift(a);
-            this.save();
-        },
-        user: function() {
-            return this._d.user;
-        },
-        login: function(u) {
-            this._d.user = u;
-            this.save();
-        },
-        logout: function() {
-            this._d.user = null;
-            this.save();
-        },
-        addUser: function(u) {
-            this._d.users.push(u);
-            this.save();
-        },
-        payments: function() {
-            return this._d.payments || [];
-        },
-        addPayment: function(p) {
-            this._d.payments.unshift(p);
-            this.save();
-        },
-        favs: function() {
-            return this._d.favs || [];
-        },
-        addFav: function(id) {
-            if (!this._d.favs)
-                this._d.favs = [];
-            if (!this._d.favs.includes(id)) {
-                this._d.favs.push(id);
-                this.save();
+    var DB={
+      _d:{users:[],ads:DEMO_ADS,payments:[],favs:[],user:null},
+      load:function(){
+        try{
+          var s=localStorage.getItem('ygy5');
+          if(s){
+            var parsed=JSON.parse(s);
+            // Ne pas écraser les ads avec un tableau vide
+            if(!parsed.ads||parsed.ads.length===0) delete parsed.ads;
+            // Nettoyer les sessions "Utilisateur YouGouYou" fantômes
+            if(parsed.user&&(parsed.user.name==='Utilisateur YouGouYou'||!parsed.user.name)){
+              parsed.user=null;
             }
-        }
+            this._d=Object.assign(this._d,parsed);
+          }
+        }catch(e){}
+      },
+      save:function(){try{localStorage.setItem('ygy5',JSON.stringify(this._d));}catch(e){}},
+      ads:function(){
+        var stored=this._d.ads;
+        // Si pas d'annonces stockées, retourner les démos
+        if(!stored||stored.length===0) return DEMO_ADS;
+        return stored;
+      },
+      addAd:function(a){this._d.ads.unshift(a);this.save();},
+      user:function(){return this._d.user;},
+      login:function(u){this._d.user=u;this.save();},
+      logout:function(){this._d.user=null;this.save();},
+      addUser:function(u){this._d.users.push(u);this.save();},
+      payments:function(){return this._d.payments||[];},
+      addPayment:function(p){this._d.payments.unshift(p);this.save();},
+      favs:function(){return this._d.favs||[];},
+      addFav:function(id){if(!this._d.favs)this._d.favs=[];if(!this._d.favs.includes(id)){this._d.favs.push(id);this.save();}}
     };
 
     // ══════════════════════════════════════════
     //  ROUTING
     // ══════════════════════════════════════════
-    function goTo(page) {
-        document.querySelectorAll('.page').forEach(function(p) {
-            p.classList.remove('active');
-        });
-        var el = document.getElementById('page-' + page);
-        if (el) {
-            el.classList.add('active');
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        }
-        if (page === 'dashboard')
-            loadDash();
+    function goTo(page){
+      document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+      var el=document.getElementById('page-'+page);
+      if(el){el.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+      if(page==='dashboard')loadDash();
     }
-    function scrollToAds() {
-        document.getElementById('ads-section').scrollIntoView({
-            behavior: 'smooth'
-        });
-    }
+    function scrollToAds(){document.getElementById('ads-section').scrollIntoView({behavior:'smooth'});}
 
     // ══════════════════════════════════════════
     //  POPULATE
     // ══════════════════════════════════════════
-    function populateCities() {
-        var ids = ['hero-city-sel', 'pc'];
-        ids.forEach(function(id) {
-            var el = document.getElementById(id);
-            if (!el)
-                return;
-            var o = '<option value="">Toutes les villes</option>';
-            ALL_CITIES.forEach(function(c) {
-                o += '<option>' + c + '</option>';
-            });
-            el.innerHTML = o;
-        });
+    function populateCities(){
+      var ids=['hero-city-sel','pc'];
+      ids.forEach(function(id){
+        var el=document.getElementById(id);if(!el)return;
+        var o='<option value="">Toutes les villes</option>';
+        ALL_CITIES.forEach(function(c){o+='<option>'+c+'</option>';});
+        el.innerHTML=o;
+      });
     }
 
-    function renderNavCats() {
-        var el = document.getElementById('nav-cats-bar');
-        if (!el)
-            return;
-        var all = [{
-            n: 'Tout',
-            e: '🔍'
-        }].concat(CATS);
-        el.innerHTML = all.map(function(c, i) {
-            return '<div class="ncat' + (i === 0 ? ' active' : '') + '" onclick="filterCat(this,\'' + c.n + '\')" >' + '<span class="em">' + c.e + '</span>' + c.n + '</div>';
-        }).join('');
+    function renderNavCats(){
+      var el=document.getElementById('nav-cats-bar');if(!el)return;
+      var all=[{n:'Tout',e:'🔍'}].concat(CATS);
+      el.innerHTML=all.map(function(c,i){
+        return '<div class="ncat'+(i===0?' active':'')+'" onclick="filterCat(this,\''+c.n+'\')" >'+'<span class="em">'+c.e+'</span>'+c.n+'</div>';
+      }).join('');
     }
-    function filterCat(el, name) {
-        document.querySelectorAll('.ncat').forEach(function(n) {
-            n.classList.remove('active');
-        });
-        el.classList.add('active');
-        var ads = DB.ads();
-        var filtered = (name === 'Tout') ? ads : ads.filter(function(a) {
-            return a.cat === name;
-        });
-        var fg = document.getElementById('featured-grid');
-        var rg = document.getElementById('recent-grid');
-        if (fg)
-            fg.innerHTML = filtered.filter(function(a) {
-                return a.feat;
-            }).slice(0, 4).map(function(a) {
-                return adCard(a, true);
-            }).join('') || filtered.slice(0, 4).map(function(a) {
-                return adCard(a, false);
-            }).join('');
-        if (rg)
-            rg.innerHTML = filtered.filter(function(a) {
-                return !a.feat;
-            }).slice(0, 8).map(function(a) {
-                return adCard(a, false);
-            }).join('');
-        if (name !== 'Tout')
-            toast('🔍 ' + name + ' — ' + filtered.length + ' annonce(s)');
-        document.getElementById('ads-section').scrollIntoView({
-            behavior: 'smooth'
-        });
+    function filterCat(el,name){
+      document.querySelectorAll('.ncat').forEach(function(n){n.classList.remove('active');});
+      el.classList.add('active');
+      var ads=DB.ads();
+      var filtered=(name==='Tout')?ads:ads.filter(function(a){return a.cat===name;});
+      var fg=document.getElementById('featured-grid');
+      var rg=document.getElementById('recent-grid');
+      if(fg)fg.innerHTML=filtered.filter(function(a){return a.feat;}).slice(0,4).map(function(a){return adCard(a,true);}).join('')||filtered.slice(0,4).map(function(a){return adCard(a,false);}).join('');
+      if(rg)rg.innerHTML=filtered.filter(function(a){return !a.feat;}).slice(0,8).map(function(a){return adCard(a,false);}).join('');
+      if(name!=='Tout')toast('🔍 '+name+' — '+filtered.length+' annonce(s)');
+      document.getElementById('ads-section').scrollIntoView({behavior:'smooth'});
     }
 
-    function renderAds() {
-        var ads = DB.ads();
-        var fg = document.getElementById('featured-grid');
-        var rg = document.getElementById('recent-grid');
-        var sbEl = document.getElementById('sb-ads');
-        if (sbEl)
-            sbEl.textContent = ads.length.toLocaleString('fr-FR');
+    function renderAds(){
+      var ads=DB.ads();
+      var fg=document.getElementById('featured-grid');
+      var rg=document.getElementById('recent-grid');
+      var sbEl=document.getElementById('sb-ads');
+      if(sbEl)sbEl.textContent=ads.length.toLocaleString('fr-FR');
 
-        var featured = ads.filter(function(a) {
-            return a.feat || a.featured;
-        });
-        var recent = ads.filter(function(a) {
-            return !a.feat && !a.featured;
-        });
+      var featured=ads.filter(function(a){return a.feat||a.featured;});
+      var recent=ads.filter(function(a){return !a.feat&&!a.featured;});
 
-        // Si pas assez de vedettes, prendre les 4 premières
-        if (featured.length === 0)
-            featured = ads.slice(0, 4);
-        // Si pas assez de récentes, prendre le reste
-        if (recent.length === 0)
-            recent = ads.slice(4);
+      // Si pas assez de vedettes, prendre les 4 premières
+      if(featured.length===0) featured=ads.slice(0,4);
+      // Si pas assez de récentes, prendre le reste
+      if(recent.length===0) recent=ads.slice(4);
 
-        if (fg) {
-            if (featured.length > 0) {
-                fg.innerHTML = featured.slice(0, 4).map(function(a) {
-                    return adCard(a, true);
-                }).join('');
-            } else {
-                fg.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">Aucune annonce vedette pour le moment.</div>';
-            }
+      if(fg){
+        if(featured.length>0){
+          fg.innerHTML=featured.slice(0,4).map(function(a){return adCard(a,true);}).join('');
+        } else {
+          fg.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">Aucune annonce vedette pour le moment.</div>';
         }
-        if (rg) {
-            if (recent.length > 0) {
-                rg.innerHTML = recent.slice(0, 8).map(function(a) {
-                    return adCard(a, false);
-                }).join('');
-            } else {
-                rg.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">Aucune annonce récente.</div>';
-            }
+      }
+      if(rg){
+        if(recent.length>0){
+          rg.innerHTML=recent.slice(0,8).map(function(a){return adCard(a,false);}).join('');
+        } else {
+          rg.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">Aucune annonce récente.</div>';
         }
+      }
     }
 
-    function adCard(a, feat) {
-        return '<div class="ad-card" onclick="viewAd(' + a.id + ')">' +
-        '<div class="ad-img" style="background:' + a.bg + '"><span>' + a.e + '</span>' +
-        (feat ? '<span class="ad-badge">⭐ À la une</span>' : '') +
-        '<button class="ad-fav" onclick="event.stopPropagation();favAd(' + a.id + ')">🤍</button></div>' +
-        '<div class="ad-body"><div class="ad-price">' + a.p.toLocaleString('fr-FR') + ' GNF</div>' +
-        '<div class="ad-title">' + a.t + '</div>' +
-        '<div class="ad-meta"><span class="ad-tag">📍 ' + a.city + '</span><span class="ad-tag">🕐 ' + a.date + '</span></div></div></div>';
+    function adCard(a,feat){
+      return '<div class="ad-card" onclick="viewAd('+a.id+')">'+
+        '<div class="ad-img" style="background:'+a.bg+'"><span>'+a.e+'</span>'+
+        (feat?'<span class="ad-badge">⭐ À la une</span>':'')+
+        '<button class="ad-fav" onclick="event.stopPropagation();favAd('+a.id+')">🤍</button></div>'+
+        '<div class="ad-body"><div class="ad-price">'+a.p.toLocaleString('fr-FR')+' GNF</div>'+
+        '<div class="ad-title">'+a.t+'</div>'+
+        '<div class="ad-meta"><span class="ad-tag">📍 '+a.city+'</span><span class="ad-tag">🕐 '+a.date+'</span></div></div></div>';
     }
 
-    function renderPostCats() {
-        var el = document.getElementById('post-cats');
-        if (!el)
-            return;
-        el.innerHTML = CATS.map(function(c) {
-            return '<div class="cat-opt" onclick="pickCat(this,\'' + c.n + '\')"><span class="em">' + c.e + '</span>' + c.n + '</div>';
-        }).join('');
+    function renderPostCats(){
+      var el=document.getElementById('post-cats');if(!el)return;
+      el.innerHTML=CATS.map(function(c){
+        return '<div class="cat-opt" onclick="pickCat(this,\''+c.n+'\')"><span class="em">'+c.e+'</span>'+c.n+'</div>';
+      }).join('');
     }
 
     // ══════════════════════════════════════════
     //  MAP — GUINÉE + FILTRAGE ANNONCES
     // ══════════════════════════════════════════
-    var mapObj = null,
-        lyrReg = null,
-        lyrPref = null,
-        mapFilter = null;
+    var mapObj=null,lyrReg=null,lyrPref=null,mapFilter=null;
 
-    function initMap() {
-        var el = document.getElementById('guinee-map');
-        if (!el || mapObj)
-            return;
-        var bounds = L.latLngBounds([[7.0, -15.3], [12.9, -7.4]]);
-        mapObj = L.map('guinee-map', {
-            center: [10.2, -11.2],
-            zoom: 7,
-            maxBounds: bounds,
-            maxBoundsViscosity: 1,
-            minZoom: 6,
-            maxZoom: 14
-        });
+    function initMap(){
+      var el=document.getElementById('guinee-map');if(!el||mapObj)return;
+      var bounds=L.latLngBounds([[7.0,-15.3],[12.9,-7.4]]);
+      mapObj=L.map('guinee-map',{center:[10.2,-11.2],zoom:7,maxBounds:bounds,maxBoundsViscosity:1,minZoom:6,maxZoom:14});
 
-        // Tuiles OpenStreetMap — fonctionne en ligne et en local
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap',
-            maxZoom: 18,
-            crossOrigin: true
-        }).addTo(mapObj);
+      // Tuiles OpenStreetMap — fonctionne en ligne et en local
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+        attribution:'© OpenStreetMap',
+        maxZoom:18,
+        crossOrigin:true
+      }).addTo(mapObj);
 
-        // Masquer hors Guinée
-        L.polygon([[[90, -180], [90, 180], [-90, 180], [-90, -180]], [[7.0, -15.3], [7.0, -7.4], [12.9, -7.4], [12.9, -15.3]]],
-        {
-            color: 'transparent',
-            fillColor: '#F5F2EE',
-            fillOpacity: 0.72,
-            interactive: false
-        }).addTo(mapObj);
+      // Masquer hors Guinée
+      L.polygon([[[90,-180],[90,180],[-90,180],[-90,-180]],[[7.0,-15.3],[7.0,-7.4],[12.9,-7.4],[12.9,-15.3]]],
+        {color:'transparent',fillColor:'#F5F2EE',fillOpacity:0.72,interactive:false}).addTo(mapObj);
 
-        lyrReg = L.layerGroup();
-        lyrPref = L.layerGroup();
+      lyrReg=L.layerGroup();
+      lyrPref=L.layerGroup();
 
-        // Régions — gros marqueurs
-        REGIONS.forEach(function(r) {
-            var sz = Math.min(28, 16 + Math.floor(r.ads / 60));
-            var icon = L.divIcon({
-                className: '',
-                html: '<div style="background:' + r.col + ';width:' + sz + 'px;height:' + sz + 'px;border-radius:50%;border:3px solid #fff;box-shadow:0 3px 12px rgba(0,0,0,.3);cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:' + (sz < 22 ? '8' : '10') + 'px;font-weight:800;font-family:Cabinet Grotesk,sans-serif">' + r.ads + '</div>',
-                iconSize: [sz, sz],
-                iconAnchor: [sz / 2, sz / 2]
-            });
-            var m = L.marker([r.lat, r.lng], {
-                icon: icon
-            });
-            m.bindPopup(
-            '<div style="font-family:Cabinet Grotesk,sans-serif;min-width:180px;padding:4px">' +
-            '<div style="background:' + r.col + ';color:#fff;font-size:10px;font-weight:800;padding:3px 10px;border-radius:50px;display:inline-block;margin-bottom:9px;text-transform:uppercase;letter-spacing:.5px">Région</div>' +
-            '<div style="font-size:18px;font-weight:800;margin-bottom:6px;color:#0E0E0E">' + r.n + '</div>' +
-            '<div style="font-size:13px;color:#767676;line-height:1.9">👥 Population : ' + r.pop + '<br>📋 <strong style="color:' + r.col + '">' + r.ads + '</strong> annonces actives</div>' +
-            '<button onclick="filterByZone(\'' + r.n + '\')" style="margin-top:10px;background:' + r.col + ';color:#fff;border:none;padding:9px 16px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;width:100%;font-family:inherit">Voir les annonces →</button>' +
-            '</div>', {
-                maxWidth: 220
-            });
-            m.addTo(lyrReg);
-        });
+      // Régions — gros marqueurs
+      REGIONS.forEach(function(r){
+        var sz=Math.min(28,16+Math.floor(r.ads/60));
+        var icon=L.divIcon({className:'',
+          html:'<div style="background:'+r.col+';width:'+sz+'px;height:'+sz+'px;border-radius:50%;border:3px solid #fff;box-shadow:0 3px 12px rgba(0,0,0,.3);cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:'+(sz<22?'8':'10')+'px;font-weight:800;font-family:Cabinet Grotesk,sans-serif">'+r.ads+'</div>',
+          iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]});
+        var m=L.marker([r.lat,r.lng],{icon:icon});
+        m.bindPopup(
+          '<div style="font-family:Cabinet Grotesk,sans-serif;min-width:180px;padding:4px">'+
+          '<div style="background:'+r.col+';color:#fff;font-size:10px;font-weight:800;padding:3px 10px;border-radius:50px;display:inline-block;margin-bottom:9px;text-transform:uppercase;letter-spacing:.5px">Région</div>'+
+          '<div style="font-size:18px;font-weight:800;margin-bottom:6px;color:#0E0E0E">'+r.n+'</div>'+
+          '<div style="font-size:13px;color:#767676;line-height:1.9">👥 Population : '+r.pop+'<br>📋 <strong style="color:'+r.col+'">'+r.ads+'</strong> annonces actives</div>'+
+          '<button onclick="filterByZone(\''+r.n+'\')" style="margin-top:10px;background:'+r.col+';color:#fff;border:none;padding:9px 16px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;width:100%;font-family:inherit">Voir les annonces →</button>'+
+          '</div>',{maxWidth:220});
+        m.addTo(lyrReg);
+      });
 
-        // Préfectures — marqueurs avec compteur
-        PREFS.forEach(function(p) {
-            var reg = REGIONS.find(function(r) {
-                return r.n === p.r;
-            });
-            var col = reg ? reg.col : '#767676';
-            var icon = L.divIcon({
-                className: '',
-                html: '<div style="background:' + col + ';width:14px;height:14px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.25);cursor:pointer"></div>',
-                iconSize: [14, 14],
-                iconAnchor: [7, 7]
-            });
-            var m = L.marker([p.lat, p.lng], {
-                icon: icon
-            });
-            m.bindPopup(
-            '<div style="font-family:Cabinet Grotesk,sans-serif">' +
-            '<div style="font-weight:800;font-size:15px;margin-bottom:4px;color:#0E0E0E">' + p.n + '</div>' +
-            '<div style="font-size:13px;color:#767676;margin-bottom:10px">Région de ' + p.r + ' · <strong style="color:' + col + '">' + p.ads + '</strong> annonces</div>' +
-            '<button onclick="filterByZone(\'' + p.n + '\')" style="background:' + col + ';color:#fff;border:none;padding:7px 14px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;width:100%;font-family:inherit">Filtrer les annonces</button>' +
-            '</div>');
-            m.addTo(lyrPref);
-        });
+      // Préfectures — marqueurs avec compteur
+      PREFS.forEach(function(p){
+        var reg=REGIONS.find(function(r){return r.n===p.r;});
+        var col=reg?reg.col:'#767676';
+        var icon=L.divIcon({className:'',
+          html:'<div style="background:'+col+';width:14px;height:14px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.25);cursor:pointer"></div>',
+          iconSize:[14,14],iconAnchor:[7,7]});
+        var m=L.marker([p.lat,p.lng],{icon:icon});
+        m.bindPopup(
+          '<div style="font-family:Cabinet Grotesk,sans-serif">'+
+          '<div style="font-weight:800;font-size:15px;margin-bottom:4px;color:#0E0E0E">'+p.n+'</div>'+
+          '<div style="font-size:13px;color:#767676;margin-bottom:10px">Région de '+p.r+' · <strong style="color:'+col+'">'+p.ads+'</strong> annonces</div>'+
+          '<button onclick="filterByZone(\''+p.n+'\')" style="background:'+col+';color:#fff;border:none;padding:7px 14px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;width:100%;font-family:inherit">Filtrer les annonces</button>'+
+          '</div>');
+        m.addTo(lyrPref);
+      });
 
-        lyrReg.addTo(mapObj);
+      lyrReg.addTo(mapObj);
 
-        // Légende
-        var leg = document.getElementById('map-legend');
-        if (leg) {
-            leg.innerHTML = REGIONS.map(function(r) {
-                return '<div class="map-leg-item"><div class="map-dot" style="background:' + r.col + '"></div><span><strong>' + r.n + '</strong> — ' + r.ads + ' ann.</span></div>';
-            }).join('');
-        }
-        setTimeout(function() {
-            mapObj.invalidateSize();
-        }, 200);
+      // Légende
+      var leg=document.getElementById('map-legend');
+      if(leg){
+        leg.innerHTML=REGIONS.map(function(r){
+          return '<div class="map-leg-item"><div class="map-dot" style="background:'+r.col+'"></div><span><strong>'+r.n+'</strong> — '+r.ads+' ann.</span></div>';
+        }).join('');
+      }
+      setTimeout(function(){mapObj.invalidateSize();},200);
     }
 
-    function showLayer(l) {
-        if (!mapObj)
-            return;
-        document.getElementById('btn-reg').classList.toggle('active', l === 'regions');
-        document.getElementById('btn-pref').classList.toggle('active', l === 'prefectures');
-        if (l === 'regions') {
-            mapObj.removeLayer(lyrPref);
-            lyrReg.addTo(mapObj);
-        }
-        else {
-            mapObj.removeLayer(lyrReg);
-            lyrPref.addTo(mapObj);
-        }
-        if (mapObj)
-            mapObj.closePopup();
+    function showLayer(l){
+      if(!mapObj)return;
+      document.getElementById('btn-reg').classList.toggle('active',l==='regions');
+      document.getElementById('btn-pref').classList.toggle('active',l==='prefectures');
+      if(l==='regions'){mapObj.removeLayer(lyrPref);lyrReg.addTo(mapObj);}
+      else{mapObj.removeLayer(lyrReg);lyrPref.addTo(mapObj);}
+      if(mapObj)mapObj.closePopup();
     }
 
-    function filterByZone(zone) {
-        mapFilter = zone;
-        var filtered = DB.ads().filter(function(a) {
-            return a.city === zone || a.cat === zone;
-        });
-        if (filtered.length === 0)
-            filtered = DB.ads().slice(0, 3); // fallback demo
-        var fg = document.getElementById('featured-grid');
-        var rg = document.getElementById('recent-grid');
-        if (fg)
-            fg.innerHTML = filtered.slice(0, 4).map(function(a) {
-                return adCard(a, false);
-            }).join('');
-        if (rg)
-            rg.innerHTML = filtered.slice(0, 8).map(function(a) {
-                return adCard(a, false);
-            }).join('');
-        var info = document.getElementById('map-filter-info');
-        if (info) {
-            info.classList.remove('hidden');
-            document.getElementById('mfi-zone').textContent = zone;
-            document.getElementById('mfi-count').textContent = DB.ads().length;
-        }
-        mapObj.closePopup();
-        document.getElementById('ads-section').scrollIntoView({
-            behavior: 'smooth'
-        });
-        toast('🔍 ' + zone + ' — ' + filtered.length + ' annonce(s) trouvée(s)');
+    function filterByZone(zone){
+      mapFilter=zone;
+      var filtered=DB.ads().filter(function(a){return a.city===zone||a.cat===zone;});
+      if(filtered.length===0)filtered=DB.ads().slice(0,3); // fallback demo
+      var fg=document.getElementById('featured-grid');
+      var rg=document.getElementById('recent-grid');
+      if(fg)fg.innerHTML=filtered.slice(0,4).map(function(a){return adCard(a,false);}).join('');
+      if(rg)rg.innerHTML=filtered.slice(0,8).map(function(a){return adCard(a,false);}).join('');
+      var info=document.getElementById('map-filter-info');
+      if(info){info.classList.remove('hidden');document.getElementById('mfi-zone').textContent=zone;document.getElementById('mfi-count').textContent=DB.ads().length;}
+      mapObj.closePopup();
+      document.getElementById('ads-section').scrollIntoView({behavior:'smooth'});
+      toast('🔍 '+zone+' — '+filtered.length+' annonce(s) trouvée(s)');
     }
 
-    function clearMapFilter() {
-        mapFilter = null;
-        renderAds();
-        var info = document.getElementById('map-filter-info');
-        if (info)
-            info.classList.add('hidden');
-        toast('✓ Filtre effacé');
+    function clearMapFilter(){
+      mapFilter=null;
+      renderAds();
+      var info=document.getElementById('map-filter-info');
+      if(info)info.classList.add('hidden');
+      toast('✓ Filtre effacé');
     }
 
     // ══════════════════════════════════════════
     //  VIEW AD
     // ══════════════════════════════════════════
-    var curAd = null;
-    function viewAd(id) {
-        var ad = DB.ads().find(function(a) {
-            return a.id === id;
-        });
-        if (!ad)
-            return;
-        curAd = ad;
+    var curAd=null;
+    function viewAd(id){
+      var ad=DB.ads().find(function(a){return a.id===id;});if(!ad)return;
+      curAd=ad;
 
-        // Enregistrer dans l'historique de navigation
-        if (!DB._d.history)
-            DB._d.history = [];
-        DB._d.history = DB._d.history.filter(function(h) {
-            return h.id !== id;
-        }); // éviter doublons
-        DB._d.history.unshift({
-            id: ad.id,
-            e: ad.e,
-            t: ad.t,
-            p: ad.p,
-            city: ad.city,
-            date: 'À l\'instant'
-        });
-        if (DB._d.history.length > 20)
-            DB._d.history = DB._d.history.slice(0, 20);
-        DB.save();
-        document.getElementById('det-emoji').textContent = ad.e;
-        document.getElementById('det-emoji').style.background = ad.bg;
-        document.getElementById('bc-cat').textContent = ad.cat;
-        document.getElementById('bc-title').textContent = ad.t.substring(0, 40) + '...';
-        document.getElementById('det-price').textContent = ad.p.toLocaleString('fr-FR') + ' GNF';
-        document.getElementById('det-title').textContent = ad.t;
-        document.getElementById('det-desc').textContent = ad.desc;
-        document.getElementById('dm-city').textContent = ad.city;
-        document.getElementById('dm-cat').textContent = ad.cat;
-        document.getElementById('dm-date').textContent = ad.date;
-        document.getElementById('dm-views').textContent = (ad.views || 0) + ' vues';
-        document.getElementById('det-tags').innerHTML = (ad.tags || []).map(function(t) {
-            return '<span class="tag-chip">' + t + '</span>';
-        }).join(' ');
-        document.getElementById('det-seller').textContent = ad.seller;
-        document.getElementById('det-av').textContent = ad.seller ? ad.seller.charAt(0).toUpperCase() : '?';
-        document.getElementById('om-val').textContent = ad.p.toLocaleString('fr-FR') + ' GNF';
-        document.getElementById('om-item').textContent = ad.t;
-        goTo('detail');
+      // Enregistrer dans l'historique de navigation
+      if(!DB._d.history) DB._d.history=[];
+      DB._d.history=DB._d.history.filter(function(h){return h.id!==id;}); // éviter doublons
+      DB._d.history.unshift({id:ad.id,e:ad.e,t:ad.t,p:ad.p,city:ad.city,date:'À l\'instant'});
+      if(DB._d.history.length>20) DB._d.history=DB._d.history.slice(0,20);
+      DB.save();
+      document.getElementById('det-emoji').textContent=ad.e;
+      document.getElementById('det-emoji').style.background=ad.bg;
+      document.getElementById('bc-cat').textContent=ad.cat;
+      document.getElementById('bc-title').textContent=ad.t.substring(0,40)+'...';
+      document.getElementById('det-price').textContent=ad.p.toLocaleString('fr-FR')+' GNF';
+      document.getElementById('det-title').textContent=ad.t;
+      document.getElementById('det-desc').textContent=ad.desc;
+      document.getElementById('dm-city').textContent=ad.city;
+      document.getElementById('dm-cat').textContent=ad.cat;
+      document.getElementById('dm-date').textContent=ad.date;
+      document.getElementById('dm-views').textContent=(ad.views||0)+' vues';
+      document.getElementById('det-tags').innerHTML=(ad.tags||[]).map(function(t){return '<span class="tag-chip">'+t+'</span>';}).join(' ');
+      document.getElementById('det-seller').textContent=ad.seller;
+      document.getElementById('det-av').textContent=ad.seller?ad.seller.charAt(0).toUpperCase():'?';
+      document.getElementById('om-val').textContent=ad.p.toLocaleString('fr-FR')+' GNF';
+      document.getElementById('om-item').textContent=ad.t;
+      goTo('detail');
     }
-    function favAd(id) {
-        DB.addFav(id);
-        toast('❤️ Ajouté aux favoris !', 'ok');
-    }
-    function addFav() {
-        if (curAd) {
-            DB.addFav(curAd.id);
-            toast('❤️ Ajouté aux favoris !', 'ok');
-        }
-    }
+    function favAd(id){DB.addFav(id);toast('❤️ Ajouté aux favoris !','ok');}
+    function addFav(){if(curAd){DB.addFav(curAd.id);toast('❤️ Ajouté aux favoris !','ok');}}
 
     // ══════════════════════════════════════════
     //  POST AD
     // ══════════════════════════════════════════
-    var selCat = '';
-    function pickCat(el, name) {
-        document.querySelectorAll('.cat-opt').forEach(function(c) {
-            c.classList.remove('sel');
-        });
-        el.classList.add('sel');
-        selCat = name;
-    }
-    function submitAd() {
-        var title = (document.getElementById('pt').value || '').trim();
-        var price = (document.getElementById('pp').value || '').trim();
-        var city = document.getElementById('pc').value;
-        var name = (document.getElementById('pn').value || '').trim();
-        if (!title || !price) {
-            toast('⚠️ Remplissez le titre et le prix', 'err');
-            return;
-        }
-        var cat = CATS.find(function(c) {
-            return c.n === selCat;
-        });
-        DB.addAd({
-            id: Date.now(),
-            e: cat ? cat.e : '📦',
-            t: title,
-            p: parseInt(price) || 0,
-            city: city || 'Conakry',
-            cat: selCat || 'Autres',
-            date: 'À l\'instant',
-            views: 0,
-            feat: false,
-            seller: name || 'Vendeur',
-            desc: (document.getElementById('pd').value || ''),
-            tags: [selCat || 'Autres'],
-            bg: 'linear-gradient(135deg,#FFF3EE,#FFB899)'
-        });
-        renderAds();
-        toast('🎉 Annonce publiée !', 'ok');
-        setTimeout(function() {
-            goTo('home');
-        }, 1200);
+    var selCat='';
+    function pickCat(el,name){document.querySelectorAll('.cat-opt').forEach(function(c){c.classList.remove('sel');});el.classList.add('sel');selCat=name;}
+    function submitAd(){
+      var title=(document.getElementById('pt').value||'').trim();
+      var price=(document.getElementById('pp').value||'').trim();
+      var city=document.getElementById('pc').value;
+      var name=(document.getElementById('pn').value||'').trim();
+      if(!title||!price){toast('⚠️ Remplissez le titre et le prix','err');return;}
+      var cat=CATS.find(function(c){return c.n===selCat;});
+      DB.addAd({id:Date.now(),e:cat?cat.e:'📦',t:title,p:parseInt(price)||0,city:city||'Conakry',cat:selCat||'Autres',date:'À l\'instant',views:0,feat:false,seller:name||'Vendeur',desc:(document.getElementById('pd').value||''),tags:[selCat||'Autres'],bg:'linear-gradient(135deg,#FFF3EE,#FFB899)'});
+      renderAds();toast('🎉 Annonce publiée !','ok');
+      setTimeout(function(){goTo('home');},1200);
     }
 
     // ══════════════════════════════════════════
     //  AUTH + SMS
     // ══════════════════════════════════════════
-    var pendingUser = null,
-        smsCode = '',
+    var pendingUser=null, smsCode='', codeFromServer=false;
+    function authTab(tab){
+      var isL=(tab==='login');
+      document.getElementById('mtab-login').classList.toggle('active',isL);
+      document.getElementById('mtab-reg').classList.toggle('active',!isL);
+      document.getElementById('auth-tt').textContent=isL?'Connexion':'Inscription';
+      renderAuthForm(tab);
+    }
+
+    function renderAuthForm(tab){
+      var body=document.getElementById('auth-body');
+      var gBtn='<button class="g-btn" onclick="loginWithGoogle()"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Continuer avec Google</button><div class="or-sep">ou</div>';
+
+      if(tab==='login'){
+        body.innerHTML=gBtn+
+          // Toggle : connexion par téléphone OU email
+          '<div style="display:flex;background:var(--brl);border-radius:50px;padding:3px;margin-bottom:16px" id="login-toggle">'+
+            '<div id="lt-phone" style="flex:1;text-align:center;padding:8px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;background:var(--wh);box-shadow:var(--sh);color:var(--ink)" onclick="loginToggle(\'phone\')">📱 Téléphone</div>'+
+            '<div id="lt-email" style="flex:1;text-align:center;padding:8px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted)" onclick="loginToggle(\'email\')">📧 Email</div>'+
+          '</div>'+
+          '<div id="li-phone-wrap" class="fg"><label>Téléphone</label><div class="ph-row"><span class="ph-pfx">🇬🇳 +224</span><input type="tel" id="li-phone" placeholder="620 00 00 00" style="flex:1"></div></div>'+
+          '<div id="li-email-wrap" class="fg" style="display:none"><label>Adresse email</label><input type="email" id="li-email" placeholder="votre@email.com"></div>'+
+          '<div class="fg"><label>Mot de passe</label><input type="password" id="lp" placeholder="••••••••"></div>'+
+          '<button class="btn btn-ink btn-full" style="border-radius:12px" onclick="doLogin()">Se connecter →</button>'+
+          '<p style="text-align:center;font-size:13px;color:var(--muted);margin-top:14px">Pas de compte ? <a style="color:var(--or);cursor:pointer;font-weight:700" onclick="authTab(\'reg\')">S\'inscrire gratuitement</a></p>';
+
+      } else {
+        // INSCRIPTION — 2 modes : Téléphone OU Email
+        var opts='<option value="">Choisir votre préfecture...</option>';
+        ALL_CITIES.forEach(function(c){opts+='<option>'+c+'</option>';});
+        body.innerHTML=gBtn+
+          // Toggle mode inscription
+          '<div style="display:flex;background:var(--brl);border-radius:50px;padding:3px;margin-bottom:20px">'+
+            '<div id="rt-phone" style="flex:1;text-align:center;padding:9px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;background:var(--wh);box-shadow:var(--sh);color:var(--ink);transition:all .2s" onclick="regToggle(\'phone\')">📱 Téléphone</div>'+
+            '<div id="rt-email" style="flex:1;text-align:center;padding:9px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted);transition:all .2s" onclick="regToggle(\'email\')">📧 Email</div>'+
+          '</div>'+
+          // Prénom + Nom
+          '<div class="frow">'+
+            '<div class="fg"><label>Prénom *</label><input type="text" id="rfn" placeholder="Prénom"></div>'+
+            '<div class="fg"><label>Nom</label><input type="text" id="rln" placeholder="Nom"></div>'+
+          '</div>'+
+          // Champ Téléphone (mode phone = obligatoire, mode email = optionnel)
+          '<div class="fg" id="rph-wrap">'+
+            '<label id="rph-label">📱 Téléphone Orange *</label>'+
+            '<div class="ph-row"><span class="ph-pfx">🇬🇳 +224</span><input type="tel" id="rph" placeholder="620 00 00 00" maxlength="9" style="flex:1"></div>'+
+          '</div>'+
+          // Champ Email (mode email = obligatoire, caché en mode phone)
+          '<div class="fg" id="rem-wrap" style="display:none">'+
+            '<label>📧 Adresse email *</label>'+
+            '<input type="email" id="rem" placeholder="votre@email.com">'+
+          '</div>'+
+          // Mot de passe
+          '<div class="fg"><label>Mot de passe *</label><input type="password" id="rpw" placeholder="8 caractères minimum" oninput="checkPwMatch()"></div>'+
+          '<div class="fg"><label>Confirmer le mot de passe *</label><input type="password" id="rpw2" placeholder="Répétez votre mot de passe" oninput="checkPwMatch()"></div>'+
+          '<div id="pw-match-msg" style="margin-top:-10px;margin-bottom:12px;font-size:13px;font-weight:700;display:none"></div>'+
+          // Ville
+          '<div class="fg"><label>📍 Préfecture / Ville *</label><select id="rct">'+opts+'</select></div>'+
+          // Bouton envoyer
+          '<button class="btn btn-or btn-full" style="border-radius:12px" id="btn-sendcode" onclick="sendVerifCode()">📱 Recevoir le code SMS →</button>'+
+          '<p style="text-align:center;font-size:13px;color:var(--muted);margin-top:14px">Déjà un compte ? <a style="color:var(--or);cursor:pointer;font-weight:700" onclick="authTab(\'login\')">Se connecter</a></p>';
+
+        // Mode actif par défaut = téléphone → vérification SMS
+        regMode = 'phone';
+        verifyMethod = 'sms';
+      }
+    }
+
+    function checkPwMatch(){
+      var pw=(document.getElementById('rpw')||{value:''}).value;
+      var pw2=(document.getElementById('rpw2')||{value:''}).value;
+      var msg=document.getElementById('pw-match-msg');
+      if(!msg||!pw2) return;
+      msg.style.display='block';
+      if(pw===pw2){
+        msg.textContent='✅ Les mots de passe correspondent';
+        msg.style.color='#065F46';
+      } else {
+        msg.textContent='❌ Les mots de passe ne correspondent pas';
+        msg.style.color='#DC2626';
+      }
+    }
+
+    var regMode='phone'; // 'phone' ou 'email'
+
+    function regToggle(mode){
+      regMode=mode;
+      var phoneWrap=document.getElementById('rph-wrap');
+      var emailWrap=document.getElementById('rem-wrap');
+      var phoneLabel=document.getElementById('rph-label');
+      var rtPhone=document.getElementById('rt-phone');
+      var rtEmail=document.getElementById('rt-email');
+      var btn=document.getElementById('btn-sendcode');
+      var activeStyle={background:'var(--wh)',boxShadow:'var(--sh)',color:'var(--ink)'};
+      var inactiveStyle={background:'transparent',boxShadow:'none',color:'var(--muted)'};
+
+      if(mode==='phone'){
+        // Mode téléphone : téléphone obligatoire, email caché
+        if(phoneWrap) phoneWrap.style.display='';
+        if(phoneLabel) phoneLabel.textContent='📱 Téléphone Orange *';
+        if(emailWrap) emailWrap.style.display='none';
+        if(rtPhone) Object.assign(rtPhone.style,activeStyle);
+        if(rtEmail) Object.assign(rtEmail.style,inactiveStyle);
+        verifyMethod='sms';
+        if(btn) btn.textContent='📱 Recevoir le code SMS →';
+      } else {
+        // Mode email : email obligatoire + téléphone optionnel
+        if(emailWrap) emailWrap.style.display='';
+        if(phoneWrap) phoneWrap.style.display='';
+        if(phoneLabel) phoneLabel.textContent='📱 Téléphone Orange (optionnel)';
+        if(rtPhone) Object.assign(rtPhone.style,inactiveStyle);
+        if(rtEmail) Object.assign(rtEmail.style,activeStyle);
+        verifyMethod='email';
+        if(btn) btn.textContent='📧 Recevoir le code par email →';
+      }
+    }
+
+    var verifyMethod='sms';
+    function pickVerifyMethod(m){
+      verifyMethod=m;
+      var smsEl=document.getElementById('vm-sms');
+      var emEl=document.getElementById('vm-email');
+      var btn=document.getElementById('btn-sendcode');
+      if(smsEl){smsEl.style.border='2px solid '+(m==='sms'?'var(--or)':'var(--br)');smsEl.style.background=m==='sms'?'var(--orl)':'var(--wh)';smsEl.querySelector('div:nth-child(2)').style.color=m==='sms'?'var(--or2)':'var(--muted)';}
+      if(emEl){emEl.style.border='2px solid '+(m==='email'?'var(--or)':'var(--br)');emEl.style.background=m==='email'?'var(--orl)':'var(--wh)';emEl.querySelector('div:nth-child(2)').style.color=m==='email'?'var(--or2)':'var(--muted)';}
+      if(btn)btn.textContent=m==='sms'?'📱 Recevoir le code SMS →':'📧 Recevoir le code par email →';
+    }
+
+    var loginMode='phone';
+    function loginToggle(mode){
+      loginMode=mode;
+      var pw=document.getElementById('li-phone-wrap');
+      var ew=document.getElementById('li-email-wrap');
+      var ltp=document.getElementById('lt-phone');
+      var lte=document.getElementById('lt-email');
+      var active={background:'var(--wh)',boxShadow:'var(--sh)',color:'var(--ink)'};
+      var inactive={background:'transparent',boxShadow:'none',color:'var(--muted)'};
+      if(pw)pw.style.display=mode==='phone'?'':'none';
+      if(ew)ew.style.display=mode==='email'?'':'none';
+      if(ltp)Object.assign(ltp.style,mode==='phone'?active:inactive);
+      if(lte)Object.assign(lte.style,mode==='email'?active:inactive);
+    }
+
+    function sendVerifCode(){
+      var fn=(document.getElementById('rfn')||{value:''}).value.trim();
+      var ph=(document.getElementById('rph')||{value:''}).value.trim();
+      var em=(document.getElementById('rem')||{value:''}).value.trim();
+      var pw=(document.getElementById('rpw')||{value:''}).value.trim();
+      var pw2=(document.getElementById('rpw2')||{value:''}).value.trim();
+      var city=(document.getElementById('rct')||{value:''}).value;
+
+      if(!fn){toast('⚠️ Remplissez votre prénom','err');return;}
+      // Validation selon le mode choisi
+      if(regMode==='phone'){
+        if(!ph||ph.length<8){toast('⚠️ Numéro de téléphone invalide (8 chiffres min)','err');return;}
+      } else {
+        if(!em||!em.includes('@')){toast('⚠️ Adresse email invalide','err');return;}
+      }
+      if(!pw||pw.length<6){toast('⚠️ Mot de passe trop court (6 caractères min)','err');return;}
+      if(pw!==pw2){toast('❌ Les mots de passe ne correspondent pas','err');return;}
+      if(!city){toast('⚠️ Choisissez votre ville','err');return;}
+
+      pendingUser={
+        prenom:fn,
+        nom:(document.getElementById('rln')||{value:''}).value.trim(),
+        phone: ph ? '+224'+ph : '',
+        email: regMode==='email' ? em : '',
+        password:pw,
+        city: city,
+        method: regMode==='email'?'email':'sms',
+        initials:(fn.charAt(0)+((document.getElementById('rln')||{value:''}).value.trim().charAt(0)||'')).toUpperCase()
+      };
+
+      // Désactiver le bouton pendant l'appel
+      var sendBtn=document.getElementById('btn-sendcode');
+      if(sendBtn){sendBtn.disabled=true;sendBtn.textContent='⏳ Envoi en cours...';}
+
+      // Appel API → génère le code dans MongoDB
+      // Appel API avec timeout de 5 secondes
+      var apiDone = false;
+      var timeout = setTimeout(function(){
+        if(!apiDone){
+          apiDone = true;
+          if(sendBtn){sendBtn.disabled=false;sendBtn.textContent=verifyMethod==='sms'?'📱 Recevoir le code SMS →':'📧 Recevoir le code par email →';}
+          smsCode = Math.floor(1000+Math.random()*9000).toString();
+          codeFromServer = false;
+          showCodeForm(verifyMethod==='email'?em:'+224 '+ph, verifyMethod==='email'?'📧':'📱');
+        }
+      }, 5000);
+
+      fetch('/api/auth/send-code',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({phone:'+224'+ph, email:em, method:verifyMethod, prenom:fn})
+      })
+      .then(function(r){return r.json();})
+      .then(function(data){
+        if(apiDone) return; apiDone = true; clearTimeout(timeout);
+        if(sendBtn){sendBtn.disabled=false;sendBtn.textContent=verifyMethod==='sms'?'📱 Recevoir le code SMS →':'📧 Recevoir le code par email →';}
+        if(data.error){toast('❌ '+data.error,'err');return;}
+        smsCode = data.debug_code || Math.floor(1000+Math.random()*9000).toString();
+        codeFromServer = !!data.debug_code;
+        showCodeForm(verifyMethod==='email'?em:'+224 '+ph, verifyMethod==='email'?'📧':'📱');
+      })
+      .catch(function(){
+        if(apiDone) return; apiDone = true; clearTimeout(timeout);
+        if(sendBtn){sendBtn.disabled=false;sendBtn.textContent=verifyMethod==='sms'?'📱 Recevoir le code SMS →':'📧 Recevoir le code par email →';}
+        smsCode = Math.floor(1000+Math.random()*9000).toString();
         codeFromServer = false;
-    function authTab(tab) {
-        var isL = (tab === 'login');
-        document.getElementById('mtab-login').classList.toggle('active', isL);
-        document.getElementById('mtab-reg').classList.toggle('active', !isL);
-        document.getElementById('auth-tt').textContent = isL ? 'Connexion' : 'Inscription';
-        renderAuthForm(tab);
+        showCodeForm(verifyMethod==='email'?em:'+224 '+ph, verifyMethod==='email'?'📧':'📱');
+      });
     }
 
-    function renderAuthForm(tab) {
-        var body = document.getElementById('auth-body');
-        var gBtn = '<button class="g-btn" onclick="loginWithGoogle()"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Continuer avec Google</button><div class="or-sep">ou</div>';
-
-        if (tab === 'login') {
-            body.innerHTML = gBtn + // Toggle : connexion par téléphone OU email
-            '<div style="display:flex;background:var(--brl);border-radius:50px;padding:3px;margin-bottom:16px" id="login-toggle">' +
-            '<div id="lt-phone" style="flex:1;text-align:center;padding:8px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;background:var(--wh);box-shadow:var(--sh);color:var(--ink)" onclick="loginToggle(\'phone\')">📱 Téléphone</div>' +
-            '<div id="lt-email" style="flex:1;text-align:center;padding:8px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted)" onclick="loginToggle(\'email\')">📧 Email</div>' +
-            '</div>' +
-            '<div id="li-phone-wrap" class="fg"><label>Téléphone</label><div class="ph-row"><span class="ph-pfx">🇬🇳 +224</span><input type="tel" id="li-phone" placeholder="620 00 00 00" style="flex:1"></div></div>' +
-            '<div id="li-email-wrap" class="fg" style="display:none"><label>Adresse email</label><input type="email" id="li-email" placeholder="votre@email.com"></div>' +
-            '<div class="fg"><label>Mot de passe</label><input type="password" id="lp" placeholder="••••••••"></div>' +
-            '<button class="btn btn-ink btn-full" style="border-radius:12px" onclick="doLogin()">Se connecter →</button>' +
-            '<p style="text-align:center;font-size:13px;color:var(--muted);margin-top:14px">Pas de compte ? <a style="color:var(--or);cursor:pointer;font-weight:700" onclick="authTab(\'reg\')">S\'inscrire gratuitement</a></p>';
-
-        } else {
-            // INSCRIPTION — 2 modes : Téléphone OU Email
-            var opts = '<option value="">Choisir votre préfecture...</option>';
-            ALL_CITIES.forEach(function(c) {
-                opts += '<option>' + c + '</option>';
-            });
-            body.innerHTML = gBtn + // Toggle mode inscription
-            '<div style="display:flex;background:var(--brl);border-radius:50px;padding:3px;margin-bottom:20px">' +
-            '<div id="rt-phone" style="flex:1;text-align:center;padding:9px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;background:var(--wh);box-shadow:var(--sh);color:var(--ink);transition:all .2s" onclick="regToggle(\'phone\')">📱 Téléphone</div>' +
-            '<div id="rt-email" style="flex:1;text-align:center;padding:9px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted);transition:all .2s" onclick="regToggle(\'email\')">📧 Email</div>' +
-            '</div>' + // Prénom + Nom
-            '<div class="frow">' +
-            '<div class="fg"><label>Prénom *</label><input type="text" id="rfn" placeholder="Prénom"></div>' +
-            '<div class="fg"><label>Nom</label><input type="text" id="rln" placeholder="Nom"></div>' +
-            '</div>' + // Champ Téléphone (mode phone = obligatoire, mode email = optionnel)
-            '<div class="fg" id="rph-wrap">' +
-            '<label id="rph-label">📱 Téléphone Orange *</label>' +
-            '<div class="ph-row"><span class="ph-pfx">🇬🇳 +224</span><input type="tel" id="rph" placeholder="620 00 00 00" maxlength="9" style="flex:1"></div>' +
-            '</div>' + // Champ Email (mode email = obligatoire, caché en mode phone)
-            '<div class="fg" id="rem-wrap" style="display:none">' +
-            '<label>📧 Adresse email *</label>' +
-            '<input type="email" id="rem" placeholder="votre@email.com">' +
-            '</div>' + // Mot de passe
-            '<div class="fg"><label>Mot de passe *</label><input type="password" id="rpw" placeholder="8 caractères minimum" oninput="checkPwMatch()"></div>' +
-            '<div class="fg"><label>Confirmer le mot de passe *</label><input type="password" id="rpw2" placeholder="Répétez votre mot de passe" oninput="checkPwMatch()"></div>' +
-            '<div id="pw-match-msg" style="margin-top:-10px;margin-bottom:12px;font-size:13px;font-weight:700;display:none"></div>' + // Ville
-            '<div class="fg"><label>📍 Préfecture / Ville *</label><select id="rct">' + opts + '</select></div>' + // Bouton envoyer
-            '<button class="btn btn-or btn-full" style="border-radius:12px" id="btn-sendcode" onclick="sendVerifCode()">📱 Recevoir le code SMS →</button>' +
-            '<p style="text-align:center;font-size:13px;color:var(--muted);margin-top:14px">Déjà un compte ? <a style="color:var(--or);cursor:pointer;font-weight:700" onclick="authTab(\'login\')">Se connecter</a></p>';
-
-            // Mode actif par défaut = téléphone → vérification SMS
-            regMode = 'phone';
-            verifyMethod = 'sms';
-        }
-    }
-
-    function checkPwMatch() {
-        var pw = (document.getElementById('rpw') || {
-            value: ''
-        }).value;
-        var pw2 = (document.getElementById('rpw2') || {
-            value: ''
-        }).value;
-        var msg = document.getElementById('pw-match-msg');
-        if (!msg || !pw2)
-            return;
-        msg.style.display = 'block';
-        if (pw === pw2) {
-            msg.textContent = '✅ Les mots de passe correspondent';
-            msg.style.color = '#065F46';
-        } else {
-            msg.textContent = '❌ Les mots de passe ne correspondent pas';
-            msg.style.color = '#DC2626';
-        }
-    }
-
-    var regMode = 'phone'; // 'phone' ou 'email'
-
-    function regToggle(mode) {
-        regMode = mode;
-        var phoneWrap = document.getElementById('rph-wrap');
-        var emailWrap = document.getElementById('rem-wrap');
-        var phoneLabel = document.getElementById('rph-label');
-        var rtPhone = document.getElementById('rt-phone');
-        var rtEmail = document.getElementById('rt-email');
-        var btn = document.getElementById('btn-sendcode');
-        var activeStyle = {
-            background: 'var(--wh)',
-            boxShadow: 'var(--sh)',
-            color: 'var(--ink)'
-        };
-        var inactiveStyle = {
-            background: 'transparent',
-            boxShadow: 'none',
-            color: 'var(--muted)'
-        };
-
-        if (mode === 'phone') {
-            // Mode téléphone : téléphone obligatoire, email caché
-            if (phoneWrap)
-                phoneWrap.style.display = '';
-            if (phoneLabel)
-                phoneLabel.textContent = '📱 Téléphone Orange *';
-            if (emailWrap)
-                emailWrap.style.display = 'none';
-            if (rtPhone)
-                Object.assign(rtPhone.style, activeStyle);
-            if (rtEmail)
-                Object.assign(rtEmail.style, inactiveStyle);
-            verifyMethod = 'sms';
-            if (btn)
-                btn.textContent = '📱 Recevoir le code SMS →';
-        } else {
-            // Mode email : email obligatoire + téléphone optionnel
-            if (emailWrap)
-                emailWrap.style.display = '';
-            if (phoneWrap)
-                phoneWrap.style.display = '';
-            if (phoneLabel)
-                phoneLabel.textContent = '📱 Téléphone Orange (optionnel)';
-            if (rtPhone)
-                Object.assign(rtPhone.style, inactiveStyle);
-            if (rtEmail)
-                Object.assign(rtEmail.style, activeStyle);
-            verifyMethod = 'email';
-            if (btn)
-                btn.textContent = '📧 Recevoir le code par email →';
-        }
-    }
-
-    var verifyMethod = 'sms';
-    function pickVerifyMethod(m) {
-        verifyMethod = m;
-        var smsEl = document.getElementById('vm-sms');
-        var emEl = document.getElementById('vm-email');
-        var btn = document.getElementById('btn-sendcode');
-        if (smsEl) {
-            smsEl.style.border = '2px solid ' + (m === 'sms' ? 'var(--or)' : 'var(--br)');
-            smsEl.style.background = m === 'sms' ? 'var(--orl)' : 'var(--wh)';
-            smsEl.querySelector('div:nth-child(2)').style.color = m === 'sms' ? 'var(--or2)' : 'var(--muted)';
-        }
-        if (emEl) {
-            emEl.style.border = '2px solid ' + (m === 'email' ? 'var(--or)' : 'var(--br)');
-            emEl.style.background = m === 'email' ? 'var(--orl)' : 'var(--wh)';
-            emEl.querySelector('div:nth-child(2)').style.color = m === 'email' ? 'var(--or2)' : 'var(--muted)';
-        }
-        if (btn)
-            btn.textContent = m === 'sms' ? '📱 Recevoir le code SMS →' : '📧 Recevoir le code par email →';
-    }
-
-    var loginMode = 'phone';
-    function loginToggle(mode) {
-        loginMode = mode;
-        var pw = document.getElementById('li-phone-wrap');
-        var ew = document.getElementById('li-email-wrap');
-        var ltp = document.getElementById('lt-phone');
-        var lte = document.getElementById('lt-email');
-        var active = {
-            background: 'var(--wh)',
-            boxShadow: 'var(--sh)',
-            color: 'var(--ink)'
-        };
-        var inactive = {
-            background: 'transparent',
-            boxShadow: 'none',
-            color: 'var(--muted)'
-        };
-        if (pw)
-            pw.style.display = mode === 'phone' ? '' : 'none';
-        if (ew)
-            ew.style.display = mode === 'email' ? '' : 'none';
-        if (ltp)
-            Object.assign(ltp.style, mode === 'phone' ? active : inactive);
-        if (lte)
-            Object.assign(lte.style, mode === 'email' ? active : inactive);
-    }
-
-    function sendVerifCode() {
-        var fn = (document.getElementById('rfn') || {
-            value: ''
-        }).value.trim();
-        var ph = (document.getElementById('rph') || {
-            value: ''
-        }).value.trim();
-        var em = (document.getElementById('rem') || {
-            value: ''
-        }).value.trim();
-        var pw = (document.getElementById('rpw') || {
-            value: ''
-        }).value.trim();
-        var pw2 = (document.getElementById('rpw2') || {
-            value: ''
-        }).value.trim();
-        var city = (document.getElementById('rct') || {
-            value: ''
-        }).value;
-
-        if (!fn) {
-            toast('⚠️ Remplissez votre prénom', 'err');
-            return;
-        }
-        // Validation selon le mode choisi
-        if (regMode === 'phone') {
-            if (!ph || ph.length < 8) {
-                toast('⚠️ Numéro de téléphone invalide (8 chiffres min)', 'err');
-                return;
-            }
-        } else {
-            if (!em || !em.includes('@')) {
-                toast('⚠️ Adresse email invalide', 'err');
-                return;
-            }
-        }
-        if (!pw || pw.length < 6) {
-            toast('⚠️ Mot de passe trop court (6 caractères min)', 'err');
-            return;
-        }
-        if (pw !== pw2) {
-            toast('❌ Les mots de passe ne correspondent pas', 'err');
-            return;
-        }
-        if (!city) {
-            toast('⚠️ Choisissez votre ville', 'err');
-            return;
-        }
-
-        pendingUser = {
-            prenom: fn,
-            nom: (document.getElementById('rln') || {
-                value: ''
-            }).value.trim(),
-            phone: ph ? '+224' + ph : '',
-            email: regMode === 'email' ? em : '',
-            password: pw,
-            city: city,
-            method: regMode === 'email' ? 'email' : 'sms',
-            initials: (fn.charAt(0) + ((document.getElementById('rln') || {
-                value: ''
-            }).value.trim().charAt(0) || '')).toUpperCase()
-        };
-
-        // Désactiver le bouton pendant l'appel
-        var sendBtn = document.getElementById('btn-sendcode');
-        if (sendBtn) {
-            sendBtn.disabled = true;
-            sendBtn.textContent = '⏳ Envoi en cours...';
-        }
-
-        // Appel API → génère le code dans MongoDB
-        // Appel API avec timeout de 5 secondes
-        var apiDone = false;
-        var timeout = setTimeout(function() {
-            if (!apiDone) {
-                apiDone = true;
-                if (sendBtn) {
-                    sendBtn.disabled = false;
-                    sendBtn.textContent = verifyMethod === 'sms' ? '📱 Recevoir le code SMS →' : '📧 Recevoir le code par email →';
-                }
-                smsCode = Math.floor(1000 + Math.random() * 9000).toString();
-                codeFromServer = false;
-                showCodeForm(verifyMethod === 'email' ? em : '+224 ' + ph, verifyMethod === 'email' ? '📧' : '📱');
-            }
-        }, 5000);
-
-        fetch('/api/auth/send-code', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                phone: '+224' + ph,
-                email: em,
-                method: verifyMethod,
-                prenom: fn
-            })
-        })
-        .then(function(r) {
-            return r.json();
-        })
-        .then(function(data) {
-            if (apiDone)
-                return;
-            apiDone = true;
-            clearTimeout(timeout);
-            if (sendBtn) {
-                sendBtn.disabled = false;
-                sendBtn.textContent = verifyMethod === 'sms' ? '📱 Recevoir le code SMS →' : '📧 Recevoir le code par email →';
-            }
-            if (data.error) {
-                toast('❌ ' + data.error, 'err');
-                return;
-            }
-            smsCode = data.debug_code || Math.floor(1000 + Math.random() * 9000).toString();
-            codeFromServer = !!data.debug_code;
-            showCodeForm(verifyMethod === 'email' ? em : '+224 ' + ph, verifyMethod === 'email' ? '📧' : '📱');
-        })
-        .catch(function() {
-            if (apiDone)
-                return;
-            apiDone = true;
-            clearTimeout(timeout);
-            if (sendBtn) {
-                sendBtn.disabled = false;
-                sendBtn.textContent = verifyMethod === 'sms' ? '📱 Recevoir le code SMS →' : '📧 Recevoir le code par email →';
-            }
-            smsCode = Math.floor(1000 + Math.random() * 9000).toString();
-            codeFromServer = false;
-            showCodeForm(verifyMethod === 'email' ? em : '+224 ' + ph, verifyMethod === 'email' ? '📧' : '📱');
-        });
-    }
-
-    function showCodeForm(dest, icon) {
-        var body = document.getElementById('auth-body');
-        var codeHint = '<div style="background:#FFF3EE;border:1.5px solid var(--orm);border-radius:10px;padding:12px;margin-bottom:10px;text-align:center">' +
-        '<div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">' + icon + ' VOTRE CODE DE VÉRIFICATION</div>' +
-        '<div id="code-display" style="font-size:32px;font-weight:900;letter-spacing:8px;color:var(--or)">' + smsCode + '</div>' +
-        '<div style="font-size:11px;color:var(--muted);margin-top:4px">' + (icon === '📧' ? '(En attente config email — copiez ce code)' : '(Mode simulation — copiez ce code)') + '</div>' +
+    function showCodeForm(dest, icon){
+      var body=document.getElementById('auth-body');
+      var codeHint='<div style="background:#FFF3EE;border:1.5px solid var(--orm);border-radius:10px;padding:12px;margin-bottom:10px;text-align:center">'+
+        '<div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">'+icon+' VOTRE CODE DE VÉRIFICATION</div>'+
+        '<div id="code-display" style="font-size:32px;font-weight:900;letter-spacing:8px;color:var(--or)">'+smsCode+'</div>'+
+        '<div style="font-size:11px;color:var(--muted);margin-top:4px">'+(icon==='📧'?'(En attente config email — copiez ce code)':'(Mode simulation — copiez ce code)')+'</div>'+
         '</div>';
-        body.innerHTML +=
-        '<div class="sms-wrap" id="code-box">' +
-        '<div class="sw-title">' + icon + ' Code de vérification</div>' +
-        '<div class="sw-sub" style="margin-bottom:12px">Destinataire : <strong>' + dest + '</strong></div>' +
-        codeHint +
-        '<div class="sms-digits">' +
-        '<input type="text" maxlength="1" id="s1" oninput="movSms(this,\'s2\')" autocomplete="one-time-code">' +
-        '<input type="text" maxlength="1" id="s2" oninput="movSms(this,\'s3\')">' +
-        '<input type="text" maxlength="1" id="s3" oninput="movSms(this,\'s4\')">' +
-        '<input type="text" maxlength="1" id="s4" oninput="autoVerify()">' +
-        '</div>' +
-        '<button class="btn btn-or btn-full" style="border-radius:12px;margin-bottom:10px" onclick="verifyCode()">✅ Confirmer et créer mon compte</button>' +
-        '<div class="sms-resend">Code oublié ? <a onclick="resendCode()">Générer un nouveau code</a></div>' +
+      body.innerHTML+=
+        '<div class="sms-wrap" id="code-box">'+
+          '<div class="sw-title">'+icon+' Code de vérification</div>'+
+          '<div class="sw-sub" style="margin-bottom:12px">Destinataire : <strong>'+dest+'</strong></div>'+
+          codeHint+
+          '<div class="sms-digits">'+
+            '<input type="text" maxlength="1" id="s1" oninput="movSms(this,\'s2\')" autocomplete="one-time-code">'+
+            '<input type="text" maxlength="1" id="s2" oninput="movSms(this,\'s3\')">'+
+            '<input type="text" maxlength="1" id="s3" oninput="movSms(this,\'s4\')">'+
+            '<input type="text" maxlength="1" id="s4" oninput="autoVerify()">'+
+          '</div>'+
+          '<button class="btn btn-or btn-full" style="border-radius:12px;margin-bottom:10px" onclick="verifyCode()">✅ Confirmer et créer mon compte</button>'+
+          '<div class="sms-resend">Code oublié ? <a onclick="resendCode()">Générer un nouveau code</a></div>'+
         '</div>';
-        var s1 = document.getElementById('s1');
-        if (s1)
-            s1.focus();
-        // Pré-remplir automatiquement
-        setTimeout(function() {
-            var digits = smsCode.split('');
-            ['s1', 's2', 's3', 's4'].forEach(function(id, i) {
-                var el = document.getElementById(id);
-                if (el && !el.value)
-                    el.value = digits[i] || '';
-            });
-        }, 800);
-    }
-
-    function autoVerify() {
-        var entered = ['s1', 's2', 's3', 's4'].map(function(id) {
-            return (document.getElementById(id) || {
-                value: ''
-            }).value;
-        }).join('');
-        if (entered.length === 4)
-            verifyCode();
-    }
-
-    function movSms(el, nid) {
-        if (el.value.length >= 1) {
-            var n = document.getElementById(nid);
-            if (n)
-                n.focus();
-        }
-    }
-
-    function resendCode() {
-        smsCode = Math.floor(1000 + Math.random() * 9000).toString();
-        // Mettre à jour l'affichage du code
-        var codeBox = document.getElementById('code-box');
-        if (codeBox) {
-            var orDiv = codeBox.querySelector('[style*="letter-spacing:8px"]');
-            if (orDiv)
-                orDiv.textContent = smsCode;
-        }
-        ['s1', 's2', 's3', 's4'].forEach(function(id) {
-            var e = document.getElementById(id);
-            if (e)
-                e.value = '';
+      var s1=document.getElementById('s1');if(s1)s1.focus();
+      // Pré-remplir automatiquement
+      setTimeout(function(){
+        var digits=smsCode.split('');
+        ['s1','s2','s3','s4'].forEach(function(id,i){
+          var el=document.getElementById(id);
+          if(el&&!el.value)el.value=digits[i]||'';
         });
-        setTimeout(function() {
-            var digits = smsCode.split('');
-            ['s1', 's2', 's3', 's4'].forEach(function(id, i) {
-                var el = document.getElementById(id);
-                if (el)
-                    el.value = digits[i] || '';
-            });
-        }, 600);
-        toast('🔄 Nouveau code généré !', 'ok');
+      },800);
     }
 
-    function verifyCode() {
-        var entered = ['s1', 's2', 's3', 's4'].map(function(id) {
-            return (document.getElementById(id) || {
-                value: ''
-            }).value;
-        }).join('');
-        if (entered.length < 4) {
-            toast('⚠️ Entrez les 4 chiffres du code', 'err');
-            return;
-        }
-        if (entered !== smsCode) {
-            toast('❌ Code incorrect — réessayez', 'err');
-            return;
-        }
+    function autoVerify(){
+      var entered=['s1','s2','s3','s4'].map(function(id){return(document.getElementById(id)||{value:''}).value;}).join('');
+      if(entered.length===4) verifyCode();
+    }
 
-        var u = Object.assign({
-            name: pendingUser.prenom + (pendingUser.nom ? ' ' + pendingUser.nom : '')
-        }, pendingUser);
+    function movSms(el,nid){if(el.value.length>=1){var n=document.getElementById(nid);if(n)n.focus();}}
 
-        // Si code vient du serveur → enregistrer dans MongoDB
-        if (codeFromServer) {
-            fetch('/api/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    prenom: pendingUser.prenom,
-                    nom: pendingUser.nom || '',
-                    phone: pendingUser.phone,
-                    email: pendingUser.email || '',
-                    password: pendingUser.password,
-                    city: pendingUser.city || '',
-                    code: entered,
-                    method: pendingUser.method || 'sms'
-                })
-            })
-            .then(function(r) {
-                return r.json();
-            })
-            .then(function(data) {
-                if (data.error) {
-                    toast('❌ ' + (data.error), 'err');
-                    return;
-                }
-                var serverUser = data.user || u;
-                serverUser.initials = ((serverUser.prenom || u.prenom || 'U').charAt(0) + ((serverUser.nom || u.nom || '').charAt(0) || '')).toUpperCase();
-                serverUser.name = serverUser.name || (serverUser.prenom + (serverUser.nom ? ' ' + serverUser.nom : ''));
-                if (data.token)
-                    localStorage.setItem('ygy_token', data.token);
-                DB.addUser(serverUser);
-                DB.login(serverUser);
-                updateNav();
-                closeModal('auth');
-                toast('🎉 Bienvenue ' + u.prenom + ' ! Compte créé 🇬🇳', 'ok');
-                pendingUser = null;
-                smsCode = '';
-                codeFromServer = false;
-            })
-            .catch(function() {
-                DB.addUser(u);
-                DB.login(u);
-                updateNav();
-                closeModal('auth');
-                toast('🎉 Bienvenue ' + u.prenom + ' ! (mode hors-ligne)', 'ok');
-                pendingUser = null;
-                smsCode = '';
-                codeFromServer = false;
-            });
-        } else {
-            // Mode hors-ligne : sauvegarder localement seulement
-            u.initials = (u.prenom.charAt(0) + (u.nom ? u.nom.charAt(0) : '')).toUpperCase();
-            DB.addUser(u);
-            DB.login(u);
-            updateNav();
-            closeModal('auth');
-            toast('🎉 Bienvenue ' + u.prenom + ' ! Compte créé 🇬🇳', 'ok');
-            pendingUser = null;
-            smsCode = '';
-            codeFromServer = false;
-        }
+    function resendCode(){
+      smsCode=Math.floor(1000+Math.random()*9000).toString();
+      // Mettre à jour l'affichage du code
+      var codeBox=document.getElementById('code-box');
+      if(codeBox){
+        var orDiv=codeBox.querySelector('[style*="letter-spacing:8px"]');
+        if(orDiv)orDiv.textContent=smsCode;
+      }
+      ['s1','s2','s3','s4'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+      setTimeout(function(){
+        var digits=smsCode.split('');
+        ['s1','s2','s3','s4'].forEach(function(id,i){
+          var el=document.getElementById(id);if(el)el.value=digits[i]||'';
+        });
+      },600);
+      toast('🔄 Nouveau code généré !','ok');
+    }
+
+    function verifyCode(){
+      var entered=['s1','s2','s3','s4'].map(function(id){return(document.getElementById(id)||{value:''}).value;}).join('');
+      if(entered.length<4){toast('⚠️ Entrez les 4 chiffres du code','err');return;}
+      if(entered!==smsCode){toast('❌ Code incorrect — réessayez','err');return;}
+
+      var u=Object.assign({name:pendingUser.prenom+(pendingUser.nom?' '+pendingUser.nom:'')},pendingUser);
+
+      // Si code vient du serveur → enregistrer dans MongoDB
+      if(codeFromServer){
+        fetch('/api/register',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({
+            prenom: pendingUser.prenom,
+            nom: pendingUser.nom||'',
+            phone: pendingUser.phone,
+            email: pendingUser.email||'',
+            password: pendingUser.password,
+            city: pendingUser.city||'',
+            code: entered,
+            method: pendingUser.method||'sms'
+          })
+        })
+        .then(function(r){return r.json();})
+        .then(function(data){
+          if(data.error){toast('❌ '+(data.error),'err');return;}
+          var serverUser=data.user||u;
+          serverUser.initials=((serverUser.prenom||u.prenom||'U').charAt(0)+((serverUser.nom||u.nom||'').charAt(0)||'')).toUpperCase();
+          serverUser.name=serverUser.name||(serverUser.prenom+(serverUser.nom?' '+serverUser.nom:''));
+          if(data.token) localStorage.setItem('ygy_token',data.token);
+          DB.addUser(serverUser);DB.login(serverUser);updateNav();closeModal('auth');
+          toast('🎉 Bienvenue '+u.prenom+' ! Compte créé 🇬🇳','ok');
+          pendingUser=null;smsCode='';codeFromServer=false;
+        })
+        .catch(function(){
+          DB.addUser(u);DB.login(u);updateNav();closeModal('auth');
+          toast('🎉 Bienvenue '+u.prenom+' ! (mode hors-ligne)','ok');
+          pendingUser=null;smsCode='';codeFromServer=false;
+        });
+      } else {
+        // Mode hors-ligne : sauvegarder localement seulement
+        u.initials=(u.prenom.charAt(0)+(u.nom?u.nom.charAt(0):'')).toUpperCase();
+        DB.addUser(u);DB.login(u);updateNav();closeModal('auth');
+        toast('🎉 Bienvenue '+u.prenom+' ! Compte créé 🇬🇳','ok');
+        pendingUser=null;smsCode='';codeFromServer=false;
+      }
     }
 
     // ══════════════════════════════════════════
     //  GOOGLE OAUTH (One Tap + bouton)
     // ══════════════════════════════════════════
-    var GOOGLE_CLIENT_ID = '639681741514-qrgubnbcah0ec95s83jg6656gs6fje1o.apps.googleusercontent.com';
+    // ══════════════════════════════════════════
+    //  LANGUE + SALUTATIONS
+    // ══════════════════════════════════════════
+    var currentLang = 'fr';
+    var GREETINGS_FR = ['Marketplace N°1 de Guinée', 'Djarama ! 🙏', 'Wonou Wally ! 👋', 'I ni sogoma ! 🌅', 'Jam waali ! ☀️'];
+    var GREETINGS_EN = ['Guinea's #1 Marketplace', 'Welcome! 🙏', 'Hello Guinea! 👋', 'Good morning! 🌅'];
+    var greetIdx = 0;
 
-    function initGoogleAuth() {
-        if (typeof google === 'undefined' || !google.accounts)
-            return;
-        google.accounts.id.initialize({
+    function setLang(lang) {
+      currentLang = lang;
+      var L = {
+        fr: {
+          h1: 'Le marché de<br>toute la <strong>Guinée</strong>,<br>en un clic.',
+          sub: 'Des milliers d'annonces dans vos 38 préfectures. Achetez, vendez et payez avec Orange Money — simple et sécurisé.',
+          trust: '<strong>+12 400</strong> Guinéens font confiance à YouGouYou'
+        },
+        en: {
+          h1: 'Guinea's marketplace,<br>in one <strong>click</strong>.',
+          sub: 'Thousands of listings across 38 prefectures. Buy, sell and pay with Orange Money — simple and secure.',
+          trust: '<strong>+12,400</strong> Guineans trust YouGouYou'
+        }
+      }[lang];
+      // Boutons langue
+      var btnFr=document.getElementById('lang-fr');
+      var btnEn=document.getElementById('lang-en');
+      if(btnFr){btnFr.style.background=lang==='fr'?'var(--or)':'var(--brl)';btnFr.style.color=lang==='fr'?'#fff':'var(--muted)';}
+      if(btnEn){btnEn.style.background=lang==='en'?'var(--or)':'var(--brl)';btnEn.style.color=lang==='en'?'#fff':'var(--muted)';}
+      // Hero
+      var h1=document.querySelector('.hero h1');
+      var sub=document.querySelector('.hero .hero-sub');
+      var trust=document.querySelector('.trust-txt');
+      if(h1) h1.innerHTML=L.h1;
+      if(sub) sub.textContent=L.sub;
+      if(trust) trust.innerHTML=L.trust;
+      // Search placeholders
+      document.querySelectorAll('input[type=text]').forEach(function(el){
+        if(el.placeholder&&(el.placeholder.includes('Toyota')||el.placeholder.includes('Apartment')))
+          el.placeholder=lang==='fr'?'Toyota, iPhone, Appartement, Emploi...':'Toyota, iPhone, Apartment, Job...';
+      });
+      toast(lang==='fr'?'🇫🇷 Français activé':'🇬🇧 English activated','ok');
+    }
+
+    // Rotation salutations toutes les 3 secondes
+    function rotateGreeting(){
+      var el=document.getElementById('hero-greet');
+      if(!el) return;
+      var list=currentLang==='en'?GREETINGS_EN:GREETINGS_FR;
+      greetIdx=(greetIdx+1)%list.length;
+      el.style.transition='opacity .3s';
+      el.style.opacity='0';
+      setTimeout(function(){el.textContent=list[greetIdx];el.style.opacity='1';},300);
+    }
+    setInterval(rotateGreeting,3000);
+
+    var GOOGLE_CLIENT_ID='639681741514-qrgubnbcah0ec95s83jg6656gs6fje1o.apps.googleusercontent.com';
+
+    function initGoogleAuth(){
+      if(typeof google==='undefined'||!google.accounts)return;
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleLogin,
+        auto_select: false,
+        cancel_on_tap_outside: true,
+      });
+    }
+
+    function loginWithGoogle(){
+      if(typeof google==='undefined'||!google.accounts){
+        // Google OAuth pas encore configuré → mode démo
+        var demoUser={
+          name:'Mohamed Diallo',
+          email:'utilisateur@gmail.com',
+          phone:'',
+          initials:'MD',
+          method:'google'
+        };
+        DB.addUser(demoUser);
+        DB.login(demoUser);
+        updateNav();
+        closeModal('auth');
+        toast('✅ Connecté via Google (mode démo) 🇬🇳','ok');
+        return;
+      }
+      google.accounts.id.prompt(function(notification){
+        if(notification.isNotDisplayed()||notification.isSkippedMoment()){
+          // Fallback : ouvrir popup OAuth
+          google.accounts.oauth2.initTokenClient({
             client_id: GOOGLE_CLIENT_ID,
-            callback: handleGoogleLogin,
-            auto_select: false,
-            cancel_on_tap_outside: true,
-        });
-    }
-
-    function loginWithGoogle() {
-        if (typeof google === 'undefined' || !google.accounts) {
-            // Google OAuth pas encore configuré → mode démo
-            var demoUser = {
-                name: 'Mohamed Diallo',
-                email: 'utilisateur@gmail.com',
-                phone: '',
-                initials: 'MD',
-                method: 'google'
-            };
-            DB.addUser(demoUser);
-            DB.login(demoUser);
-            updateNav();
-            closeModal('auth');
-            toast('✅ Connecté via Google (mode démo) 🇬🇳', 'ok');
-            return;
-        }
-        google.accounts.id.prompt(function(notification) {
-            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-                // Fallback : ouvrir popup OAuth
-                google.accounts.oauth2.initTokenClient({
-                    client_id: GOOGLE_CLIENT_ID,
-                    scope: 'email profile',
-                    callback: function(resp) {
-                        if (resp.access_token)
-                            fetchGoogleProfile(resp.access_token);
-                    }
-                }).requestAccessToken();
+            scope: 'email profile',
+            callback: function(resp){
+              if(resp.access_token) fetchGoogleProfile(resp.access_token);
             }
-        });
-    }
-
-    function handleGoogleLogin(response) {
-        // Décoder le JWT Google
-        try {
-            var payload = JSON.parse(atob(response.credential.split('.')[1]));
-            var u = {
-                name: payload.name || 'Utilisateur Google',
-                email: payload.email || '',
-                phone: '',
-                initials: (payload.given_name || 'G').charAt(0) + (payload.family_name || '').charAt(0),
-                avatar: payload.picture || '',
-                method: 'google'
-            };
-            DB.addUser(u);
-            DB.login(u);
-            updateNav();
-            closeModal('auth');
-            toast('✅ Bienvenue ' + u.name.split(' ')[0] + ' ! Connecté via Google 🇬🇳', 'ok');
-        } catch (e) {
-            toast('⚠️ Connexion Google échouée', 'err');
+          }).requestAccessToken();
         }
+      });
     }
 
-    function fetchGoogleProfile(token) {
-        fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-            headers: {
-                Authorization: 'Bearer ' + token
-            }
-        })
-        .then(function(r) {
-            return r.json();
-        })
-        .then(function(p) {
-            var u = {
-                name: (p.given_name || '') + ' ' + (p.family_name || ''),
-                email: p.email || '',
-                phone: '',
-                initials: ((p.given_name || 'G').charAt(0) + (p.family_name || '').charAt(0)).toUpperCase(),
-                method: 'google'
-            };
-            DB.addUser(u);
-            DB.login(u);
-            updateNav();
-            closeModal('auth');
-            toast('✅ Connecté via Google !', 'ok');
-        }).catch(function() {
-            toast('⚠️ Erreur profil Google', 'err');
-        });
+    function handleGoogleLogin(response){
+      // Décoder le JWT Google
+      try{
+        var payload=JSON.parse(atob(response.credential.split('.')[1]));
+        var u={
+          name: payload.name||'Utilisateur Google',
+          email: payload.email||'',
+          phone: '',
+          initials: (payload.given_name||'G').charAt(0)+(payload.family_name||'').charAt(0),
+          avatar: payload.picture||'',
+          method: 'google'
+        };
+        DB.addUser(u);DB.login(u);updateNav();closeModal('auth');
+        toast('✅ Bienvenue '+u.name.split(' ')[0]+' ! Connecté via Google 🇬🇳','ok');
+      }catch(e){
+        toast('⚠️ Connexion Google échouée','err');
+      }
+    }
+
+    function fetchGoogleProfile(token){
+      fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+token}})
+        .then(function(r){return r.json();})
+        .then(function(p){
+          var u={name:(p.given_name||'')+' '+(p.family_name||''),email:p.email||'',phone:'',
+            initials:((p.given_name||'G').charAt(0)+(p.family_name||'').charAt(0)).toUpperCase(),method:'google'};
+          DB.addUser(u);DB.login(u);updateNav();closeModal('auth');
+          toast('✅ Connecté via Google !','ok');
+        }).catch(function(){toast('⚠️ Erreur profil Google','err');});
     }
 
     // Init Google au chargement
-    window.addEventListener('load', function() {
-        setTimeout(initGoogleAuth, 1000);
-    });
+    window.addEventListener('load',function(){setTimeout(initGoogleAuth,1000);});
 
-    function doLogin() {
-        var id = '';
-        if (loginMode === 'phone') {
-            id = (document.getElementById('li-phone') || {
-                value: ''
-            }).value.trim();
-        }
-        else {
-            id = (document.getElementById('li-email') || {
-                value: ''
-            }).value.trim();
-        }
-        var pw = (document.getElementById('lp') || {
-            value: ''
-        }).value.trim();
-        if (!id) {
-            toast('⚠️ Remplissez votre ' + (loginMode === 'phone' ? 'téléphone' : 'email'), 'err');
-            return;
-        }
-        if (!pw) {
-            toast('⚠️ Entrez votre mot de passe', 'err');
-            return;
-        }
+    function doLogin(){
+      var id='';
+      if(loginMode==='phone'){id=(document.getElementById('li-phone')||{value:''}).value.trim();}
+      else{id=(document.getElementById('li-email')||{value:''}).value.trim();}
+      var pw=(document.getElementById('lp')||{value:''}).value.trim();
+      if(!id){toast('⚠️ Remplissez votre '+(loginMode==='phone'?'téléphone':'email'),'err');return;}
+      if(!pw){toast('⚠️ Entrez votre mot de passe','err');return;}
 
-        // Désactiver le bouton pendant l'appel
-        var btns = document.querySelectorAll('#auth-body .btn-ink');
-        btns.forEach(function(b) {
-            b.disabled = true;
-            b.textContent = '⏳ Connexion...';
-        });
+      // Désactiver le bouton pendant l'appel
+      var btns=document.querySelectorAll('#auth-body .btn-ink');
+      btns.forEach(function(b){b.disabled=true;b.textContent='⏳ Connexion...';});
 
-        function resetBtn() {
-            btns.forEach(function(b) {
-                b.disabled = false;
-                b.textContent = 'Se connecter →';
-            });
-        }
+      function resetBtn(){btns.forEach(function(b){b.disabled=false;b.textContent='Se connecter →';});}
 
-        fetch('/api/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                identifier: loginMode === 'phone' ? '+224' + id.replace(/\s/g, '') : id.toLowerCase(),
-                password: pw
-            })
-        })
-        .then(function(r) {
-            return r.json();
-        })
-        .then(function(data) {
-            resetBtn();
-            if (data.error || !data.user) {
-                toast('❌ ' + (data.error || 'Identifiants incorrects'), 'err');
-                return;
-            }
-            var u = data.user;
-            u.initials = ((u.prenom || u.name || 'U').charAt(0) + ((u.nom || '').charAt(0) || '')).toUpperCase();
-            DB.login(u);
-            if (data.token)
-                localStorage.setItem('ygy_token', data.token);
-            updateNav();
-            closeModal('auth');
-            toast('✅ Bienvenue ' + (u.prenom || u.name || '').split(' ')[0] + ' ! 🇬🇳', 'ok');
-        })
-        .catch(function() {
-            resetBtn();
-            // Fallback localStorage si serveur indisponible
-            var users = DB._d.users || [];
-            var fullId = loginMode === 'phone' ? ('+224' + id.replace(/\s/g, '')) : id.toLowerCase();
-            var found = users.find(function(u) {
-                return (u.phone && u.phone.replace(/\s/g, '') === fullId.replace(/\s/g, '')) || (u.email && u.email.toLowerCase() === fullId);
-            });
-            if (!found) {
-                toast('❌ Serveur indisponible — compte introuvable localement', 'err');
-                return;
-            }
-            if (found.password && found.password !== pw) {
-                toast('❌ Mot de passe incorrect', 'err');
-                return;
-            }
-            DB.login(found);
-            updateNav();
-            closeModal('auth');
-            toast('⚠️ Connecté hors-ligne — mode limité', 'ok');
-        });
-    }
-    function openEditProfile() {
-        var u = DB.user();
-        if (!u)
-            return;
-        var prenom = u.prenom || (u.name || '').split(' ')[0] || '';
-        var nom = u.nom || (u.name || '').split(' ').slice(1).join(' ') || '';
-        var phone = (u.phone || '').replace('+224', '').replace(/\s/g, '');
-        document.getElementById('ep-prenom').value = prenom;
-        document.getElementById('ep-nom').value = nom;
-        document.getElementById('ep-phone').value = phone;
-        document.getElementById('ep-city').value = u.city || '';
-        document.getElementById('ep-pw').value = '';
-        openModal('editprofile');
-    }
-
-    function saveProfile() {
-        var u = DB.user();
-        if (!u)
-            return;
-        var prenom = document.getElementById('ep-prenom').value.trim();
-        var nom = document.getElementById('ep-nom').value.trim();
-        var phone = document.getElementById('ep-phone').value.trim();
-        var city = document.getElementById('ep-city').value;
-        var pw = document.getElementById('ep-pw').value.trim();
-        if (!prenom) {
-            toast('⚠️ Le prénom est obligatoire', 'err');
-            return;
+      fetch('/api/login',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({identifier:loginMode==='phone'?'+224'+id.replace(/\s/g,''):id.toLowerCase(), password:pw})
+      })
+      .then(function(r){return r.json();})
+      .then(function(data){
+        resetBtn();
+        if(data.error||!data.user){
+          toast('❌ '+(data.error||'Identifiants incorrects'),'err');
+          return;
         }
-        // Mettre à jour l'utilisateur
-        u.prenom = prenom;
-        u.nom = nom;
-        u.name = prenom + (nom ? ' ' + nom : '');
-        u.initials = (prenom.charAt(0) + (nom.charAt(0) || '')).toUpperCase();
-        if (phone)
-            u.phone = '+224' + phone.replace(/\s/g, '');
-        if (city)
-            u.city = city;
-        if (pw && pw.length >= 6)
-            u.password = pw;
-        else if (pw && pw.length < 6) {
-            toast('⚠️ Mot de passe trop court (6 min)', 'err');
-            return;
-        }
-        // Sauvegarder dans la session et la liste des users
+        var u=data.user;
+        u.initials=((u.prenom||u.name||'U').charAt(0)+((u.nom||'').charAt(0)||'')).toUpperCase();
         DB.login(u);
-        var users = DB._d.users || [];
-        var idx = users.findIndex(function(x) {
-            return x.email === u.email || x.phone === u.phone;
-        });
-        if (idx >= 0)
-            users[idx] = u;
-        else
-            users.push(u);
-        DB._d.users = users;
-        DB.save();
-        closeModal('editprofile');
-        loadDash();
+        if(data.token) localStorage.setItem('ygy_token',data.token);
         updateNav();
-        toast('✅ Profil mis à jour !', 'ok');
+        closeModal('auth');
+        toast('✅ Bienvenue '+(u.prenom||u.name||'').split(' ')[0]+' ! 🇬🇳','ok');
+      })
+      .catch(function(){
+        resetBtn();
+        // Fallback localStorage si serveur indisponible
+        var users=DB._d.users||[];
+        var fullId=loginMode==='phone'?('+224'+id.replace(/\s/g,'')):id.toLowerCase();
+        var found=users.find(function(u){
+          return (u.phone&&u.phone.replace(/\s/g,'')===fullId.replace(/\s/g,''))||(u.email&&u.email.toLowerCase()===fullId);
+        });
+        if(!found){toast('❌ Serveur indisponible — compte introuvable localement','err');return;}
+        if(found.password&&found.password!==pw){toast('❌ Mot de passe incorrect','err');return;}
+        DB.login(found);updateNav();closeModal('auth');
+        toast('⚠️ Connecté hors-ligne — mode limité','ok');
+      });
+    }
+    function openEditProfile(){
+      var u=DB.user();if(!u)return;
+      var prenom=u.prenom||(u.name||'').split(' ')[0]||'';
+      var nom=u.nom||(u.name||'').split(' ').slice(1).join(' ')||'';
+      var phone=(u.phone||'').replace('+224','').replace(/\s/g,'');
+      document.getElementById('ep-prenom').value=prenom;
+      document.getElementById('ep-nom').value=nom;
+      document.getElementById('ep-phone').value=phone;
+      document.getElementById('ep-city').value=u.city||'';
+      document.getElementById('ep-pw').value='';
+      openModal('editprofile');
     }
 
-    function logout() {
-        DB.logout();
-        updateNav();
-        goTo('home');
-        toast('👋 Déconnecté');
+    function saveProfile(){
+      var u=DB.user();if(!u)return;
+      var prenom=document.getElementById('ep-prenom').value.trim();
+      var nom=document.getElementById('ep-nom').value.trim();
+      var phone=document.getElementById('ep-phone').value.trim();
+      var city=document.getElementById('ep-city').value;
+      var pw=document.getElementById('ep-pw').value.trim();
+      if(!prenom){toast('⚠️ Le prénom est obligatoire','err');return;}
+      // Mettre à jour l'utilisateur
+      u.prenom=prenom;
+      u.nom=nom;
+      u.name=prenom+(nom?' '+nom:'');
+      u.initials=(prenom.charAt(0)+(nom.charAt(0)||'')).toUpperCase();
+      if(phone) u.phone='+224'+phone.replace(/\s/g,'');
+      if(city) u.city=city;
+      if(pw&&pw.length>=6) u.password=pw;
+      else if(pw&&pw.length<6){toast('⚠️ Mot de passe trop court (6 min)','err');return;}
+      // Sauvegarder dans la session et la liste des users
+      DB.login(u);
+      var users=DB._d.users||[];
+      var idx=users.findIndex(function(x){return x.email===u.email||x.phone===u.phone;});
+      if(idx>=0) users[idx]=u; else users.push(u);
+      DB._d.users=users;
+      DB.save();
+      closeModal('editprofile');
+      loadDash();
+      updateNav();
+      toast('✅ Profil mis à jour !','ok');
     }
-    function updateNav() {
-        var btn = document.getElementById('nav-auth-btn');
-        if (!btn)
-            return;
-        var u = DB.user();
-        if (u) {
-            btn.textContent = '👤 ' + u.name.split(' ')[0];
-            btn.onclick = function() {
-                loadDash();
-                goTo('dashboard');
-            };
-        }
-        else {
-            btn.textContent = '👤 Connexion';
-            btn.onclick = function() {
-                openModal('auth');
-            };
-        }
+
+    function logout(){DB.logout();updateNav();goTo('home');toast('👋 Déconnecté');}
+    function updateNav(){
+      var btn=document.getElementById('nav-auth-btn');if(!btn)return;
+      var u=DB.user();
+      if(u){btn.textContent='👤 '+u.name.split(' ')[0];btn.onclick=function(){loadDash();goTo('dashboard');};}
+      else{btn.textContent='👤 Connexion';btn.onclick=function(){openModal('auth');};}
     }
 
     // ══════════════════════════════════════════
     //  SYNC ROLE DEPUIS MONGODB
     // ══════════════════════════════════════════
-    function syncRoleFromServer(callback) {
-        var token = localStorage.getItem('ygy_token');
-        if (!token) {
-            if (callback)
-                callback();
-            return;
+    function syncRoleFromServer(callback){
+      var token=localStorage.getItem('ygy_token');
+      if(!token){if(callback)callback();return;}
+      fetch('/api/me',{headers:{'Authorization':'Bearer '+token}})
+      .then(function(r){return r.ok?r.json():Promise.reject();})
+      .then(function(data){
+        if(data&&data.user){
+          var u=DB.user()||{};
+          u.role=data.user.role;
+          if(data.user.prenom) u.prenom=data.user.prenom;
+          if(data.user.nom) u.nom=data.user.nom;
+          if(data.user.name) u.name=data.user.name;
+          if(data.user.phone) u.phone=data.user.phone;
+          if(data.user.email) u.email=data.user.email;
+          if(data.user.city) u.city=data.user.city;
+          DB.login(u);
         }
-        fetch('/api/me', {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        })
-        .then(function(r) {
-            return r.ok ? r.json() : Promise.reject();
-        })
-        .then(function(data) {
-            if (data && data.user) {
-                var u = DB.user() || {};
-                u.role = data.user.role;
-                if (data.user.prenom)
-                    u.prenom = data.user.prenom;
-                if (data.user.nom)
-                    u.nom = data.user.nom;
-                if (data.user.name)
-                    u.name = data.user.name;
-                if (data.user.phone)
-                    u.phone = data.user.phone;
-                if (data.user.email)
-                    u.email = data.user.email;
-                if (data.user.city)
-                    u.city = data.user.city;
-                DB.login(u);
-            }
-            if (callback)
-                callback();
-        })
-        .catch(function() {
-            if (callback)
-                callback();
-        });
+        if(callback)callback();
+      })
+      .catch(function(){if(callback)callback();});
     }
 
     // ══════════════════════════════════════════
     //  DASHBOARD
     // ══════════════════════════════════════════
-    function loadDash() {
-        var u = DB.user();
-        if (!u) {
-            openModal('auth');
-            return;
-        }
-        syncRoleFromServer(function() {
-            renderDash();
-        });
+    function loadDash(){
+      var u=DB.user();if(!u){openModal('auth');return;}
+      syncRoleFromServer(function(){renderDash();});
     }
-    function renderDash() {
-        var u = DB.user();
-        if (!u)
-            return;
+    function renderDash(){
+      var u=DB.user();if(!u)return;
 
-        // Sidebar
-        var initials = (u.prenom || u.name || 'U').charAt(0).toUpperCase() + ((u.nom || '').charAt(0) || '').toUpperCase();
-        document.getElementById('d-av').textContent = initials || 'U';
-        document.getElementById('d-nm').textContent = u.name || u.prenom || 'Utilisateur';
-        document.getElementById('d-ph').textContent = u.phone || u.email || '';
+      // Sidebar
+      var initials=(u.prenom||u.name||'U').charAt(0).toUpperCase()+((u.nom||'').charAt(0)||'').toUpperCase();
+      document.getElementById('d-av').textContent=initials||'U';
+      document.getElementById('d-nm').textContent=u.name||u.prenom||'Utilisateur';
+      document.getElementById('d-ph').textContent=u.phone||u.email||'';
 
-        // Lien Admin visible seulement pour admin
-        var adminLink = document.getElementById('nav-admin-link');
-        if (adminLink) {
-            if (u.role === 'admin')
-                adminLink.removeAttribute('hidden');
-            else
-                adminLink.setAttribute('hidden', '');
-        }
+      // Lien Admin visible seulement pour admin
+      var adminLink=document.getElementById('nav-admin-link');
+      if(adminLink){
+        if(u.role==='admin') adminLink.removeAttribute('hidden');
+        else adminLink.setAttribute('hidden','');
+      }
 
-        // Onglet Profil — infos personnelles
-        var av = document.getElementById('p-avatar');
-        if (av)
-            av.textContent = initials || 'U';
-        var pn = document.getElementById('p-name');
-        if (pn)
-            pn.textContent = u.name || u.prenom || '—';
-        var rb = document.getElementById('p-role-badge');
-        if (rb)
-            rb.innerHTML = u.role === 'admin'
-            ? '<span style="background:#EFF6FF;color:#1D4ED8;font-size:11px;font-weight:800;padding:3px 10px;border-radius:50px">👑 Administrateur</span>'
-            : '<span style="background:#D1FAE5;color:#065F46;font-size:11px;font-weight:800;padding:3px 10px;border-radius:50px">✅ Membre vérifié</span>';
-        var pp = document.getElementById('p-phone');
-        if (pp)
-            pp.textContent = u.phone || 'Non renseigné';
-        var pe = document.getElementById('p-email');
-        if (pe)
-            pe.textContent = u.email || 'Non renseigné';
-        var pc = document.getElementById('p-city');
-        if (pc)
-            pc.textContent = u.city || 'Non renseignée';
-        var pv = document.getElementById('p-verif');
-        if (pv)
-            pv.textContent = (u.method === 'email' ? '📧 Email' : '📱 SMS') + ' — Vérifié';
+      // Onglet Profil — infos personnelles
+      var av=document.getElementById('p-avatar');
+      if(av) av.textContent=initials||'U';
+      var pn=document.getElementById('p-name');
+      if(pn) pn.textContent=u.name||u.prenom||'—';
+      var rb=document.getElementById('p-role-badge');
+      if(rb) rb.innerHTML=u.role==='admin'
+        ? '<span style="background:#EFF6FF;color:#1D4ED8;font-size:11px;font-weight:800;padding:3px 10px;border-radius:50px">👑 Administrateur</span>'
+        : '<span style="background:#D1FAE5;color:#065F46;font-size:11px;font-weight:800;padding:3px 10px;border-radius:50px">✅ Membre vérifié</span>';
+      var pp=document.getElementById('p-phone');
+      if(pp) pp.textContent=u.phone||'Non renseigné';
+      var pe=document.getElementById('p-email');
+      if(pe) pe.textContent=u.email||'Non renseigné';
+      var pc=document.getElementById('p-city');
+      if(pc) pc.textContent=u.city||'Non renseignée';
+      var pv=document.getElementById('p-verif');
+      if(pv) pv.textContent=(u.method==='email'?'📧 Email':'📱 SMS')+' — Vérifié';
 
-        // Mes annonces (seulement les siennes, pas les démos)
-        var allAds = DB._d.ads || [];
-        var myAds = allAds.filter(function(a) {
-            return !a.isDemo && (a.uid === u.id || a.uid === u.email || a.sellerEmail === u.email || a.seller === u.name);
-        });
+      // Mes annonces (seulement les siennes, pas les démos)
+      var allAds=DB._d.ads||[];
+      var myAds=allAds.filter(function(a){
+        return !a.isDemo && (a.uid===u.id||a.uid===u.email||a.sellerEmail===u.email||a.seller===u.name);
+      });
 
-        // Stats
-        var pays = DB.payments();
-        var favIds = DB.favs();
-        var pca = document.getElementById('p-count-ads');
-        if (pca)
-            pca.textContent = myAds.length;
-        var pcp = document.getElementById('p-count-pay');
-        if (pcp)
-            pcp.textContent = pays.length;
-        var pcf = document.getElementById('p-count-favs');
-        if (pcf)
-            pcf.textContent = favIds.length;
+      // Stats
+      var pays=DB.payments();
+      var favIds=DB.favs();
+      var pca=document.getElementById('p-count-ads'); if(pca) pca.textContent=myAds.length;
+      var pcp=document.getElementById('p-count-pay'); if(pcp) pcp.textContent=pays.length;
+      var pcf=document.getElementById('p-count-favs'); if(pcf) pcf.textContent=favIds.length;
 
-        // Historique de navigation (annonces consultées)
-        var hist = DB._d.history || [];
-        var ph = document.getElementById('p-history');
-        if (ph) {
-            if (!hist.length) {
-                ph.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted)">' +
-                '<div style="font-size:48px;margin-bottom:12px">🔍</div>' +
-                '<p style="font-weight:700">Aucune annonce consultée récemment</p>' +
-                '<p style="font-size:13px;margin-top:6px">Les annonces que vous visitez apparaîtront ici</p>' +
-                '</div>';
-            } else {
-                ph.innerHTML = hist.slice(0, 10).map(function(a) {
-                    return '<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--brl)">' +
-                    '<span style="font-size:28px">' + a.e + '</span>' +
-                    '<div style="flex:1"><div style="font-weight:700;font-size:14px">' + a.t + '</div>' +
-                    '<div style="font-size:12px;color:var(--muted)">📍 ' + a.city + ' · ' + a.date + '</div></div>' +
-                    '<div style="font-weight:800;color:var(--or);font-size:14px">' + a.p.toLocaleString('fr-FR') + ' GNF</div>' +
-                    '</div>';
-                }).join('');
-            }
-        }
-
-        // Onglet Mes annonces
-        var full = document.getElementById('d-ads-full');
-        if (full)
-            full.innerHTML = myAds.length
-            ? myAds.map(dashRow).join('')
-            : '<div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:48px;text-align:center;color:var(--muted);box-shadow:var(--sh)">' +
-            '<div style="font-size:52px;margin-bottom:14px">📋</div>' +
-            '<p style="font-weight:800;font-size:16px;margin-bottom:8px">Aucune annonce publiée</p>' +
-            '<a onclick="goTo(\'post\')" style="color:var(--or);font-weight:800;cursor:pointer;font-size:14px">➕ Déposer ma première annonce →</a>' +
+      // Historique de navigation (annonces consultées)
+      var hist=DB._d.history||[];
+      var ph=document.getElementById('p-history');
+      if(ph){
+        if(!hist.length){
+          ph.innerHTML='<div style="text-align:center;padding:32px;color:var(--muted)">'+
+            '<div style="font-size:48px;margin-bottom:12px">🔍</div>'+
+            '<p style="font-weight:700">Aucune annonce consultée récemment</p>'+
+            '<p style="font-size:13px;margin-top:6px">Les annonces que vous visitez apparaîtront ici</p>'+
             '</div>';
-
-        // Onglet Paiements
-        var pl = document.getElementById('d-pay-list');
-        if (pl) {
-            if (!pays.length) {
-                pl.innerHTML = '<div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:48px;text-align:center;color:var(--muted);box-shadow:var(--sh)"><div style="font-size:52px;margin-bottom:14px">🟠</div><p style="font-weight:800;font-size:16px;margin-bottom:6px">Aucun paiement</p><p style="font-size:14px">Vos transactions Orange Money apparaîtront ici</p></div>';
-            } else {
-                pl.innerHTML = pays.map(function(p) {
-                    return '<div class="dash-ad-row"><div style="font-size:30px">🟠</div><div style="flex:1"><div style="font-weight:800;font-size:14px">' + p.item + '</div><div style="font-size:12px;color:var(--muted)">📅 ' + p.date + ' · 🔑 ' + p.ref + '</div></div><div style="text-align:right"><div style="font-weight:800;font-size:16px;color:var(--or)">' + parseInt(p.amount).toLocaleString('fr-FR') + ' GNF</div><span class="badge badge-g">✅ Payé</span></div></div>';
-                }).join('');
-            }
+        } else {
+          ph.innerHTML=hist.slice(0,10).map(function(a){
+            return '<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--brl)">'+
+              '<span style="font-size:28px">'+a.e+'</span>'+
+              '<div style="flex:1"><div style="font-weight:700;font-size:14px">'+a.t+'</div>'+
+              '<div style="font-size:12px;color:var(--muted)">📍 '+a.city+' · '+a.date+'</div></div>'+
+              '<div style="font-weight:800;color:var(--or);font-size:14px">'+a.p.toLocaleString('fr-FR')+' GNF</div>'+
+              '</div>';
+          }).join('');
         }
+      }
 
-        // Onglet Favoris
-        var favAds = DB.ads().filter(function(a) {
-            return favIds.includes(a.id);
-        });
-        var df = document.getElementById('d-favs');
-        if (df)
-            df.innerHTML = favAds.length
-            ? favAds.map(function(a) {
-                return adCard(a, false);
-            }).join('')
-            : '<div style="grid-column:1/-1;background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:48px;text-align:center;color:var(--muted);box-shadow:var(--sh)"><div style="font-size:52px;margin-bottom:14px">❤️</div><p>Aucun favori</p></div>';
+      // Onglet Mes annonces
+      var full=document.getElementById('d-ads-full');
+      if(full) full.innerHTML=myAds.length
+        ? myAds.map(dashRow).join('')
+        : '<div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:48px;text-align:center;color:var(--muted);box-shadow:var(--sh)">'+
+          '<div style="font-size:52px;margin-bottom:14px">📋</div>'+
+          '<p style="font-weight:800;font-size:16px;margin-bottom:8px">Aucune annonce publiée</p>'+
+          '<a onclick="goTo(\'post\')" style="color:var(--or);font-weight:800;cursor:pointer;font-size:14px">➕ Déposer ma première annonce →</a>'+
+          '</div>';
+
+      // Onglet Paiements
+      var pl=document.getElementById('d-pay-list');
+      if(pl){
+        if(!pays.length){
+          pl.innerHTML='<div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:48px;text-align:center;color:var(--muted);box-shadow:var(--sh)"><div style="font-size:52px;margin-bottom:14px">🟠</div><p style="font-weight:800;font-size:16px;margin-bottom:6px">Aucun paiement</p><p style="font-size:14px">Vos transactions Orange Money apparaîtront ici</p></div>';
+        } else {
+          pl.innerHTML=pays.map(function(p){
+            return '<div class="dash-ad-row"><div style="font-size:30px">🟠</div><div style="flex:1"><div style="font-weight:800;font-size:14px">'+p.item+'</div><div style="font-size:12px;color:var(--muted)">📅 '+p.date+' · 🔑 '+p.ref+'</div></div><div style="text-align:right"><div style="font-weight:800;font-size:16px;color:var(--or)">'+parseInt(p.amount).toLocaleString('fr-FR')+' GNF</div><span class="badge badge-g">✅ Payé</span></div></div>';
+          }).join('');
+        }
+      }
+
+      // Onglet Favoris
+      var favAds=DB.ads().filter(function(a){return favIds.includes(a.id);});
+      var df=document.getElementById('d-favs');
+      if(df) df.innerHTML=favAds.length
+        ? favAds.map(function(a){return adCard(a,false);}).join('')
+        : '<div style="grid-column:1/-1;background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:48px;text-align:center;color:var(--muted);box-shadow:var(--sh)"><div style="font-size:52px;margin-bottom:14px">❤️</div><p>Aucun favori</p></div>';
     }
-    function dashRow(a) {
-        return '<div class="dash-ad-row"><div style="font-size:30px">' + a.e + '</div><div style="flex:1"><div style="font-weight:800;font-size:14px">' + a.t + '</div><div style="font-size:12px;color:var(--muted)">📍 ' + a.city + ' · 👁️ ' + a.views + ' vues · ' + a.date + '</div></div><div style="text-align:right"><div style="font-weight:800;font-size:16px;color:var(--or)">' + a.p.toLocaleString('fr-FR') + ' GNF</div><span class="badge badge-g">✅ Active</span></div></div>';
+    function dashRow(a){
+      return '<div class="dash-ad-row"><div style="font-size:30px">'+a.e+'</div><div style="flex:1"><div style="font-weight:800;font-size:14px">'+a.t+'</div><div style="font-size:12px;color:var(--muted)">📍 '+a.city+' · 👁️ '+a.views+' vues · '+a.date+'</div></div><div style="text-align:right"><div style="font-weight:800;font-size:16px;color:var(--or)">'+a.p.toLocaleString('fr-FR')+' GNF</div><span class="badge badge-g">✅ Active</span></div></div>';
     }
-    function showTab(tab) {
-        ['profil', 'ads', 'payments', 'favs'].forEach(function(t) {
-            var el = document.getElementById('tab-' + t);
-            if (el)
-                el.style.display = (t === tab ? 'block' : 'none');
-        });
-        document.querySelectorAll('.dash-nav a').forEach(function(a, i) {
-            a.classList.toggle('active', i === (['profil', 'ads', 'payments', 'favs'].indexOf(tab)));
-        });
+    function showTab(tab){
+      ['profil','ads','payments','favs'].forEach(function(t){
+        var el=document.getElementById('tab-'+t);
+        if(el) el.style.display=(t===tab?'block':'none');
+      });
+      document.querySelectorAll('.dash-nav a').forEach(function(a,i){
+        a.classList.toggle('active',i===(['profil','ads','payments','favs'].indexOf(tab)));
+      });
     }
 
     // ══════════════════════════════════════════
     //  ORANGE MONEY
     // ══════════════════════════════════════════
-    function openOM() {
-        document.getElementById('om-form').style.display = 'block';
-        document.getElementById('om-processing').style.display = 'none';
-        document.getElementById('om-success').style.display = 'none';
-        var ph = document.getElementById('om-phone');
-        if (ph)
-            ph.value = '';
-        ['p1', 'p2', 'p3', 'p4'].forEach(function(id) {
-            var e = document.getElementById(id);
-            if (e)
-                e.value = '';
-        });
-        openModal('om');
+    function openOM(){
+      document.getElementById('om-form').style.display='block';
+      document.getElementById('om-processing').style.display='none';
+      document.getElementById('om-success').style.display='none';
+      var ph=document.getElementById('om-phone');if(ph)ph.value='';
+      ['p1','p2','p3','p4'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+      openModal('om');
     }
-    function movPin(el, nid) {
-        if (el.value.length >= 1) {
-            var n = document.getElementById(nid);
-            if (n)
-                n.focus();
-        }
-    }
-    function processPayment() {
-        var phone = (document.getElementById('om-phone') || {
-            value: ''
-        }).value.trim();
-        var pin = ['p1', 'p2', 'p3', 'p4'].map(function(id) {
-            return (document.getElementById(id) || {
-                value: ''
-            }).value;
-        }).join('');
-        if (!phone || phone.length < 8) {
-            toast('⚠️ Numéro Orange invalide', 'err');
-            return;
-        }
-        if (pin.length < 4) {
-            toast('⚠️ Code PIN incomplet', 'err');
-            return;
-        }
-        document.getElementById('om-form').style.display = 'none';
-        document.getElementById('om-processing').style.display = 'block';
-        setTimeout(function() {
-            var ref = 'OM' + Date.now().toString(36).toUpperCase().slice(-9);
-            var amt = curAd ? curAd.p : 0;
-            var item = curAd ? curAd.t : 'Article';
-            DB.addPayment({
-                ref: ref,
-                amount: amt,
-                item: item,
-                date: new Date().toLocaleDateString('fr-FR'),
-                phone: '+224 ' + phone
-            });
-            document.getElementById('om-ok-val').textContent = amt.toLocaleString('fr-FR') + ' GNF';
-            document.getElementById('om-ref').textContent = 'Référence : ' + ref;
-            document.getElementById('om-ok-phone').textContent = 'SMS de confirmation envoyé au +224 ' + phone;
-            document.getElementById('om-processing').style.display = 'none';
-            document.getElementById('om-success').style.display = 'block';
-            if (DB.user())
-                loadDash();
-        }, 3000);
+    function movPin(el,nid){if(el.value.length>=1){var n=document.getElementById(nid);if(n)n.focus();}}
+    function processPayment(){
+      var phone=(document.getElementById('om-phone')||{value:''}).value.trim();
+      var pin=['p1','p2','p3','p4'].map(function(id){return(document.getElementById(id)||{value:''}).value;}).join('');
+      if(!phone||phone.length<8){toast('⚠️ Numéro Orange invalide','err');return;}
+      if(pin.length<4){toast('⚠️ Code PIN incomplet','err');return;}
+      document.getElementById('om-form').style.display='none';
+      document.getElementById('om-processing').style.display='block';
+      setTimeout(function(){
+        var ref='OM'+Date.now().toString(36).toUpperCase().slice(-9);
+        var amt=curAd?curAd.p:0;var item=curAd?curAd.t:'Article';
+        DB.addPayment({ref:ref,amount:amt,item:item,date:new Date().toLocaleDateString('fr-FR'),phone:'+224 '+phone});
+        document.getElementById('om-ok-val').textContent=amt.toLocaleString('fr-FR')+' GNF';
+        document.getElementById('om-ref').textContent='Référence : '+ref;
+        document.getElementById('om-ok-phone').textContent='SMS de confirmation envoyé au +224 '+phone;
+        document.getElementById('om-processing').style.display='none';
+        document.getElementById('om-success').style.display='block';
+        if(DB.user())loadDash();
+      },3000);
     }
 
     // ══════════════════════════════════════════
     //  MODALS
     // ══════════════════════════════════════════
-    function openModal(id) {
-        var el = document.getElementById('overlay-' + id);
-        if (el) {
-            el.classList.add('open');
-            document.body.style.overflow = 'hidden';
-        }
-        if (id === 'auth')
-            renderAuthForm('login');
-    }
-    function closeModal(id) {
-        var el = document.getElementById('overlay-' + id);
-        if (el) {
-            el.classList.remove('open');
-            document.body.style.overflow = '';
-        }
-    }
-    function maybeClose(e, id) {
-        if (e.target === e.currentTarget)
-            closeModal(id);
-    }
+    function openModal(id){var el=document.getElementById('overlay-'+id);if(el){el.classList.add('open');document.body.style.overflow='hidden';}if(id==='auth')renderAuthForm('login');}
+    function closeModal(id){var el=document.getElementById('overlay-'+id);if(el){el.classList.remove('open');document.body.style.overflow='';}}
+    function maybeClose(e,id){if(e.target===e.currentTarget)closeModal(id);}
 
     // ══════════════════════════════════════════
     //  TOAST
     // ══════════════════════════════════════════
     var tt;
-    function toast(msg, type) {
-        var el = document.getElementById('toast-el');
-        el.textContent = msg;
-        el.className = 'toast show' + (type ? ' ' + type : '');
-        clearTimeout(tt);
-        tt = setTimeout(function() {
-            el.className = 'toast';
-        }, 3600);
+    function toast(msg,type){
+      var el=document.getElementById('toast-el');
+      el.textContent=msg;el.className='toast show'+(type?' '+type:'');
+      clearTimeout(tt);tt=setTimeout(function(){el.className='toast';},3600);
     }
 
     // ══════════════════════════════════════════
     //  COMMISSION — VOIR NUMÉRO ANNONCEUR
     // ══════════════════════════════════════════
-    function openCommission() {
-        if (!curAd) {
-            return;
-        }
-        var price = curAd.p;
-        var fee = Math.round(price * 0.1);
-        document.getElementById('com-price').textContent = price.toLocaleString('fr-FR') + ' GNF';
-        document.getElementById('com-fee').textContent = fee.toLocaleString('fr-FR') + ' GNF';
-        document.getElementById('com-total').textContent = fee.toLocaleString('fr-FR') + ' GNF';
-        document.getElementById('com-success').style.display = 'none';
-        document.getElementById('com-phone').value = '';
-        ['cp1', 'cp2', 'cp3', 'cp4'].forEach(function(id) {
-            var e = document.getElementById(id);
-            if (e)
-                e.value = '';
-        });
-        // Reaffiche le formulaire
-        document.querySelector('#overlay-commission .m-body').style.display = '';
-        openModal('commission');
+    function openCommission(){
+      if(!curAd){return;}
+      var price=curAd.p;
+      var fee=Math.round(price*0.1);
+      document.getElementById('com-price').textContent=price.toLocaleString('fr-FR')+' GNF';
+      document.getElementById('com-fee').textContent=fee.toLocaleString('fr-FR')+' GNF';
+      document.getElementById('com-total').textContent=fee.toLocaleString('fr-FR')+' GNF';
+      document.getElementById('com-success').style.display='none';
+      document.getElementById('com-phone').value='';
+      ['cp1','cp2','cp3','cp4'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+      // Reaffiche le formulaire
+      document.querySelector('#overlay-commission .m-body').style.display='';
+      openModal('commission');
     }
-    function payCommission() {
-        var phone = (document.getElementById('com-phone') || {
-            value: ''
-        }).value.trim();
-        var pin = ['cp1', 'cp2', 'cp3', 'cp4'].map(function(id) {
-            return (document.getElementById(id) || {
-                value: ''
-            }).value;
-        }).join('');
-        if (!phone || phone.length < 8) {
-            toast('⚠️ Numéro Orange invalide', 'err');
-            return;
-        }
-        if (pin.length < 4) {
-            toast('⚠️ Code PIN incomplet', 'err');
-            return;
-        }
-        // Simulation : révéler un faux numéro (en prod = appel API backend)
-        var fakeNumbers = ['+224 622 45 78 90', '+224 664 12 34 56', '+224 655 98 76 54', '+224 628 00 11 22'];
-        var revealed = fakeNumbers[Math.floor(Math.random() * fakeNumbers.length)];
-        var fee = curAd ? Math.round(curAd.p * 0.1) : 0;
-        DB.addPayment({
-            ref: 'COM' + Date.now().toString(36).toUpperCase().slice(-8),
-            amount: fee,
-            item: 'Commission — ' + (curAd ? curAd.t : ''),
-            date: new Date().toLocaleDateString('fr-FR'),
-            phone: '+224 ' + phone
-        });
-        document.querySelector('#overlay-commission .m-body').style.display = 'none';
-        document.getElementById('com-revealed-phone').textContent = revealed;
-        document.getElementById('com-success').style.display = 'block';
-        toast('✅ Numéro révélé !', 'ok');
+    function payCommission(){
+      var phone=(document.getElementById('com-phone')||{value:''}).value.trim();
+      var pin=['cp1','cp2','cp3','cp4'].map(function(id){return(document.getElementById(id)||{value:''}).value;}).join('');
+      if(!phone||phone.length<8){toast('⚠️ Numéro Orange invalide','err');return;}
+      if(pin.length<4){toast('⚠️ Code PIN incomplet','err');return;}
+      // Simulation : révéler un faux numéro (en prod = appel API backend)
+      var fakeNumbers=['+224 622 45 78 90','+224 664 12 34 56','+224 655 98 76 54','+224 628 00 11 22'];
+      var revealed=fakeNumbers[Math.floor(Math.random()*fakeNumbers.length)];
+      var fee=curAd?Math.round(curAd.p*0.1):0;
+      DB.addPayment({ref:'COM'+Date.now().toString(36).toUpperCase().slice(-8),amount:fee,item:'Commission — '+(curAd?curAd.t:''),date:new Date().toLocaleDateString('fr-FR'),phone:'+224 '+phone});
+      document.querySelector('#overlay-commission .m-body').style.display='none';
+      document.getElementById('com-revealed-phone').textContent=revealed;
+      document.getElementById('com-success').style.display='block';
+      toast('✅ Numéro révélé !','ok');
     }
-    function copyPhone() {
-        var txt = document.getElementById('com-revealed-phone').textContent;
-        navigator.clipboard.writeText(txt).then(function() {
-            toast('📋 Numéro copié !', 'ok');
-        }).catch(function() {
-            toast('📋 ' + txt);
-        });
+    function copyPhone(){
+      var txt=document.getElementById('com-revealed-phone').textContent;
+      navigator.clipboard.writeText(txt).then(function(){toast('📋 Numéro copié !','ok');}).catch(function(){toast('📋 '+txt);});
     }
 
     // ══════════════════════════════════════════
     //  APP MOBILE QR
     // ══════════════════════════════════════════
-    function showAppQR(platform) {
-        var zone = document.getElementById('app-qr-zone');
-        var label = document.getElementById('app-qr-label');
-        if (zone)
-            zone.style.display = 'block';
-        if (label)
-            label.textContent = platform === 'android' ? '▶️ Google Play Store — yougouyougou' : '🍎 Apple App Store — yougouyougou';
-        toast('📲 App ' + (platform === 'android' ? 'Android' : 'iOS') + ' — bientôt disponible !');
-        zone.scrollIntoView({
-            behavior: 'smooth'
-        });
+    function showAppQR(platform){
+      var zone=document.getElementById('app-qr-zone');
+      var label=document.getElementById('app-qr-label');
+      if(zone)zone.style.display='block';
+      if(label)label.textContent=platform==='android'?'▶️ Google Play Store — yougouyougou':'🍎 Apple App Store — yougouyougou';
+      toast('📲 App '+(platform==='android'?'Android':'iOS')+' — bientôt disponible !');
+      zone.scrollIntoView({behavior:'smooth'});
     }
 
     // ══════════════════════════════════════════
     //  ADMIN — VOIR UTILISATEURS
     // ══════════════════════════════════════════
-    function goAdmin() {
-        var u = DB.user();
-        if (!u) {
-            openModal('auth');
-            return;
+    function goAdmin(){
+      var u=DB.user();
+      if(!u){openModal('auth');return;}
+      if(u.role!=='admin'){
+        toast('🚫 Accès refusé — réservé aux administrateurs','err');
+        return;
+      }
+      goTo('admin');
+      loadAdmin();
+    }
+    function loadAdmin(){
+      var users=DB._d.users||[];
+      var pays=DB.payments();
+      var ads=DB.ads();
+      // Stats
+      var stats=document.getElementById('admin-stats');
+      if(stats){
+        var cards=[
+          {n:users.length,l:'Utilisateurs inscrits',e:'👥',c:'var(--or)'},
+          {n:ads.length,l:'Annonces publiées',e:'📋',c:'var(--gr)'},
+          {n:pays.length,l:'Paiements Orange Money',e:'🟠',c:'#FF6A00'},
+          {n:pays.reduce(function(s,p){return s+parseInt(p.amount||0);},0).toLocaleString('fr-FR')+' GNF',l:'Total transactions',e:'💰',c:'#2563EB'},
+        ];
+        stats.innerHTML=cards.map(function(c){
+          return '<div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:22px;box-shadow:var(--sh)">'+
+            '<div style="font-size:28px;margin-bottom:8px">'+c.e+'</div>'+
+            '<div style="font-family:\'Instrument Serif\',serif;font-size:28px;color:'+c.c+';font-style:italic;margin-bottom:4px">'+c.n+'</div>'+
+            '<div style="font-size:13px;color:var(--muted);font-weight:600">'+c.l+'</div></div>';
+        }).join('');
+      }
+      // Users table
+      var uc=document.getElementById('admin-user-count');
+      if(uc)uc.textContent=users.length+' utilisateur'+(users.length>1?'s':'');
+      var tbody=document.getElementById('admin-users-body');
+      if(tbody){
+        if(!users.length){
+          tbody.innerHTML='<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--muted);font-size:14px">Aucun utilisateur inscrit pour le moment.<br>Les inscriptions apparaîtront ici en temps réel.</td></tr>';
+        } else {
+          tbody.innerHTML=users.map(function(u,i){
+            // Badge rôle
+            var isAdmin=(u.role==='admin');
+            var roleBadge=isAdmin
+              ? '<span style="background:#EFF6FF;color:#1D4ED8;font-size:11px;font-weight:800;padding:4px 10px;border-radius:50px;margin-left:6px">👑 Admin</span>'
+              : '';
+            // Badge vérification
+            var vm=u.verifyMethod||u.method||'sms';
+            var verifyBadge=u.verified||u.initials
+              ? '<span style="background:#D1FAE5;color:#065F46;font-size:11px;font-weight:800;padding:4px 10px;border-radius:50px">'+(vm==='email'?'✅ Email':'✅ SMS')+'</span>'
+              : '<span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:800;padding:4px 10px;border-radius:50px">⏳ Non vérifié</span>';
+            return '<tr style="border-top:1px solid var(--br)">'+
+              '<td style="padding:14px 20px;font-size:13px;color:var(--muted)">'+(i+1)+'</td>'+
+              '<td style="padding:14px 20px">'+
+                '<div style="display:flex;align-items:center;gap:4px">'+
+                  '<span style="font-weight:800;font-size:14px">'+(u.name||u.prenom||'—')+'</span>'+roleBadge+
+                '</div>'+
+                '<div style="font-size:12px;color:var(--muted)">'+(u.initials||'')+'</div>'+
+              '</td>'+
+              '<td style="padding:14px 20px;font-size:14px;font-weight:600">'+(u.phone||'—')+'</td>'+
+              '<td style="padding:14px 20px;font-size:14px">'+(u.city||'—')+'</td>'+
+              '<td style="padding:14px 20px;font-size:13px;color:var(--muted)">'+(u.email||'—')+'</td>'+
+              '<td style="padding:14px 20px">'+verifyBadge+'</td>'+
+              '<td style="padding:14px 20px">'+
+                (!isAdmin
+                  ? '<button onclick="promoteAdmin(\''+i+'\')" style="background:var(--orl);color:var(--or2);border:1px solid var(--orm);border-radius:50px;padding:4px 10px;font-size:11px;font-weight:800;cursor:pointer">👑 Promouvoir admin</button>'
+                  : '<span style="font-size:11px;color:var(--muted)">— admin —</span>'
+                )+
+              '</td>'+
+              '</tr>';
+          }).join('');
         }
-        if (u.role !== 'admin') {
-            toast('🚫 Accès refusé — réservé aux administrateurs', 'err');
-            return;
+      }
+      // Payments
+      var pb=document.getElementById('admin-payments-body');
+      if(pb){
+        if(!pays.length){pb.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);font-size:14px">Aucune transaction enregistrée.</div>';}
+        else{
+          pb.innerHTML=pays.map(function(p){
+            return '<div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--br)">'+
+              '<div style="font-size:26px">🟠</div>'+
+              '<div style="flex:1"><div style="font-weight:800;font-size:14px">'+p.item+'</div><div style="font-size:12px;color:var(--muted)">📅 '+p.date+' · 📞 '+p.phone+' · 🔑 '+p.ref+'</div></div>'+
+              '<div style="font-weight:800;color:var(--or)">'+parseInt(p.amount||0).toLocaleString('fr-FR')+' GNF</div>'+
+              '</div>';
+          }).join('');
         }
-        goTo('admin');
+      }
+    }
+
+    function promoteAdmin(idx){
+      var users=DB._d.users||[];
+      var u=users[parseInt(idx)];
+      if(!u)return;
+      if(confirm('Promouvoir '+u.name+' en administrateur ?')){
+        users[parseInt(idx)].role='admin';
+        DB._d.users=users;
+        localStorage.setItem('ygy5',JSON.stringify(DB._d));
         loadAdmin();
-    }
-    function loadAdmin() {
-        var users = DB._d.users || [];
-        var pays = DB.payments();
-        var ads = DB.ads();
-        // Stats
-        var stats = document.getElementById('admin-stats');
-        if (stats) {
-            var cards = [
-            {
-                n: users.length,
-                l: 'Utilisateurs inscrits',
-                e: '👥',
-                c: 'var(--or)'
-            },
-            {
-                n: ads.length,
-                l: 'Annonces publiées',
-                e: '📋',
-                c: 'var(--gr)'
-            },
-            {
-                n: pays.length,
-                l: 'Paiements Orange Money',
-                e: '🟠',
-                c: '#FF6A00'
-            },
-            {
-                n: pays.reduce(function(s, p) {
-                    return s + parseInt(p.amount || 0);
-                }, 0).toLocaleString('fr-FR') + ' GNF',
-                l: 'Total transactions',
-                e: '💰',
-                c: '#2563EB'
-            },
-            ];
-            stats.innerHTML = cards.map(function(c) {
-                return '<div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:22px;box-shadow:var(--sh)">' +
-                '<div style="font-size:28px;margin-bottom:8px">' + c.e + '</div>' +
-                '<div style="font-family:\'Instrument Serif\',serif;font-size:28px;color:' + c.c + ';font-style:italic;margin-bottom:4px">' + c.n + '</div>' +
-                '<div style="font-size:13px;color:var(--muted);font-weight:600">' + c.l + '</div></div>';
-            }).join('');
-        }
-        // Users table
-        var uc = document.getElementById('admin-user-count');
-        if (uc)
-            uc.textContent = users.length + ' utilisateur' + (users.length > 1 ? 's' : '');
-        var tbody = document.getElementById('admin-users-body');
-        if (tbody) {
-            if (!users.length) {
-                tbody.innerHTML = '<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--muted);font-size:14px">Aucun utilisateur inscrit pour le moment.<br>Les inscriptions apparaîtront ici en temps réel.</td></tr>';
-            } else {
-                tbody.innerHTML = users.map(function(u, i) {
-                    // Badge rôle
-                    var isAdmin = (u.role === 'admin');
-                    var roleBadge = isAdmin
-                    ? '<span style="background:#EFF6FF;color:#1D4ED8;font-size:11px;font-weight:800;padding:4px 10px;border-radius:50px;margin-left:6px">👑 Admin</span>'
-                    : '';
-                    // Badge vérification
-                    var vm = u.verifyMethod || u.method || 'sms';
-                    var verifyBadge = u.verified || u.initials
-                    ? '<span style="background:#D1FAE5;color:#065F46;font-size:11px;font-weight:800;padding:4px 10px;border-radius:50px">' + (vm === 'email' ? '✅ Email' : '✅ SMS') + '</span>'
-                    : '<span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:800;padding:4px 10px;border-radius:50px">⏳ Non vérifié</span>';
-                    return '<tr style="border-top:1px solid var(--br)">' +
-                    '<td style="padding:14px 20px;font-size:13px;color:var(--muted)">' + (i + 1) + '</td>' +
-                    '<td style="padding:14px 20px">' +
-                    '<div style="display:flex;align-items:center;gap:4px">' +
-                    '<span style="font-weight:800;font-size:14px">' + (u.name || u.prenom || '—') + '</span>' + roleBadge +
-                    '</div>' +
-                    '<div style="font-size:12px;color:var(--muted)">' + (u.initials || '') + '</div>' +
-                    '</td>' +
-                    '<td style="padding:14px 20px;font-size:14px;font-weight:600">' + (u.phone || '—') + '</td>' +
-                    '<td style="padding:14px 20px;font-size:14px">' + (u.city || '—') + '</td>' +
-                    '<td style="padding:14px 20px;font-size:13px;color:var(--muted)">' + (u.email || '—') + '</td>' +
-                    '<td style="padding:14px 20px">' + verifyBadge + '</td>' +
-                    '<td style="padding:14px 20px">' +
-                    (!isAdmin
-                    ? '<button onclick="promoteAdmin(\'' + i + '\')" style="background:var(--orl);color:var(--or2);border:1px solid var(--orm);border-radius:50px;padding:4px 10px;font-size:11px;font-weight:800;cursor:pointer">👑 Promouvoir admin</button>'
-                    : '<span style="font-size:11px;color:var(--muted)">— admin —</span>'
-                    ) +
-                    '</td>' +
-                    '</tr>';
-                }).join('');
-            }
-        }
-        // Payments
-        var pb = document.getElementById('admin-payments-body');
-        if (pb) {
-            if (!pays.length) {
-                pb.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:14px">Aucune transaction enregistrée.</div>';
-            }
-            else {
-                pb.innerHTML = pays.map(function(p) {
-                    return '<div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--br)">' +
-                    '<div style="font-size:26px">🟠</div>' +
-                    '<div style="flex:1"><div style="font-weight:800;font-size:14px">' + p.item + '</div><div style="font-size:12px;color:var(--muted)">📅 ' + p.date + ' · 📞 ' + p.phone + ' · 🔑 ' + p.ref + '</div></div>' +
-                    '<div style="font-weight:800;color:var(--or)">' + parseInt(p.amount || 0).toLocaleString('fr-FR') + ' GNF</div>' +
-                    '</div>';
-                }).join('');
-            }
-        }
+        toast('👑 '+u.name+' est maintenant administrateur','ok');
+      }
     }
 
-    function promoteAdmin(idx) {
-        var users = DB._d.users || [];
-        var u = users[parseInt(idx)];
-        if (!u)
-            return;
-        if (confirm('Promouvoir ' + u.name + ' en administrateur ?')) {
-            users[parseInt(idx)].role = 'admin';
-            DB._d.users = users;
-            localStorage.setItem('ygy5', JSON.stringify(DB._d));
-            loadAdmin();
-            toast('👑 ' + u.name + ' est maintenant administrateur', 'ok');
-        }
-    }
-
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            document.querySelectorAll('.overlay.open').forEach(function(o) {
-                o.classList.remove('open');
-            });
-            document.body.style.overflow = '';
-        }
+    document.addEventListener('keydown',function(e){
+      if(e.key==='Escape'){document.querySelectorAll('.overlay.open').forEach(function(o){o.classList.remove('open');});document.body.style.overflow='';}
     });
 
     // ══════════════════════════════════════════
     //  INIT
     // ══════════════════════════════════════════
-    document.addEventListener('DOMContentLoaded', function() {
-        DB.load();
-        populateCities();
-        renderNavCats();
-        renderAds();
-        renderPostCats();
-        updateNav();
-        // Carte : essayer plusieurs fois pour s'assurer que le conteneur est visible
-        setTimeout(initMap, 300);
-        setTimeout(function() {
-            if (mapObj)
-                mapObj.invalidateSize();
-            else
-                initMap();
-        }, 1000);
-        setTimeout(function() {
-            if (mapObj)
-                mapObj.invalidateSize();
-            else
-                initMap();
-        }, 2500);
+    document.addEventListener('DOMContentLoaded',function(){
+      DB.load();
+      populateCities();
+      renderNavCats();
+      renderAds();
+      renderPostCats();
+      updateNav();
+      // Carte : essayer plusieurs fois pour s'assurer que le conteneur est visible
+      setTimeout(initMap, 300);
+      setTimeout(function(){
+        if(mapObj) mapObj.invalidateSize();
+        else initMap();
+      }, 1000);
+      setTimeout(function(){
+        if(mapObj) mapObj.invalidateSize();
+        else initMap();
+      }, 2500);
     });
     </script>
 </body>
