@@ -4131,22 +4131,25 @@
         .then(function(data) {
             if (sendBtn) {
                 sendBtn.disabled = false;
+                sendBtn.textContent = verifyMethod === 'sms' ? '📱 Recevoir le code SMS →' : '📧 Recevoir le code par email →';
             }
             if (data.error) {
                 toast('❌ ' + data.error, 'err');
                 return;
             }
-            // Utiliser le code du serveur (debug_code en mode dev, sinon code local affiché)
+            // Utiliser le code du serveur (toujours présent dans debug_code)
             smsCode = data.debug_code || Math.floor(1000 + Math.random() * 9000).toString();
             showCodeForm(verifyMethod === 'email' ? em : '+224 ' + ph, verifyMethod === 'email' ? '📧' : '📱');
         })
         .catch(function() {
             if (sendBtn) {
                 sendBtn.disabled = false;
+                sendBtn.textContent = verifyMethod === 'sms' ? '📱 Recevoir le code SMS →' : '📧 Recevoir le code par email →';
             }
             // Fallback : code local si pas de réseau
             smsCode = Math.floor(1000 + Math.random() * 9000).toString();
             showCodeForm(verifyMethod === 'email' ? em : '+224 ' + ph, verifyMethod === 'email' ? '📧' : '📱');
+            toast('⚠️ Serveur indisponible — code local généré', 'ok');
         });
     }
 
