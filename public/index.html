@@ -3960,7 +3960,9 @@
             '<div class="frow"><div class="fg"><label>Prénom *</label><input type="text" id="rfn" placeholder="Prénom"></div><div class="fg"><label>Nom *</label><input type="text" id="rln" placeholder="Nom"></div></div>' +
             '<div class="fg"><label>Téléphone Orange *</label><div class="ph-row"><span class="ph-pfx">🇬🇳 +224</span><input type="tel" id="rph" placeholder="620 00 00 00" maxlength="9" style="flex:1"></div></div>' +
             '<div class="fg"><label>Email</label><input type="email" id="rem" placeholder="votre@email.com"></div>' +
-            '<div class="fg"><label>Mot de passe *</label><input type="password" id="rpw" placeholder="8 caractères minimum"></div>' +
+            '<div class="fg"><label>Mot de passe *</label><input type="password" id="rpw" placeholder="8 caractères minimum" oninput="checkPwMatch()"></div>' +
+            '<div class="fg"><label>Confirmer le mot de passe *</label><input type="password" id="rpw2" placeholder="Répétez votre mot de passe" oninput="checkPwMatch()"></div>' +
+            '<div id="pw-match-msg" style="margin-top:-10px;margin-bottom:12px;font-size:13px;font-weight:700;display:none"></div>' +
             '<div class="fg"><label>Votre préfecture / ville *</label><select id="rct">' + opts + '</select></div>' + // Choix méthode de vérification
             '<div style="margin-bottom:16px">' +
             '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:9px">Vérification du compte via :</div>' +
@@ -3979,6 +3981,26 @@
             '</div>' +
             '<button class="btn btn-or btn-full" style="border-radius:12px" id="btn-sendcode" onclick="sendVerifCode()">📱 Recevoir le code SMS →</button>' +
             '<p style="text-align:center;font-size:13px;color:var(--muted);margin-top:14px">Déjà un compte ? <a style="color:var(--or);cursor:pointer;font-weight:700" onclick="authTab(\'login\')">Se connecter</a></p>';
+        }
+    }
+
+    function checkPwMatch() {
+        var pw = (document.getElementById('rpw') || {
+            value: ''
+        }).value;
+        var pw2 = (document.getElementById('rpw2') || {
+            value: ''
+        }).value;
+        var msg = document.getElementById('pw-match-msg');
+        if (!msg || !pw2)
+            return;
+        msg.style.display = 'block';
+        if (pw === pw2) {
+            msg.textContent = '✅ Les mots de passe correspondent';
+            msg.style.color = '#065F46';
+        } else {
+            msg.textContent = '❌ Les mots de passe ne correspondent pas';
+            msg.style.color = '#DC2626';
         }
     }
 
@@ -4056,6 +4078,13 @@
         }
         if (!pw || pw.length < 6) {
             toast('⚠️ Mot de passe trop court (6 min)', 'err');
+            return;
+        }
+        var pw2 = (document.getElementById('rpw2') || {
+            value: ''
+        }).value.trim();
+        if (pw !== pw2) {
+            toast('❌ Les mots de passe ne correspondent pas', 'err');
             return;
         }
 
@@ -4339,11 +4368,18 @@
             return;
         }
 
-        // Appel API → MongoDB
-        var btn = document.querySelector('#auth-body button[onclick="doLogin()"]');
-        if (btn) {
-            btn.disabled = true;
-            btn.textContent = '⏳ Connexion...';
+        // Désactiver le bouton pendant l'appel
+        var btns = document.querySelectorAll('#auth-body .btn-ink');
+        btns.forEach(function(b) {
+            b.disabled = true;
+            b.textContent = '⏳ Connexion...';
+        });
+
+        function resetBtn() {
+            btns.forEach(function(b) {
+                b.disabled = false;
+                b.textContent = 'Se connecter →';
+            });
         }
 
         fetch('/api/login', {
@@ -4352,7 +4388,7 @@
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                identifier: id,
+                identifier: loginMode === 'phone' ? '+224' + id.replace(/\s/g, '') : id.toLowerCase(),
                 password: pw
             })
         })
@@ -4360,19 +4396,14 @@
             return r.json();
         })
         .then(function(data) {
-            if (btn) {
-                btn.disabled = false;
-                btn.textContent = 'Se connecter';
-            }
+            resetBtn();
             if (data.error || !data.user) {
                 toast('❌ ' + (data.error || 'Identifiants incorrects'), 'err');
                 return;
             }
-            // Connecter avec les vraies données MongoDB (incluant role)
             var u = data.user;
             u.initials = ((u.prenom || u.name || 'U').charAt(0) + ((u.nom || '').charAt(0) || '')).toUpperCase();
             DB.login(u);
-            // Sauvegarder aussi le token JWT si présent
             if (data.token)
                 localStorage.setItem('ygy_token', data.token);
             updateNav();
@@ -4380,18 +4411,15 @@
             toast('✅ Bienvenue ' + (u.prenom || u.name || '').split(' ')[0] + ' ! 🇬🇳', 'ok');
         })
         .catch(function() {
-            if (btn) {
-                btn.disabled = false;
-                btn.textContent = 'Se connecter';
-            }
-            // Fallback localStorage si pas de réseau
+            resetBtn();
+            // Fallback localStorage si serveur indisponible
             var users = DB._d.users || [];
             var fullId = loginMode === 'phone' ? ('+224' + id.replace(/\s/g, '')) : id.toLowerCase();
             var found = users.find(function(u) {
                 return (u.phone && u.phone.replace(/\s/g, '') === fullId.replace(/\s/g, '')) || (u.email && u.email.toLowerCase() === fullId);
             });
             if (!found) {
-                toast('❌ Serveur indisponible — compte introuvable', 'err');
+                toast('❌ Serveur indisponible — compte introuvable localement', 'err');
                 return;
             }
             if (found.password && found.password !== pw) {
@@ -4401,7 +4429,7 @@
             DB.login(found);
             updateNav();
             closeModal('auth');
-            toast('✅ Bienvenue ' + (found.prenom || found.name || '').split(' ')[0] + ' !', 'ok');
+            toast('⚠️ Connecté hors-ligne — mode limité', 'ok');
         });
     }
     function openEditProfile() {
@@ -4492,6 +4520,51 @@
     }
 
     // ══════════════════════════════════════════
+    //  SYNC ROLE DEPUIS MONGODB
+    // ══════════════════════════════════════════
+    function syncRoleFromServer(callback) {
+        var token = localStorage.getItem('ygy_token');
+        if (!token) {
+            if (callback)
+                callback();
+            return;
+        }
+        fetch('/api/me', {
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        })
+        .then(function(r) {
+            return r.ok ? r.json() : Promise.reject();
+        })
+        .then(function(data) {
+            if (data && data.user) {
+                var u = DB.user() || {};
+                u.role = data.user.role;
+                if (data.user.prenom)
+                    u.prenom = data.user.prenom;
+                if (data.user.nom)
+                    u.nom = data.user.nom;
+                if (data.user.name)
+                    u.name = data.user.name;
+                if (data.user.phone)
+                    u.phone = data.user.phone;
+                if (data.user.email)
+                    u.email = data.user.email;
+                if (data.user.city)
+                    u.city = data.user.city;
+                DB.login(u);
+            }
+            if (callback)
+                callback();
+        })
+        .catch(function() {
+            if (callback)
+                callback();
+        });
+    }
+
+    // ══════════════════════════════════════════
     //  DASHBOARD
     // ══════════════════════════════════════════
     function loadDash() {
@@ -4500,6 +4573,14 @@
             openModal('auth');
             return;
         }
+        syncRoleFromServer(function() {
+            renderDash();
+        });
+    }
+    function renderDash() {
+        var u = DB.user();
+        if (!u)
+            return;
 
         // Sidebar
         var initials = (u.prenom || u.name || 'U').charAt(0).toUpperCase() + ((u.nom || '').charAt(0) || '').toUpperCase();
