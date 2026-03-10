@@ -196,33 +196,36 @@ app.post('/api/auth/send-code', async (req, res) => {
     if (method === 'email' && !email) return res.status(400).json({ error: 'Email requis' });
 
     const code   = Math.floor(1000 + Math.random() * 9000).toString();
-    const expiry = new Date(Date.now() + 15 * 60 * 1000); // 15 min
+    const expiry = new Date(Date.now() + 15 * 60 * 1000);
 
-    // Créer/mettre à jour le doc pending selon la méthode (phone OU email)
     const query = method === 'email' && email ? { email: email.toLowerCase() } : { phone };
     const update = { verifyCode: code, codeExpiry: expiry, method };
     if (phone) update.phone = phone;
     if (email) update.email = email.toLowerCase();
     await User.findOneAndUpdate(query, update, { upsert: true, new: true });
 
+    let emailSent = false;
     if (method === 'sms') {
-      // 🔧 En prod : appeler l'API SMS Orange Guinée ici
-      // await orangeSMS.send({ to: phone, message: `YouGouYou — code : ${code}` });
       console.log(`📱 [SMS] Code pour ${phone} : ${code}`);
     } else {
-      await sendVerificationEmail(email, code, prenom);
-      console.log(`📧 [EMAIL] Code pour ${email} : ${code}`);
+      try {
+        await sendVerificationEmail(email, code, prenom);
+        emailSent = true;
+        console.log(`📧 [EMAIL] Code envoyé à ${email} : ${code}`);
+      } catch (emailErr) {
+        console.error(`📧 [EMAIL] Échec envoi à ${email} :`, emailErr.message);
+      }
     }
 
+    // Toujours renvoyer debug_code pour affichage à l'écran
     res.json({
-      success: true,
-      method,
-      message: method === 'sms' ? `Code SMS envoyé au ${phone}` : `Code envoyé à ${email}`,
-      ...(process.env.NODE_ENV !== 'production' && { debug_code: code }),
+      success: true, method, emailSent,
+      message: emailSent ? `Code envoyé à ${email}` : `Code généré — consultez l'écran`,
+      debug_code: code,
     });
   } catch (err) {
     console.error('send-code error:', err.message);
-    res.status(500).json({ error: 'Envoi du code impossible : ' + err.message });
+    res.status(500).json({ error: 'Erreur serveur : ' + err.message });
   }
 });
 
