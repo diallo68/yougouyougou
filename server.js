@@ -311,6 +311,30 @@ app.post('/api/auth/resend-code', async (req, res) => {
 //  ANNONCES
 // ═══════════════════════════════════════════════════════════
 
+// ── Profil utilisateur connecté (vérifie le rôle depuis MongoDB) ────────────
+app.get('/api/me', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password -verifyCode -codeExpiry');
+    if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
+    res.json({
+      user: {
+        id: user._id,
+        name: `${user.prenom} ${user.nom||''}`.trim(),
+        prenom: user.prenom,
+        nom: user.nom,
+        phone: user.phone,
+        email: user.email,
+        city: user.city,
+        role: user.role,
+        verified: user.verified,
+        method: user.method,
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Lister toutes les annonces (public)
 app.get('/api/ads', async (req, res) => {
   try {
