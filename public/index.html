@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouGouYou — Le marché de la Guinée</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Instrument+Serif:ital@0;1&family=Righteous&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@800&family=Nunito:wght@400;600;700;800;900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
     <style>
     :root {
         --or: #FF5C00;
@@ -40,7 +40,7 @@
     }
 
     body {
-        font-family: 'Cabinet Grotesk', sans-serif;
+        font-family: 'Nunito', sans-serif;
         background: var(--bg);
         color: var(--ink);
         line-height: 1.6
@@ -157,16 +157,16 @@
         max-width: 1320px;
         margin: 0 auto;
         padding: 0 28px;
-        height: 62px;
+        height: 72px;
         display: flex;
         align-items: center;
         gap: 14px
-    }/* ── LOGO ANIMÉ ── */
+    }/* ── LOGO ZOOM + PULSE ── */
 
     .logo {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
         cursor: pointer;
         text-decoration: none;
         flex-shrink: 0
@@ -175,88 +175,105 @@
     .logo-anim-wrap {
         position: relative;
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
+        align-items: center;
         gap: 0px;
         line-height: 1;
         overflow: visible
     }
 
     .logo-block {
-        display: flex;
+        display: inline-flex;
         align-items: baseline;
-        font-family: 'Righteous', sans-serif;
-        font-size: 16px;
-        letter-spacing: -.3px;
-        line-height: 1.05;
-        animation-fill-mode: both
+        font-family: 'Syne', sans-serif;
+        font-weight: 800;
+        letter-spacing: -1.5px;
+        line-height: 1;
+        animation-fill-mode: both;
+        text-transform: uppercase
     }
 
     .logo-b1 {
-        animation: logoDown1 .7s cubic-bezier(.22, 1, .36, 1) both
+        font-size: 30px;
+        animation: logoZoom1 .7s cubic-bezier(.34, 1.56, .64, 1) both, logoPulse 3s ease-in-out 1.2s infinite
     }
 
     .logo-b2 {
-        animation: logoDown2 .85s cubic-bezier(.22, 1, .36, 1) both
+        font-size: 30px;
+        animation: logoZoom2 .7s cubic-bezier(.34, 1.56, .64, 1) .18s both, logoPulse 3s ease-in-out 1.7s infinite
     }
 
     .logo-y {
-        font-size: 22px;
-        font-weight: 900;
+        font-size: 40px;
+        font-weight: 800;
         color: var(--or);
         line-height: 1;
         display: inline-block;
-        animation: logoY 2s ease-in-out infinite alternate
-    }
-
-    .logo-b2 .logo-y {
-        animation-delay: .3s
+        text-shadow: 0 3px 20px rgba(232, 93, 4, .5);
+        letter-spacing: -2px
     }
 
     .logo-rest {
         color: var(--ink);
-        font-size: 16px;
-        letter-spacing: .2px
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: -1.5px
     }
 
-    @keyframes logoDown1 {
-        from {
-            opacity: 0;
-            transform:translateY(-18px)
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0)
-        }
-    }
-
-    @keyframes logoDown2 {
-        from {
-            opacity: 0;
-            transform:translateY(-28px)
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0)
-        }
-    }
-
-    @keyframes logoY {
+    @keyframes logoZoom1 {
         0% {
-            transform: translateY(0) scale(1);
-            text-shadow:none
+            opacity: 0;
+            transform:scale(0.3) translateY(8px)
+        }
+
+        70% {
+            transform:scale(1.12) translateY(-2px)
         }
 
         100% {
-            transform: translateY(-2px) scale(1.08);
-            text-shadow: 0 4px 12px rgba(255, 92, 0, .5)
+            opacity: 1;
+            transform: scale(1) translateY(0)
         }
-    }/* Particules autour du logo */
+    }
+
+    @keyframes logoZoom2 {
+        0% {
+            opacity: 0;
+            transform:scale(0.3) translateY(8px)
+        }
+
+        70% {
+            transform:scale(1.12) translateY(-2px)
+        }
+
+        100% {
+            opacity: 1;
+            transform: scale(1) translateY(0)
+        }
+    }
+
+    @keyframes logoPulse {
+        0%, 100% {
+            transform:scale(1)
+        }
+
+        50% {
+            transform: scale(1.045)
+        }
+    }/* Point séparateur */
+
+    .logo-sep {
+        font-size: 30px;
+        color: var(--or);
+        opacity: .5;
+        margin: 0 3px;
+        line-height: 1;
+        animation: logoZoom1 .7s cubic-bezier(.34, 1.56, .64, 1) .09s both
+    }/* Particules emojis */
 
     .logo-particles {
         position: absolute;
-        inset: -10px;
+        inset: -18px;
         pointer-events: none;
         overflow: visible
     }
@@ -271,15 +288,15 @@
     @keyframes lpFloat {
         0% {
             opacity: 0;
-            transform:translate(0, 0) scale(.5)
+            transform:translate(0, 0) scale(.4)
         }
 
-        40% {
+        45% {
             opacity:1
         }
 
         100% {
-            opacity: .7;
+            opacity: .8;
             transform: translate(var(--tx, 6px), var(--ty, -8px)) scale(1)
         }
     }
@@ -305,7 +322,7 @@
     .nav-sc input {
         border: none;
         background: transparent;
-        font-family: 'Cabinet Grotesk', sans-serif;
+        font-family: 'Nunito', sans-serif;
         font-size: 14px;
         color: var(--ink);
         width: 100%;
@@ -471,7 +488,7 @@
         gap: 7px;
         padding: 10px 22px;
         border-radius: 50px;
-        font-family: 'Cabinet Grotesk', sans-serif;
+        font-family: 'Nunito', sans-serif;
         font-size: 14px;
         font-weight: 700;
         cursor: pointer;
@@ -715,7 +732,7 @@
         padding: 12px 16px;
         border: 1.5px solid var(--br);
         border-radius: var(--rads);
-        font-family: 'Cabinet Grotesk', sans-serif;
+        font-family: 'Nunito', sans-serif;
         font-size: 14px;
         color: var(--ink);
         background: var(--wh);
@@ -934,7 +951,7 @@
         border-radius: 50px;
         border: 1.5px solid var(--br);
         background: var(--wh);
-        font-family: 'Cabinet Grotesk', sans-serif;
+        font-family: 'Nunito', sans-serif;
         font-size: 13px;
         font-weight: 700;
         cursor: pointer;
@@ -1395,7 +1412,7 @@
         padding: 13px 16px;
         border: 1.5px solid var(--br);
         border-radius: var(--rads);
-        font-family: 'Cabinet Grotesk', sans-serif;
+        font-family: 'Nunito', sans-serif;
         font-size: 14px;
         color: var(--ink);
         background: var(--wh);
@@ -1452,7 +1469,7 @@
         padding: 13px;
         border: 1.5px solid var(--br);
         border-radius: var(--rads);
-        font-family: 'Cabinet Grotesk', sans-serif;
+        font-family: 'Nunito', sans-serif;
         font-size: 14px;
         font-weight: 700;
         cursor: pointer;
@@ -1521,7 +1538,7 @@
         border: 2px solid var(--orm);
         border-radius: 12px;
         outline: none;
-        font-family: 'Cabinet Grotesk', sans-serif;
+        font-family: 'Nunito', sans-serif;
         background: #fff;
         color: var(--ink);
         transition: all .2s
@@ -1674,7 +1691,7 @@
         border: 2px solid var(--br);
         border-radius: 12px;
         outline: none;
-        font-family: 'Cabinet Grotesk', sans-serif;
+        font-family: 'Nunito', sans-serif;
         transition: all .2s
     }
 
@@ -2183,14 +2200,15 @@
         <div class="nav-top">
             <a class="logo" onclick="goTo('home')" id="main-logo">
                 <div class="logo-anim-wrap">
-                    <div class="logo-block logo-b1">
+                    <span class="logo-block logo-b1">
                         <span class="logo-y">Y</span>
                         <span class="logo-rest">ougou</span>
-                    </div>
-                    <div class="logo-block logo-b2">
+                    </span>
+                    <span class="logo-sep">·</span>
+                    <span class="logo-block logo-b2">
                         <span class="logo-y">Y</span>
                         <span class="logo-rest">ougou</span>
-                    </div>
+                    </span>
                     <div class="logo-particles" id="logo-particles"></div>
                 </div>
                 <span class="logo-flag">🇬🇳</span>
