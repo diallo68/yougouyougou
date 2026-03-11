@@ -2500,7 +2500,7 @@
                         </div>
                     </div>
                     <button class="btn btn-ghost btn-full" style="border-radius:12px" onclick="addFav()">🤍 Ajouter aux favoris</button>
-                    <div id="owner-btns" style="display:none;margin-top:10px;display:flex;flex-direction:column;gap:8px">
+                    <div id="owner-btns" style="display:none;margin-top:10px;flex-direction:column;gap:8px">
                         <button class="btn btn-full" style="border-radius:12px;background:#2563EB;color:#fff;justify-content:center" onclick="editMyAd()">✏️ Modifier mon annonce</button>
                         <button class="btn btn-full" style="border-radius:12px;background:#EF4444;color:#fff;justify-content:center" onclick="deleteMyAd()">🗑️ Supprimer mon annonce</button>
                     </div>
@@ -4243,7 +4243,7 @@
 
         if (mainImg) {
             if (photos.length > 0) {
-                mainImg.innerHTML = '<img src="' + photos[0] + '" style="width:100%;height:100%;object-fit:cover">';
+                mainImg.innerHTML = '<img src="' + photos[0] + '" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in" onclick="zoomPhoto(0)">';
                 mainImg.style.background = '';
             } else {
                 mainImg.innerHTML = '<span style="font-size:80px">' + (ad.e || '📦') + '</span>';
@@ -4252,17 +4252,15 @@
         }
 
         if (thumbsWrap) {
-            if (photos.length > 1) {
-                // Stocker photos dans variable globale pour éviter problème de guillemets
-                window._detPhotos = photos;
+            window._detPhotos = photos;
+            if (photos.length > 0) {
                 thumbsWrap.innerHTML = photos.map(function(p, i) {
-                    return '<div class="det-thumb' + (i === 0 ? ' active' : '') + '" onclick="switchPhotoIdx(' + i + ',this)" style="overflow:hidden;padding:0">'
+                    return '<div class="det-thumb' + (i === 0 ? ' active' : '') + '" onclick="switchPhotoIdx(' + i + ',this)" '
+                    + 'style="overflow:hidden;padding:0;cursor:pointer;border:' + (i === 0 ? '2px solid var(--or)' : '2px solid var(--br)') + '">'
                     + '<img src="' + p + '" style="width:100%;height:100%;object-fit:cover"></div>';
                 }).join('');
-            } else if (photos.length === 1) {
-                thumbsWrap.innerHTML = '';
             } else {
-                thumbsWrap.innerHTML = '<div class="det-thumb active">' + (ad.e || '📦') + '</div>';
+                thumbsWrap.innerHTML = '<div class="det-thumb active" style="font-size:32px">' + (ad.e || '📦') + '</div>';
             }
         }
         document.getElementById('bc-cat').textContent = ad.cat;
@@ -4285,14 +4283,68 @@
         var ownerBtns = document.getElementById('owner-btns');
         if (ownerBtns) {
             var user = DB.user();
+            var userId = String(user._id || user.id || '');
+            var adSeller = String(ad.sellerId || ad.seller_id || '');
             var isOwner = user && (
-            String(ad.sellerId || '') === String(user._id || user.id || '') ||
-            ad.seller === (user.name || user.prenom || '')
+            (adSeller && adSeller === userId) ||
+            (ad.seller && ad.seller === (user.name || ((user.prenom || '') + ' ' + (user.nom || '')).trim())) ||
+            (ad.sellerName && ad.sellerName === (user.prenom || user.name || ''))
             );
-            ownerBtns.style.display = isOwner ? 'flex' : 'none';
+            ownerBtns.style.cssText = isOwner
+            ? 'display:flex;flex-direction:column;gap:8px;margin-top:10px'
+            : 'display:none';
         }
         goTo('detail');
     }
+    function zoomPhoto(idx) {
+        var photos = window._detPhotos || [];
+        var src = photos[idx] || photos[0];
+        if (!src)
+            return;
+        window._zoomIdx = idx;
+        var ov = document.getElementById('overlay-zoom');
+        if (!ov) {
+            ov = document.createElement('div');
+            ov.id = 'overlay-zoom';
+            ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:zoom-out';
+            ov.innerHTML = '<img id="zoom-img" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:8px">'
+            + '<button onclick="closeZoom()" style="position:absolute;top:18px;right:22px;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:22px;cursor:pointer;border-radius:50%;width:40px;height:40px;line-height:1;font-family:inherit">✕</button>'
+            + '<button onclick="zoomPhoto(window._zoomIdx-1)" style="position:absolute;left:16px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:none;color:#fff;font-size:26px;cursor:pointer;border-radius:50%;width:46px;height:46px;line-height:1;font-family:inherit">‹</button>'
+            + '<button onclick="zoomPhoto(window._zoomIdx+1)" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:none;color:#fff;font-size:26px;cursor:pointer;border-radius:50%;width:46px;height:46px;line-height:1;font-family:inherit">›</button>';
+            ov.addEventListener('click', function(e) {
+                if (e.target === ov)
+                    closeZoom();
+            });
+            document.body.appendChild(ov);
+        }
+        var photos2 = window._detPhotos || [];
+        if (idx < 0)
+            idx = photos2.length - 1;
+        if (idx >= photos2.length)
+            idx = 0;
+        window._zoomIdx = idx;
+        var img = document.getElementById('zoom-img');
+        if (img)
+            img.src = photos2[idx] || src;
+        ov.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+    function closeZoom() {
+        var ov = document.getElementById('overlay-zoom');
+        if (ov)
+            ov.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+    // Touche Echap pour fermer le zoom
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape')
+            closeZoom();
+        if (e.key === 'ArrowRight' && document.getElementById('overlay-zoom') && document.getElementById('overlay-zoom').style.display === 'flex')
+            zoomPhoto(window._zoomIdx + 1);
+        if (e.key === 'ArrowLeft' && document.getElementById('overlay-zoom') && document.getElementById('overlay-zoom').style.display === 'flex')
+            zoomPhoto(window._zoomIdx - 1);
+    });
+
     function deleteMyAd() {
         if (!curAd) {
             return;
@@ -4360,12 +4412,15 @@
             return;
         var main = document.getElementById('det-main-img');
         if (main)
-            main.innerHTML = '<img src="' + src + '" style="width:100%;height:100%;object-fit:cover">';
+            main.innerHTML = '<img src="' + src + '" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in" onclick="zoomPhoto(' + idx + ')">';
         document.querySelectorAll('#det-thumbs-wrap .det-thumb').forEach(function(t) {
             t.classList.remove('active');
+            t.style.border = '2px solid var(--br)';
         });
-        if (el)
+        if (el) {
             el.classList.add('active');
+            el.style.border = '2px solid var(--or)';
+        }
     }
     function favAd(id) {
         DB.addFav(id);
