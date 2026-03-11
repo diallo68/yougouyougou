@@ -151,14 +151,16 @@ const AdSchema = new mongoose.Schema({
   category:     { type: String },
   city:         { type: String },
   quartier:     { type: String },
+  etat:         { type: String },
   condition:    { type: String },
   emoji:        { type: String, default: '📦' },
+  photos:       [String],           // base64 ou URLs
   tags:         [String],
   featured:     { type: Boolean, default: false },
   views:        { type: Number, default: 0 },
   seller:       { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   sellerName:   { type: String },
-  sellerPhone:  { type: String },   // stocké chiffré en prod
+  sellerPhone:  { type: String },
   active:       { type: Boolean, default: true },
   createdAt:    { type: Date, default: Date.now },
 });
@@ -419,19 +421,22 @@ app.get('/api/ads/:id', async (req, res) => {
 // Publier une annonce (auth requis)
 app.post('/api/ads', auth, async (req, res) => {
   try {
-    const { title, description, price, category, city, quartier, condition, emoji, tags } = req.body;
-    if (!title || !price) return res.status(400).json({ error: 'Titre et prix requis' });
+    const { title, description, price, category, city, quartier, etat, phone, photos, seller: sellerName } = req.body;
+    if (!title || !price) return res.status(400).json({ error: 'Titre et prix obligatoires' });
 
-    const user = await User.findById(req.user.id);
     const ad = await Ad.create({
-      title, description, price: Number(price), category, city, quartier,
-      condition, emoji: emoji || '📦', tags: tags || [],
-      seller: user._id,
-      sellerName: `${user.prenom} ${user.nom||''}`.trim(),
-      sellerPhone: user.phone,
+      title, description, price: Number(price),
+      category, city, quartier, etat,
+      sellerName: sellerName || req.user.prenom || '',
+      sellerPhone: phone || '',
+      seller: req.user.id,
+      photos: Array.isArray(photos) ? photos.slice(0,8) : [],
+      active: true,
     });
-    res.json({ success: true, ad: { ...ad.toObject(), sellerPhone: undefined } });
+
+    res.json({ success: true, ad });
   } catch (err) {
+    console.error('POST /api/ads error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
