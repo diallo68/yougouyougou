@@ -4633,8 +4633,8 @@
                 DB.login(serverUser);
                 updateNav();
                 closeModal('auth');
+                document.body.style.overflow = '';
                 toast('🎉 Bienvenue ' + u.prenom + ' ! Compte créé 🇬🇳', 'ok');
-                resetInactivityTimer();
                 resetInactivityTimer();
                 pendingUser = null;
                 smsCode = '';
@@ -4645,6 +4645,7 @@
                 DB.login(u);
                 updateNav();
                 closeModal('auth');
+                document.body.style.overflow = '';
                 toast('🎉 Bienvenue ' + u.prenom + ' ! (mode hors-ligne)', 'ok');
                 pendingUser = null;
                 smsCode = '';
@@ -4657,6 +4658,7 @@
             DB.login(u);
             updateNav();
             closeModal('auth');
+            document.body.style.overflow = '';
             toast('🎉 Bienvenue ' + u.prenom + ' ! Compte créé 🇬🇳', 'ok');
             pendingUser = null;
             smsCode = '';
@@ -4907,6 +4909,7 @@
             DB.login(found);
             updateNav();
             closeModal('auth');
+            document.body.style.overflow = '';
             toast('⚠️ Connecté hors-ligne — mode limité', 'ok');
         });
     }
@@ -5057,16 +5060,8 @@
         }
         fpIdentifier = identifier;
 
-        // Vérifier que l'utilisateur existe en local
-        var users = (DB._d && DB._d.users) || [];
-        var found = users.find(function(u) {
-            return u.email === identifier
-                || u.phone === identifier
-                || u.phone === identifier.replace('+224', '')
-                || ('+224' + u.phone) === identifier;
-        });
-
         // Générer code 4 chiffres local (fallback garanti)
+        // Note: on ne bloque plus sur vérification locale — l'utilisateur peut être dans MongoDB uniquement
         fpResetCode = Math.floor(1000 + Math.random() * 9000).toString();
 
         // Montrer bouton d'envoi désactivé
@@ -5672,6 +5667,10 @@
         var el = document.getElementById('overlay-' + id);
         if (el) {
             el.classList.remove('open');
+        }
+        // Vérifier qu'aucun autre overlay n'est ouvert avant de libérer le scroll
+        var anyOpen = document.querySelectorAll('.overlay.open');
+        if (anyOpen.length === 0) {
             document.body.style.overflow = '';
         }
     }
