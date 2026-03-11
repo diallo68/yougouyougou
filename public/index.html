@@ -2453,12 +2453,8 @@
         <div class="det-wrap">
             <div>
                 <div class="det-gallery">
-                    <div class="det-main-img" id="det-emoji" style="background:linear-gradient(135deg,#FFF3EE,#FFB899)">📱</div>
-                    <div class="det-thumbs">
-                        <div class="det-thumb active">📱</div>
-                        <div class="det-thumb">📦</div>
-                        <div class="det-thumb">🔌</div>
-                    </div>
+                    <div class="det-main-img" id="det-main-img" style="background:linear-gradient(135deg,#FFF3EE,#FFB899);display:flex;align-items:center;justify-content:center;font-size:80px;min-height:280px;overflow:hidden"></div>
+                    <div class="det-thumbs" id="det-thumbs-wrap"></div>
                 </div>
                 <div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:24px;margin-top:16px;box-shadow:var(--sh)">
                     <h3 style="font-family:'Instrument Serif',serif;font-size:20px;font-weight:400;margin-bottom:14px">Description</h3>
@@ -4173,7 +4169,7 @@
     var curAd = null;
     function viewAd(id) {
         var ad = DB.ads().find(function(a) {
-            return a.id === id;
+            return a.id === id || a._id === id || String(a.id) === String(id) || String(a._id) === String(id);
         });
         if (!ad)
             return;
@@ -4196,8 +4192,35 @@
         if (DB._d.history.length > 20)
             DB._d.history = DB._d.history.slice(0, 20);
         DB.save();
-        document.getElementById('det-emoji').textContent = ad.e;
-        document.getElementById('det-emoji').style.background = ad.bg;
+        // ── Galerie photos ──
+        var mainImg = document.getElementById('det-main-img');
+        var thumbsWrap = document.getElementById('det-thumbs-wrap');
+        var photos = ad.photos && ad.photos.length ? ad.photos : [];
+
+        if (mainImg) {
+            if (photos.length > 0) {
+                mainImg.innerHTML = '<img src="' + photos[0] + '" style="width:100%;height:100%;object-fit:cover">';
+                mainImg.style.background = '';
+            } else {
+                mainImg.innerHTML = '<span style="font-size:80px">' + (ad.e || '📦') + '</span>';
+                mainImg.style.background = ad.bg || 'linear-gradient(135deg,#FFF3EE,#FFB899)';
+            }
+        }
+
+        if (thumbsWrap) {
+            if (photos.length > 1) {
+                // Stocker photos dans variable globale pour éviter problème de guillemets
+                window._detPhotos = photos;
+                thumbsWrap.innerHTML = photos.map(function(p, i) {
+                    return '<div class="det-thumb' + (i === 0 ? ' active' : '') + '" onclick="switchPhotoIdx(' + i + ',this)" style="overflow:hidden;padding:0">'
+                    + '<img src="' + p + '" style="width:100%;height:100%;object-fit:cover"></div>';
+                }).join('');
+            } else if (photos.length === 1) {
+                thumbsWrap.innerHTML = '';
+            } else {
+                thumbsWrap.innerHTML = '<div class="det-thumb active">' + (ad.e || '📦') + '</div>';
+            }
+        }
         document.getElementById('bc-cat').textContent = ad.cat;
         document.getElementById('bc-title').textContent = ad.t.substring(0, 40) + '...';
         document.getElementById('det-price').textContent = ad.p.toLocaleString('fr-FR') + ' GNF';
@@ -4215,6 +4238,20 @@
         document.getElementById('om-val').textContent = ad.p.toLocaleString('fr-FR') + ' GNF';
         document.getElementById('om-item').textContent = ad.t;
         goTo('detail');
+    }
+    function switchPhotoIdx(idx, el) {
+        var photos = window._detPhotos || [];
+        var src = photos[idx];
+        if (!src)
+            return;
+        var main = document.getElementById('det-main-img');
+        if (main)
+            main.innerHTML = '<img src="' + src + '" style="width:100%;height:100%;object-fit:cover">';
+        document.querySelectorAll('#det-thumbs-wrap .det-thumb').forEach(function(t) {
+            t.classList.remove('active');
+        });
+        if (el)
+            el.classList.add('active');
     }
     function favAd(id) {
         DB.addFav(id);
