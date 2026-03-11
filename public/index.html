@@ -149,7 +149,8 @@
         border-bottom: 1px solid var(--br);
         position: sticky;
         top: 0;
-        z-index: 500
+        z-index: 500;
+        overflow: visible
     }
 
     .nav-top {
@@ -261,7 +262,8 @@
         border-top: 1px solid var(--br);
         background: var(--wh);
         position: relative;
-        z-index: 300
+        z-index: 300;
+        overflow: visible
     }
 
     .ncat {
@@ -287,24 +289,26 @@
         opacity: 0;
         pointer-events: none;
         position: absolute;
-        top: calc(100% + 2px);
+        top: 100%;
         left: 0;
         min-width: 210px;
         background: #fff;
-        border: 1.5px solid var(--br);
+        border: 1.5px solid #e5e7eb;
         border-radius: 14px;
-        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.13);
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
         padding: 6px 0;
-        z-index: 9999;
-        transition: opacity .18s, transform .18s, visibility .18s;
-        transform: translateY(-6px);
+        z-index: 99999;
+        transition: opacity .15s ease, transform .15s ease, visibility 0s linear .15s;
+        transform: translateY(-4px);
+        overflow: visible;
     }
 
     .ncat.has-sub:hover > .cat-dropdown {
         visibility: visible;
         opacity: 1;
         pointer-events: auto;
-        transform: translateY(0)
+        transform: translateY(0);
+        transition: opacity .15s ease, transform .15s ease, visibility 0s linear 0s;
     }
 
     .cat-sub-item {
@@ -350,7 +354,8 @@
         padding: 0 28px;
         display: flex;
         align-items: stretch;
-        overflow-x: auto;
+        overflow-x: visible;
+        overflow-y: visible;
         scrollbar-width: none
     }
 
@@ -3386,7 +3391,7 @@
         n: 'Ouvriers & BTP',
         e: '🔨',
         c: 156,
-        sub: ['Maçon', 'Plombier', 'Carreleur', 'Chaudronnier', 'Mécanicien', 'Menuisier', 'Électricien', 'Peintre', 'Soudeur', 'Forgeron', 'Couvreur', 'Jardinier']
+        sub: ['Maçon', 'Plombier', 'Carreleur', 'Mécanicien', 'Menuisier', 'Électricien', 'Peintre', 'Soudeur', 'Forgeron', 'Couvreur', 'Jardinier']
     },
     {
         n: 'Mode',
