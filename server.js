@@ -441,6 +441,30 @@ app.post('/api/ads', auth, async (req, res) => {
   }
 });
 
+// Modifier une annonce (propriétaire ou admin)
+app.patch('/api/ads/:id', auth, async (req, res) => {
+  try {
+    const ad = await Ad.findById(req.params.id);
+    if (!ad) return res.status(404).json({ error: 'Introuvable' });
+    if (String(ad.seller) !== req.user.id && req.user.role !== 'admin')
+      return res.status(403).json({ error: 'Non autorisé' });
+    const { title, description, price, category, city, quartier, etat, phone, photos } = req.body;
+    if (title)       ad.title       = title;
+    if (description) ad.description = description;
+    if (price)       ad.price       = Number(price);
+    if (category)    ad.category    = category;
+    if (city)        ad.city        = city;
+    if (quartier)    ad.quartier    = quartier;
+    if (etat)        ad.etat        = etat;
+    if (phone)       ad.sellerPhone = phone;
+    if (photos && Array.isArray(photos)) ad.photos = photos.slice(0,8);
+    await ad.save();
+    res.json({ success: true, ad });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Supprimer une annonce (propriétaire ou admin)
 app.delete('/api/ads/:id', auth, async (req, res) => {
   try {
