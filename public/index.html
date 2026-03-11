@@ -4760,15 +4760,6 @@
         var s1 = document.getElementById('s1');
         if (s1)
             s1.focus();
-        // Pré-remplir automatiquement
-        setTimeout(function() {
-            var digits = smsCode.split('');
-            ['s1', 's2', 's3', 's4'].forEach(function(id, i) {
-                var el = document.getElementById(id);
-                if (el && !el.value)
-                    el.value = digits[i] || '';
-            });
-        }, 800);
     }
 
     function autoVerify() {
@@ -4803,15 +4794,7 @@
             if (e)
                 e.value = '';
         });
-        setTimeout(function() {
-            var digits = smsCode.split('');
-            ['s1', 's2', 's3', 's4'].forEach(function(id, i) {
-                var el = document.getElementById(id);
-                if (el)
-                    el.value = digits[i] || '';
-            });
-        }, 600);
-        toast('🔄 Nouveau code généré !', 'ok');
+        toast('🔄 Nouveau code envoyé !', 'ok');
     }
 
     function verifyCode() {
