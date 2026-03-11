@@ -2634,8 +2634,8 @@
                 <button class="m-close" onclick="closeModal('auth')">✕</button>
             </div>
             <div class="m-tabs">
-                <div class="m-tab active" id="mtab-login" onclick="authTab('login')">Connexion</div>
-                <div class="m-tab" id="mtab-reg" onclick="authTab('reg')">Inscription</div>
+                <div class="m-tab active" id="mtab-login" onclick="authTab(&apos;login&apos;)">Connexion</div>
+                <div class="m-tab" id="mtab-reg" onclick="authTab(&apos;reg&apos;)">Inscription</div>
             </div>
             <div class="m-body" id="auth-body"></div>
         </div>
@@ -4121,6 +4121,7 @@
             '<div id="li-phone-wrap" class="fg"><label>Téléphone</label><div class="ph-row"><span class="ph-pfx">🇬🇳 +224</span><input type="tel" id="li-phone" placeholder="620 00 00 00" style="flex:1"></div></div>' +
             '<div id="li-email-wrap" class="fg" style="display:none"><label>Adresse email</label><input type="email" id="li-email" placeholder="votre@email.com"></div>' +
             '<div class="fg"><label>Mot de passe</label><input type="password" id="lp" placeholder="••••••••"></div>' +
+            '<div style="text-align:right;margin:-6px 0 12px"><a style="font-size:12px;color:var(--or);cursor:pointer;font-weight:700" onclick="showForgotPassword()">🔑 Mot de passe oublié ?</a></div>' +
             '<button class="btn btn-ink btn-full" style="border-radius:12px" onclick="doLogin()">Se connecter →</button>' +
             '<p style="text-align:center;font-size:13px;color:var(--muted);margin-top:14px">Pas de compte ? <a style="color:var(--or);cursor:pointer;font-weight:700" onclick="authTab(\'reg\')">S\'inscrire gratuitement</a></p>';
 
@@ -4891,6 +4892,302 @@
         updateNav();
         goTo('home');
         toast('👋 Déconnecté');
+    }
+
+    /* ═══════════════════════════════════════
+       MOT DE PASSE OUBLIÉ — RÉINITIALISATION
+       Étape 1 : saisir email/téléphone
+       Étape 2 : code de vérification (4 chiffres)
+       Étape 3 : nouveau mot de passe
+       ═══════════════════════════════════════ */
+    var fpMode = 'email'; // 'email' ou 'phone'
+    var fpIdentifier = '';
+    var fpResetCode = '';
+
+    function showForgotPassword() {
+        var modal = document.getElementById('auth-modal');
+        var body = document.getElementById('auth-body');
+        var title = document.getElementById('auth-title');
+        if (!modal || !body || !title)
+            return;
+        modal.style.display = 'flex';
+        title.textContent = '🔑 Mot de passe oublié';
+        body.innerHTML =
+        '<div style="margin-bottom:18px;text-align:center;font-size:14px;color:var(--muted);line-height:1.6">Entrez votre email ou téléphone.<br>Nous vous enverrons un code de réinitialisation.</div>' +
+        '<div style="display:flex;background:var(--brl);border-radius:50px;padding:3px;margin-bottom:16px">' +
+        '<div id="fp-t-email" style="flex:1;text-align:center;padding:8px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;background:var(--wh);box-shadow:var(--sh);color:var(--ink)" onclick="fpToggle(&apos;email&apos;)">📧 Email</div>' +
+        '<div id="fp-t-phone" style="flex:1;text-align:center;padding:8px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted)" onclick="fpToggle(&apos;phone&apos;)">📱 Téléphone</div>' +
+        '</div>' +
+        '<div id="fp-email-wrap" class="fg"><label>Adresse email</label><input type="email" id="fp-email" placeholder="votre@email.com"></div>' +
+        '<div id="fp-phone-wrap" class="fg" style="display:none"><label>Téléphone</label><div class="ph-row"><span class="ph-pfx">🇬🇳 +224</span><input type="tel" id="fp-phone" placeholder="620 00 00 00" maxlength="9"></div></div>' +
+        '<button class="btn btn-or btn-full" style="border-radius:12px" onclick="fpSendCode()">Envoyer le code →</button>' +
+        '<p style="text-align:center;font-size:13px;color:var(--muted);margin-top:14px"><a style="color:var(--or);cursor:pointer;font-weight:700" onclick="authTab(&apos;login&apos;)">← Retour à la connexion</a></p>';
+    }
+
+    function fpToggle(mode) {
+        fpMode = mode;
+        var eW = document.getElementById('fp-email-wrap');
+        var pW = document.getElementById('fp-phone-wrap');
+        var tE = document.getElementById('fp-t-email');
+        var tP = document.getElementById('fp-t-phone');
+        var act = 'flex:1;text-align:center;padding:8px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;background:var(--wh);box-shadow:var(--sh);color:var(--ink)';
+        var inact = 'flex:1;text-align:center;padding:8px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted)';
+        if (mode === 'email') {
+            if (eW)
+                eW.style.display = '';
+            if (pW)
+                pW.style.display = 'none';
+            if (tE)
+                tE.style.cssText = act;
+            if (tP)
+                tP.style.cssText = inact;
+        } else {
+            if (pW)
+                pW.style.display = '';
+            if (eW)
+                eW.style.display = 'none';
+            if (tP)
+                tP.style.cssText = act;
+            if (tE)
+                tE.style.cssText = inact;
+        }
+    }
+
+    function fpSendCode() {
+        var identifier = '';
+        if (fpMode === 'email') {
+            identifier = (document.getElementById('fp-email') || {}).value || '';
+            if (!identifier || !identifier.includes('@')) {
+                toast('⚠️ Email invalide', 'err');
+                return;
+            }
+        } else {
+            var ph = (document.getElementById('fp-phone') || {}).value || '';
+            if (ph.length < 8) {
+                toast('⚠️ Numéro invalide', 'err');
+                return;
+            }
+            identifier = '+224' + ph.replace(/\s/g, '');
+        }
+        fpIdentifier = identifier;
+
+        // Vérifier que l'utilisateur existe
+        var users = DB.load && DB._d ? DB._d.users || [] : [];
+        var found = users.find(function(u) {
+            return u.email === identifier || u.phone === identifier || u.phone === identifier.replace('+224', '');
+        });
+        if (!found) {
+            // En production on ne révèle pas si l'utilisateur existe, on envoie quand même
+            // Ici en démo on prévient
+            toast('⚠️ Aucun compte trouvé avec cet identifiant', 'err');
+            return;
+        }
+
+        // Générer code 4 chiffres
+        fpResetCode = Math.floor(1000 + Math.random() * 9000).toString();
+
+        // Tenter d'envoyer via API
+        fetch('/api/auth/send-code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                type: fpMode,
+                value: identifier.replace('+224', ''),
+                purpose: 'reset'
+            })
+        }).then(function(r) {
+            return r.json();
+        }).then(function(d) {
+            if (d.debug_code)
+                fpResetCode = d.debug_code;
+            toast('📨 Code envoyé à ' + identifier);
+            fpShowCodeStep();
+        }).catch(function() {
+            toast('📨 Code envoyé (démo: ' + fpResetCode + ')');
+            fpShowCodeStep();
+        });
+    }
+
+    function fpShowCodeStep() {
+        var body = document.getElementById('auth-body');
+        var title = document.getElementById('auth-title');
+        if (!body)
+            return;
+        title.textContent = '🔑 Code de vérification';
+        body.innerHTML =
+        '<div style="text-align:center;margin-bottom:18px">' +
+        '<div style="font-size:40px;margin-bottom:8px">📨</div>' +
+        '<p style="font-size:14px;color:var(--muted);line-height:1.6">Code envoyé à<br><strong style="color:var(--ink)">' + fpIdentifier + '</strong></p>' +
+        '</div>' +
+        '<div class="pin-wrap" style="display:flex;gap:10px;justify-content:center;margin:20px 0">' +
+        '<input class="pin-box" type="password" maxlength="1" id="fp1" oninput="movPin(this,&apos;fp2&apos;)" style="width:52px;height:58px;text-align:center;font-size:26px;font-weight:900;border:2px solid var(--br);border-radius:12px;font-family:inherit">' +
+        '<input class="pin-box" type="password" maxlength="1" id="fp2" oninput="movPin(this,&apos;fp3&apos;)" style="width:52px;height:58px;text-align:center;font-size:26px;font-weight:900;border:2px solid var(--br);border-radius:12px;font-family:inherit">' +
+        '<input class="pin-box" type="password" maxlength="1" id="fp3" oninput="movPin(this,&apos;fp4&apos;)" style="width:52px;height:58px;text-align:center;font-size:26px;font-weight:900;border:2px solid var(--br);border-radius:12px;font-family:inherit">' +
+        '<input class="pin-box" type="password" maxlength="1" id="fp4" style="width:52px;height:58px;text-align:center;font-size:26px;font-weight:900;border:2px solid var(--br);border-radius:12px;font-family:inherit">' +
+        '</div>' +
+        '<button class="btn btn-or btn-full" style="border-radius:12px" onclick="fpVerifyCode()">Vérifier le code →</button>' +
+        '<p style="text-align:center;font-size:13px;color:var(--muted);margin-top:14px">' +
+        '<a style="color:var(--or);cursor:pointer;font-weight:700" onclick="fpSendCode()">Renvoyer le code</a>' +
+        ' &nbsp;|&nbsp; <a style="cursor:pointer" onclick="showForgotPassword()">← Retour</a>' +
+        '</p>';
+        setTimeout(function() {
+            var f = document.getElementById('fp1');
+            if (f)
+                f.focus();
+        }, 100);
+    }
+
+    function fpVerifyCode() {
+        var code = ['fp1', 'fp2', 'fp3', 'fp4'].map(function(id) {
+            return (document.getElementById(id) || {}).value || '';
+        }).join('');
+        if (code.length < 4) {
+            toast('⚠️ Entrez les 4 chiffres', 'err');
+            return;
+        }
+        if (code !== fpResetCode) {
+            toast('❌ Code incorrect', 'err');
+            return;
+        }
+        fpShowNewPasswordStep();
+    }
+
+    function fpShowNewPasswordStep() {
+        var body = document.getElementById('auth-body');
+        var title = document.getElementById('auth-title');
+        if (!body)
+            return;
+        title.textContent = '🔒 Nouveau mot de passe';
+        body.innerHTML =
+        '<div style="text-align:center;margin-bottom:20px">' +
+        '<div style="font-size:36px">✅</div>' +
+        '<p style="font-size:14px;color:var(--muted);margin-top:8px">Code vérifié ! Choisissez un nouveau mot de passe.</p>' +
+        '</div>' +
+        '<div class="fg">' +
+        '<label>Nouveau mot de passe</label>' +
+        '<div style="position:relative">' +
+        '<input type="password" id="fp-pw1" placeholder="8 caractères minimum" style="width:100%;border:1.5px solid var(--br);border-radius:10px;padding:12px 42px 12px 14px;font-size:15px;font-family:inherit;box-sizing:border-box" oninput="checkFpPw()">' +
+        '<span onclick="toggleFpPw(&apos;fp-pw1&apos;)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:18px">👁️</span>' +
+        '</div>' +
+        '</div>' +
+        '<div class="fg">' +
+        '<label>Confirmer le mot de passe</label>' +
+        '<div style="position:relative">' +
+        '<input type="password" id="fp-pw2" placeholder="Répétez le mot de passe" style="width:100%;border:1.5px solid var(--br);border-radius:10px;padding:12px 42px 12px 14px;font-size:15px;font-family:inherit;box-sizing:border-box" oninput="checkFpPw()">' +
+        '<span onclick="toggleFpPw(&apos;fp-pw2&apos;)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:18px">👁️</span>' +
+        '</div>' +
+        '</div>' +
+        '<div id="fp-pw-match" style="font-size:12px;margin:-8px 0 12px;min-height:18px"></div>' +
+        '<div id="fp-pw-strength" style="height:5px;border-radius:3px;background:var(--br);margin-bottom:16px;overflow:hidden"><div id="fp-pw-bar" style="height:100%;width:0;border-radius:3px;transition:all .3s"></div></div>' +
+        '<button class="btn btn-or btn-full" style="border-radius:12px" onclick="fpSavePassword()">Enregistrer le mot de passe →</button>';
+        setTimeout(function() {
+            var f = document.getElementById('fp-pw1');
+            if (f)
+                f.focus();
+        }, 100);
+    }
+
+    function toggleFpPw(id) {
+        var el = document.getElementById(id);
+        if (!el)
+            return;
+        el.type = el.type === 'password' ? 'text' : 'password';
+    }
+
+    function checkFpPw() {
+        var p1 = (document.getElementById('fp-pw1') || {}).value || '';
+        var p2 = (document.getElementById('fp-pw2') || {}).value || '';
+        var match = document.getElementById('fp-pw-match');
+        var bar = document.getElementById('fp-pw-bar');
+        // Force du mot de passe
+        var str = 0;
+        if (p1.length >= 8)
+            str++;
+        if (/[A-Z]/.test(p1))
+            str++;
+        if (/[0-9]/.test(p1))
+            str++;
+        if (/[^a-zA-Z0-9]/.test(p1))
+            str++;
+        var colors = ['#ef4444', '#f97316', '#eab308', '#22c55e'];
+        var labels = ['Faible', 'Moyen', 'Bon', 'Fort'];
+        if (bar && p1) {
+            bar.style.width = (str * 25) + '%';
+            bar.style.background = colors[str - 1] || '#ef4444';
+        }
+        else if (bar) {
+            bar.style.width = '0';
+        }
+        // Concordance
+        if (match) {
+            if (!p2) {
+                match.innerHTML = '';
+            }
+            else if (p1 === p2) {
+                match.innerHTML = '<span style="color:#22c55e;font-weight:700">✅ Mots de passe identiques</span>';
+            }
+            else {
+                match.innerHTML = '<span style="color:#ef4444;font-weight:700">❌ Mots de passe différents</span>';
+            }
+        }
+    }
+
+    function fpSavePassword() {
+        var p1 = (document.getElementById('fp-pw1') || {}).value || '';
+        var p2 = (document.getElementById('fp-pw2') || {}).value || '';
+        if (p1.length < 8) {
+            toast('⚠️ Minimum 8 caractères', 'err');
+            return;
+        }
+        if (p1 !== p2) {
+            toast('❌ Mots de passe différents', 'err');
+            return;
+        }
+
+        // Tenter via API
+        fetch('/api/auth/reset-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                identifier: fpIdentifier,
+                code: fpResetCode,
+                newPassword: p1
+            })
+        }).then(function(r) {
+            return r.json();
+        }).then(function(d) {
+            if (d.ok || d.success) {
+                toast('✅ Mot de passe réinitialisé ! Connectez-vous.', 'ok');
+                authTab('login');
+            } else {
+                toast(d.error || 'Erreur serveur', 'err');
+                // Fallback local
+                fpSaveLocal(p1);
+            }
+        }).catch(function() {
+            fpSaveLocal(p1);
+        });
+    }
+
+    function fpSaveLocal(newPw) {
+        var data = DB._d;
+        var users = data.users || [];
+        var idx = users.findIndex(function(u) {
+            return u.email === fpIdentifier || u.phone === fpIdentifier || u.phone === fpIdentifier.replace('+224', '');
+        });
+        if (idx >= 0) {
+            users[idx].password = newPw;
+            data.users = users;
+            DB.save();
+            toast('✅ Mot de passe mis à jour ! Connectez-vous.', 'ok');
+            authTab('login');
+        } else {
+            toast('❌ Compte introuvable', 'err');
+        }
     }
 
     /* ═══════════════════════════════════════
