@@ -2518,9 +2518,9 @@
                         </div>
                     </div>
                     <button class="btn btn-ghost btn-full" style="border-radius:12px" onclick="addFav()">🤍 Ajouter aux favoris</button>
-                    <div id="owner-btns" style="display:none;margin-top:10px;flex-direction:column;gap:8px">
-                        <button class="btn btn-full" style="border-radius:12px;background:#2563EB;color:#fff;justify-content:center" onclick="editMyAd()">✏️ Modifier mon annonce</button>
-                        <button class="btn btn-full" style="border-radius:12px;background:#EF4444;color:#fff;justify-content:center" onclick="deleteMyAd()">🗑️ Supprimer mon annonce</button>
+                    <div id="owner-btns" style="display:none;flex-direction:column;gap:8px;margin-top:10px">
+                        <button id="owner-edit-btn" class="btn btn-full" style="border-radius:12px;background:#2563EB;color:#fff;justify-content:center" onclick="editMyAd()">✏️ Modifier mon annonce</button>
+                        <button id="owner-del-btn" class="btn btn-full" style="border-radius:12px;background:#EF4444;color:#fff;justify-content:center" onclick="deleteMyAd()">🗑️ Supprimer mon annonce</button>
                     </div>
                 </div>
             </div>
@@ -4304,8 +4304,46 @@
         var ad = DB.ads().find(function(a) {
             return a.id === id || a._id === id || String(a.id) === String(id) || String(a._id) === String(id);
         });
-        if (!ad)
+        if (!ad) {
+            // Annonce non trouvée en local → charger depuis l'API
+            fetch('/api/ads/' + id)
+            .then(function(r) {
+                return r.json();
+            })
+            .then(function(apiAd) {
+                if (!apiAd || apiAd.error) {
+                    toast('❌ Annonce introuvable', 'err');
+                    return;
+                }
+                // Normaliser
+                var a2 = {
+                    id: apiAd._id,
+                    _id: apiAd._id,
+                    t: apiAd.title || '',
+                    p: apiAd.price || 0,
+                    e: apiAd.emoji || '📦',
+                    cat: apiAd.category || '',
+                    city: apiAd.city || '',
+                    desc: apiAd.description || '',
+                    seller: apiAd.sellerName || '',
+                    sellerName: apiAd.sellerName || '',
+                    sellerId: String(apiAd.seller || ''),
+                    date: apiAd.createdAt ? new Date(apiAd.createdAt).toLocaleDateString('fr-FR') : '',
+                    views: apiAd.views || 0,
+                    feat: apiAd.featured || false,
+                    photos: apiAd.photos || [],
+                    bg: 'linear-gradient(135deg,#FFF3EE,#FFB899)',
+                    tags: [apiAd.category || '']
+                };
+                viewAd_display(a2);
+            }).catch(function() {
+                toast('❌ Erreur réseau', 'err');
+            });
             return;
+        }
+        viewAd_display(ad);
+    }
+    function viewAd_display(ad) {
         curAd = ad;
 
         // Enregistrer dans l'historique de navigation
@@ -4368,68 +4406,52 @@
         document.getElementById('det-av').textContent = ad.seller ? ad.seller.charAt(0).toUpperCase() : '?';
         document.getElementById('om-val').textContent = ad.p.toLocaleString('fr-FR') + ' GNF';
         document.getElementById('om-item').textContent = ad.t;
-        // Afficher boutons modifier/supprimer si c'est l'annonce de l'utilisateur
-        var ownerBtns = document.getElementById('owner-btns');
-        if (ownerBtns) {
-            var user = DB.user();
-            var isOwner = false;
-            if (user) {
-                var userId = String(user._id || user.id || '');
-                var adOwner = String(ad.sellerId || '');
-                var isAdmin = (user.role === 'admin');
-                // Propriétaire : sellerId correspond OU nom correspond (fallback)
-                if (isAdmin)
-                    isOwner = true; // admin peut tout gérer
-                else if (adOwner && adOwner.length > 5 && adOwner === userId)
-                    isOwner = true;
-                else {
-                    var userName = ((user.prenom || user.name || '') + ' ' + (user.nom || '')).trim();
-                    if (ad.sellerName && ad.sellerName === userName)
-                        isOwner = true;
-                    if (ad.seller && (ad.seller === userName || ad.seller === (user.prenom || user.name || '')))
-                        isOwner = true;
+        // ── Afficher boutons Modifier/Supprimer ──
+        var ownerBtns2 = document.getElementById('owner-btns');
+        var modBtn2 = document.getElementById('owner-edit-btn');
+        var delBtn2 = document.getElementById('owner-del-btn');
+        if (ownerBtns2) {
+            ownerBtns2.style.display = 'none';
+        }
+        var user2 = DB.user();
+        if (user2 && ownerBtns2) {
+            if (user2.role === 'admin') {
+                ownerBtns2.style.cssText = 'display:flex;flex-direction:column;gap:8px;margin-top:10px';
+                if (modBtn2)
+                    modBtn2.style.display = 'none';
+                if (delBtn2)
+                    delBtn2.textContent = '🗑️ Supprimer (Admin)';
+            } else {
+                var adId2 = ad._id || ad.id;
+                var tok2 = localStorage.getItem('ygy_token');
+                if (tok2 && adId2) {
+                    fetch('/api/my-ads', {
+                        headers: {
+                            'Authorization': 'Bearer ' + tok2
+                        }
+                    })
+                    .then(function(r) {
+                        return r.json();
+                    })
+                    .then(function(data) {
+                        var myAds = Array.isArray(data) ? data : (data.ads || []);
+                        var isMine = myAds.some(function(a) {
+                            return String(a._id) === String(adId2);
+                        });
+                        if (isMine) {
+                            var ob = document.getElementById('owner-btns');
+                            if (ob)
+                                ob.style.cssText = 'display:flex;flex-direction:column;gap:8px;margin-top:10px';
+                            var mb = document.getElementById('owner-edit-btn');
+                            if (mb)
+                                mb.style.display = '';
+                            var db2 = document.getElementById('owner-del-btn');
+                            if (db2)
+                                db2.textContent = '🗑️ Supprimer mon annonce';
+                        }
+                    }).catch(function() {});
                 }
             }
-            ownerBtns.style.cssText = isOwner
-            ? 'display:flex;flex-direction:column;gap:8px;margin-top:10px'
-            : 'display:none';
-            // Changer le texte du bouton supprimer pour admin
-            var delBtn = ownerBtns.querySelector('button:last-child');
-            if (delBtn && user && user.role === 'admin')
-                delBtn.textContent = '🗑️ Supprimer (Admin)';
-            else if (delBtn)
-                delBtn.textContent = '🗑️ Supprimer mon annonce';
-        }
-        // Si connecté, vérifier ownership via API pour avoir le sellerId correct
-        var token = localStorage.getItem('ygy_token');
-        var adId = ad._id || ad.id;
-        if (token && adId && adId.length > 10) {
-            fetch('/api/ads/' + adId)
-            .then(function(r) {
-                return r.json();
-            })
-            .then(function(apiAd) {
-                if (!apiAd || apiAd.error)
-                    return;
-                var user = DB.user();
-                if (!user)
-                    return;
-                var isAdmin = (user.role === 'admin');
-                var userId = String(user._id || user.id || '');
-                var sellerObjId = String(apiAd.seller || '');
-                var isOwner = isAdmin || (sellerObjId && sellerObjId === userId);
-                var ownerBtns = document.getElementById('owner-btns');
-                if (ownerBtns) {
-                    ownerBtns.style.cssText = isOwner
-                    ? 'display:flex;flex-direction:column;gap:8px;margin-top:10px'
-                    : 'display:none';
-                    var delBtn = ownerBtns.querySelector('button:last-child');
-                    if (delBtn)
-                        delBtn.textContent = isAdmin && !isOwner
-                        ? '🗑️ Supprimer (Admin)'
-                        : '🗑️ Supprimer mon annonce';
-                }
-            }).catch(function() {});
         }
         goTo('detail');
     }
@@ -6149,11 +6171,8 @@
         if (pv)
             pv.textContent = (u.method === 'email' ? '📧 Email' : '📱 SMS') + ' — Vérifié';
 
-        // Mes annonces (seulement les siennes, pas les démos)
-        var allAds = DB._d.ads || [];
-        var myAds = allAds.filter(function(a) {
-            return !a.isDemo && (a.uid === u.id || a.uid === u.email || a.sellerEmail === u.email || a.seller === u.name);
-        });
+        // Mes annonces : charger depuis l'API
+        var myAds = [];
 
         // Stats
         var pays = DB.payments();
@@ -6190,16 +6209,39 @@
             }
         }
 
-        // Onglet Mes annonces
+        // Onglet Mes annonces : charger depuis API
         var full = document.getElementById('d-ads-full');
-        if (full)
-            full.innerHTML = myAds.length
-            ? myAds.map(dashRow).join('')
-            : '<div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:48px;text-align:center;color:var(--muted);box-shadow:var(--sh)">' +
-            '<div style="font-size:52px;margin-bottom:14px">📋</div>' +
-            '<p style="font-weight:800;font-size:16px;margin-bottom:8px">Aucune annonce publiée</p>' +
-            '<a onclick="goTo(\'post\')" style="color:var(--or);font-weight:800;cursor:pointer;font-size:14px">➕ Déposer ma première annonce →</a>' +
-            '</div>';
+        if (full) {
+            full.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted)">⏳ Chargement...</div>';
+            var tok3 = localStorage.getItem('ygy_token');
+            if (tok3) {
+                fetch('/api/my-ads', {
+                    headers: {
+                        'Authorization': 'Bearer ' + tok3
+                    }
+                })
+                .then(function(r) {
+                    return r.json();
+                })
+                .then(function(apiMyAds) {
+                    window._myAdsList = Array.isArray(apiMyAds) ? apiMyAds : (apiMyAds.ads || []);
+                    var pca2 = document.getElementById('p-count-ads');
+                    if (pca2)
+                        pca2.textContent = window._myAdsList.length;
+                    full.innerHTML = window._myAdsList.length
+                    ? window._myAdsList.map(function(a, i) {
+                        return dashRow(a, i);
+                    }).join('')
+                    : '<div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:48px;text-align:center;color:var(--muted);box-shadow:var(--sh)">' +
+                    '<div style="font-size:52px;margin-bottom:14px">📋</div>' +
+                    '<p style="font-weight:800;font-size:16px;margin-bottom:8px">Aucune annonce publiée</p>' +
+                    '<a onclick="goTo(\'post\')" style="color:var(--or);font-weight:800;cursor:pointer;font-size:14px">➕ Déposer ma première annonce →</a>' +
+                    '</div>';
+                }).catch(function() {
+                    full.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted)">❌ Erreur de chargement</div>';
+                });
+            }
+        }
 
         // Onglet Paiements
         var pl = document.getElementById('d-pay-list');
@@ -6225,8 +6267,86 @@
             }).join('')
             : '<div style="grid-column:1/-1;background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:48px;text-align:center;color:var(--muted);box-shadow:var(--sh)"><div style="font-size:52px;margin-bottom:14px">❤️</div><p>Aucun favori</p></div>';
     }
-    function dashRow(a) {
-        return '<div class="dash-ad-row"><div style="font-size:30px">' + a.e + '</div><div style="flex:1"><div style="font-weight:800;font-size:14px">' + a.t + '</div><div style="font-size:12px;color:var(--muted)">📍 ' + a.city + ' · 👁️ ' + a.views + ' vues · ' + a.date + '</div></div><div style="text-align:right"><div style="font-weight:800;font-size:16px;color:var(--or)">' + a.p.toLocaleString('fr-FR') + ' GNF</div><span class="badge badge-g">✅ Active</span></div></div>';
+    function dashRow(a, idx) {
+        var adId = a._id || a.id || '';
+        var thumb = (a.photos && a.photos[0])
+        ? '<img src="' + a.photos[0] + '" style="width:44px;height:44px;object-fit:cover;border-radius:8px;flex-shrink:0">'
+        : '<div style="font-size:30px;width:44px;height:44px;display:flex;align-items:center;justify-content:center">' + (a.emoji || a.e || '📦') + '</div>';
+        var title = a.title || a.t || 'Sans titre';
+        var price = (a.price || a.p || 0).toLocaleString('fr-FR');
+        var city = a.city || '';
+        var views = a.views || 0;
+        var d = a.createdAt ? new Date(a.createdAt).toLocaleDateString('fr-FR') : (a.date || '');
+        return '<div class="dash-ad-row" style="cursor:pointer" onclick="viewAd(\'' + adId + '\')">'
+        + thumb
+        + '<div style="flex:1;min-width:0">'
+        + '<div style="font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + title + '</div>'
+        + '<div style="font-size:12px;color:var(--muted);margin-top:2px">📍 ' + city + ' · 👁️ ' + views + ' vues · ' + d + '</div>'
+        + '</div>'
+        + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">'
+        + '<div style="font-weight:800;font-size:15px;color:var(--or)">' + price + ' GNF</div>'
+        + '<div style="display:flex;gap:6px">'
+        + '<button onclick="event.stopPropagation();dashEditAd(' + idx + ')" style="background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer">✏️ Modifier</button>'
+        + '<button onclick="event.stopPropagation();dashDeleteAd(' + idx + ')" style="background:#FEE2E2;color:#DC2626;border:1px solid #FECACA;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer">🗑️ Supprimer</button>'
+        + '</div>'
+        + '</div>'
+        + '</div>';
+    }
+
+    function dashEditAd(idx) {
+        var ads = window._myAdsList || [];
+        var ad = ads[idx];
+        if (!ad)
+            return;
+        curAd = {
+            _id: ad._id,
+            id: ad._id,
+            t: ad.title || '',
+            p: ad.price || 0,
+            desc: ad.description || '',
+            city: ad.city || '',
+            cat: ad.category || '',
+            e: ad.emoji || '📦',
+            photos: ad.photos || [],
+            seller: ad.sellerName || ''
+        };
+        editMyAd();
+    }
+
+    function dashDeleteAd(idx) {
+        var ads = window._myAdsList || [];
+        var ad = ads[idx];
+        if (!ad)
+            return;
+        if (!confirm('Supprimer "' + (ad.title || 'cette annonce') + '" ?'))
+            return;
+        var token = localStorage.getItem('ygy_token');
+        fetch('/api/ads/' + ad._id, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        })
+        .then(function(r) {
+            return r.json();
+        })
+        .then(function(data) {
+            if (data.error) {
+                toast('❌ ' + data.error, 'err');
+                return;
+            }
+            toast('🗑️ Annonce supprimée', 'ok');
+            window._myAdsList = (window._myAdsList || []).filter(function(a) {
+                return a._id !== ad._id;
+            });
+            fetchAdsFromAPI(function() {
+                renderAds();
+            });
+            renderDash();
+        })
+        .catch(function() {
+            toast('❌ Erreur réseau', 'err');
+        });
     }
     function showTab(tab) {
         ['profil', 'ads', 'payments', 'favs'].forEach(function(t) {
