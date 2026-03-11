@@ -2534,11 +2534,13 @@
                     <div class="step-badge">2</div>
                     Photos
                 </h3>
-                <div class="upload-zone" onclick="toast('📸 Disponible en production')">
+                <div class="upload-zone" onclick="document.getElementById('photo-input').click()" id="upload-zone-el">
+                    <input type="file" id="photo-input" accept="image/*" multiple style="display:none" onchange="handlePhotos(this)">
                     <span class="icon">📸</span>
                     <p style="font-weight:700;margin-bottom:5px">Cliquez pour ajouter des photos</p>
                     <p style="font-size:13px;color:var(--muted)">JPG, PNG — max 8 photos (5 Mo chacune)</p>
                 </div>
+                <div id="photo-previews" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px"></div>
             </div>
             <div class="post-step">
                 <h3>
@@ -3912,13 +3914,16 @@
     }
 
     function adCard(a, feat) {
-        return '<div class="ad-card" onclick="viewAd(' + a.id + ')">' +
-        '<div class="ad-img" style="background:' + a.bg + '"><span>' + a.e + '</span>' +
+        var imgContent = (a.photos && a.photos[0])
+        ? '<img src="' + a.photos[0] + '" style="width:100%;height:100%;object-fit:cover;border-radius:0">'
+        : '<span>' + (a.e || '📦') + '</span>';
+        return '<div class="ad-card" onclick="viewAd(' + (a.id || a._id) + ')">' +
+        '<div class="ad-img" style="background:' + (a.bg || 'linear-gradient(135deg,#FFF3EE,#FFB899)') + '">' + imgContent +
         (feat ? '<span class="ad-badge">⭐ À la une</span>' : '') +
-        '<button class="ad-fav" onclick="event.stopPropagation();favAd(' + a.id + ')">🤍</button></div>' +
-        '<div class="ad-body"><div class="ad-price">' + a.p.toLocaleString('fr-FR') + ' GNF</div>' +
-        '<div class="ad-title">' + a.t + '</div>' +
-        '<div class="ad-meta"><span class="ad-tag">📍 ' + a.city + '</span><span class="ad-tag">🕐 ' + a.date + '</span></div></div></div>';
+        '<button class="ad-fav" onclick="event.stopPropagation();favAd(' + (a.id || a._id) + ')">🤍</button></div>' +
+        '<div class="ad-body"><div class="ad-price">' + ((a.p || a.price || 0).toLocaleString('fr-FR')) + ' GNF</div>' +
+        '<div class="ad-title">' + (a.t || a.title || '') + '</div>' +
+        '<div class="ad-meta"><span class="ad-tag">📍 ' + (a.city || '') + '</span><span class="ad-tag">🕐 ' + (a.date || '') + '</span></div></div></div>';
     }
 
     function doSearch(query) {
@@ -4233,6 +4238,60 @@
         el.classList.add('sel');
         selCat = name;
     }
+    var selectedPhotos = []; // stockage base64 des photos
+
+    function handlePhotos(input) {
+        var files = Array.from(input.files);
+        if (!files.length)
+            return;
+        var remaining = 8 - selectedPhotos.length;
+        if (remaining <= 0) {
+            toast('⚠️ Maximum 8 photos', 'err');
+            return;
+        }
+        files = files.slice(0, remaining);
+
+        var zone = document.getElementById('upload-zone-el');
+        var preview = document.getElementById('photo-previews');
+
+        files.forEach(function(file) {
+            if (file.size > 5 * 1024 * 1024) {
+                toast('⚠️ ' + file.name + ' dépasse 5 Mo', 'err');
+                return;
+            }
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var b64 = e.target.result;
+                selectedPhotos.push(b64);
+                // Miniature
+                var idx = selectedPhotos.length - 1;
+                var div = document.createElement('div');
+                div.style.cssText = 'position:relative;width:80px;height:80px;border-radius:10px;overflow:hidden;border:1.5px solid var(--br)';
+                div.innerHTML = '<img src="' + b64 + '" style="width:100%;height:100%;object-fit:cover">'
+                + '<button onclick="removePhoto(' + idx + ',this.parentNode)" style="position:absolute;top:3px;right:3px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;line-height:1;font-family:inherit">✕</button>';
+                preview.appendChild(div);
+                // Mettre à jour le texte de la zone
+                if (zone)
+                    zone.querySelector('p').textContent = selectedPhotos.length + ' photo' + (selectedPhotos.length > 1 ? 's' : '') + ' sélectionnée' + (selectedPhotos.length > 1 ? 's' : '');
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function removePhoto(idx, el) {
+        selectedPhotos.splice(idx, 1);
+        if (el)
+            el.remove();
+        var zone = document.getElementById('upload-zone-el');
+        if (zone) {
+            var p = zone.querySelector('p');
+            if (p)
+                p.textContent = selectedPhotos.length > 0
+                ? selectedPhotos.length + ' photo' + (selectedPhotos.length > 1 ? 's' : '') + ' sélectionnée' + (selectedPhotos.length > 1 ? 's' : '')
+                : 'Cliquez pour ajouter des photos';
+        }
+    }
+
     function requireLoginThenPost() {
         if (!DB.user()) {
             toast('👤 Connectez-vous pour déposer une annonce', 'err');
@@ -4294,7 +4353,8 @@
             etat: etat,
             seller: user.name || user.prenom || '',
             sellerId: user._id || user.id || '',
-            date: new Date().toISOString()
+            date: new Date().toISOString(),
+            photos: selectedPhotos.slice(0, 8)
         };
 
         // Bouton loading
@@ -4351,6 +4411,16 @@
                         e.value = '';
                 });
                 selCat = '';
+                selectedPhotos = [];
+                var pp = document.getElementById('photo-previews');
+                if (pp)
+                    pp.innerHTML = '';
+                var pz = document.getElementById('upload-zone-el');
+                if (pz) {
+                    var pzp = pz.querySelector('p');
+                    if (pzp)
+                        pzp.textContent = 'Cliquez pour ajouter des photos';
+                }
                 document.querySelectorAll('.cat-opt').forEach(function(c) {
                     c.classList.remove('sel');
                 });
