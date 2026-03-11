@@ -4508,7 +4508,7 @@
         '<div id="code-display" style="font-size:32px;font-weight:900;letter-spacing:8px;color:var(--or)">' + smsCode + '</div>' +
         '<div style="font-size:11px;color:var(--muted);margin-top:4px">' + (icon === '📧' ? '(En attente config email — copiez ce code)' : '(Mode simulation — copiez ce code)') + '</div>' +
         '</div>';
-        body.innerHTML +=
+        body.innerHTML =
         '<div class="sms-wrap" id="code-box">' +
         '<div class="sw-title">' + icon + ' Code de vérification</div>' +
         '<div class="sw-sub" style="margin-bottom:12px">Destinataire : <strong>' + dest + '</strong></div>' +
@@ -5082,30 +5082,39 @@
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                type: fpMode,
-                value: fpMode === 'phone' ? identifier.replace('+224', '') : identifier,
-                purpose: 'reset'
-            })
+            body: JSON.stringify(fpMode === 'email'
+            ? {
+                method: 'email',
+                email: identifier,
+                prenom: 'Utilisateur'
+            }
+            : {
+                method: 'sms',
+                phone: identifier.replace('+224', ''),
+                prenom: 'Utilisateur'
+            }
+            )
         })
         .then(function(r) {
             return r.ok ? r.json() : Promise.reject(r.status);
         })
         .then(function(d) {
-            // API a répondu — utiliser le code serveur si disponible
-            if (d.debug_code)
-                fpResetCode = d.debug_code;
             if (d.error) {
                 toast('❌ ' + d.error, 'err');
+                var b = document.querySelector('#auth-body .btn-or');
+                if (b) {
+                    b.disabled = false;
+                    b.textContent = 'Envoyer le code →';
+                }
                 return;
             }
-            // Afficher le code dans la notification (tant que SMS/email pas configurés)
-            toast('📨 Code de réinitialisation : ' + fpResetCode, 'ok', 6000);
+            // Utiliser le code du serveur (debug_code toujours renvoyé)
+            if (d.debug_code)
+                fpResetCode = d.debug_code;
             fpShowCodeStep();
         })
-        .catch(function(err) {
-            // API inaccessible — mode démo : afficher le code directement
-            toast('📨 Code de réinitialisation : ' + fpResetCode, 'ok', 6000);
+        .catch(function() {
+            // API inaccessible — code local affiché sur la page
             fpShowCodeStep();
         });
     }
@@ -5116,20 +5125,31 @@
         if (!body)
             return;
         title.textContent = '🔑 Code de vérification';
+
+        // Vérifier si l'email est configuré côté serveur
+        // Pour l'instant, afficher le code directement sur la page (mode démo)
+        var codeBox = '<div style="background:linear-gradient(135deg,#fff3e0,#ffe0b2);border:2.5px solid var(--or);border-radius:14px;padding:16px;text-align:center;margin:16px 0">' +
+        '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--or);margin-bottom:6px">⚠️ Mode démo — votre code est :</div>' +
+        '<div style="font-size:42px;font-weight:900;letter-spacing:10px;color:var(--ink);font-family:monospace">' + fpResetCode + '</div>' +
+        '<div style="font-size:11px;color:var(--muted);margin-top:6px">(Email actif après configuration du serveur)</div>' +
+        '</div>';
+
         body.innerHTML =
-        '<div style="text-align:center;margin-bottom:18px">' +
-        '<div style="font-size:40px;margin-bottom:8px">📨</div>' +
-        '<p style="font-size:14px;color:var(--muted);line-height:1.6">Code envoyé à<br><strong style="color:var(--ink)">' + fpIdentifier + '</strong></p>' +
+        '<div style="text-align:center;margin-bottom:8px">' +
+        '<div style="font-size:36px;margin-bottom:6px">📨</div>' +
+        '<p style="font-size:13px;color:var(--muted);line-height:1.5">Réinitialisation pour<br><strong style="color:var(--ink)">' + fpIdentifier + '</strong></p>' +
         '</div>' +
-        '<div class="pin-wrap" style="display:flex;gap:10px;justify-content:center;margin:20px 0">' +
-        '<input class="pin-box" type="password" maxlength="1" id="fp1" oninput="movPin(this,&apos;fp2&apos;)" style="width:52px;height:58px;text-align:center;font-size:26px;font-weight:900;border:2px solid var(--br);border-radius:12px;font-family:inherit">' +
-        '<input class="pin-box" type="password" maxlength="1" id="fp2" oninput="movPin(this,&apos;fp3&apos;)" style="width:52px;height:58px;text-align:center;font-size:26px;font-weight:900;border:2px solid var(--br);border-radius:12px;font-family:inherit">' +
-        '<input class="pin-box" type="password" maxlength="1" id="fp3" oninput="movPin(this,&apos;fp4&apos;)" style="width:52px;height:58px;text-align:center;font-size:26px;font-weight:900;border:2px solid var(--br);border-radius:12px;font-family:inherit">' +
-        '<input class="pin-box" type="password" maxlength="1" id="fp4" style="width:52px;height:58px;text-align:center;font-size:26px;font-weight:900;border:2px solid var(--br);border-radius:12px;font-family:inherit">' +
+        codeBox +
+        '<p style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:8px">Entrez ce code ci-dessous :</p>' +
+        '<div class="pin-wrap" style="display:flex;gap:10px;justify-content:center;margin:8px 0 16px">' +
+        '<input class="pin-box" type="text" maxlength="1" id="fp1" oninput="movPin(this,&apos;fp2&apos;)" style="width:52px;height:58px;text-align:center;font-size:26px;font-weight:900;border:2px solid var(--br);border-radius:12px;font-family:monospace">' +
+        '<input class="pin-box" type="text" maxlength="1" id="fp2" oninput="movPin(this,&apos;fp3&apos;)" style="width:52px;height:58px;text-align:center;font-size:26px;font-weight:900;border:2px solid var(--br);border-radius:12px;font-family:monospace">' +
+        '<input class="pin-box" type="text" maxlength="1" id="fp3" oninput="movPin(this,&apos;fp4&apos;)" style="width:52px;height:58px;text-align:center;font-size:26px;font-weight:900;border:2px solid var(--br);border-radius:12px;font-family:monospace">' +
+        '<input class="pin-box" type="text" maxlength="1" id="fp4" style="width:52px;height:58px;text-align:center;font-size:26px;font-weight:900;border:2px solid var(--br);border-radius:12px;font-family:monospace">' +
         '</div>' +
-        '<button class="btn btn-or btn-full" style="border-radius:12px" onclick="fpVerifyCode()">Vérifier le code →</button>' +
-        '<p style="text-align:center;font-size:13px;color:var(--muted);margin-top:14px">' +
-        '<a style="color:var(--or);cursor:pointer;font-weight:700" onclick="fpSendCode()">Renvoyer le code</a>' +
+        '<button class="btn btn-or btn-full" style="border-radius:12px" onclick="fpVerifyCode()">Continuer →</button>' +
+        '<p style="text-align:center;font-size:12px;color:var(--muted);margin-top:12px">' +
+        '<a style="color:var(--or);cursor:pointer;font-weight:700" onclick="fpSendCode()">Générer un nouveau code</a>' +
         ' &nbsp;|&nbsp; <a style="cursor:pointer" onclick="showForgotPassword()">← Retour</a>' +
         '</p>';
         setTimeout(function() {
