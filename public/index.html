@@ -3977,6 +3977,8 @@
                         city: a.city || '',
                         desc: a.description || '',
                         seller: a.sellerName || '',
+                        sellerName: a.sellerName || '',
+                        sellerId: String(a.seller || ''),
                         date: a.createdAt ? new Date(a.createdAt).toLocaleDateString('fr-FR') : 'Récent',
                         views: a.views || 0,
                         feat: a.featured || false,
@@ -4370,16 +4372,64 @@
         var ownerBtns = document.getElementById('owner-btns');
         if (ownerBtns) {
             var user = DB.user();
-            var userId = String(user._id || user.id || '');
-            var adSeller = String(ad.sellerId || ad.seller_id || '');
-            var isOwner = user && (
-            (adSeller && adSeller === userId) ||
-            (ad.seller && ad.seller === (user.name || ((user.prenom || '') + ' ' + (user.nom || '')).trim())) ||
-            (ad.sellerName && ad.sellerName === (user.prenom || user.name || ''))
-            );
+            var isOwner = false;
+            if (user) {
+                var userId = String(user._id || user.id || '');
+                var adOwner = String(ad.sellerId || '');
+                var isAdmin = (user.role === 'admin');
+                // Propriétaire : sellerId correspond OU nom correspond (fallback)
+                if (isAdmin)
+                    isOwner = true; // admin peut tout gérer
+                else if (adOwner && adOwner.length > 5 && adOwner === userId)
+                    isOwner = true;
+                else {
+                    var userName = ((user.prenom || user.name || '') + ' ' + (user.nom || '')).trim();
+                    if (ad.sellerName && ad.sellerName === userName)
+                        isOwner = true;
+                    if (ad.seller && (ad.seller === userName || ad.seller === (user.prenom || user.name || '')))
+                        isOwner = true;
+                }
+            }
             ownerBtns.style.cssText = isOwner
             ? 'display:flex;flex-direction:column;gap:8px;margin-top:10px'
             : 'display:none';
+            // Changer le texte du bouton supprimer pour admin
+            var delBtn = ownerBtns.querySelector('button:last-child');
+            if (delBtn && user && user.role === 'admin')
+                delBtn.textContent = '🗑️ Supprimer (Admin)';
+            else if (delBtn)
+                delBtn.textContent = '🗑️ Supprimer mon annonce';
+        }
+        // Si connecté, vérifier ownership via API pour avoir le sellerId correct
+        var token = localStorage.getItem('ygy_token');
+        var adId = ad._id || ad.id;
+        if (token && adId && adId.length > 10) {
+            fetch('/api/ads/' + adId)
+            .then(function(r) {
+                return r.json();
+            })
+            .then(function(apiAd) {
+                if (!apiAd || apiAd.error)
+                    return;
+                var user = DB.user();
+                if (!user)
+                    return;
+                var isAdmin = (user.role === 'admin');
+                var userId = String(user._id || user.id || '');
+                var sellerObjId = String(apiAd.seller || '');
+                var isOwner = isAdmin || (sellerObjId && sellerObjId === userId);
+                var ownerBtns = document.getElementById('owner-btns');
+                if (ownerBtns) {
+                    ownerBtns.style.cssText = isOwner
+                    ? 'display:flex;flex-direction:column;gap:8px;margin-top:10px'
+                    : 'display:none';
+                    var delBtn = ownerBtns.querySelector('button:last-child');
+                    if (delBtn)
+                        delBtn.textContent = isAdmin && !isOwner
+                        ? '🗑️ Supprimer (Admin)'
+                        : '🗑️ Supprimer mon annonce';
+                }
+            }).catch(function() {});
         }
         goTo('detail');
     }
@@ -4436,10 +4486,17 @@
         if (!curAd) {
             return;
         }
-        if (!confirm('Supprimer cette annonce ?'))
+        var user = DB.user();
+        var label = (user && user.role === 'admin') ? 'Supprimer cette annonce (action admin) ?' : 'Supprimer cette annonce ?';
+        if (!confirm(label))
             return;
         var token = localStorage.getItem('ygy_token');
+        if (!token) {
+            toast('❌ Vous devez être connecté', 'err');
+            return;
+        }
         var adId = curAd._id || curAd.id;
+        // /api/ads/:id accepte owner ET admin
         fetch('/api/ads/' + adId, {
             method: 'DELETE',
             headers: {
@@ -4449,10 +4506,14 @@
         .then(function(r) {
             return r.json();
         })
-        .then(function() {
+        .then(function(data) {
+            if (data.error) {
+                toast('❌ ' + data.error, 'err');
+                return;
+            }
             toast('🗑️ Annonce supprimée', 'ok');
             DB._d.ads = (DB._d.ads || []).filter(function(a) {
-                return (a._id || a.id) !== adId;
+                return String(a._id || a.id) !== String(adId);
             });
             DB.save();
             fetchAdsFromAPI(function() {
@@ -4468,7 +4529,7 @@
     function editMyAd() {
         if (!curAd)
             return;
-        // Aller sur le formulaire de dépôt pré-rempli
+        window._editingAdId = curAd._id || curAd.id; // stocker l'ID pour la mise à jour
         goTo('post');
         setTimeout(function() {
             var pt = document.getElementById('pt');
@@ -4484,11 +4545,14 @@
             if (pc)
                 pc.value = curAd.city || '';
             selCat = curAd.cat || curAd.category || '';
-            // Marquer la catégorie
             document.querySelectorAll('.cat-opt').forEach(function(el) {
                 el.classList.toggle('sel', el.textContent.includes(selCat));
             });
-            toast('✏️ Modifiez puis republiez', 'ok');
+            // Changer le titre du bouton
+            var btn = document.getElementById('submit-ad-btn');
+            if (btn)
+                btn.textContent = "✏️ Mettre à jour l'annonce";
+            toast('✏️ Modifiez puis cliquez sur Mettre à jour', 'ok');
         }, 300);
     }
 
@@ -4659,8 +4723,11 @@
 
         var token = localStorage.getItem('ygy_token');
         if (token) {
-            fetch('/api/ads', {
-                method: 'POST',
+            var editId = window._editingAdId;
+            var fetchUrl = editId ? '/api/ads/' + editId : '/api/ads';
+            var fetchMethod = editId ? 'PATCH' : 'POST';
+            fetch(fetchUrl, {
+                method: fetchMethod,
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + token
@@ -4709,6 +4776,10 @@
                 });
                 selCat = '';
                 selectedPhotos = [];
+                window._editingAdId = null;
+                var submitBtn = document.getElementById('submit-ad-btn');
+                if (submitBtn)
+                    submitBtn.textContent = '🚀 Publier mon annonce gratuitement';
                 var pp = document.getElementById('photo-previews');
                 if (pp)
                     pp.innerHTML = '';
