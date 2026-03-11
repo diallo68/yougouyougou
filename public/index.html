@@ -259,7 +259,89 @@
 
     .nav-cats {
         border-top: 1px solid var(--br);
-        background: var(--wh)
+        background: var(--wh);
+        position: relative;
+        z-index: 300
+    }
+
+    .ncat {
+        position: relative;
+        display: inline-flex;
+        align-items: center
+    }
+
+    .cat-arrow {
+        font-size: 9px;
+        opacity: 0.55;
+        margin-left: 3px;
+        transition: transform .2s;
+        display: inline-block
+    }
+
+    .ncat.has-sub:hover > .cat-arrow {
+        transform: rotate(180deg)
+    }
+
+    .cat-dropdown {
+        visibility: hidden;
+        opacity: 0;
+        pointer-events: none;
+        position: absolute;
+        top: calc(100% + 2px);
+        left: 0;
+        min-width: 210px;
+        background: #fff;
+        border: 1.5px solid var(--br);
+        border-radius: 14px;
+        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.13);
+        padding: 6px 0;
+        z-index: 9999;
+        transition: opacity .18s, transform .18s, visibility .18s;
+        transform: translateY(-6px);
+    }
+
+    .ncat.has-sub:hover > .cat-dropdown {
+        visibility: visible;
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0)
+    }
+
+    .cat-sub-item {
+        display: block;
+        padding: 9px 18px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--ink);
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background .13s, color .13s;
+        line-height: 1.3
+    }
+
+    .cat-sub-item:first-child {
+        border-radius: 12px 12px 0 0
+    }
+
+    .cat-sub-item:last-child {
+        border-radius: 0 0 12px 12px
+    }
+
+    .cat-sub-item:hover {
+        background: var(--or);
+        color: #fff
+    }
+
+    @keyframes dropFade {
+        from {
+            opacity: 0;
+            transform:translateY(-6px)
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0)
+        }
     }
 
     .nav-cats-in {
@@ -277,7 +359,8 @@
     }
 
     .ncat {
-        display: flex;
+        position: relative;
+        display: inline-flex;
         align-items: center;
         gap: 7px;
         padding: 10px 18px;
@@ -379,6 +462,26 @@
         align-items: center
     }
 
+    .logo-flag {
+        font-size: 22px;
+        margin-left: 6px;
+        display: inline-block;
+        animation: flagFloat 2.8s ease-in-out infinite;
+        transform-origin: 50% 100%;
+        line-height: 1;
+        vertical-align: middle
+    }
+
+    @keyframes flagFloat {
+        0%, 100% {
+            transform:translateY(0) rotate(-4deg)
+        }
+
+        50% {
+            transform: translateY(-5px) rotate(4deg)
+        }
+    }
+
     .hero-kicker {
         display: inline-flex;
         align-items: center;
@@ -400,6 +503,15 @@
         background: var(--or);
         border-radius: 50%;
         animation: pulse 2s ease-in-out infinite
+    }
+
+    .greet-item {
+        font-size: 13px;
+        font-weight: 800;
+        color: var(--ink);
+        text-transform: uppercase;
+        letter-spacing: .8px;
+        opacity: .85
     }
 
     .hero h1 {
@@ -1999,6 +2111,7 @@
                     <span class="Y">Y</span>
                     ougou
                 </span>
+                <span class="logo-flag">🇬🇳</span>
             </a>
             <div class="nav-sc">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A8A8A8" stroke-width="2.5">
@@ -2033,16 +2146,7 @@
         <!-- HERO -->
         <section class="hero">
             <div class="fade-up">
-                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px">
-                    <div class="hero-kicker">
-                        <span class="dot"></span>
-                        <span id="hero-greet">Marketplace N°1 de Guinée</span>
-                    </div>
-                    <div style="display:flex;gap:6px;align-items:center">
-                        <button onclick="setLang('fr')" id="lang-fr" style="background:var(--or);color:#fff;border:none;border-radius:50px;padding:5px 12px;font-size:11px;font-weight:800;cursor:pointer;transition:all .2s">🇫🇷 FR</button>
-                        <button onclick="setLang('en')" id="lang-en" style="background:var(--brl);color:var(--muted);border:none;border-radius:50px;padding:5px 12px;font-size:11px;font-weight:800;cursor:pointer;transition:all .2s">🇬🇧 EN</button>
-                    </div>
-                </div>
+
                 <h1>
                     Le marché de
                     <br>
@@ -2964,7 +3068,7 @@
     // ══════════════════════════════════════════
     //  DONNÉES
     // ══════════════════════════════════════════
-    var ALL_CITIES = ['Beyla', 'Boké', 'Boffa', 'Conakry', 'Coyah', 'Dabola', 'Dalaba', 'Dinguiraye', 'Dubréka', 'Faranah', 'Forécariah', 'Fria', 'Gaoual', 'Guéckédou', 'Kankan', 'Kérouané', 'Kindia', 'Kissidougou', 'Koubia', 'Koundara', 'Kouroussa', 'Labé', 'Lélouma', 'Lola', 'Macenta', 'Mali', 'Mamou', 'Mandiana', 'N\'Zérékoré', 'Pita', 'Siguiri', 'Télimélé', 'Tougué', 'Yomou'];
+    var ALL_CITIES = ['Beyla', 'Boké', 'Boffa', 'Conakry', 'Coyah', 'Dabola', 'Dalaba', 'Dinguiraye', 'Dubréka', 'Faranah', 'Forécariah', 'Fria', 'Gaoual', 'Guéckédou', 'Kankan', 'Kérouané', 'Kindia', 'Kissidougou', 'Koubia', 'Koundara', 'Kouroussa', 'Labé', 'Lélouma', 'Lola', 'Macenta', 'Mali', 'Mamou', 'Mandiana', 'N’Zérékoré', 'Pita', 'Siguiri', 'Télimélé', 'Tougué', 'Yomou'];
 
     var REGIONS = [
     {
@@ -3262,63 +3366,69 @@
     var CATS = [
     {
         n: 'Véhicules',
-        e: '🚗🏍️',
-        c: 234
+        e: '🚗',
+        c: 234,
+        sub: ['Voitures', 'Motos & Scooters', 'Camions & Utilitaires', 'Bus & Minibus', 'Taxis', 'Pièces & Accessoires', 'Vélos', 'Engins agricoles']
     },
     {
-        n: 'Maison : Ventes & Location',
+        n: 'Immobilier',
         e: '🏠',
-        c: 189
-    },
-    {
-        n: 'Emploi',
-        e: '💼',
-        c: 156
+        c: 189,
+        sub: ['Appartement', 'Maison', 'Terrain', 'Immeuble', 'Villa', 'Bureau & Commerce', 'Location saisonnière', 'Colocation']
     },
     {
         n: 'Électronique',
-        e: '📱💻',
-        c: 312
+        e: '📱',
+        c: 312,
+        sub: ['Téléphones', 'Ordinateurs portables', 'Télévisions', 'Enceintes & Audio', 'Appareils photo', 'Casques & Écouteurs', 'Jeux vidéo & Consoles', 'Tablettes', 'Climatiseurs', 'Réfrigérateurs', 'Accessoires informatiques']
+    },
+    {
+        n: 'Ouvriers & BTP',
+        e: '🔨',
+        c: 156,
+        sub: ['Maçon', 'Plombier', 'Carreleur', 'Chaudronnier', 'Mécanicien', 'Menuisier', 'Électricien', 'Peintre', 'Soudeur', 'Forgeron', 'Couvreur', 'Jardinier']
     },
     {
         n: 'Mode',
-        e: '👗👔👖👟',
-        c: 278
+        e: '👗',
+        c: 278,
+        sub: ['Vêtements Homme', 'Vêtements Femme', 'Vêtements Enfant', 'Chaussures Homme', 'Chaussures Femme', 'Chaussures Enfant', 'Accessoires', 'Bijoux & Montres', 'Sacs & Maroquinerie', 'Lunettes', 'Pagnes & Tissus']
     },
     {
         n: 'Maison & Jardin',
         e: '🛋️',
-        c: 145
+        c: 145,
+        sub: ['Armoires & Dressings', 'Buffets & Commodes', 'Canapés & Divans', 'Fauteuils', 'Chaises & Tabourets', 'Lits & Matelas', 'Congélateurs', 'Réfrigérateurs', 'Fours & Cuisinières', 'Micro-ondes', 'Aspirateurs', 'Ampoules & Éclairage', 'Tables', 'Rideaux & Déco', 'Outillage jardin']
+    },
+    {
+        n: 'Tourisme',
+        e: '✈️',
+        c: 43,
+        sub: ['Conakry', 'Kindia', 'Labé', 'Mamou', 'Kankan', 'Faranah', 'N’Zérékoré', 'Boké', 'Siguiri', 'Guéckédou', 'Kissidougou', 'Dalaba', 'Pita', 'Télimélé', 'Fria', 'Kamsar']
     },
     {
         n: 'Loisirs',
         e: '🎮',
-        c: 167
-    },
-    {
-        n: 'Vacances & Tourisme',
-        e: '✈️',
-        c: 43
+        c: 167,
+        sub: ['Livres & BD', 'Collections & Antiquités', 'Vélos', 'Sports & Fitness', 'Instruments de musique', 'Films & Séries', 'Jeux de société', 'Art & Artisanat', 'Chasse & Pêche', 'Jouets & Jeux enfants', 'Camping & Plein air']
     },
     {
         n: 'Cuisine & Traiteur',
         e: '🍽️',
-        c: 89
+        c: 89,
+        sub: ['Traiteur & Repas', 'Gâteaux & Pâtisseries', 'Boissons', 'Ustensiles de cuisine', 'Épices & Condiments', 'Fruits & Légumes', 'Matériel de restauration']
     },
     {
         n: 'Aide à domicile',
         e: '🤝',
-        c: 64
-    },
-    {
-        n: 'Services',
-        e: '🔧',
-        c: 112
+        c: 64,
+        sub: ['Femme de ménage', 'Garde de enfants', 'Cuisinière', 'Chauffeur', 'Gardien', 'Aide aux personnes âgées', 'Lavandière']
     },
     {
         n: 'Autres',
         e: '📦',
-        c: 97
+        c: 97,
+        sub: ['Animaux & Accessoires', 'Matériel agricole', 'Santé & Beauté', 'Fournitures scolaires', 'Matériel médical', 'Divers']
     }
     ];
 
@@ -3568,13 +3678,49 @@
         var el = document.getElementById('nav-cats-bar');
         if (!el)
             return;
-        var all = [{
+        var allItems = [{
             n: 'Tout',
             e: '🔍'
         }].concat(CATS);
-        el.innerHTML = all.map(function(c, i) {
-            return '<div class="ncat' + (i === 0 ? ' active' : '') + '" onclick="filterCat(this,\'' + c.n + '\')" >' + '<span class="em">' + c.e + '</span>' + c.n + '</div>';
+        el.innerHTML = allItems.map(function(cat, i) {
+            var subs = cat.sub ? cat.sub.map(function(s) {
+                return '<div class="cat-sub-item" onclick="filterSubCat(event,\'' + cat.n + '\',\'' + s + '\')">' + s + '</div>';
+            }).join('') : '';
+            var arrow = cat.sub ? ' <span class="cat-arrow">▾</span>' : '';
+            return '<div class="ncat' + (i === 0 ? ' active' : '') + (cat.sub ? ' has-sub' : '') + '" onclick="filterCat(this,\'' + cat.n + '\')">'
+            + '<span class="em">' + cat.e + '</span><span class="cat-label">' + cat.n + '</span>' + arrow
+            + (subs ? '<div class="cat-dropdown">' + subs + '</div>' : '')
+            + '</div>';
         }).join('');
+    }
+    function filterSubCat(e, catName, subName) {
+        e.stopPropagation();
+        var ads = DB.ads().filter(function(a) {
+            return a.cat === catName;
+        });
+        var fg = document.getElementById('featured-grid');
+        var rg = document.getElementById('recent-grid');
+        document.querySelectorAll('.ncat').forEach(function(n) {
+            n.classList.remove('active');
+        });
+        if (fg)
+            fg.innerHTML = ads.filter(function(a) {
+                return a.feat;
+            }).slice(0, 4).map(function(a) {
+                return adCard(a, true);
+            }).join('') || ads.slice(0, 4).map(function(a) {
+                return adCard(a, false);
+            }).join('');
+        if (rg)
+            rg.innerHTML = ads.filter(function(a) {
+                return !a.feat;
+            }).slice(0, 8).map(function(a) {
+                return adCard(a, false);
+            }).join('');
+        toast('🔍 ' + catName + ' › ' + subName);
+        document.getElementById('ads-section').scrollIntoView({
+            behavior: 'smooth'
+        });
     }
     function filterCat(el, name) {
         document.querySelectorAll('.ncat').forEach(function(n) {
@@ -4469,23 +4615,12 @@
         toast(lang === 'fr' ? '🇫🇷 Français activé' : '🇬🇧 English activated', 'ok');
     }
 
-    // Rotation salutations toutes les 3 secondes
-    function rotateGreeting() {
-        var el = document.getElementById('hero-greet');
-        if (!el)
-            return;
-        var list = currentLang === 'en' ? GREETINGS_EN : GREETINGS_FR;
-        greetIdx = (greetIdx + 1) % list.length;
-        el.style.transition = 'opacity .3s';
-        el.style.opacity = '0';
-        setTimeout(function() {
-            el.textContent = list[greetIdx];
-            el.style.opacity = '1';
-        }, 300);
-    }
-    setInterval(rotateGreeting, 3000);
 
     var GOOGLE_CLIENT_ID = '639681741514-qrgubnbcah0ec95s83jg6656gs6fje1o.apps.googleusercontent.com';
+
+    // ── DIALOGUE PERSONNAGES ──
+
+
 
     function initGoogleAuth() {
         if (typeof google === 'undefined' || !google.accounts)
