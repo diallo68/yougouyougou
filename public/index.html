@@ -4742,11 +4742,7 @@
 
     function showCodeForm(dest, icon) {
         var body = document.getElementById('auth-body');
-        var codeHint = '<div style="background:#FFF3EE;border:1.5px solid var(--orm);border-radius:10px;padding:12px;margin-bottom:10px;text-align:center">' +
-        '<div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">' + icon + ' VOTRE CODE DE VÉRIFICATION</div>' +
-        '<div id="code-display" style="font-size:32px;font-weight:900;letter-spacing:8px;color:var(--or)">' + smsCode + '</div>' +
-        '<div style="font-size:11px;color:var(--muted);margin-top:4px">' + (icon === '📧' ? '(En attente config email — copiez ce code)' : '(Mode simulation — copiez ce code)') + '</div>' +
-        '</div>';
+        var codeHint = '<p style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:16px">Code envoyé ' + (icon === '📧' ? 'par email' : 'par SMS') + ' à <strong style="color:var(--ink)">' + dest + '</strong><br><span style="font-size:12px">Vérifiez vos spams si nécessaire</span></p>';
         body.innerHTML =
         '<div class="sms-wrap" id="code-box">' +
         '<div class="sw-title">' + icon + ' Code de vérification</div>' +
