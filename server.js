@@ -49,7 +49,21 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER || '',
     pass: process.env.EMAIL_PASS || '',
   },
+  tls: { rejectUnauthorized: false }
 });
+
+// Vérifier la connexion email au démarrage
+if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+  transporter.verify(function(error, success) {
+    if (error) {
+      console.error('❌ [EMAIL] Connexion SMTP échouée:', error.message);
+    } else {
+      console.log('✅ [EMAIL] SMTP prêt — envoi depuis:', process.env.EMAIL_USER);
+    }
+  });
+} else {
+  console.warn('⚠️ [EMAIL] Variables EMAIL_USER/EMAIL_PASS non configurées — emails désactivés');
+}
 
 // Fonction d'envoi d'email de vérification
 async function sendVerificationEmail(to, code, prenom) {
