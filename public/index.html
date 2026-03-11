@@ -348,6 +348,16 @@
         }
     }
 
+    @keyframes slideUpWarn {
+        from {
+            transform:translateY(100%)
+        }
+
+        to {
+            transform: translateY(0)
+        }
+    }
+
     .nav-cats-in {
         max-width: 1320px;
         margin: 0 auto;
@@ -4538,6 +4548,8 @@
                 updateNav();
                 closeModal('auth');
                 toast('🎉 Bienvenue ' + u.prenom + ' ! Compte créé 🇬🇳', 'ok');
+                resetInactivityTimer();
+                resetInactivityTimer();
                 pendingUser = null;
                 smsCode = '';
                 codeFromServer = false;
@@ -4875,9 +4887,80 @@
 
     function logout() {
         DB.logout();
+        localStorage.removeItem('ygy_token');
         updateNav();
         goTo('home');
         toast('👋 Déconnecté');
+    }
+
+    /* ═══════════════════════════════════════
+       AUTO-DÉCONNEXION après 20min d'inactivité
+       ═══════════════════════════════════════ */
+    var AUTO_LOGOUT_DELAY = 20 * 60 * 1000; // 20 minutes en ms
+    var autoLogoutTimer = null;
+    var warningTimer = null;
+    var WARNING_BEFORE = 60 * 1000; // avertissement 1min avant
+
+    function resetInactivityTimer() {
+        // Ne rien faire si personne n'est connecté
+        if (!DB.user())
+            return;
+
+        // Annuler les timers précédents
+        clearTimeout(autoLogoutTimer);
+        clearTimeout(warningTimer);
+
+        // Supprimer le bandeau d'avertissement s'il existe
+        var warn = document.getElementById('inactivity-warn');
+        if (warn)
+            warn.remove();
+
+        // Timer avertissement (19min)
+        warningTimer = setTimeout(function() {
+            if (!DB.user())
+                return;
+            // Afficher bandeau d'avertissement
+            var band = document.createElement('div');
+            band.id = 'inactivity-warn';
+            band.innerHTML = '⚠️ Inactivité détectée — vous serez déconnecté dans <strong id="inact-countdown">60</strong>s. '
+            + '<button onclick="resetInactivityTimer()" style="margin-left:12px;background:var(--or);color:#fff;border:none;border-radius:20px;padding:5px 14px;font-weight:700;cursor:pointer;font-size:13px">Rester connecté</button>';
+            band.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#1a1a2e;color:#fff;padding:14px 24px;font-size:14px;z-index:99999;display:flex;align-items:center;gap:8px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);animation:slideUpWarn .3s ease';
+            document.body.appendChild(band);
+
+            // Compte à rebours
+            var secs = 60;
+            var cdInterval = setInterval(function() {
+                secs--;
+                var cd = document.getElementById('inact-countdown');
+                if (cd)
+                    cd.textContent = secs;
+                if (secs <= 0)
+                    clearInterval(cdInterval);
+            }, 1000);
+
+        }, AUTO_LOGOUT_DELAY - WARNING_BEFORE);
+
+        // Timer déconnexion (20min)
+        autoLogoutTimer = setTimeout(function() {
+            if (!DB.user())
+                return;
+            var warn2 = document.getElementById('inactivity-warn');
+            if (warn2)
+                warn2.remove();
+            logout();
+            toast('⏱️ Déconnecté pour inactivité (20 min)', 'warn');
+        }, AUTO_LOGOUT_DELAY);
+    }
+
+    function startInactivityWatch() {
+        // Écouter tous les événements d'activité
+        ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'].forEach(function(ev) {
+            document.addEventListener(ev, resetInactivityTimer, {
+                passive: true
+            });
+        });
+        // Démarrer le premier timer
+        resetInactivityTimer();
     }
     function updateNav() {
         var btn = document.getElementById('nav-auth-btn');
@@ -5426,6 +5509,7 @@
         renderAds();
         renderPostCats();
         updateNav();
+        startInactivityWatch(); // démarrer la surveillance
         // Carte : essayer plusieurs fois pour s'assurer que le conteneur est visible
         setTimeout(initMap, 300);
         setTimeout(function() {
