@@ -2222,7 +2222,7 @@
             </div>
             <div class="nav-right">
                 <button class="btn btn-or" onclick="goTo('app-download')" style="background:var(--ink);font-size:13px;padding:9px 16px">📲 App mobile</button>
-                <button class="btn btn-or" onclick="goTo('post')" style="font-size:13px;padding:9px 18px">
+                <button class="btn btn-or" onclick="requireLoginThenPost()" style="font-size:13px;padding:9px 18px">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                         <line x1="12" y1="5" x2="12" y2="19"/>
                         <line x1="5" y1="12" x2="19" y2="12"/>
@@ -2231,7 +2231,7 @@
                           Déposer une annonce
                         
                 </button>
-                <button class="btn btn-ghost" id="nav-auth-btn" onclick="openModal('auth')" style="font-size:13px;padding:9px 16px">👤 Connexion</button>
+                <button class="btn btn-ghost" id="nav-auth-btn" onclick="openModal('auth')" style="font-size:13px;padding:9px 16px">👤 Se connecter</button>
             </div>
         </div>
         <!-- BARRE CATÉGORIES -->
@@ -4145,38 +4145,189 @@
         el.classList.add('sel');
         selCat = name;
     }
+    function requireLoginThenPost() {
+        if (!DB.user()) {
+            toast('👤 Connectez-vous pour déposer une annonce', 'err');
+            setTimeout(function() {
+                openModal('auth');
+            }, 600);
+            return;
+        }
+        goTo('post');
+    }
     function submitAd() {
+        // Vérifier que l'utilisateur est connecté
+        var user = DB.user();
+        if (!user) {
+            toast('⚠️ Vous devez être connecté pour déposer une annonce', 'err');
+            setTimeout(function() {
+                openModal('auth');
+            }, 800);
+            return;
+        }
         var title = (document.getElementById('pt').value || '').trim();
         var price = (document.getElementById('pp').value || '').trim();
         var city = document.getElementById('pc').value;
-        var name = (document.getElementById('pn').value || '').trim();
-        if (!title || !price) {
-            toast('⚠️ Remplissez le titre et le prix', 'err');
+        var desc = (document.getElementById('pd').value || '').trim();
+        var phone = (document.getElementById('ptel').value || '').trim();
+        var quartier = (document.getElementById('pq').value || '').trim();
+        var etat = document.getElementById('pe') ? document.getElementById('pe').value : '';
+
+        if (!title) {
+            toast('⚠️ Le titre est obligatoire', 'err');
+            document.getElementById('pt').focus();
             return;
         }
-        var cat = CATS.find(function(c) {
-            return c.n === selCat;
+        if (!price) {
+            toast('⚠️ Le prix est obligatoire', 'err');
+            document.getElementById('pp').focus();
+            return;
+        }
+        if (!selCat) {
+            toast('⚠️ Choisissez une catégorie', 'err');
+            return;
+        }
+        if (!city) {
+            toast('⚠️ Choisissez une ville', 'err');
+            return;
+        }
+
+        var cat = CATS.find(function(ct) {
+            return ct.n === selCat;
         });
-        DB.addAd({
-            id: Date.now(),
-            e: cat ? cat.e : '📦',
-            t: title,
-            p: parseInt(price) || 0,
-            city: city || 'Conakry',
-            cat: selCat || 'Autres',
-            date: 'À l\'instant',
-            views: 0,
-            feat: false,
-            seller: name || 'Vendeur',
-            desc: (document.getElementById('pd').value || ''),
-            tags: [selCat || 'Autres'],
-            bg: 'linear-gradient(135deg,#FFF3EE,#FFB899)'
-        });
-        renderAds();
-        toast('🎉 Annonce publiée !', 'ok');
-        setTimeout(function() {
-            goTo('home');
-        }, 1200);
+        var adData = {
+            title: title,
+            price: parseInt(price) || 0,
+            city: city,
+            quartier: quartier,
+            category: selCat,
+            description: desc,
+            phone: phone ? '+224' + phone : '',
+            etat: etat,
+            seller: user.name || user.prenom || '',
+            sellerId: user._id || user.id || '',
+            date: new Date().toISOString()
+        };
+
+        // Bouton loading
+        var btn = document.querySelector('#page-post .btn-or');
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = '⏳ Publication en cours...';
+        }
+
+        var token = localStorage.getItem('ygy_token');
+        if (token) {
+            fetch('/api/ads', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify(adData)
+            })
+            .then(function(r) {
+                return r.json();
+            })
+            .then(function(data) {
+                if (data.error) {
+                    toast('❌ ' + data.error, 'err');
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.textContent = '🚀 Publier mon annonce gratuitement';
+                    }
+                    return;
+                }
+                // Aussi ajouter en local pour affichage immédiat
+                DB.addAd({
+                    id: data._id || Date.now(),
+                    e: cat ? cat.e : '📦',
+                    t: title,
+                    p: parseInt(price) || 0,
+                    city: city,
+                    cat: selCat,
+                    date: 'À l\'instant',
+                    views: 0,
+                    feat: false,
+                    seller: user.name || user.prenom || 'Vendeur',
+                    desc: desc,
+                    tags: [selCat],
+                    bg: 'linear-gradient(135deg,#FFF3EE,#FFB899)'
+                });
+                renderAds();
+                toast('🎉 Annonce publiée avec succès !', 'ok');
+                // Réinitialiser le formulaire
+                ['pt', 'pp', 'pd', 'ptel', 'pq', 'pn', 'pem'].forEach(function(id) {
+                    var e = document.getElementById(id);
+                    if (e)
+                        e.value = '';
+                });
+                selCat = '';
+                document.querySelectorAll('.cat-opt').forEach(function(c) {
+                    c.classList.remove('sel');
+                });
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = '🚀 Publier mon annonce gratuitement';
+                }
+                setTimeout(function() {
+                    goTo('home');
+                }, 1400);
+            })
+            .catch(function() {
+                // Fallback local
+                DB.addAd({
+                    id: Date.now(),
+                    e: cat ? cat.e : '📦',
+                    t: title,
+                    p: parseInt(price) || 0,
+                    city: city,
+                    cat: selCat,
+                    date: 'À l\'instant',
+                    views: 0,
+                    feat: false,
+                    seller: user.name || user.prenom || 'Vendeur',
+                    desc: desc,
+                    tags: [selCat],
+                    bg: 'linear-gradient(135deg,#FFF3EE,#FFB899)'
+                });
+                renderAds();
+                toast('🎉 Annonce publiée (mode local) !', 'ok');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = '🚀 Publier mon annonce gratuitement';
+                }
+                setTimeout(function() {
+                    goTo('home');
+                }, 1400);
+            });
+        } else {
+            // Pas de token → local seulement
+            DB.addAd({
+                id: Date.now(),
+                e: cat ? cat.e : '📦',
+                t: title,
+                p: parseInt(price) || 0,
+                city: city,
+                cat: selCat,
+                date: 'À l\'instant',
+                views: 0,
+                feat: false,
+                seller: user.name || user.prenom || 'Vendeur',
+                desc: desc,
+                tags: [selCat],
+                bg: 'linear-gradient(135deg,#FFF3EE,#FFB899)'
+            });
+            renderAds();
+            toast('🎉 Annonce publiée !', 'ok');
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = '🚀 Publier mon annonce gratuitement';
+            }
+            setTimeout(function() {
+                goTo('home');
+            }, 1400);
+        }
     }
 
     // ══════════════════════════════════════════
@@ -5387,7 +5538,7 @@
             };
         }
         else {
-            btn.textContent = '👤 Connexion';
+            btn.textContent = '👤 Se connecter';
             btn.onclick = function() {
                 openModal('auth');
             };
