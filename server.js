@@ -9,7 +9,7 @@ const mongoose   = require('mongoose');
 const cors       = require('cors');
 const bcrypt     = require('bcryptjs');
 const jwt        = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
+// Email via SendGrid API (HTTP — fonctionne sur Render)
 const path       = require('path');
 
 const app  = express();
@@ -41,79 +41,80 @@ mongoose.connect(process.env.MONGO_URI, {
 //   EMAIL_PORT     = 587
 //   EMAIL_USER     = yougouyougou@gmail.com
 //   EMAIL_PASS     = (mot de passe application Gmail)
-const transporter = nodemailer.createTransport({
-  host:   process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port:   parseInt(process.env.EMAIL_PORT) || 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER || '',
-    pass: process.env.EMAIL_PASS || '',
-  },
-  tls: { rejectUnauthorized: false }
-});
-
-// Vérifier la connexion email au démarrage
-if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-  transporter.verify(function(error, success) {
-    if (error) {
-      console.error('❌ [EMAIL] Connexion SMTP échouée:', error.message);
-    } else {
-      console.log('✅ [EMAIL] SMTP prêt — envoi depuis:', process.env.EMAIL_USER);
-    }
-  });
+// ── Vérification config email au démarrage ──
+if (process.env.SENDGRID_API_KEY) {
+  console.log('✅ [EMAIL] SendGrid configuré — envoi depuis:', process.env.EMAIL_FROM || 'noreply@yougouyougou.net');
 } else {
-  console.warn('⚠️ [EMAIL] Variables EMAIL_USER/EMAIL_PASS non configurées — emails désactivés');
+  console.warn('⚠️ [EMAIL] SENDGRID_API_KEY non défini — emails désactivés');
 }
 
 // Fonction d'envoi d'email de vérification
 async function sendVerificationEmail(to, code, prenom) {
-  const html = `
-  <!DOCTYPE html>
-  <html>
-  <head><meta charset="UTF-8"></head>
-  <body style="margin:0;padding:0;background:#F5F2EE;font-family:'Helvetica Neue',Arial,sans-serif">
+  const apiKey = process.env.SENDGRID_API_KEY;
+  if (!apiKey) {
+    console.warn('[EMAIL] SendGrid non configuré — code:', code, '→', to);
+    return; // pas d'erreur, le code est déjà retourné dans debug_code
+  }
+
+  const fromEmail = process.env.EMAIL_FROM || 'noreply@yougouyougou.net';
+  const fromName  = 'YouGouYou 🇬🇳';
+
+  const html = `<!DOCTYPE html>
+  <html><head><meta charset="UTF-8"></head>
+  <body style="margin:0;padding:0;background:#F5F2EE;font-family:Helvetica Neue,Arial,sans-serif">
     <div style="max-width:520px;margin:40px auto;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.08)">
-      <!-- Header -->
       <div style="background:linear-gradient(135deg,#FF5C00,#FF6A00);padding:36px 40px;text-align:center">
-        <div style="font-size:36px;margin-bottom:10px">🇬🇳</div>
+        <div style="font-size:36px;margin-bottom:10px">&#127468;&#127475;</div>
         <div style="font-size:26px;font-weight:900;color:#fff;letter-spacing:-0.5px">YouGouYou</div>
         <div style="font-size:13px;color:rgba(255,255,255,.8);margin-top:4px">Le marché de la Guinée</div>
       </div>
-      <!-- Body -->
       <div style="padding:36px 40px">
         <p style="font-size:16px;color:#0E0E0E;margin-bottom:8px">Bonjour <strong>${prenom}</strong> 👋</p>
         <p style="font-size:14px;color:#767676;line-height:1.7;margin-bottom:28px">
           Voici votre code de vérification pour finaliser votre inscription sur <strong>YouGouYou</strong>.
         </p>
-        <!-- Code -->
         <div style="background:#FFF3EE;border:2px solid #FFB899;border-radius:16px;padding:28px;text-align:center;margin-bottom:28px">
           <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#767676;margin-bottom:10px">Votre code de vérification</div>
           <div style="font-size:48px;font-weight:900;letter-spacing:12px;color:#FF5C00">${code}</div>
-          <div style="font-size:12px;color:#767676;margin-top:10px">⏱️ Ce code expire dans <strong>15 minutes</strong></div>
+          <div style="font-size:12px;color:#767676;margin-top:10px">Ce code expire dans 15 minutes</div>
         </div>
         <p style="font-size:13px;color:#A8A8A8;line-height:1.7">
-          Si vous n'avez pas créé de compte sur YouGouYou, ignorez cet email.<br>
-          Ne partagez jamais ce code avec quelqu'un d'autre.
+          Si vous n'avez pas créé de compte sur YouGouYou, ignorez cet email.
         </p>
       </div>
-      <!-- Footer -->
       <div style="background:#F5F2EE;padding:20px 40px;text-align:center;border-top:1px solid #E2DDD7">
         <div style="font-size:12px;color:#A8A8A8">
-          © 2025 YouGouYou · Conakry, Guinée<br>
+          &copy; 2025 YouGouYou &middot; Conakry, Guinée<br>
           <a href="https://yougouyougou.net" style="color:#FF5C00;text-decoration:none">yougouyougou.net</a>
         </div>
       </div>
     </div>
-  </body>
-  </html>`;
+  </body></html>`;
 
-  await transporter.sendMail({
-    from:    `"YouGouYou 🇬🇳" <${process.env.EMAIL_USER}>`,
-    to,
+  const body = JSON.stringify({
+    personalizations: [{ to: [{ email: to }] }],
+    from: { email: fromEmail, name: fromName },
     subject: `${code} — Votre code de vérification YouGouYou`,
-    html,
-    text: `Bonjour ${prenom},\n\nVotre code de vérification YouGouYou est : ${code}\n\nCe code expire dans 15 minutes.\n\n© YouGouYou — yougouyougou.net`,
+    content: [
+      { type: 'text/plain', value: `Bonjour ${prenom},\n\nVotre code YouGouYou : ${code}\n\nExpire dans 15 min.\n\nyoougouyougou.net` },
+      { type: 'text/html',  value: html }
+    ]
   });
+
+  const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body
+  });
+
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`SendGrid ${response.status}: ${err}`);
+  }
+  console.log('✅ [EMAIL] SendGrid envoyé à', to);
 }
 
 // ═══════════════════════════════════════════════════════════
