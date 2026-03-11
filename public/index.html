@@ -1305,15 +1305,21 @@
         inset: 0;
         background: rgba(14, 14, 14, .6);
         z-index: 1000;
-        display: none;
+        display: flex;
         align-items: center;
         justify-content: center;
         padding: 16px;
-        backdrop-filter: blur(8px)
+        backdrop-filter: blur(8px);
+        visibility: hidden;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .2s, visibility .2s
     }
 
     .overlay.open {
-        display: flex
+        visibility: visible;
+        opacity: 1;
+        pointer-events: all
     }
 
     .modal {
@@ -5121,6 +5127,8 @@
                 localStorage.setItem('ygy_token', data.token);
             updateNav();
             closeModal('auth');
+            document.body.style.overflow = '';
+            resetInactivityTimer();
             toast('✅ Bienvenue ' + (u.prenom || u.name || '').split(' ')[0] + ' ! 🇬🇳', 'ok');
         })
         .catch(function() {
@@ -5354,13 +5362,7 @@
             return;
         title.textContent = '🔑 Code de vérification';
 
-        // Vérifier si l'email est configuré côté serveur
-        // Pour l'instant, afficher le code directement sur la page (mode démo)
-        var codeBox = '<div style="background:linear-gradient(135deg,#fff3e0,#ffe0b2);border:2.5px solid var(--or);border-radius:14px;padding:16px;text-align:center;margin:16px 0">' +
-        '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--or);margin-bottom:6px">⚠️ Mode démo — votre code est :</div>' +
-        '<div style="font-size:42px;font-weight:900;letter-spacing:10px;color:var(--ink);font-family:monospace">' + fpResetCode + '</div>' +
-        '<div style="font-size:11px;color:var(--muted);margin-top:6px">(Email actif après configuration du serveur)</div>' +
-        '</div>';
+        var codeBox = '';
 
         body.innerHTML =
         '<div style="text-align:center;margin-bottom:8px">' +
@@ -5368,7 +5370,7 @@
         '<p style="font-size:13px;color:var(--muted);line-height:1.5">Réinitialisation pour<br><strong style="color:var(--ink)">' + fpIdentifier + '</strong></p>' +
         '</div>' +
         codeBox +
-        '<p style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:8px">Entrez ce code ci-dessous :</p>' +
+        '<p style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:8px">Entrez le code reçu par email :</p>' +
         '<div class="pin-wrap" style="display:flex;gap:10px;justify-content:center;margin:8px 0 16px">' +
         '<input class="pin-box" type="text" maxlength="1" id="fp1" oninput="movPin(this,&apos;fp2&apos;)" style="width:52px;height:58px;text-align:center;font-size:26px;font-weight:900;border:2px solid var(--br);border-radius:12px;font-family:monospace">' +
         '<input class="pin-box" type="text" maxlength="1" id="fp2" oninput="movPin(this,&apos;fp3&apos;)" style="width:52px;height:58px;text-align:center;font-size:26px;font-weight:900;border:2px solid var(--br);border-radius:12px;font-family:monospace">' +
@@ -5899,6 +5901,15 @@
         var el = document.getElementById('overlay-' + id);
         if (el) {
             el.classList.remove('open');
+            // Forcer le masquage immédiat sans attendre la transition
+            el.style.visibility = 'hidden';
+            el.style.opacity = '0';
+            el.style.pointerEvents = 'none';
+            setTimeout(function() {
+                el.style.visibility = '';
+                el.style.opacity = '';
+                el.style.pointerEvents = '';
+            }, 250);
         }
         document.body.style.overflow = '';
     }
