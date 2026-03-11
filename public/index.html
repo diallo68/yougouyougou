@@ -4905,12 +4905,13 @@
     var fpResetCode = '';
 
     function showForgotPassword() {
-        var modal = document.getElementById('auth-modal');
+        var modal = document.getElementById('overlay-auth');
         var body = document.getElementById('auth-body');
-        var title = document.getElementById('auth-title');
-        if (!modal || !body || !title)
+        var title = document.getElementById('auth-tt');
+        if (!body || !title)
             return;
-        modal.style.display = 'flex';
+        if (modal)
+            modal.style.display = 'flex';
         title.textContent = '🔑 Mot de passe oublié';
         body.innerHTML =
         '<div style="margin-bottom:18px;text-align:center;font-size:14px;color:var(--muted);line-height:1.6">Entrez votre email ou téléphone.<br>Nous vous enverrons un code de réinitialisation.</div>' +
@@ -5012,7 +5013,7 @@
 
     function fpShowCodeStep() {
         var body = document.getElementById('auth-body');
-        var title = document.getElementById('auth-title');
+        var title = document.getElementById('auth-tt');
         if (!body)
             return;
         title.textContent = '🔑 Code de vérification';
@@ -5056,7 +5057,7 @@
 
     function fpShowNewPasswordStep() {
         var body = document.getElementById('auth-body');
-        var title = document.getElementById('auth-title');
+        var title = document.getElementById('auth-tt');
         if (!body)
             return;
         title.textContent = '🔒 Nouveau mot de passe';
