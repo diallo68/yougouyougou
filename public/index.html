@@ -5891,7 +5891,6 @@
         var el = document.getElementById('overlay-' + id);
         if (el) {
             el.classList.add('open');
-            document.body.style.overflow = 'hidden';
         }
         if (id === 'auth')
             renderAuthForm('login');
@@ -5901,11 +5900,7 @@
         if (el) {
             el.classList.remove('open');
         }
-        // Vérifier qu'aucun autre overlay n'est ouvert avant de libérer le scroll
-        var anyOpen = document.querySelectorAll('.overlay.open');
-        if (anyOpen.length === 0) {
-            document.body.style.overflow = '';
-        }
+        document.body.style.overflow = '';
     }
     function maybeClose(e, id) {
         if (e.target === e.currentTarget)
