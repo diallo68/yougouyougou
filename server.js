@@ -554,6 +554,31 @@ app.get('/api/my-payments', auth, async (req, res) => {
 // ═══════════════════════════════════════════════════════════
 
 // Tableau de bord admin global
+// Stats par période pour graphiques
+app.get('/api/admin/stats/period', auth, adminOnly, async (req, res) => {
+  try {
+    const now = new Date();
+    const periods = {
+      day:   new Date(now - 24*3600*1000),
+      week:  new Date(now - 7*24*3600*1000),
+      month: new Date(now - 30*24*3600*1000),
+    };
+    const results = {};
+    for (const [k, since] of Object.entries(periods)) {
+      const [ads, users, payments] = await Promise.all([
+        Ad.countDocuments({ createdAt: { $gte: since } }),
+        User.countDocuments({ createdAt: { $gte: since } }),
+        Payment.aggregate([
+          { $match: { status: 'success', createdAt: { $gte: since } } },
+          { $group: { _id: null, total: { $sum: '$amount' }, count: { $sum: 1 } } }
+        ])
+      ]);
+      results[k] = { ads, users, revenue: payments[0]?.total||0, payments: payments[0]?.count||0 };
+    }
+    res.json(results);
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
 app.get('/api/admin/stats', auth, adminOnly, async (req, res) => {
   try {
     const [totalUsers, totalAds, totalPayments, revenueResult] = await Promise.all([
@@ -638,6 +663,16 @@ app.get('/api/admin/ads', auth, adminOnly, async (req, res) => {
       .limit(Number(limit));
     const total = await Ad.countDocuments();
     res.json({ ads, total });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Supprimer une annonce (admin)
+app.delete('/api/admin/ads/:id', auth, adminOnly, async (req, res) => {
+  try {
+    await Ad.findByIdAndDelete(req.params.id);
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
