@@ -2494,12 +2494,16 @@
                             </div>
                         </div>
                         <div style="display:flex;flex-direction:column;gap:9px">
-                            <button class="btn" style="background:#00A550;color:#fff;border-radius:12px;justify-content:center;padding:13px;font-size:14px;width:100%" onclick="openCommission()">📞 Voir le numéro (commission 10%)</button>
+                            <button class="btn" style="background:#00A550;color:#fff;border-radius:12px;justify-content:center;padding:13px;font-size:14px;width:100%" onclick="openCommission()">📞 Contacter le vendeur</button>
                             <button class="btn btn-or btn-full" style="border-radius:12px;font-size:14px" onclick="toast('💬 Message envoyé !','ok')">💬 Envoyer un message</button>
                             <button class="btn btn-om btn-full" style="border-radius:12px;font-size:14px" onclick="openOM()">🟠 Payer via Orange Money</button>
                         </div>
                     </div>
                     <button class="btn btn-ghost btn-full" style="border-radius:12px" onclick="addFav()">🤍 Ajouter aux favoris</button>
+                    <div id="owner-btns" style="display:none;margin-top:10px;display:flex;flex-direction:column;gap:8px">
+                        <button class="btn btn-full" style="border-radius:12px;background:#2563EB;color:#fff;justify-content:center" onclick="editMyAd()">✏️ Modifier mon annonce</button>
+                        <button class="btn btn-full" style="border-radius:12px;background:#EF4444;color:#fff;justify-content:center" onclick="deleteMyAd()">🗑️ Supprimer mon annonce</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -3867,6 +3871,46 @@
         });
     }
 
+    function fetchAdsFromAPI(callback) {
+        fetch('/api/ads?limit=100')
+        .then(function(r) {
+            return r.json();
+        })
+        .then(function(data) {
+            if (data.ads && data.ads.length) {
+                // Normaliser le format pour DB local
+                var normalized = data.ads.map(function(a) {
+                    return {
+                        id: a._id,
+                        _id: a._id,
+                        t: a.title || '',
+                        p: a.price || 0,
+                        e: a.emoji || '📦',
+                        cat: a.category || '',
+                        city: a.city || '',
+                        desc: a.description || '',
+                        seller: a.sellerName || '',
+                        date: a.createdAt ? new Date(a.createdAt).toLocaleDateString('fr-FR') : 'Récent',
+                        views: a.views || 0,
+                        feat: a.featured || false,
+                        photos: a.photos || [],
+                        bg: 'linear-gradient(135deg,#FFF3EE,#FFB899)',
+                        tags: [a.category || '']
+                    };
+                });
+                DB._d.ads = normalized;
+                DB.save();
+            }
+            if (callback)
+                callback();
+        })
+        .catch(function() {
+            // API indisponible → utiliser le cache local
+            if (callback)
+                callback();
+        });
+    }
+
     function renderAds() {
         var ads = DB.ads();
         var fg = document.getElementById('featured-grid');
@@ -4237,8 +4281,78 @@
         document.getElementById('det-av').textContent = ad.seller ? ad.seller.charAt(0).toUpperCase() : '?';
         document.getElementById('om-val').textContent = ad.p.toLocaleString('fr-FR') + ' GNF';
         document.getElementById('om-item').textContent = ad.t;
+        // Afficher boutons modifier/supprimer si c'est l'annonce de l'utilisateur
+        var ownerBtns = document.getElementById('owner-btns');
+        if (ownerBtns) {
+            var user = DB.user();
+            var isOwner = user && (
+            String(ad.sellerId || '') === String(user._id || user.id || '') ||
+            ad.seller === (user.name || user.prenom || '')
+            );
+            ownerBtns.style.display = isOwner ? 'flex' : 'none';
+        }
         goTo('detail');
     }
+    function deleteMyAd() {
+        if (!curAd) {
+            return;
+        }
+        if (!confirm('Supprimer cette annonce ?'))
+            return;
+        var token = localStorage.getItem('ygy_token');
+        var adId = curAd._id || curAd.id;
+        fetch('/api/ads/' + adId, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        })
+        .then(function(r) {
+            return r.json();
+        })
+        .then(function() {
+            toast('🗑️ Annonce supprimée', 'ok');
+            DB._d.ads = (DB._d.ads || []).filter(function(a) {
+                return (a._id || a.id) !== adId;
+            });
+            DB.save();
+            fetchAdsFromAPI(function() {
+                renderAds();
+            });
+            goTo('home');
+        })
+        .catch(function() {
+            toast('❌ Erreur lors de la suppression', 'err');
+        });
+    }
+
+    function editMyAd() {
+        if (!curAd)
+            return;
+        // Aller sur le formulaire de dépôt pré-rempli
+        goTo('post');
+        setTimeout(function() {
+            var pt = document.getElementById('pt');
+            if (pt)
+                pt.value = curAd.t || curAd.title || '';
+            var pp = document.getElementById('pp');
+            if (pp)
+                pp.value = curAd.p || curAd.price || '';
+            var pd = document.getElementById('pd');
+            if (pd)
+                pd.value = curAd.desc || curAd.description || '';
+            var pc = document.getElementById('pc');
+            if (pc)
+                pc.value = curAd.city || '';
+            selCat = curAd.cat || curAd.category || '';
+            // Marquer la catégorie
+            document.querySelectorAll('.cat-opt').forEach(function(el) {
+                el.classList.toggle('sel', el.textContent.includes(selCat));
+            });
+            toast('✏️ Modifiez puis republiez', 'ok');
+        }, 300);
+    }
+
     function switchPhotoIdx(idx, el) {
         var photos = window._detPhotos || [];
         var src = photos[idx];
@@ -4426,6 +4540,7 @@
                 // Aussi ajouter en local pour affichage immédiat
                 DB.addAd({
                     id: data._id || Date.now(),
+                    _id: data._id,
                     e: cat ? cat.e : '📦',
                     t: title,
                     p: parseInt(price) || 0,
@@ -4437,9 +4552,12 @@
                     seller: user.name || user.prenom || 'Vendeur',
                     desc: desc,
                     tags: [selCat],
-                    bg: 'linear-gradient(135deg,#FFF3EE,#FFB899)'
+                    bg: 'linear-gradient(135deg,#FFF3EE,#FFB899)',
+                    photos: selectedPhotos.slice(0, 8)
                 });
-                renderAds();
+                fetchAdsFromAPI(function() {
+                    renderAds();
+                });
                 toast('🎉 Annonce publiée avec succès !', 'ok');
                 // Réinitialiser le formulaire
                 ['pt', 'pp', 'pd', 'ptel', 'pq', 'pn', 'pem'].forEach(function(id) {
@@ -6374,9 +6492,12 @@
         })();
         populateCities();
         renderNavCats();
-        renderAds();
         renderPostCats();
         updateNav();
+        // Charger les annonces depuis l'API MongoDB
+        fetchAdsFromAPI(function() {
+            renderAds();
+        });
         startInactivityWatch(); // démarrer la surveillance
         // Carte : essayer plusieurs fois pour s'assurer que le conteneur est visible
         setTimeout(initMap, 300);
