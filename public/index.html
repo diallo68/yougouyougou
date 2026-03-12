@@ -16,20 +16,21 @@
 <style>
 
 :root{
-  --or:#FF5C00;--or2:#C94A00;--orl:#FFF3EE;--orm:#FFB899;
-  --ink:#0E0E0E;--ink2:#2A2A2A;
-  --muted:#767676;--subtle:#A8A8A8;
-  --bg:#F5F2EE;--wh:#FFFFFF;
-  --br:#E2DDD7;--brl:#F0EDE9;
-  --gr:#00A550;--re:#D92D20;
-  --rad:18px;--rads:10px;
-  --sh:0 1px 3px rgba(14,14,14,.06),0 1px 2px rgba(14,14,14,.04);
-  --shm:0 4px 16px rgba(14,14,14,.08);
-  --shl:0 24px 48px rgba(14,14,14,.12);
+  --or:#FF5C00;--or2:#CC4A00;--orl:#FFF5F0;--orm:#FFCAB0;
+  --ink:#1A1A1A;--ink2:#333333;
+  --muted:#6B6B6B;--subtle:#ABABAB;
+  --bg:#F6F6F6;--wh:#FFFFFF;
+  --br:#E4E4E4;--brl:#F0F0F0;
+  --gr:#00875A;--re:#D91C0C;
+  --rad:8px;--rads:6px;
+  --sh:0 1px 4px rgba(0,0,0,.07);
+  --shm:0 2px 12px rgba(0,0,0,.10);
+  --shl:0 8px 32px rgba(0,0,0,.12);
+  --nav-h:56px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;font-size:15px}
 .page{display:none}.page.active{display:block}
 
 /* ── ANIMATIONS ── */
@@ -1368,6 +1369,605 @@ footer{background:var(--ink);margin-top:96px}
   .vendor-stats-grid{grid-template-columns:repeat(2,1fr)}
   .share-buttons{flex-direction:column}
 }
+
+/* ═══════════════════════════════════════════════════════
+   V11 — REDESIGN INSPIRÉ LEBONCOIN
+   Objectif : simplicité, lisibilité, hiérarchie claire,
+   navigation intuitive, mobile-first
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Variables et base ── */
+:root{
+  --bg:#F6F6F6;--wh:#FFFFFF;
+  --br:#E4E4E4;--brl:#F0F0F0;
+  --ink:#1A1A1A;--ink2:#333;
+  --muted:#6B6B6B;--subtle:#ABABAB;
+  --rad:8px;--rads:5px;
+  --sh:0 1px 4px rgba(0,0,0,.07);
+  --shm:0 2px 10px rgba(0,0,0,.09);
+  --shl:0 4px 20px rgba(0,0,0,.12);
+  --or:#FF5C00;--or2:#CC4A00;--orl:#FFF5F0;--orm:#FFD0B5;
+}
+body{background:var(--bg);font-size:14px}
+
+/* ── NAV ── */
+nav{background:#fff!important;backdrop-filter:none!important;border-bottom:1px solid var(--br)!important}
+.nav-top{height:56px!important;padding:0 20px!important;max-width:1280px!important;gap:10px!important}
+.logo-b1,.logo-b2{font-size:22px!important}
+.logo-y{font-size:28px!important;text-shadow:none!important}
+.logo-rest{font-size:18px!important}
+.logo-sep{font-size:20px!important}
+.logo-flag{font-size:16px!important}
+
+/* Barre de recherche centrale inspirée LeBonCoin */
+.nav-sc{
+  flex:1!important;max-width:none!important;
+  background:var(--wh)!important;
+  border:2px solid var(--br)!important;
+  border-radius:6px!important;
+  padding:0 12px!important;
+  height:38px!important;
+  transition:border-color .2s!important;
+  box-shadow:none!important;
+}
+.nav-sc:focus-within{border-color:var(--or)!important;box-shadow:none!important}
+.nav-sc input{font-size:14px!important}
+
+/* Bouton de recherche dans la nav */
+.nav-search-submit{
+  height:38px;padding:0 16px;
+  background:var(--or);color:#fff;border:none;
+  border-radius:0 4px 4px 0;
+  font-size:13px;font-weight:700;
+  cursor:pointer;white-space:nowrap;
+  margin-right:-2px;
+  transition:background .15s;
+  font-family:inherit;
+}
+.nav-search-submit:hover{background:var(--or2)}
+
+/* Boutons nav plus sobres */
+.btn{border-radius:6px!important;letter-spacing:0!important;font-size:13px!important;padding:8px 16px!important}
+.btn-or{box-shadow:none!important}
+.btn-or:hover{transform:none!important;box-shadow:none!important}
+.btn-ink:hover{transform:none!important;box-shadow:none!important}
+.btn-ghost{border-radius:6px!important}
+
+/* ── Barre catégories ── */
+.nav-cats-in{max-width:1280px!important;padding:0 20px!important}
+.ncat{
+  padding:7px 12px!important;
+  font-size:12px!important;font-weight:600!important;
+  border-bottom:2px solid transparent!important;
+  border-right:none!important;
+  color:var(--ink2)!important;
+  border-radius:0!important;
+}
+.ncat:hover,.ncat.active{
+  color:var(--or)!important;
+  border-bottom-color:var(--or)!important;
+  background:transparent!important;
+  font-weight:700!important;
+}
+.cat-dropdown{
+  border-radius:6px!important;
+  border:1px solid var(--br)!important;
+  box-shadow:0 8px 24px rgba(0,0,0,.12)!important;
+}
+.cat-sub-item{font-size:13px!important;padding:8px 16px!important;border-radius:0!important}
+.cat-sub-item:hover{background:var(--orl)!important;color:var(--or)!important}
+
+/* ── HERO LEBONCOIN STYLE ── */
+/* Hero simplifié : fond blanc, barre de recherche centrale proéminente */
+.hero{
+  background:#fff!important;
+  border-bottom:1px solid var(--br)!important;
+  max-width:100%!important;
+  padding:0!important;
+  grid-template-columns:1fr!important;
+  gap:0!important;
+  display:block!important;
+}
+
+/* Nouveau hero compact centré */
+.hero::before{display:none}
+.hero > div:first-child{
+  max-width:800px;margin:0 auto;
+  padding:36px 20px 28px;
+  text-align:center;
+}
+.hero h1{
+  font-family:'Syne',sans-serif!important;
+  font-size:clamp(22px,3vw,32px)!important;
+  font-weight:800!important;
+  color:var(--ink)!important;
+  margin-bottom:8px!important;
+  letter-spacing:-.5px!important;
+}
+.hero h1 strong{
+  font-weight:800!important;
+  color:var(--or)!important;
+  font-style:normal!important;
+}
+.hero-sub{
+  font-size:14px!important;
+  color:var(--muted)!important;
+  margin-bottom:20px!important;
+  max-width:480px!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+}
+
+/* Grande barre de recherche hero style LeBonCoin */
+.hero-search-block{
+  display:flex;
+  max-width:680px;
+  margin:0 auto 16px;
+  background:#fff;
+  border:2px solid var(--or);
+  border-radius:8px;
+  overflow:hidden;
+  box-shadow:0 4px 20px rgba(255,92,0,.15);
+}
+.hero-search-input{
+  flex:1;padding:14px 16px;
+  border:none;outline:none;
+  font-size:15px;font-family:inherit;
+  color:var(--ink);
+  background:transparent;
+}
+.hero-search-input::placeholder{color:var(--subtle)}
+.hero-search-btn{
+  background:var(--or);color:#fff;border:none;
+  padding:0 24px;font-size:14px;font-weight:800;
+  cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;gap:8px;
+  white-space:nowrap;transition:background .15s;
+}
+.hero-search-btn:hover{background:var(--or2)}
+
+/* Catégories rapides sous la barre hero */
+.hero-cat-strip{
+  display:flex;justify-content:center;flex-wrap:wrap;
+  gap:8px;max-width:680px;margin:0 auto;
+  padding:0 0 8px;
+}
+.hero-cat-strip a{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:5px 12px;border-radius:20px;
+  font-size:12px;font-weight:700;color:var(--muted);
+  background:var(--bg);border:1px solid var(--br);
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.hero-cat-strip a:hover{background:var(--orl);border-color:var(--or);color:var(--or)}
+
+/* Hero card masquée (intégré dans le hero compact) */
+.hero-card{display:none!important}
+
+/* Ancien hero badge */
+.hero-badge{
+  background:transparent!important;
+  backdrop-filter:none!important;
+  border:none!important;
+  color:var(--muted)!important;
+  font-size:11px!important;
+  padding:0!important;
+  margin-bottom:10px!important;
+  border-radius:0!important;
+  letter-spacing:.3px!important;
+  text-transform:uppercase!important;
+}
+.hero-badge .dot{display:none}
+.hero-actions{justify-content:center!important;gap:10px!important;margin-bottom:16px!important}
+.hero-trust{justify-content:center!important;padding-top:16px!important;margin-top:16px!important}
+
+/* Cats rapides hero */
+.hero-quick-cats{
+  justify-content:center!important;
+}
+.hero-quick-cats span{
+  background:var(--bg)!important;
+  backdrop-filter:none!important;
+  border:1px solid var(--br)!important;
+  color:var(--muted)!important;
+  border-radius:20px!important;
+  font-size:12px!important;
+}
+.hero-quick-cats span:hover{background:var(--orl)!important;border-color:var(--or)!important;color:var(--or)!important;transform:none!important}
+
+/* ── LAYOUT PRINCIPAL LEBONCOIN ── */
+/* Deux colonnes : filtres gauche + annonces droite */
+.home-content-layout{
+  max-width:1280px;margin:0 auto;
+  padding:16px 20px;
+  display:grid;
+  grid-template-columns:240px 1fr;
+  gap:16px;
+  align-items:start;
+}
+
+/* ── PANNEAU FILTRES (colonne gauche) ── */
+#filters-panel{
+  background:#fff!important;
+  border:1px solid var(--br)!important;
+  border-radius:var(--rad)!important;
+  overflow:visible!important;
+  position:sticky!important;
+  top:calc(56px + 34px + 8px)!important;
+  box-shadow:none!important;
+}
+.fp-title{
+  font-size:14px!important;font-weight:800!important;
+  color:var(--ink)!important;padding:14px 16px!important;
+  border-bottom:1px solid var(--br)!important;
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+}
+.fp-title span{font-size:12px;font-weight:600;color:var(--or);cursor:pointer}
+.filter-block{
+  padding:12px 16px!important;
+  border-bottom:1px solid var(--br)!important;
+}
+.filter-block:last-child{border-bottom:none!important}
+.fb-title{
+  font-size:12px!important;font-weight:800!important;
+  text-transform:uppercase!important;letter-spacing:.4px!important;
+  color:var(--muted)!important;margin-bottom:8px!important;
+}
+.filter-block input,.filter-block select{
+  width:100%!important;padding:8px 10px!important;
+  border:1px solid var(--br)!important;border-radius:var(--rads)!important;
+  font-size:13px!important;font-family:inherit!important;
+  color:var(--ink)!important;background:#fff!important;
+  margin-bottom:6px!important;
+}
+.filter-block input:focus,.filter-block select:focus{border-color:var(--or)!important;outline:none!important}
+.filter-btn{
+  width:100%!important;padding:9px!important;
+  background:var(--or)!important;color:#fff!important;
+  border:none!important;border-radius:var(--rads)!important;
+  font-size:13px!important;font-weight:700!important;
+  cursor:pointer!important;font-family:inherit!important;
+  transition:background .15s!important;
+}
+.filter-btn:hover{background:var(--or2)!important}
+
+/* ── AD CARDS LEBONCOIN STYLE ── */
+/* Vue grille améliorée + option liste */
+.ads-grid{
+  display:grid!important;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr))!important;
+  gap:12px!important;
+}
+.ad-card{
+  background:#fff!important;
+  border:1px solid var(--br)!important;
+  border-radius:var(--rad)!important;
+  overflow:hidden!important;
+  cursor:pointer!important;
+  transition:box-shadow .15s,border-color .15s!important;
+  position:relative!important;
+  transform:none!important;
+}
+.ad-card:hover{
+  box-shadow:var(--shm)!important;
+  border-color:#CCC!important;
+  transform:none!important;
+}
+.ad-img{height:170px!important;font-size:56px!important}
+.ad-badge{
+  background:var(--or)!important;
+  border-radius:3px!important;
+  font-size:10px!important;
+  padding:2px 8px!important;
+  letter-spacing:.2px!important;
+  box-shadow:none!important;
+}
+.ad-badge-new{background:var(--gr)!important}
+.ad-fav{
+  background:rgba(255,255,255,.9)!important;
+  backdrop-filter:none!important;
+  box-shadow:0 1px 4px rgba(0,0,0,.15)!important;
+  width:30px!important;height:30px!important;
+  border-radius:50%!important;
+  font-size:13px!important;
+}
+.ad-body{padding:12px!important}
+.ad-price{
+  font-family:'Syne',sans-serif!important;
+  font-style:normal!important;
+  font-size:16px!important;
+  font-weight:800!important;
+  color:var(--ink)!important;
+  margin-bottom:4px!important;
+  letter-spacing:0!important;
+}
+.ad-title{
+  font-size:13px!important;font-weight:600!important;
+  color:var(--ink)!important;margin-bottom:8px!important;
+  line-height:1.35!important;
+}
+.ad-meta{gap:6px!important}
+.ad-tag{
+  background:var(--brl)!important;
+  color:var(--muted)!important;
+  font-size:11px!important;font-weight:600!important;
+  padding:2px 8px!important;border-radius:3px!important;
+}
+
+/* ── SECTION HEADERS ── */
+.sec{max-width:100%!important;padding:16px 0!important}
+.sec-head{
+  margin-bottom:12px!important;
+  padding-bottom:10px!important;
+  border-bottom:1px solid var(--br)!important;
+}
+.sec-tt{
+  font-family:'Syne',sans-serif!important;
+  font-size:16px!important;font-weight:800!important;
+  color:var(--ink)!important;
+}
+.sec-tt::after{display:none!important}
+.sec-sub{font-size:12px!important;color:var(--muted)!important;margin-top:2px!important}
+.see-all-btn{
+  font-size:12px!important;font-weight:700!important;
+  border:1px solid var(--br)!important;
+  border-radius:4px!important;
+  padding:5px 12px!important;
+  color:var(--ink)!important;
+  background:#fff!important;
+}
+.see-all-btn:hover{background:var(--brl)!important;border-color:#999!important;color:var(--ink)!important}
+
+/* Sort bar ── */
+.sort-bar{
+  background:#fff!important;
+  border:1px solid var(--br)!important;
+  border-radius:6px!important;
+  padding:8px 12px!important;
+  margin-bottom:12px!important;
+  gap:8px!important;
+}
+.sort-bar label{font-size:12px!important;color:var(--muted)!important}
+.sort-select{
+  font-size:12px!important;
+  border:1px solid var(--br)!important;
+  border-radius:4px!important;
+  padding:4px 10px!important;
+}
+
+/* ── STATS BAND ── */
+.stats-band{
+  background:var(--ink)!important;
+  border-radius:var(--rad)!important;
+  grid-template-columns:repeat(4,1fr)!important;
+  margin-top:16px!important;
+}
+.sband{padding:18px!important}
+.sband-n{font-size:22px!important;font-weight:800!important;color:var(--or)!important;font-style:normal!important;font-family:'Syne',sans-serif!important}
+.sband-l{font-size:11px!important;color:rgba(255,255,255,.6)!important}
+.sband::before{display:none!important}
+
+/* ── APP BANNER ── */
+.app-banner{
+  background:linear-gradient(135deg,#1A1A1A,#2a2a2a)!important;
+  border-radius:var(--rad)!important;
+  padding:28px 32px!important;
+  border:none!important;
+}
+.app-banner h2{font-size:20px!important;font-weight:800!important;color:#fff!important;font-family:'Syne',sans-serif!important}
+.app-banner p{font-size:13px!important;color:rgba(255,255,255,.65)!important}
+.store-btn{
+  background:rgba(255,255,255,.12)!important;
+  border:1px solid rgba(255,255,255,.2)!important;
+  color:#fff!important;
+  border-radius:6px!important;
+  padding:9px 16px!important;
+  font-size:13px!important;font-weight:700!important;
+}
+.store-btn:hover{background:rgba(255,255,255,.22)!important;transform:none!important}
+.app-banner-tag{
+  background:rgba(255,92,0,.2)!important;
+  color:var(--or)!important;
+  border-radius:4px!important;
+  font-size:11px!important;
+}
+.app-phone{
+  background:rgba(255,255,255,.08)!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  border-radius:var(--rad)!important;
+}
+.astat .n{color:#fff!important;font-family:'Syne',sans-serif!important;font-style:normal!important}
+
+/* ── MAP SECTION ── */
+.map-toolbar{background:#fff;border:1px solid var(--br);border-radius:6px;padding:8px;display:inline-flex;margin-bottom:12px}
+.map-tb-btn{
+  border-radius:4px!important;
+  font-size:12px!important;
+  padding:6px 14px!important;
+  border:none!important;
+  background:transparent!important;
+  color:var(--muted)!important;
+}
+.map-tb-btn.active,.map-tb-btn:hover{background:var(--or)!important;color:#fff!important;border-color:transparent!important}
+#guinee-map{border-radius:var(--rad)!important}
+
+/* ── PAGE DETAIL ── */
+.det-layout{
+  max-width:1100px!important;
+  margin:0 auto!important;
+  padding:16px 20px!important;
+  gap:16px!important;
+}
+.det-photos{border-radius:var(--rad)!important;border:1px solid var(--br)!important}
+#det-main-img{height:360px!important;background:#f8f8f8!important}
+.det-info{
+  background:#fff!important;
+  border:1px solid var(--br)!important;
+  border-radius:var(--rad)!important;
+  padding:18px!important;
+  box-shadow:none!important;
+  margin-bottom:12px!important;
+}
+.det-title{font-size:20px!important;font-weight:800!important;line-height:1.3!important}
+.det-price{
+  font-size:26px!important;font-weight:900!important;
+  color:var(--ink)!important;
+  font-family:'Syne',sans-serif!important;
+  margin-bottom:10px!important;
+}
+.det-cat-badge{background:var(--brl)!important;color:var(--muted)!important;border-radius:4px!important;font-size:12px!important}
+.det-seller-card{
+  background:#fff!important;
+  border:1px solid var(--br)!important;
+  border-radius:var(--rad)!important;
+  padding:16px!important;
+  box-shadow:none!important;
+  margin-bottom:12px!important;
+}
+.btn-contact{border-radius:6px!important;font-size:14px!important;font-weight:800!important}
+.btn-msg{border-radius:6px!important;font-size:13px!important;font-weight:700!important}
+.btn-fav-det,.btn-share{border-radius:6px!important;font-size:13px!important}
+.det-safety{
+  background:#F0F7FF!important;
+  border-radius:var(--rad)!important;
+  padding:12px 14px!important;
+  font-size:12px!important;
+  color:#1D4ED8!important;
+  border:1px solid #BFDBFE!important;
+}
+
+/* ── PAGE POST ── */
+.post-section{
+  border-radius:var(--rad)!important;
+  padding:16px!important;
+  box-shadow:none!important;
+  border:1px solid var(--br)!important;
+}
+.post-section-title{
+  color:var(--ink)!important;
+  font-size:13px!important;font-weight:800!important;
+  border-bottom:1px solid var(--br)!important;
+  padding-bottom:10px!important;
+  margin-bottom:12px!important;
+}
+.form-group input,.form-group select,.form-group textarea{
+  border:1px solid var(--br)!important;
+  border-radius:var(--rads)!important;
+  font-size:13px!important;
+}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--or)!important;outline:none!important;box-shadow:none!important}
+.btn-post-submit{border-radius:6px!important}
+.cat-opt{border-radius:6px!important}
+
+/* ── DASHBOARD ── */
+.dash-layout{grid-template-columns:220px 1fr!important;min-height:calc(100vh - 90px)!important}
+.dash-side{
+  background:#fff!important;
+  border-right:1px solid var(--br)!important;
+  padding:16px 12px!important;
+  top:90px!important;
+  height:calc(100vh - 90px)!important;
+  box-shadow:none!important;
+}
+.dash-nav a{
+  padding:8px 10px!important;
+  border-radius:5px!important;
+  font-size:13px!important;
+}
+.dash-nav a.active{background:var(--orl)!important;color:var(--or)!important}
+.dash-section-title{font-size:16px!important;font-weight:800!important}
+.stat-card{border-radius:var(--rad)!important;box-shadow:none!important;border:1px solid var(--br)!important}
+.stat-card-val{color:var(--or)!important}
+
+/* ── ADMIN ── */
+.admin-layout{grid-template-columns:200px 1fr!important;min-height:calc(100vh - 90px)!important}
+.admin-side{padding:16px 12px!important;top:90px!important;height:calc(100vh - 90px)!important}
+.admin-nav-item{border-radius:5px!important;font-size:13px!important;padding:8px 10px!important}
+.admin-table{border-radius:var(--rad)!important}
+.admin-table th{font-size:11px!important}
+.admin-table td{font-size:12px!important}
+
+/* ── MODAUX ── */
+.modal{border-radius:10px!important;max-width:420px!important}
+.modal-head{border-bottom:1px solid var(--br)!important}
+.modal-title{font-size:15px!important;font-weight:800!important}
+.modal-close{border-radius:50%!important;background:var(--brl)!important}
+.m-tab{font-size:13px!important}
+.m-tab.active{box-shadow:none!important;border:1px solid var(--br)!important}
+.fg input,.fg select{border:1px solid var(--br)!important;border-radius:var(--rads)!important;font-size:13px!important}
+.fg input:focus,.fg select:focus{border-color:var(--or)!important}
+.overlay{background:rgba(0,0,0,.45)!important;backdrop-filter:none!important}
+
+/* ── FOOTER ── */
+#footer{margin-top:24px!important;background:#1A1A1A!important}
+.footer-grid{max-width:1280px!important;padding:28px 20px!important;display:grid!important;grid-template-columns:2fr 1fr 1fr 1fr!important;gap:24px!important;margin-bottom:16px!important}
+.footer-brand{font-size:16px!important}
+
+/* ── TAGS RECHERCHE ── */
+.hero-card-tags span{
+  background:var(--brl)!important;color:var(--muted)!important;
+  border-radius:4px!important;font-size:11px!important;
+}
+.hero-card-tags span:hover{background:var(--orl)!important;color:var(--or)!important}
+
+/* ── FAB MOBILE ── */
+#fab-post{border-radius:6px!important;width:auto!important;height:auto!important;padding:10px 16px!important;font-size:13px!important;font-weight:700!important}
+
+/* ── BADGES ── */
+.badge{border-radius:3px!important}
+
+/* ── BREADCRUMB DETAIL ── */
+.det-breadcrumb{
+  font-size:12px!important;color:var(--muted)!important;
+  padding:8px 0 12px!important;
+  background:transparent!important;
+}
+.det-breadcrumb a{color:var(--or)!important;cursor:pointer!important}
+
+/* ── RÉSULTATS ── */
+.results-count{font-size:12px!important;color:var(--muted)!important}
+
+/* ── SELLER PAGE ── */
+.seller-hero{
+  background:linear-gradient(135deg,var(--ink),#2a2a2a)!important;
+  border-radius:var(--rad)!important;
+}
+
+/* ── PARTAGE ── */
+.btn-share-wa,.btn-share-tg,.btn-share-fb,.btn-share-copy{border-radius:6px!important}
+
+/* ── RESPONSIVE LEBONCOIN MOBILE ── */
+@media(max-width:900px){
+  .home-content-layout{grid-template-columns:1fr!important}
+  #filters-panel{
+    position:static!important;
+    display:none;
+    border-radius:0!important;
+    border-left:none!important;border-right:none!important;
+  }
+  #filters-panel.mobile-open{display:block!important;position:fixed!important;inset:0!important;top:90px!important;z-index:900!important;height:calc(100vh - 90px)!important;overflow-y:auto!important;border-radius:0!important}
+  .nav-search-loc{display:none!important}
+  .ads-grid{grid-template-columns:repeat(2,1fr)!important;gap:8px!important}
+  .footer-grid{grid-template-columns:1fr 1fr!important}
+  .dash-layout,.admin-layout{grid-template-columns:1fr!important}
+  .dash-side,.admin-side{display:none!important}
+  #fab-post{display:flex!important;border-radius:6px!important;padding:12px 20px!important;font-size:14px!important;width:auto!important;height:auto!important;right:16px!important;bottom:16px!important}
+}
+@media(max-width:600px){
+  .hero > div:first-child{padding:20px 16px 16px!important}
+  .hero h1{font-size:20px!important}
+  .hero-sub{font-size:13px!important}
+  .ads-grid{grid-template-columns:repeat(2,1fr)!important;gap:6px!important}
+  .ad-img{height:140px!important}
+  .ad-body{padding:8px!important}
+  .ad-price{font-size:14px!important}
+  .ad-title{font-size:12px!important}
+  .det-layout{padding:10px!important}
+  .stats-band{grid-template-columns:repeat(2,1fr)!important}
+  .sband:nth-child(2){border-right:none!important}
+  .footer-grid{grid-template-columns:1fr!important}
+  .nav-top{gap:8px!important}
+}
 </style>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#FF5C00">
@@ -1391,17 +1991,29 @@ footer{background:var(--ink);margin-top:96px}
     </div>
     <span class="logo-flag">🇬🇳</span>
   </a>
-  <div class="nav-sc">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A8A8A8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-    <input type="text" id="search-input" placeholder="Toyota, iPhone, Appartement, Emploi..." oninput="doSearch(this.value)" onkeydown="if(event.key==='Enter')doSearch(this.value)">
+  <div class="nav-sc" style="flex:1;max-width:560px;border-radius:6px;height:38px;padding:0;display:flex;align-items:center;overflow:hidden;gap:0">
+    <div style="display:flex;align-items:center;gap:7px;padding:0 12px;flex:1;height:100%">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ABABAB" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" id="search-input" placeholder="Que recherchez-vous ?" oninput="doSearch(this.value)" onkeydown="if(event.key==='Enter')doSearch(this.value)">
+    </div>
+    <div style="width:1px;height:22px;background:var(--br);flex-shrink:0"></div>
+    <div style="display:flex;align-items:center;gap:5px;padding:0 12px;height:100%;cursor:pointer;color:var(--muted);font-size:12px;white-space:nowrap;min-width:110px;transition:color .15s" onmouseover="this.style.color='var(--or)'" onmouseout="this.style.color='var(--muted)'">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <span>Toute la Guinée</span>
+    </div>
+    <button onclick="doSearch(document.getElementById('search-input').value)" style="background:var(--or);border:none;width:44px;height:100%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:background .15s" onmouseover="this.style.background='var(--or2)'" onmouseout="this.style.background='var(--or)'">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    </button>
   </div>
   <div class="nav-right">
-    <button class="btn btn-or" onclick="goTo('app-download')" style="background:var(--ink);font-size:13px;padding:9px 16px">📲 App mobile</button>
-    <button class="btn btn-or" onclick="requireLoginThenPost()" style="font-size:13px;padding:9px 18px">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <button class="btn btn-or" onclick="requireLoginThenPost()" style="font-size:13px;padding:8px 16px;border-radius:6px;box-shadow:none">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Déposer une annonce
     </button>
-    <button class="btn btn-ghost" id="nav-auth-btn" onclick="openModal('auth')" style="font-size:13px;padding:9px 16px">👤 Se connecter</button>
+    <button class="btn btn-ghost" id="nav-auth-btn" onclick="openModal('auth')" style="font-size:13px;padding:8px 14px;border-radius:6px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span id="nav-user-label">Connexion</span>
+    </button>
   </div>
 </div>
 <!-- BARRE CATÉGORIES -->
@@ -1413,160 +2025,216 @@ footer{background:var(--ink);margin-top:96px}
 <!-- ══ PAGE HOME ══ -->
 <div id="page-home" class="page active">
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="fade-up">
-      <div class="hero-badge">🇬🇳 N°1 en Guinée · Gratuit · Sécurisé</div>
-      <h1>Le marché de<br>toute la <strong>Guinée</strong>,<br>en un clic.</h1>
-      <p class="hero-sub">Des milliers d'annonces dans vos 38 préfectures. Achetez, vendez et payez avec Orange Money — simple et sécurisé.</p>
-      <div class="hero-actions">
-        <button class="btn btn-or" style="font-size:15px;padding:14px 30px;border-radius:14px" onclick="requireLoginThenPost()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  <!-- HERO LEBONCOIN STYLE -->
+  <section class="hero" style="background:#fff;border-bottom:1px solid var(--br);padding:0;display:block">
+    <div style="max-width:800px;margin:0 auto;padding:32px 20px 24px;text-align:center">
+      <div style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px">
+        <span style="width:6px;height:6px;border-radius:50%;background:var(--gr);display:inline-block;animation:pulse 2s infinite"></span>
+        🇬🇳 N°1 en Guinée · Gratuit · Sécurisé
+      </div>
+      <h1 style="font-family:'Syne',sans-serif;font-size:clamp(22px,3.5vw,34px);font-weight:800;color:var(--ink);margin-bottom:8px;letter-spacing:-.5px;line-height:1.15">
+        Le marché de toute la <span style="color:var(--or)">Guinée</span>, en un clic.
+      </h1>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:20px;max-width:480px;margin-left:auto;margin-right:auto;line-height:1.6">
+        Des milliers d'annonces dans vos 38 préfectures. Achetez, vendez et payez avec Orange Money.
+      </p>
+
+      <!-- Grande barre de recherche hero -->
+      <div style="display:flex;max-width:680px;margin:0 auto 14px;border:2px solid var(--or);border-radius:8px;overflow:hidden;box-shadow:0 4px 20px rgba(255,92,0,.15)">
+        <input type="text" id="hero-search" placeholder="Toyota, iPhone, Appartement, Emploi..."
+          style="flex:1;padding:14px 16px;border:none;outline:none;font-size:15px;font-family:inherit;color:var(--ink);background:#fff"
+          onkeydown="if(event.key==='Enter')heroSearch()">
+        <div style="width:1px;height:auto;background:var(--br);flex-shrink:0;margin:8px 0"></div>
+        <select id="hero-cat-quick" onchange="document.getElementById('hero-cat-sel').value=this.value;applySortFilter()" style="padding:0 16px;border:none;outline:none;font-size:13px;font-family:inherit;color:var(--muted);background:#fff;cursor:pointer;min-width:130px">
+          <option value="">Toutes catégories</option>
+        </select>
+        <button onclick="heroSearch()" style="background:var(--or);color:#fff;border:none;padding:0 24px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px;white-space:nowrap;transition:background .15s" onmouseover="this.style.background='#CC4A00'" onmouseout="this.style.background='#FF5C00'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          Rechercher
+        </button>
+      </div>
+
+      <!-- Filtres rapides sous la barre -->
+      <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:6px;max-width:680px;margin:0 auto 4px">
+        <a onclick="filterCat(this,'Véhicules')" style="display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;color:var(--muted);background:var(--bg);border:1px solid var(--br);cursor:pointer;transition:all .15s" onmouseover="this.style.background='#FFF5F0';this.style.borderColor='var(--or)';this.style.color='var(--or)'" onmouseout="this.style.background='var(--bg)';this.style.borderColor='var(--br)';this.style.color='var(--muted)'">🚗 Véhicules</a>
+        <a onclick="filterCat(this,'Immobilier')" style="display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;color:var(--muted);background:var(--bg);border:1px solid var(--br);cursor:pointer;transition:all .15s" onmouseover="this.style.background='#FFF5F0';this.style.borderColor='var(--or)';this.style.color='var(--or)'" onmouseout="this.style.background='var(--bg)';this.style.borderColor='var(--br)';this.style.color='var(--muted)'">🏠 Immobilier</a>
+        <a onclick="filterCat(this,'Électronique')" style="display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;color:var(--muted);background:var(--bg);border:1px solid var(--br);cursor:pointer;transition:all .15s" onmouseover="this.style.background='#FFF5F0';this.style.borderColor='var(--or)';this.style.color='var(--or)'" onmouseout="this.style.background='var(--bg)';this.style.borderColor='var(--br)';this.style.color='var(--muted)'">📱 Électronique</a>
+        <a onclick="filterCat(this,'Mode')" style="display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;color:var(--muted);background:var(--bg);border:1px solid var(--br);cursor:pointer;transition:all .15s" onmouseover="this.style.background='#FFF5F0';this.style.borderColor='var(--or)';this.style.color='var(--or)'" onmouseout="this.style.background='var(--bg)';this.style.borderColor='var(--br)';this.style.color='var(--muted)'">👗 Mode</a>
+        <a onclick="filterCat(this,'Services')" style="display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;color:var(--muted);background:var(--bg);border:1px solid var(--br);cursor:pointer;transition:all .15s" onmouseover="this.style.background='#FFF5F0';this.style.borderColor='var(--or)';this.style.color='var(--or)'" onmouseout="this.style.background='var(--bg)';this.style.borderColor='var(--br)';this.style.color='var(--muted)'">🤝 Services</a>
+        <a onclick="filterCat(this,'Emploi')" style="display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;color:var(--muted);background:var(--bg);border:1px solid var(--br);cursor:pointer;transition:all .15s" onmouseover="this.style.background='#FFF5F0';this.style.borderColor='var(--or)';this.style.color='var(--or)'" onmouseout="this.style.background='var(--bg)';this.style.borderColor='var(--br)';this.style.color='var(--muted)'">💼 Emploi</a>
+      </div>
+
+      <!-- Trust bar -->
+      <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:18px;padding-top:16px;border-top:1px solid var(--br)">
+        <div style="display:flex">
+          <div style="width:26px;height:26px;border-radius:50%;border:2px solid #fff;background:#F97316;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;margin-left:0">M</div>
+          <div style="width:26px;height:26px;border-radius:50%;border:2px solid #fff;background:#3B82F6;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;margin-left:-6px">A</div>
+          <div style="width:26px;height:26px;border-radius:50%;border:2px solid #fff;background:#22C55E;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;margin-left:-6px">F</div>
+          <div style="width:26px;height:26px;border-radius:50%;border:2px solid #fff;background:#8B5CF6;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;margin-left:-6px">I</div>
+        </div>
+        <span style="font-size:13px;color:var(--muted)"><strong style="color:var(--ink)">+12 400</strong> Guinéens font confiance à YouGouYou</span>
+        <span style="color:var(--br)">·</span>
+        <button class="btn btn-or" style="font-size:12px;padding:6px 14px;border-radius:5px;box-shadow:none" onclick="requireLoginThenPost()">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Déposer gratuitement
         </button>
-        <button class="btn btn-ghost" style="font-size:15px;padding:14px 24px;border-radius:14px" onclick="scrollToAds()">Voir les annonces →</button>
-      </div>
-      <div class="hero-trust">
-        <div class="trust-av">
-          <div class="av" style="background:#F97316">M</div>
-          <div class="av" style="background:#3B82F6">A</div>
-          <div class="av" style="background:#22C55E">F</div>
-          <div class="av" style="background:#8B5CF6">I</div>
-        </div>
-        <div class="trust-txt"><strong>+12 400</strong> Guinéens font confiance à YouGouYou</div>
-      </div>
-      <!-- Quick cats -->
-      <div class="hero-quick-cats">
-        <span onclick="filterCat(this,'Véhicules')">🚗 Véhicules</span>
-        <span onclick="filterCat(this,'Immobilier')">🏠 Immobilier</span>
-        <span onclick="filterCat(this,'Électronique')">📱 Électronique</span>
-        <span onclick="filterCat(this,'Mode')">👗 Mode</span>
-        <span onclick="filterCat(this,'Services')">🤝 Services</span>
-      </div>
-    </div>
-    <div class="hero-card fade-up-2">
-      <div class="hero-card-tt">🔍 Trouver une annonce</div>
-      <div class="inp-grp">
-        <label>Que recherchez-vous ?</label>
-        <input type="text" id="hero-search" placeholder="Toyota, iPhone, Appartement...">
-      </div>
-      <div class="inp-row">
-        <div class="inp-grp">
-          <label>Catégorie</label>
-          <select id="hero-cat-sel">
-            <option value="">Toutes catégories</option>
-          </select>
-        </div>
-        <div class="inp-grp">
-          <label>Ville</label>
-          <select id="hero-city-sel"><option value="">Toutes les villes</option></select>
-        </div>
-      </div>
-      <div class="inp-price-row" style="margin-bottom:16px">
-        <div class="inp-grp"><label>Prix min (GNF)</label><input type="number" id="hero-pmin" placeholder="0"></div>
-        <div class="inp-grp"><label>Prix max (GNF)</label><input type="number" id="hero-pmax" placeholder="Max"></div>
-      </div>
-      <button class="btn btn-ink btn-full" style="border-radius:12px;font-size:15px" onclick="heroSearch()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-        Rechercher
-      </button>
-      <div class="hero-card-tags">
-        <span onclick="heroTag('Toyota')">🔖 Toyota</span>
-        <span onclick="heroTag('iPhone')">🔖 iPhone</span>
-        <span onclick="heroTag('Appartement')">🔖 Appartement</span>
-        <span onclick="heroTag('Moto')">🔖 Moto</span>
       </div>
     </div>
   </section>
 
   <!-- cats now in nav -->
 
-  <!-- FEATURED ADS -->
-  <section class="sec" id="ads-section">
-    <div id="search-banner" style="display:none;background:var(--brl);border:1.5px solid var(--or);border-radius:14px;padding:12px 18px;margin-bottom:16px;align-items:center;justify-content:space-between;gap:12px"></div>
-    <div class="sec-head">
-      <div>
-        <h2 class="sec-tt">⭐ À la une</h2>
-        <div class="sec-sub">Annonces mises en avant · <span id="sb-ads">0</span> annonces actives</div>
-      </div>
-      <button class="see-all-btn" onclick="clearSearch();document.querySelectorAll('.ncat').forEach(function(n){n.classList.remove('active')});document.querySelector('.ncat')&&document.querySelector('.ncat').classList.add('active');">Tout voir →</button>
-    </div>
-    <!-- Sort + Filter bar -->
-    <div class="sort-bar">
-      <label>Trier par :</label>
-      <select class="sort-select" id="sort-select" onchange="applySortFilter()">
-        <option value="date_desc">Plus récent</option>
-        <option value="price_asc">Prix croissant</option>
-        <option value="price_desc">Prix décroissant</option>
-        <option value="views_desc">Plus vus</option>
-      </select>
-      <label style="margin-left:8px">État :</label>
-      <select class="sort-select" id="etat-select" onchange="applySortFilter()">
-        <option value="">Tous états</option>
-        <option value="Neuf">Neuf</option>
-        <option value="Très bon état">Très bon état</option>
-        <option value="Bon état">Bon état</option>
-        <option value="Occasion">Occasion</option>
-      </select>
-      <button onclick="showAlertModal()" style="margin-left:auto;background:none;border:1.5px solid var(--or);color:var(--or);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">🔔 Créer une alerte</button>
-      <span class="results-count" id="results-count"></span>
-    </div>
-    <div class="ads-grid" id="featured-grid"></div>
-    <div class="load-more-sentinel" id="load-sentinel">
-      <div class="load-spinner" id="load-spinner"></div>
-    </div>
-    <div class="end-of-results" id="end-results">✓ Toutes les annonces sont affichées</div>
-  </section>
+  <!-- LAYOUT LEBONCOIN : filtres gauche + annonces droite -->
+  <div style="max-width:1280px;margin:0 auto;padding:16px 20px;display:grid;grid-template-columns:240px 1fr;gap:16px;align-items:start" id="main-two-col">
 
-  <!-- RECENT ADS -->
-  <section class="sec" style="padding-top:0">
-    <div class="sec-head">
-      <div><h2 class="sec-tt">🕐 Annonces récentes</h2><div class="sec-sub">Publiées ces dernières heures</div></div>
-      <button class="see-all-btn" onclick="clearSearch()">Tout voir →</button>
+    <!-- PANNEAU FILTRES GAUCHE -->
+    <div id="filters-panel" style="background:#fff;border:1px solid var(--br);border-radius:8px;position:sticky;top:92px">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:13px;font-weight:800;color:var(--ink)">Filtrer les annonces</span>
+        <span onclick="clearSearch()" style="font-size:12px;font-weight:600;color:var(--or);cursor:pointer">Réinitialiser</span>
+      </div>
+      <div style="padding:12px 16px;border-bottom:1px solid var(--br)">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:8px">Catégorie</div>
+        <select id="hero-cat-sel" onchange="applySortFilter()" style="width:100%;padding:8px 10px;border:1px solid var(--br);border-radius:5px;font-size:13px;font-family:inherit;color:var(--ink);background:#fff">
+          <option value="">Toutes catégories</option>
+        </select>
+      </div>
+      <div style="padding:12px 16px;border-bottom:1px solid var(--br)">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:8px">Localisation</div>
+        <select id="hero-city-sel" onchange="applySortFilter()" style="width:100%;padding:8px 10px;border:1px solid var(--br);border-radius:5px;font-size:13px;font-family:inherit;color:var(--ink);background:#fff">
+          <option value="">Toutes les villes</option>
+        </select>
+      </div>
+      <div style="padding:12px 16px;border-bottom:1px solid var(--br)">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:8px">Prix (GNF)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <input type="number" id="hero-pmin" placeholder="Min" style="width:100%;padding:7px 10px;border:1px solid var(--br);border-radius:5px;font-size:13px;font-family:inherit">
+          <input type="number" id="hero-pmax" placeholder="Max" style="width:100%;padding:7px 10px;border:1px solid var(--br);border-radius:5px;font-size:13px;font-family:inherit">
+        </div>
+      </div>
+      <div style="padding:12px 16px;border-bottom:1px solid var(--br)">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:8px">État</div>
+        <select id="etat-select" onchange="applySortFilter()" style="width:100%;padding:8px 10px;border:1px solid var(--br);border-radius:5px;font-size:13px;font-family:inherit;color:var(--ink);background:#fff">
+          <option value="">Tous états</option>
+          <option value="Neuf">Neuf</option>
+          <option value="Très bon état">Très bon état</option>
+          <option value="Bon état">Bon état</option>
+          <option value="Occasion">Occasion</option>
+        </select>
+      </div>
+      <div style="padding:12px 16px;border-bottom:1px solid var(--br)">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:8px">Trier par</div>
+        <select id="sort-select" onchange="applySortFilter()" style="width:100%;padding:8px 10px;border:1px solid var(--br);border-radius:5px;font-size:13px;font-family:inherit;color:var(--ink);background:#fff">
+          <option value="date_desc">Plus récent</option>
+          <option value="price_asc">Prix croissant</option>
+          <option value="price_desc">Prix décroissant</option>
+          <option value="views_desc">Plus vus</option>
+        </select>
+      </div>
+      <div style="padding:12px 16px">
+        <button onclick="heroSearch()" style="width:100%;padding:10px;background:var(--or);color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s" onmouseover="this.style.background='#CC4A00'" onmouseout="this.style.background='var(--or)'">
+          Appliquer les filtres
+        </button>
+        <button onclick="showAlertModal()" style="width:100%;padding:9px;background:none;border:1px solid var(--br);color:var(--muted);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:8px;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px" onmouseover="this.style.borderColor='var(--or)';this.style.color='var(--or)'" onmouseout="this.style.borderColor='var(--br)';this.style.color='var(--muted)'">
+          🔔 Créer une alerte pour cette recherche
+        </button>
+      </div>
     </div>
-    <div class="ads-grid" id="recent-grid"></div>
-  </section>
+
+    <!-- COLONNE ANNONCES DROITE -->
+    <div>
+
+      <!-- FEATURED ADS -->
+      <section class="sec" id="ads-section" style="padding:0">
+        <div id="search-banner" style="display:none;background:var(--orl);border:1.5px solid var(--or);border-radius:7px;padding:10px 14px;margin-bottom:12px;align-items:center;justify-content:space-between;gap:12px"></div>
+        <div class="sec-head" style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <h2 style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--ink)">Annonces à la une</h2>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px"><span id="sb-ads">0</span> annonces actives</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="results-count" id="results-count" style="font-size:12px;color:var(--muted)"></span>
+            <button class="see-all-btn" onclick="clearSearch();document.querySelectorAll('.ncat').forEach(function(n){n.classList.remove('active')});document.querySelector('.ncat')&&document.querySelector('.ncat').classList.add('active');" style="font-size:12px;font-weight:700;border:1px solid var(--br);border-radius:4px;padding:5px 12px;color:var(--ink);background:#fff;cursor:pointer">Tout voir</button>
+          </div>
+        </div>
+        <div class="ads-grid" id="featured-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px"></div>
+        <div class="load-more-sentinel" id="load-sentinel">
+          <div class="load-spinner" id="load-spinner"></div>
+        </div>
+        <div class="end-of-results" id="end-results" style="text-align:center;padding:16px;font-size:13px;color:var(--muted);display:none">✓ Toutes les annonces sont affichées</div>
+      </section>
+
+      <!-- RECENT ADS -->
+      <section class="sec" style="padding:24px 0 0">
+        <div class="sec-head" style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <h2 style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--ink)">Annonces récentes</h2>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px">Publiées ces dernières heures</div>
+          </div>
+          <button class="see-all-btn" onclick="clearSearch()" style="font-size:12px;font-weight:700;border:1px solid var(--br);border-radius:4px;padding:5px 12px;color:var(--ink);background:#fff;cursor:pointer">Tout voir</button>
+        </div>
+        <div class="ads-grid" id="recent-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px"></div>
+      </section>
+
+    </div><!-- /colonne annonces -->
+  </div><!-- /main-two-col -->
 
   <!-- MAP -->
-  <section class="sec" style="padding-top:0">
-    <div class="sec-head">
-      <div><h2 class="sec-tt">Carte de la Guinée</h2><div class="sec-sub">Cliquez sur une préfecture pour filtrer les annonces</div></div>
+  <section style="max-width:1280px;margin:0 auto;padding:0 20px 24px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--br)">
+      <div>
+        <h2 style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--ink)">Carte de la Guinée</h2>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">Cliquez sur une préfecture pour filtrer les annonces</div>
+      </div>
     </div>
     <div class="map-toolbar">
       <button class="map-tb-btn active" id="btn-reg" onclick="showLayer('regions')">8 Régions</button>
       <button class="map-tb-btn" id="btn-pref" onclick="showLayer('prefectures')">38 Préfectures</button>
     </div>
-    <div id="guinee-map" style="width:100%;height:540px;background:#E8F4F0;border-radius:16px;border:1px solid var(--br)"></div>
-    <div class="map-filter-info hidden" id="map-filter-info">
-      <div class="mfi-txt">Annonces filtrées : <strong id="mfi-zone">-</strong> — <span id="mfi-count">0</span> annonce(s)</div>
-      <span class="mfi-clear" onclick="clearMapFilter()">✕ Effacer le filtre</span>
+    <div id="guinee-map" style="width:100%;height:480px;background:#E8F4F0;border-radius:8px;border:1px solid var(--br)"></div>
+    <div class="map-filter-info hidden" id="map-filter-info" style="background:#fff;border:1px solid var(--br);border-radius:7px;padding:10px 16px;margin-top:10px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:13px;color:var(--ink)">Annonces filtrées : <strong id="mfi-zone" style="color:var(--or)">-</strong> — <span id="mfi-count">0</span> annonce(s)</div>
+      <span style="font-size:12px;font-weight:700;color:var(--muted);cursor:pointer" onclick="clearMapFilter()" onmouseover="this.style.color='#D91C0C'" onmouseout="this.style.color='var(--muted)'">✕ Effacer le filtre</span>
     </div>
-    <div class="map-legend" id="map-legend"></div>
-    <div class="stats-band">
-      <div class="sband"><div class="sband-n" id="sb-ads">1 679</div><div class="sband-l">Annonces actives</div></div>
-      <div class="sband"><div class="sband-n">8</div><div class="sband-l">Régions couvertes</div></div>
-      <div class="sband"><div class="sband-n">12 400+</div><div class="sband-l">Utilisateurs inscrits</div></div>
-      <div class="sband"><div class="sband-n">Gratuit</div><div class="sband-l">Pour déposer</div></div>
+    <div class="map-legend" id="map-legend" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:7px;margin-top:12px"></div>
+    <div style="background:var(--ink);border-radius:8px;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:16px;overflow:hidden">
+      <div style="padding:18px 20px;text-align:center;border-right:1px solid rgba(255,255,255,.08)">
+        <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--or)" id="sb-ads2">1 679</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:3px;font-weight:600">Annonces actives</div>
+      </div>
+      <div style="padding:18px 20px;text-align:center;border-right:1px solid rgba(255,255,255,.08)">
+        <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--or)">8</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:3px;font-weight:600">Régions couvertes</div>
+      </div>
+      <div style="padding:18px 20px;text-align:center;border-right:1px solid rgba(255,255,255,.08)">
+        <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--or)">12 400+</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:3px;font-weight:600">Utilisateurs inscrits</div>
+      </div>
+      <div style="padding:18px 20px;text-align:center">
+        <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--or)">Gratuit</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:3px;font-weight:600">Pour déposer</div>
+      </div>
     </div>
   </section>
 
   <!-- APP BANNER -->
-  <section class="sec" style="padding-top:0">
-    <div class="app-banner">
+  <section style="max-width:1280px;margin:0 auto;padding:0 20px 32px">
+    <div style="background:linear-gradient(135deg,#1A1A1A,#2a2a2a);border-radius:8px;padding:28px 36px;display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-40px;right:200px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(255,92,0,.12),transparent 70%);pointer-events:none"></div>
       <div>
-        <div class="app-banner-tag">📲 Bientôt disponible</div>
-        <h2>YouGouYou sur<br>votre smartphone</h2>
-        <p>Notifications instantanées, messagerie intégrée, paiement Orange Money en un tap. Disponible iOS & Android.</p>
-        <div class="store-btns">
-          <button class="store-btn" onclick="toast('🍎 Bientôt sur App Store !')">🍎 App Store</button>
-          <button class="store-btn" onclick="toast('▶️ Bientôt sur Google Play !')">▶️ Google Play</button>
+        <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,92,0,.2);color:var(--or);font-size:11px;font-weight:800;padding:4px 10px;border-radius:4px;margin-bottom:12px;text-transform:uppercase;letter-spacing:.4px">📲 Bientôt disponible</div>
+        <h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#fff;margin-bottom:8px;line-height:1.3">YouGouYou sur votre smartphone</h2>
+        <p style="font-size:13px;color:rgba(255,255,255,.65);margin-bottom:20px;line-height:1.7;max-width:420px">Notifications instantanées, messagerie intégrée, paiement Orange Money en un tap. Disponible iOS & Android.</p>
+        <div style="display:flex;gap:10px">
+          <button onclick="toast('🍎 Bientôt sur App Store !')" style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:9px 16px;border-radius:6px;font-weight:700;font-size:13px;cursor:pointer;transition:all .2s;font-family:inherit" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">🍎 App Store</button>
+          <button onclick="toast('▶️ Bientôt sur Google Play !')" style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:9px 16px;border-radius:6px;font-weight:700;font-size:13px;cursor:pointer;transition:all .2s;font-family:inherit" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">▶️ Google Play</button>
         </div>
       </div>
-      <div class="app-phone">
-        <span class="icon">📲</span>
-        <div class="app-stats">
-          <div class="astat"><div class="n">4.8</div><div class="l">Note</div></div>
-          <div class="astat"><div class="n">10K+</div><div class="l">Téléch.</div></div>
+      <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:20px 28px;text-align:center;min-width:160px">
+        <span style="font-size:32px;display:block;margin-bottom:12px">📲</span>
+        <div style="display:flex;gap:20px;justify-content:center">
+          <div><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff">4.8</div><div style="font-size:10px;color:rgba(255,255,255,.5);font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-top:2px">Note</div></div>
+          <div><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff">10K+</div><div style="font-size:10px;color:rgba(255,255,255,.5);font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-top:2px">Téléch.</div></div>
         </div>
       </div>
     </div>
@@ -4692,11 +5360,14 @@ function heroTag(tag){
 
 function populateHeroCats(){
   var sel = document.getElementById('hero-cat-sel');
+  var quick = document.getElementById('hero-cat-quick');
   if(!sel) return;
-  sel.innerHTML = '<option value="">Toutes catégories</option>';
+  var opts = '<option value="">Toutes catégories</option>';
   CATS.forEach(function(cat){
-    sel.innerHTML += '<option value="'+cat.n+'">'+cat.e+' '+cat.n+'</option>';
+    opts += '<option value="'+cat.n+'">'+cat.e+' '+cat.n+'</option>';
   });
+  sel.innerHTML = opts;
+  if(quick) quick.innerHTML = opts;
 }
 
 
