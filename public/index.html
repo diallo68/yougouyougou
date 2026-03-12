@@ -3750,6 +3750,300 @@
     .catbar-item:nth-last-child(-n + 3).has-sub > .cat-dropdown {
         left: auto;
         right: 0
+    }/* ═══════════════════════════════════════
+       AMÉLIORATIONS VISUELLES v9.1
+    ═══════════════════════════════════════ */
+
+    /* Hero badge */
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255, 255, 255, .18);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, .3);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 5px 12px;
+        border-radius: 20px;
+        margin-bottom: 18px;
+    }/* Hero quick cats */
+    .hero-quick-cats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 18px;
+    }
+
+    .hero-quick-cats span {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(255, 255, 255, .15);
+        backdrop-filter: blur(6px);
+        border: 1px solid rgba(255, 255, 255, .25);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 6px 12px;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all .15s;
+    }
+
+    .hero-quick-cats span:hover {
+        background: rgba(255, 255, 255, .28);
+        transform: translateY(-1px)
+    }/* Hero card tags */
+    .hero-card-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--br);
+    }
+
+    .hero-card-tags span {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--muted);
+        background: var(--brl);
+        padding: 4px 10px;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all .15s;
+    }
+
+    .hero-card-tags span:hover {
+        background: var(--orl);
+        color: var(--or)
+    }/* Section headers améliorés */
+    .sec-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        padding-bottom: 14px;
+        border-bottom: 2px solid var(--brl);
+    }
+
+    .sec-tt {
+        font-size: 20px !important;
+        font-weight: 800 !important;
+        color: var(--ink) !important
+    }
+
+    .sec-tt::after {
+        content: '';
+        display: block;
+        width: 40px;
+        height: 3px;
+        background: var(--or);
+        border-radius: 2px;
+        margin-top: 6px;
+    }
+
+    .sec-sub {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 3px
+    }
+
+    .see-all-btn {
+        background: none;
+        border: 1.5px solid var(--or);
+        color: var(--or);
+        border-radius: 20px;
+        padding: 7px 16px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all .15s;
+        white-space: nowrap;
+    }
+
+    .see-all-btn:hover {
+        background: var(--or);
+        color: #fff
+    }/* Cards améliorées */
+    .ad-card {
+        transition: transform .2s, box-shadow .2s, border-color .2s !important;
+    }
+
+    .ad-card:hover {
+        transform: translateY(-3px) !important;
+        box-shadow: 0 8px 28px rgba(255, 92, 0, .12) !important;
+        border-color: var(--orm) !important;
+    }
+
+    .ad-price {
+        font-size: 17px !important;
+        color: var(--or) !important;
+    }/* Stats band amélioré */
+    .stats-band {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0;
+        margin-top: 24px;
+        background: linear-gradient(135deg, var(--ink), #1a1a2e);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .sband {
+        padding: 22px 20px;
+        text-align: center;
+        border-right: 1px solid rgba(255, 255, 255, .08);
+        position: relative;
+    }
+
+    .sband:last-child {
+        border-right: none
+    }
+
+    .sband-n {
+        font-size: 26px;
+        font-weight: 900;
+        color: #fff;
+        font-family: 'Syne', sans-serif
+    }
+
+    .sband-l {
+        font-size: 12px;
+        color: rgba(255, 255, 255, .55);
+        margin-top: 4px;
+        font-weight: 600
+    }
+
+    .sband::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--or), transparent);
+    }/* App banner amélioré */
+    .app-banner {
+        background: linear-gradient(135deg, #0E0E0E 0%, #1a1a2e 50%, #0E0E0E 100%) !important;
+        border-radius: 20px !important;
+        padding: 40px !important;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .app-banner::before {
+        content: '';
+        position: absolute;
+        top: -40px;
+        right: -40px;
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 92, 0, .15), transparent 70%);
+    }
+
+    .app-banner h2 {
+        font-size: 26px !important;
+        font-weight: 800 !important;
+        color: #fff !important;
+        margin-bottom: 12px
+    }
+
+    .app-banner p {
+        color: rgba(255, 255, 255, .65) !important;
+        font-size: 14px !important;
+        line-height: 1.7
+    }
+
+    .store-btn {
+        background: rgba(255, 255, 255, .1) !important;
+        border: 1.5px solid rgba(255, 255, 255, .2) !important;
+        color: #fff !important;
+        border-radius: 10px !important;
+        padding: 10px 18px !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+    }
+
+    .store-btn:hover {
+        background: rgba(255, 255, 255, .2) !important
+    }/* Map section améliorée */
+    .map-toolbar {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 14px;
+    }
+
+    .map-tb-btn {
+        padding: 8px 18px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 700;
+        border: 1.5px solid var(--br);
+        background: #fff;
+        cursor: pointer;
+        transition: all .15s;
+        color: var(--muted);
+    }
+
+    .map-tb-btn.active, .map-tb-btn:hover {
+        background: var(--or);
+        border-color: var(--or);
+        color: #fff;
+    }
+
+    #guinee-map {
+        border-radius: 16px !important;
+        overflow: hidden;
+        box-shadow: var(--shm)
+    }/* Nav improvements */
+    .nav-top {
+        box-shadow: 0 1px 0 var(--br);
+    }
+
+    .ncat {
+        padding: 8px 12px !important;
+        border-radius: 8px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        transition: background .12s !important;
+    }
+
+    .ncat:hover {
+        background: var(--brl) !important;
+        color: var(--or) !important
+    }
+
+    .ncat.active {
+        background: var(--orl) !important;
+        color: var(--or) !important;
+        font-weight: 700 !important
+    }/* Featured badge amélioré */
+    .ad-badge {
+        background: linear-gradient(135deg, var(--or), #FF8C42) !important;
+        font-size: 11px !important;
+        font-weight: 800 !important;
+        padding: 3px 9px !important;
+        border-radius: 20px !important;
+        letter-spacing: .3px !important;
+        box-shadow: 0 2px 8px rgba(255, 92, 0, .3) !important;
+    }/* Responsive hero quick cats */
+    @media (max-width: 600px) {
+        .hero-quick-cats {
+            display: none
+        }
+
+        .stats-band {
+            grid-template-columns: repeat(2, 1fr)
+        }
+
+        .sband:nth-child(2) {
+            border-right: none
+        }
     }
     </style>
 </head>
@@ -3805,7 +4099,7 @@
         <!-- HERO -->
         <section class="hero">
             <div class="fade-up">
-
+                <div class="hero-badge">🇬🇳 N°1 en Guinée · Gratuit · Sécurisé</div>
                 <h1>
                     Le marché de
                     <br>
@@ -3817,8 +4111,16 @@
                 </h1>
                 <p class="hero-sub">Des milliers d'annonces dans vos 38 préfectures. Achetez, vendez et payez avec Orange Money — simple et sécurisé.</p>
                 <div class="hero-actions">
-                    <button class="btn btn-or" style="font-size:15px;padding:14px 30px" onclick="goTo('post')">Déposer gratuitement</button>
-                    <button class="btn btn-ghost" style="font-size:15px;padding:14px 24px" onclick="scrollToAds()">Voir les annonces →</button>
+                    <button class="btn btn-or" style="font-size:15px;padding:14px 30px;border-radius:14px" onclick="requireLoginThenPost()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+
+                                  Déposer gratuitement
+                                
+                    </button>
+                    <button class="btn btn-ghost" style="font-size:15px;padding:14px 24px;border-radius:14px" onclick="scrollToAds()">Voir les annonces →</button>
                 </div>
                 <div class="hero-trust">
                     <div class="trust-av">
@@ -3832,36 +4134,30 @@
                          Guinéens font confiance à YouGouYou
                     </div>
                 </div>
+                <!-- Quick cats -->
+                <div class="hero-quick-cats">
+                    <span onclick="filterCat(this,'Véhicules')">🚗 Véhicules</span>
+                    <span onclick="filterCat(this,'Immobilier')">🏠 Immobilier</span>
+                    <span onclick="filterCat(this,'Électronique')">📱 Électronique</span>
+                    <span onclick="filterCat(this,'Mode')">👗 Mode</span>
+                    <span onclick="filterCat(this,'Services')">🤝 Services</span>
+                </div>
             </div>
             <div class="hero-card fade-up-2">
                 <div class="hero-card-tt">🔍 Trouver une annonce</div>
                 <div class="inp-grp">
                     <label>Que recherchez-vous ?</label>
-                    <input type="text" placeholder="Toyota, iPhone, Appartement, Emploi...">
+                    <input type="text" id="hero-search" placeholder="Toyota, iPhone, Appartement...">
                 </div>
                 <div class="inp-row">
                     <div class="inp-grp">
                         <label>Catégorie</label>
-                        <select>
-                            <option>Toutes catégories</option>
-                            <option>Véhicules</option>
-                            <option>Maison : Ventes & Location</option>
-                            <option>Électronique</option>
-                            <option>Mode</option>
-                            <option>Emploi</option>
-                            <option>Maison & Jardin</option>
-                            <option>Loisirs</option>
-                            <option>Vacances & Tourisme</option>
-                            <option>Cuisine & Traiteur</option>
-                            <option>Aide à domicile</option>
-                            <option>Services</option>
-                            <option>Autres</option>
-                            <option>Maison & Jardin</option>
-                            <option>Loisirs</option>
+                        <select id="hero-cat-sel">
+                            <option value="">Toutes catégories</option>
                         </select>
                     </div>
                     <div class="inp-grp">
-                        <label>Préfecture / Ville</label>
+                        <label>Ville</label>
                         <select id="hero-city-sel">
                             <option value="">Toutes les villes</option>
                         </select>
@@ -3870,14 +4166,14 @@
                 <div class="inp-price-row" style="margin-bottom:16px">
                     <div class="inp-grp">
                         <label>Prix min (GNF)</label>
-                        <input type="number" placeholder="0">
+                        <input type="number" id="hero-pmin" placeholder="0">
                     </div>
                     <div class="inp-grp">
                         <label>Prix max (GNF)</label>
-                        <input type="number" placeholder="100 000 000">
+                        <input type="number" id="hero-pmax" placeholder="Max">
                     </div>
                 </div>
-                <button class="btn btn-ink btn-full" style="border-radius:12px;font-size:15px">
+                <button class="btn btn-ink btn-full" style="border-radius:12px;font-size:15px" onclick="heroSearch()">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <circle cx="11" cy="11" r="8"/>
                         <path d="M21 21l-4.35-4.35"/>
@@ -3886,6 +4182,12 @@
                             Rechercher
                           
                 </button>
+                <div class="hero-card-tags">
+                    <span onclick="heroTag('Toyota')">🔖 Toyota</span>
+                    <span onclick="heroTag('iPhone')">🔖 iPhone</span>
+                    <span onclick="heroTag('Appartement')">🔖 Appartement</span>
+                    <span onclick="heroTag('Moto')">🔖 Moto</span>
+                </div>
             </div>
         </section>
 
@@ -3893,12 +4195,17 @@
 
         <!-- FEATURED ADS -->
         <section class="sec" id="ads-section">
+            <div id="search-banner" style="display:none;background:var(--brl);border:1.5px solid var(--or);border-radius:14px;padding:12px 18px;margin-bottom:16px;align-items:center;justify-content:space-between;gap:12px"></div>
             <div class="sec-head">
                 <div>
-                    <h2 class="sec-tt">À la une</h2>
-                    <div class="sec-sub">Annonces mises en avant par nos vendeurs</div>
+                    <h2 class="sec-tt">⭐ À la une</h2>
+                    <div class="sec-sub">
+                        Annonces mises en avant · 
+                        <span id="sb-ads">0</span>
+                         annonces actives
+                    </div>
                 </div>
-                <button class="see-all-btn">Tout voir →</button>
+                <button class="see-all-btn" onclick="clearSearch();document.querySelectorAll('.ncat').forEach(function(n){n.classList.remove('active')});document.querySelector('.ncat').classList.add('active');">Tout voir →</button>
             </div>
             <div class="ads-grid" id="featured-grid"></div>
         </section>
@@ -3907,10 +4214,10 @@
         <section class="sec" style="padding-top:0">
             <div class="sec-head">
                 <div>
-                    <h2 class="sec-tt">Annonces récentes</h2>
+                    <h2 class="sec-tt">🕐 Annonces récentes</h2>
                     <div class="sec-sub">Publiées ces dernières heures</div>
                 </div>
-                <button class="see-all-btn">Tout voir →</button>
+                <button class="see-all-btn" onclick="clearSearch()">Tout voir →</button>
             </div>
             <div class="ads-grid" id="recent-grid"></div>
         </section>
@@ -4482,13 +4789,19 @@
                                   Un petit frais de mise en relation vous permet de voir le numéro du vendeur. Paiement via Orange Money.
                                 
                     </div>
-                    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:10px">
-                        <span>Prix de l'article</span>
-                        <strong id="com-price">0 GNF</strong>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;font-size:13px;padding-top:8px;border-top:1px solid var(--br);font-weight:800">
-                        <span>Frais de mise en relation</span>
-                        <strong id="com-fee" style="color:var(--or)">0 GNF</strong>
+                    <div style="background:var(--brl);border-radius:10px;padding:14px;margin-bottom:12px">
+                        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px">
+                            <span style="color:var(--muted);font-weight:600">Prix de l'article</span>
+                            <strong id="com-price">0 GNF</strong>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px">
+                            <span style="color:var(--muted);font-weight:600">Commission (5%)</span>
+                            <strong id="com-fee" style="color:var(--or)">0 GNF</strong>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;font-size:14px;padding-top:8px;border-top:1px solid var(--br);font-weight:800">
+                            <span>Total à payer</span>
+                            <strong id="com-total" style="color:var(--or)">0 GNF</strong>
+                        </div>
                     </div>
                     <div class="fg" style="margin-top:14px">
                         <label>Votre numéro Orange Money</label>
@@ -5208,32 +5521,53 @@
     }
     function filterSubCat(e, catName, subName) {
         e.stopPropagation();
+        // Mettre en surbrillance la catégorie parente
+        document.querySelectorAll('.ncat').forEach(function(n) {
+            n.classList.toggle('active', n.querySelector('.cat-label') && n.querySelector('.cat-label').textContent === catName);
+        });
+        // Filtrer
         var ads = DB.ads().filter(function(a) {
             return a.cat === catName;
         });
         var fg = document.getElementById('featured-grid');
         var rg = document.getElementById('recent-grid');
-        document.querySelectorAll('.ncat').forEach(function(n) {
-            n.classList.remove('active');
-        });
+        var sbEl = document.getElementById('sb-ads');
+        if (sbEl)
+            sbEl.textContent = ads.length.toLocaleString('fr-FR');
         if (fg)
             fg.innerHTML = ads.filter(function(a) {
-                return a.feat;
+                return a.feat || a.featured;
             }).slice(0, 4).map(function(a) {
                 return adCard(a, true);
-            }).join('') || ads.slice(0, 4).map(function(a) {
+            }).join('') ||
+            ads.slice(0, 4).map(function(a) {
                 return adCard(a, false);
             }).join('');
         if (rg)
             rg.innerHTML = ads.filter(function(a) {
-                return !a.feat;
-            }).slice(0, 8).map(function(a) {
+                return !a.feat && !a.featured;
+            }).slice(0, 12).map(function(a) {
                 return adCard(a, false);
             }).join('');
+        // Afficher breadcrumb
+        var banner = document.getElementById('search-banner');
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'search-banner';
+            banner.style.cssText = 'background:var(--brl);border:1.5px solid var(--or);border-radius:14px;padding:12px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;';
+            var adsSection = document.getElementById('ads-section');
+            if (adsSection)
+                adsSection.insertBefore(banner, adsSection.firstChild);
+        }
+        banner.style.display = 'flex';
+        banner.innerHTML = '<span style="font-size:14px;font-weight:700">📂 <strong style="color:var(--or)">' + catName + '</strong> › ' + subName + '</span>' +
+        '<button onclick="clearSearch();resetFilters();" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--muted);font-family:inherit;font-weight:700">✕ Tout voir</button>';
         toast('🔍 ' + catName + ' › ' + subName);
-        document.getElementById('ads-section').scrollIntoView({
-            behavior: 'smooth'
-        });
+        var adsSection2 = document.getElementById('ads-section');
+        if (adsSection2)
+            adsSection2.scrollIntoView({
+                behavior: 'smooth'
+            });
     }
     function filterCat(el, name) {
         document.querySelectorAll('.ncat').forEach(function(n) {
@@ -5260,8 +5594,18 @@
             }).slice(0, 8).map(function(a) {
                 return adCard(a, false);
             }).join('');
-        if (name !== 'Tout')
+        if (name === 'Tout') {
+            var banner2 = document.getElementById('search-banner');
+            if (banner2)
+                banner2.style.display = 'none';
+        } else {
             toast('🔍 ' + name + ' — ' + filtered.length + ' annonce(s)');
+            var banner3 = document.getElementById('search-banner');
+            if (banner3) {
+                banner3.style.display = 'flex';
+                banner3.innerHTML = '<span style="font-size:14px;font-weight:700">📂 <strong style="color:var(--or)">' + name + '</strong> — ' + filtered.length + ' annonce' + (filtered.length > 1 ? 's' : '') + '</span><button onclick="clearSearch()" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--muted);font-family:inherit;font-weight:700">✕ Tout voir</button>';
+            }
+        }
         document.getElementById('ads-section').scrollIntoView({
             behavior: 'smooth'
         });
@@ -7807,7 +8151,7 @@
             }, 600);
             return;
         }
-        toast('💬 Message envoyé au vendeur !', 'ok');
+        openCommission();
     }
 
     // ══════════════════════════════════════════
@@ -7817,11 +8161,19 @@
         if (!curAd) {
             return;
         }
-        var price = curAd.p;
-        var fee = Math.round(price * 0.1);
-        document.getElementById('com-price').textContent = price.toLocaleString('fr-FR') + ' GNF';
-        document.getElementById('com-fee').textContent = fee.toLocaleString('fr-FR') + ' GNF';
-        document.getElementById('com-total').textContent = fee.toLocaleString('fr-FR') + ' GNF';
+        var price = curAd.p || curAd.price || 0;
+        var fee = Math.max(1000, Math.round(price * 0.05)); // 5% min 1000 GNF
+        var elPrice = document.getElementById('com-price');
+        var elFee = document.getElementById('com-fee');
+        var elTotal = document.getElementById('com-total');
+        if (elPrice)
+            elPrice.textContent = price.toLocaleString('fr-FR') + ' GNF';
+        if (elFee)
+            elFee.textContent = fee.toLocaleString('fr-FR') + ' GNF';
+        if (elTotal)
+            elTotal.textContent = fee.toLocaleString('fr-FR') + ' GNF';
+        // stocker pour payCommission
+        window._commFee = fee;
         document.getElementById('com-success').style.display = 'none';
         document.getElementById('com-phone').value = '';
         ['cp1', 'cp2', 'cp3', 'cp4'].forEach(function(id) {
@@ -7834,37 +8186,100 @@
         openModal('commission');
     }
     function payCommission() {
-        var phone = (document.getElementById('com-phone') || {
-            value: ''
-        }).value.trim();
-        var pin = ['cp1', 'cp2', 'cp3', 'cp4'].map(function(id) {
-            return (document.getElementById(id) || {
-                value: ''
-            }).value;
-        }).join('');
+        var phone = (document.getElementById('com-phone') || {}).value || '';
         if (!phone || phone.length < 8) {
-            toast('⚠️ Numéro Orange invalide', 'err');
+            toast('📱 Entrez votre numéro Orange Money', 'err');
             return;
         }
+        var pin = ['cp1', 'cp2', 'cp3', 'cp4'].map(function(id) {
+            return (document.getElementById(id) || {}).value || '';
+        }).join('');
         if (pin.length < 4) {
-            toast('⚠️ Code PIN incomplet', 'err');
+            toast('🔑 Entrez votre code PIN (4 chiffres)', 'err');
             return;
         }
-        // Simulation : révéler un faux numéro (en prod = appel API backend)
-        var fakeNumbers = ['+224 622 45 78 90', '+224 664 12 34 56', '+224 655 98 76 54', '+224 628 00 11 22'];
-        var revealed = fakeNumbers[Math.floor(Math.random() * fakeNumbers.length)];
-        var fee = curAd ? Math.round(curAd.p * 0.1) : 0;
-        DB.addPayment({
-            ref: 'COM' + Date.now().toString(36).toUpperCase().slice(-8),
-            amount: fee,
-            item: 'Commission — ' + (curAd ? curAd.t : ''),
-            date: new Date().toLocaleDateString('fr-FR'),
-            phone: '+224 ' + phone
+        var fee = window._commFee || Math.max(1000, Math.round((curAd && (curAd.p || curAd.price) || 0) * 0.05));
+        var btn = document.querySelector('#overlay-commission .btn-or');
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = '⏳ Traitement...';
+        }
+        var token = localStorage.getItem('ygy_token');
+        fetch('/api/payment/commission', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + (token || '')
+            },
+            body: JSON.stringify({
+                adId: curAd && (curAd._id || curAd.id),
+                adTitle: curAd && (curAd.t || curAd.title || ''),
+                amount: fee,
+                phone: '224' + phone,
+                pin: pin
+            })
+        })
+        .then(function(r) {
+            return r.json();
+        })
+        .then(function(data) {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = '🟠 Payer et voir le numéro';
+            }
+            if (data.error) {
+                toast('❌ ' + data.error, 'err');
+                return;
+            }
+            // Afficher le numéro révélé
+            var mb = document.querySelector('#overlay-commission .m-body');
+            var sc = document.getElementById('com-success');
+            if (mb)
+                mb.style.display = 'none';
+            if (sc) {
+                sc.style.display = 'block';
+                var ph = document.getElementById('com-revealed-phone');
+                if (ph)
+                    ph.textContent = data.sellerPhone || ('+224 ' + phone);
+            }
+            // Sauvegarder paiement local
+            DB._d.payments = DB._d.payments || [];
+            DB._d.payments.push({
+                ref: 'COM-' + Date.now(),
+                item: curAd && (curAd.t || curAd.title || 'Annonce'),
+                amount: fee,
+                date: new Date().toLocaleDateString('fr-FR'),
+                type: 'commission'
+            });
+            DB.save();
+        })
+        .catch(function() {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = '🟠 Payer et voir le numéro';
+            }
+            // Mode démo : afficher le numéro quand même
+            var mb = document.querySelector('#overlay-commission .m-body');
+            var sc = document.getElementById('com-success');
+            if (mb)
+                mb.style.display = 'none';
+            if (sc) {
+                sc.style.display = 'block';
+                var ph = document.getElementById('com-revealed-phone');
+                if (ph)
+                    ph.textContent = '+224 6XX XX XX XX (mode démo)';
+            }
+            DB._d.payments = DB._d.payments || [];
+            DB._d.payments.push({
+                ref: 'COM-' + Date.now(),
+                item: curAd && (curAd.t || ''),
+                amount: fee,
+                date: new Date().toLocaleDateString('fr-FR'),
+                type: 'commission'
+            });
+            DB.save();
+            toast('✅ Commission enregistrée (mode démo)', 'ok');
         });
-        document.querySelector('#overlay-commission .m-body').style.display = 'none';
-        document.getElementById('com-revealed-phone').textContent = revealed;
-        document.getElementById('com-success').style.display = 'block';
-        toast('✅ Numéro révélé !', 'ok');
     }
     function copyPhone() {
         var txt = document.getElementById('com-revealed-phone').textContent;
@@ -8571,6 +8986,79 @@
             fp.classList.toggle('mobile-open');
     }
 
+    // ══════════════════════════════════════════
+    //  HERO SEARCH
+    // ══════════════════════════════════════════
+    function heroSearch() {
+        var q = (document.getElementById('hero-search') || {}).value || '';
+        var cat = (document.getElementById('hero-cat-sel') || {}).value || '';
+        var city = (document.getElementById('hero-city-sel') || {}).value || '';
+        var pmin = parseInt((document.getElementById('hero-pmin') || {}).value) || 0;
+        var pmax = parseInt((document.getElementById('hero-pmax') || {}).value) || Infinity;
+        // Remplir la barre de recherche principale
+        var mainSearch = document.getElementById('search-input');
+        if (mainSearch && q)
+            mainSearch.value = q;
+        // Filtrer
+        var ads = DB.ads();
+        var results = ads.filter(function(a) {
+            var matchQ = !q || ((a.t || a.title || '') + ' ' + (a.cat || '') + ' ' + (a.city || '') + ' ' + (a.desc || '')).toLowerCase().includes(q.toLowerCase());
+            var matchCat = !cat || (a.cat || a.category || '') === cat;
+            var matchCity = !city || (a.city || '') === city;
+            var matchP = (a.p || a.price || 0) >= pmin && (a.p || a.price || 0) <= pmax;
+            return matchQ && matchCat && matchCity && matchP;
+        });
+        var fg = document.getElementById('featured-grid');
+        var rg = document.getElementById('recent-grid');
+        var sbEl = document.getElementById('sb-ads');
+        if (sbEl)
+            sbEl.textContent = results.length.toLocaleString('fr-FR');
+        // Banner
+        var banner = document.getElementById('search-banner');
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'search-banner';
+            banner.style.cssText = 'background:var(--brl);border:1.5px solid var(--or);border-radius:14px;padding:12px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;';
+            var adsSection = document.getElementById('ads-section');
+            if (adsSection)
+                adsSection.insertBefore(banner, adsSection.firstChild);
+        }
+        banner.style.display = 'flex';
+        var label = q ? ('"' + q + '"') : (cat || 'Toutes catégories');
+        if (city)
+            label += ' à ' + city;
+        banner.innerHTML = '<span style="font-size:14px;font-weight:700">🔍 ' + label + ' — <strong style="color:var(--or)">' + results.length + '</strong> annonce' + (results.length > 1 ? 's' : '') + '</span>' +
+        '<button onclick="clearSearch()" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--muted);font-family:inherit;font-weight:700">✕ Effacer</button>';
+        if (fg)
+            fg.innerHTML = results.length > 0
+            ? results.slice(0, 4).map(function(a) {
+                return adCard(a, false);
+            }).join('')
+            : '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:14px">Aucun résultat — <a style="color:var(--or);cursor:pointer;font-weight:700" onclick="clearSearch()">Voir toutes les annonces</a></div>';
+        if (rg)
+            rg.innerHTML = results.slice(4, 16).map(function(a) {
+                return adCard(a, false);
+            }).join('');
+        scrollToAds();
+    }
+
+    function heroTag(tag) {
+        var inp = document.getElementById('hero-search');
+        if (inp)
+            inp.value = tag;
+        heroSearch();
+    }
+
+    function populateHeroCats() {
+        var sel = document.getElementById('hero-cat-sel');
+        if (!sel)
+            return;
+        sel.innerHTML = '<option value="">Toutes catégories</option>';
+        CATS.forEach(function(cat) {
+            sel.innerHTML += '<option value="' + cat.n + '">' + cat.e + ' ' + cat.n + '</option>';
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         DB.load();
         // ── Emojis flottants autour du logo ──
@@ -8701,6 +9189,7 @@
             });
         })();
         populateCities();
+        populateHeroCats();
         renderNavCats();
         renderPostCats();
         updateNav();
