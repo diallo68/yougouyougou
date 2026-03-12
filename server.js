@@ -181,6 +181,64 @@ const PaymentSchema = new mongoose.Schema({
 });
 const Payment = mongoose.model('Payment', PaymentSchema);
 
+// ── Conversation (messagerie entre acheteur et vendeur) ──────
+const MessageSchema = new mongoose.Schema({
+  sender:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  content:   { type: String, required: true, trim: true },
+  read:      { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now },
+});
+
+const ConversationSchema = new mongoose.Schema({
+  ad:           { type: mongoose.Schema.Types.ObjectId, ref: 'Ad', required: true },
+  participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  messages:     [MessageSchema],
+  lastMessage:  { type: String },
+  updatedAt:    { type: Date, default: Date.now },
+  createdAt:    { type: Date, default: Date.now },
+});
+const Conversation = mongoose.model('Conversation', ConversationSchema);
+
+// ── Avis / Évaluation vendeur ────────────────────────────────
+const ReviewSchema = new mongoose.Schema({
+  seller:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  reviewer:  { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  ad:        { type: mongoose.Schema.Types.ObjectId, ref: 'Ad' },
+  rating:    { type: Number, required: true, min: 1, max: 5 },
+  comment:   { type: String, trim: true, maxlength: 500 },
+  createdAt: { type: Date, default: Date.now },
+});
+ReviewSchema.index({ seller: 1, reviewer: 1, ad: 1 }, { unique: true }); // 1 avis par transaction
+const Review = mongoose.model('Review', ReviewSchema);
+
+// ── Alerte / Recherche sauvegardée ──────────────────────────
+const AlertSchema = new mongoose.Schema({
+  user:      { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  label:     { type: String, trim: true },            // nom de l'alerte
+  category:  { type: String },
+  city:      { type: String },
+  query:     { type: String },                        // mot-clé
+  minPrice:  { type: Number },
+  maxPrice:  { type: Number },
+  active:    { type: Boolean, default: true },
+  createdAt: { type: Date, default: Date.now },
+});
+const Alert = mongoose.model('Alert', AlertSchema);
+
+// ── Boost d'annonce ──────────────────────────────────────────
+const BoostSchema = new mongoose.Schema({
+  ad:         { type: mongoose.Schema.Types.ObjectId, ref: 'Ad', required: true },
+  seller:     { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  plan:       { type: String, enum: ['basic', 'pro', 'premium'], default: 'basic' },
+  amount:     { type: Number, required: true },       // montant payé en GNF
+  reference:  { type: String, unique: true },
+  startDate:  { type: Date, default: Date.now },
+  endDate:    { type: Date, required: true },
+  status:     { type: String, enum: ['active', 'expired', 'cancelled'], default: 'active' },
+  createdAt:  { type: Date, default: Date.now },
+});
+const Boost = mongoose.model('Boost', BoostSchema);
+
 // ═══════════════════════════════════════════════════════════
 //  UTILITAIRES
 // ═══════════════════════════════════════════════════════════
@@ -734,6 +792,397 @@ app.get('/api/admin/payments', auth, adminOnly, async (req, res) => {
       { $group: { _id: null, total: { $sum: '$amount' } } }
     ]);
     res.json({ payments: pays, total, revenue: revenue[0]?.total || 0 });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+//  CONVERSATIONS — MESSAGERIE ENTRE ACHETEUR ET VENDEUR
+// ═══════════════════════════════════════════════════════════
+
+// Lister mes conversations
+app.get('/api/conversations', auth, async (req, res) => {
+  try {
+    const convs = await Conversation.find({ participants: req.user.id })
+      .populate('ad', 'title photos price active')
+      .populate('participants', 'prenom nom')
+      .sort({ updatedAt: -1 });
+    res.json(convs);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Créer ou récupérer une conversation pour une annonce
+app.post('/api/conversations', auth, async (req, res) => {
+  try {
+    const { adId } = req.body;
+    if (!adId) return res.status(400).json({ error: 'adId requis' });
+
+    const ad = await Ad.findById(adId);
+    if (!ad) return res.status(404).json({ error: 'Annonce introuvable' });
+    if (String(ad.seller) === req.user.id)
+      return res.status(400).json({ error: 'Vous ne pouvez pas vous envoyer un message' });
+
+    // Chercher une conversation existante entre ces deux utilisateurs pour cette annonce
+    let conv = await Conversation.findOne({
+      ad: adId,
+      participants: { $all: [req.user.id, ad.seller] }
+    });
+
+    if (!conv) {
+      conv = await Conversation.create({
+        ad: adId,
+        participants: [req.user.id, ad.seller],
+        messages: [],
+      });
+    }
+
+    await conv.populate('ad', 'title photos price');
+    await conv.populate('participants', 'prenom nom');
+    res.json({ success: true, conversation: conv });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Lire une conversation (avec messages)
+app.get('/api/conversations/:id', auth, async (req, res) => {
+  try {
+    const conv = await Conversation.findById(req.params.id)
+      .populate('ad', 'title photos price')
+      .populate('participants', 'prenom nom');
+    if (!conv) return res.status(404).json({ error: 'Conversation introuvable' });
+    if (!conv.participants.some(p => String(p._id) === req.user.id))
+      return res.status(403).json({ error: 'Non autorisé' });
+
+    // Marquer les messages reçus comme lus
+    await Conversation.updateOne(
+      { _id: conv._id, 'messages.sender': { $ne: req.user.id } },
+      { $set: { 'messages.$[elem].read': true } },
+      { arrayFilters: [{ 'elem.sender': { $ne: req.user.id } }], multi: true }
+    );
+
+    res.json(conv);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Envoyer un message dans une conversation
+app.post('/api/conversations/:id/messages', auth, async (req, res) => {
+  try {
+    const { content } = req.body;
+    if (!content || !content.trim()) return res.status(400).json({ error: 'Message vide' });
+
+    const conv = await Conversation.findById(req.params.id);
+    if (!conv) return res.status(404).json({ error: 'Conversation introuvable' });
+    if (!conv.participants.some(p => String(p) === req.user.id))
+      return res.status(403).json({ error: 'Non autorisé' });
+
+    const msg = { sender: req.user.id, content: content.trim() };
+    conv.messages.push(msg);
+    conv.lastMessage = content.trim().slice(0, 80);
+    conv.updatedAt   = new Date();
+    await conv.save();
+
+    res.json({ success: true, message: conv.messages[conv.messages.length - 1] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+//  AVIS — ÉVALUATIONS DES VENDEURS
+// ═══════════════════════════════════════════════════════════
+
+// Avis d'un vendeur (public)
+app.get('/api/reviews', async (req, res) => {
+  try {
+    const { sellerId, limit = 20, skip = 0 } = req.query;
+    if (!sellerId) return res.status(400).json({ error: 'sellerId requis' });
+
+    const reviews = await Review.find({ seller: sellerId })
+      .populate('reviewer', 'prenom nom')
+      .populate('ad', 'title')
+      .sort({ createdAt: -1 })
+      .skip(Number(skip))
+      .limit(Number(limit));
+
+    const stats = await Review.aggregate([
+      { $match: { seller: new mongoose.Types.ObjectId(sellerId) } },
+      { $group: {
+          _id: null,
+          avgRating: { $avg: '$rating' },
+          total:     { $sum: 1 },
+      }}
+    ]);
+
+    res.json({
+      reviews,
+      total:     stats[0]?.total     || 0,
+      avgRating: stats[0]?.avgRating || 0,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Laisser un avis (auth requis — 1 avis par annonce)
+app.post('/api/reviews', auth, async (req, res) => {
+  try {
+    const { sellerId, adId, rating, comment } = req.body;
+    if (!sellerId || !rating)
+      return res.status(400).json({ error: 'sellerId et rating requis' });
+    if (rating < 1 || rating > 5)
+      return res.status(400).json({ error: 'Note entre 1 et 5' });
+    if (sellerId === req.user.id)
+      return res.status(400).json({ error: 'Vous ne pouvez pas vous évaluer vous-même' });
+
+    const review = await Review.create({
+      seller:   sellerId,
+      reviewer: req.user.id,
+      ad:       adId || undefined,
+      rating:   Number(rating),
+      comment:  comment?.trim() || '',
+    });
+
+    res.status(201).json({ success: true, review });
+  } catch (err) {
+    if (err.code === 11000)
+      return res.status(409).json({ error: 'Vous avez déjà laissé un avis pour cette annonce' });
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Supprimer son avis (ou admin)
+app.delete('/api/reviews/:id', auth, async (req, res) => {
+  try {
+    const review = await Review.findById(req.params.id);
+    if (!review) return res.status(404).json({ error: 'Avis introuvable' });
+    if (String(review.reviewer) !== req.user.id && req.user.role !== 'admin')
+      return res.status(403).json({ error: 'Non autorisé' });
+    await review.deleteOne();
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+//  ALERTES — RECHERCHES SAUVEGARDÉES
+// ═══════════════════════════════════════════════════════════
+
+// Mes alertes
+app.get('/api/alerts', auth, async (req, res) => {
+  try {
+    const alerts = await Alert.find({ user: req.user.id }).sort({ createdAt: -1 });
+    res.json(alerts);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Créer une alerte
+app.post('/api/alerts', auth, async (req, res) => {
+  try {
+    const { label, category, city, query, minPrice, maxPrice } = req.body;
+    if (!category && !query && !city)
+      return res.status(400).json({ error: 'Au moins un critère requis (category, city ou query)' });
+
+    const count = await Alert.countDocuments({ user: req.user.id, active: true });
+    if (count >= 10)
+      return res.status(400).json({ error: 'Maximum 10 alertes actives' });
+
+    const alert = await Alert.create({
+      user: req.user.id,
+      label: label || query || category || 'Alerte',
+      category, city, query,
+      minPrice: minPrice ? Number(minPrice) : undefined,
+      maxPrice: maxPrice ? Number(maxPrice) : undefined,
+    });
+    res.status(201).json({ success: true, alert });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Modifier une alerte (activer/désactiver ou changer les critères)
+app.patch('/api/alerts/:id', auth, async (req, res) => {
+  try {
+    const alert = await Alert.findOne({ _id: req.params.id, user: req.user.id });
+    if (!alert) return res.status(404).json({ error: 'Alerte introuvable' });
+
+    const fields = ['label', 'category', 'city', 'query', 'minPrice', 'maxPrice', 'active'];
+    fields.forEach(f => { if (req.body[f] !== undefined) alert[f] = req.body[f]; });
+    await alert.save();
+    res.json({ success: true, alert });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Supprimer une alerte
+app.delete('/api/alerts/:id', auth, async (req, res) => {
+  try {
+    const result = await Alert.findOneAndDelete({ _id: req.params.id, user: req.user.id });
+    if (!result) return res.status(404).json({ error: 'Alerte introuvable' });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+//  RAPPORTS — SIGNALEMENT DE CONTENU ABUSIF
+// ═══════════════════════════════════════════════════════════
+
+const ReportSchema = new mongoose.Schema({
+  reporter:   { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  targetType: { type: String, enum: ['ad', 'user'], required: true },
+  targetId:   { type: mongoose.Schema.Types.ObjectId, required: true },
+  reason:     { type: String, enum: ['spam', 'fake', 'inappropriate', 'scam', 'other'], required: true },
+  details:    { type: String, trim: true, maxlength: 500 },
+  status:     { type: String, enum: ['pending', 'reviewed', 'resolved', 'dismissed'], default: 'pending' },
+  createdAt:  { type: Date, default: Date.now },
+});
+const Report = mongoose.model('Report', ReportSchema);
+
+// Signaler une annonce ou un utilisateur
+app.post('/api/reports', auth, async (req, res) => {
+  try {
+    const { targetType, targetId, reason, details } = req.body;
+    if (!targetType || !targetId || !reason)
+      return res.status(400).json({ error: 'targetType, targetId et reason requis' });
+
+    // Vérifier que la cible existe
+    if (targetType === 'ad') {
+      const ad = await Ad.findById(targetId);
+      if (!ad) return res.status(404).json({ error: 'Annonce introuvable' });
+    } else if (targetType === 'user') {
+      const user = await User.findById(targetId);
+      if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
+    }
+
+    const report = await Report.create({
+      reporter: req.user.id,
+      targetType, targetId, reason,
+      details: details?.trim() || '',
+    });
+    res.status(201).json({ success: true, report });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Admin — liste des signalements
+app.get('/api/reports', auth, adminOnly, async (req, res) => {
+  try {
+    const { status, limit = 50, skip = 0 } = req.query;
+    const filter = {};
+    if (status) filter.status = status;
+
+    const reports = await Report.find(filter)
+      .populate('reporter', 'prenom nom phone')
+      .sort({ createdAt: -1 })
+      .skip(Number(skip))
+      .limit(Number(limit));
+    const total = await Report.countDocuments(filter);
+    res.json({ reports, total });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Admin — mettre à jour le statut d'un signalement
+app.patch('/api/reports/:id', auth, adminOnly, async (req, res) => {
+  try {
+    const { status } = req.body;
+    if (!['pending','reviewed','resolved','dismissed'].includes(status))
+      return res.status(400).json({ error: 'Statut invalide' });
+    const report = await Report.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    if (!report) return res.status(404).json({ error: 'Signalement introuvable' });
+    res.json({ success: true, report });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+//  BOOST D'ANNONCES — MISE EN AVANT PAYANTE
+// ═══════════════════════════════════════════════════════════
+
+// Plans disponibles
+const BOOST_PLANS = {
+  basic:   { days: 3,  amount: 50000,  label: 'Basic — 3 jours'   },
+  pro:     { days: 7,  amount: 100000, label: 'Pro — 7 jours'     },
+  premium: { days: 30, amount: 300000, label: 'Premium — 30 jours' },
+};
+
+// Booster une annonce (auth requis + paiement simulé)
+app.post('/api/ads/:id/boost', auth, async (req, res) => {
+  try {
+    const { plan = 'basic', buyerPhone } = req.body;
+    if (!BOOST_PLANS[plan]) return res.status(400).json({ error: 'Plan invalide (basic | pro | premium)' });
+    if (!buyerPhone) return res.status(400).json({ error: 'buyerPhone requis' });
+
+    const ad = await Ad.findById(req.params.id);
+    if (!ad) return res.status(404).json({ error: 'Annonce introuvable' });
+    if (String(ad.seller) !== req.user.id && req.user.role !== 'admin')
+      return res.status(403).json({ error: 'Non autorisé — vous n\'êtes pas le propriétaire' });
+
+    const { days, amount } = BOOST_PLANS[plan];
+    const startDate = new Date();
+    const endDate   = new Date(startDate.getTime() + days * 24 * 3600 * 1000);
+    const ref       = 'BST' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2,5).toUpperCase();
+
+    // En prod : débiter via Orange Money API ici
+    // const omResult = await orangeMoneyAPI.charge({ phone: buyerPhone, amount, pin });
+
+    // Marquer l'annonce comme featured pendant la durée du boost
+    await Ad.findByIdAndUpdate(req.params.id, { featured: true });
+
+    const boost = await Boost.create({
+      ad:      ad._id,
+      seller:  req.user.id,
+      plan, amount,
+      reference: ref,
+      startDate, endDate,
+      status: 'active',
+    });
+
+    // Enregistrer aussi un paiement de commission
+    await Payment.create({
+      type:       'commission',
+      buyer:      req.user.id,
+      buyerPhone,
+      ad:         ad._id,
+      adTitle:    ad.title,
+      amount,
+      commission: amount,
+      reference:  ref + '_B',
+      status:     'success',
+    });
+
+    res.json({
+      success: true,
+      boost,
+      reference: ref,
+      plan:  BOOST_PLANS[plan].label,
+      endDate,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Historique de mes boosts
+app.get('/api/ads/:id/boost', auth, async (req, res) => {
+  try {
+    const boosts = await Boost.find({ ad: req.params.id, seller: req.user.id })
+      .sort({ createdAt: -1 });
+    res.json(boosts);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
