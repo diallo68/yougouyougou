@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -1945,7 +1944,7 @@ function renderAuthForm(tab){
         '<input type="email" id="rem" placeholder="votre@email.com">'+
       '</div>'+
       // Mot de passe
-      '<div class="fg"><label>Mot de passe *</label><input type="password" id="rpw" placeholder="8 caractères minimum" oninput="checkPwMatch()"></div>'+
+      '<div class="fg"><label>Mot de passe *</label><input type="password" id="rpw" placeholder="8 caractères minimum" minlength="8" oninput="checkPwMatch()"></div>'+
       '<div class="fg"><label>Confirmer le mot de passe *</label><input type="password" id="rpw2" placeholder="Répétez votre mot de passe" oninput="checkPwMatch()"></div>'+
       '<div id="pw-match-msg" style="margin-top:-10px;margin-bottom:12px;font-size:13px;font-weight:700;display:none"></div>'+
       // Ville
@@ -1964,14 +1963,19 @@ function checkPwMatch(){
   var pw=(document.getElementById('rpw')||{value:''}).value;
   var pw2=(document.getElementById('rpw2')||{value:''}).value;
   var msg=document.getElementById('pw-match-msg');
-  if(!msg||!pw2) return;
+  if(!msg) return;
   msg.style.display='block';
-  if(pw===pw2){
+  if(pw.length>0 && pw.length<8){
+    msg.textContent='⚠️ Minimum 8 caractères requis';
+    msg.style.color='#D97706';
+  } else if(pw2.length>0 && pw!==pw2){
+    msg.textContent='❌ Les mots de passe ne correspondent pas';
+    msg.style.color='#DC2626';
+  } else if(pw.length>=8 && pw===pw2 && pw2.length>0){
     msg.textContent='✅ Les mots de passe correspondent';
     msg.style.color='#065F46';
   } else {
-    msg.textContent='❌ Les mots de passe ne correspondent pas';
-    msg.style.color='#DC2626';
+    msg.style.display='none';
   }
 }
 
@@ -2050,7 +2054,7 @@ function sendVerifCode(){
   } else {
     if(!em||!em.includes('@')){toast('⚠️ Adresse email invalide','err');return;}
   }
-  if(!pw||pw.length<6){toast('⚠️ Mot de passe trop court (6 caractères min)','err');return;}
+  if(!pw||pw.length<8){toast('⚠️ Mot de passe trop court (8 caractères min)','err');return;}
   if(pw!==pw2){toast('❌ Les mots de passe ne correspondent pas','err');return;}
   if(!city){toast('⚠️ Choisissez votre ville','err');return;}
 
@@ -2113,11 +2117,13 @@ function showCodeForm(dest, icon){
       '<div class="sw-title">'+icon+' Code de vérification</div>'+
       '<div class="sw-sub" style="margin-bottom:12px">Destinataire : <strong>'+dest+'</strong></div>'+
       codeHint+
-      '<div class="sms-digits">'+
-        '<input type="text" maxlength="1" id="s1" oninput="movSms(this,\'s2\')" autocomplete="one-time-code">'+
-        '<input type="text" maxlength="1" id="s2" oninput="movSms(this,\'s3\')">'+
-        '<input type="text" maxlength="1" id="s3" oninput="movSms(this,\'s4\')">'+
-        '<input type="text" maxlength="1" id="s4" oninput="autoVerify()">'+
+      '<div style="margin:0 auto 16px;max-width:200px">'+
+        '<input type="text" maxlength="4" id="s1" autocomplete="one-time-code" '+
+        'oninput="this.value=this.value.replace(/[^0-9]/g,\'\');if(this.value.length===4)autoVerify();" '+
+        'style="width:100%;height:52px;border:2px solid var(--br);border-radius:8px;'+
+        'text-align:center;font-size:24px;font-weight:700;letter-spacing:8px;'+
+        'font-family:monospace;outline:none;transition:border-color .15s" '+
+        'onfocus="this.style.borderColor=\'var(--or)\'" onblur="this.style.borderColor=\'var(--br)\'">'+
       '</div>'+
       '<button class="btn btn-or btn-full" style="border-radius:12px;margin-bottom:10px" onclick="verifyCode()">✅ Confirmer et créer mon compte</button>'+
       '<div class="sms-resend">Code oublié ? <a onclick="resendCode()">Générer un nouveau code</a></div>'+
@@ -2126,28 +2132,46 @@ function showCodeForm(dest, icon){
 }
 
 function autoVerify(){
-  var entered=['s1','s2','s3','s4'].map(function(id){return(document.getElementById(id)||{value:''}).value;}).join('');
+  var el=document.getElementById('s1');
+  var entered=el?el.value.replace(/[^0-9]/g,''):'';
   if(entered.length===4) verifyCode();
 }
 
-function movSms(el,nid){if(el.value.length>=1){var n=document.getElementById(nid);if(n)n.focus();}}
-
 function resendCode(){
-  smsCode=Math.floor(1000+Math.random()*9000).toString();
-  // Mettre à jour l'affichage du code
-  var codeBox=document.getElementById('code-box');
-  if(codeBox){
-    var orDiv=codeBox.querySelector('[style*="letter-spacing:8px"]');
-    if(orDiv)orDiv.textContent=smsCode;
-  }
-  ['s1','s2','s3','s4'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
-  toast('🔄 Nouveau code envoyé !','ok');
+  if(!pendingUser){toast('⚠️ Session expirée, recommencez','err');return;}
+  var el=document.getElementById('s1');
+  if(el) el.value='';
+  toast('⏳ Envoi d\'un nouveau code...','ok');
+
+  fetch('/api/auth/resend-code',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      phone: pendingUser.phone||'',
+      email: pendingUser.email||'',
+      method: pendingUser.method||'sms',
+      prenom: pendingUser.prenom||'Utilisateur'
+    })
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(data.error){toast('❌ '+data.error,'err');return;}
+    smsCode = data.debug_code || smsCode;
+    codeFromServer = !!data.debug_code;
+    toast('✅ Nouveau code envoyé !','ok');
+  })
+  .catch(function(){
+    smsCode=Math.floor(1000+Math.random()*9000).toString();
+    codeFromServer=false;
+    toast('🔄 Nouveau code généré (hors-ligne)','ok');
+  });
 }
 
 function verifyCode(){
-  var entered=['s1','s2','s3','s4'].map(function(id){return(document.getElementById(id)||{value:''}).value;}).join('');
+  var el=document.getElementById('s1');
+  var entered=(el?el.value:'').replace(/[^0-9]/g,'').slice(0,4);
   if(entered.length<4){toast('⚠️ Entrez les 4 chiffres du code','err');return;}
-  if(entered!==smsCode){toast('❌ Code incorrect — réessayez','err');return;}
+  if(codeFromServer===false && entered!==smsCode){toast('❌ Code incorrect — réessayez','err');return;}
 
   var u=Object.assign({name:pendingUser.prenom+(pendingUser.nom?' '+pendingUser.nom:'')},pendingUser);
 
