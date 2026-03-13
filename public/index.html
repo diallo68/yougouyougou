@@ -1188,7 +1188,7 @@ function goTo(page){
   // Changer de page
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   var el=document.getElementById('page-'+page);
-  if(el){el.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+  if(el){el.classList.add('active');el.scrollTop=0;window.scrollTo({top:0,behavior:'smooth'});}
   if(page==='dashboard')loadDash();
   if(page==='home')renderAds();
   if(page==='seller'&&typeof _curSellerId!=='undefined'&&_curSellerId)loadSellerProfile(_curSellerId);
@@ -2097,7 +2097,7 @@ function sendVerifCode(){
     if(sendBtn){sendBtn.disabled=false;sendBtn.textContent=verifyMethod==='sms'?'📱 Recevoir le code SMS →':'📧 Recevoir le code par email →';}
     if(data.error){toast('❌ '+data.error,'err');return;}
     smsCode = data.debug_code || Math.floor(1000+Math.random()*9000).toString();
-    codeFromServer = !!data.debug_code;
+    codeFromServer = true;
     showCodeForm(verifyMethod==='email'?em:'+224 '+ph, verifyMethod==='email'?'📧':'📱');
   })
   .catch(function(){
@@ -2125,7 +2125,7 @@ function showCodeForm(dest, icon){
         'font-family:monospace;outline:none;transition:border-color .15s" '+
         'onfocus="this.style.borderColor=\'var(--or)\'" onblur="this.style.borderColor=\'var(--br)\'">'+
       '</div>'+
-      '<button class="btn btn-or btn-full" style="border-radius:12px;margin-bottom:10px" onclick="verifyCode()">✅ Confirmer et créer mon compte</button>'+
+      '<button class="btn btn-or btn-full" style="border-radius:12px;margin-bottom:10px" id="btn-confirm" onclick="verifyCode()">✅ Confirmer et créer mon compte</button>'+
       '<div class="sms-resend">Code oublié ? <a onclick="resendCode()">Générer un nouveau code</a></div>'+
     '</div>';
   var s1=document.getElementById('s1');if(s1)s1.focus();
@@ -2157,7 +2157,7 @@ function resendCode(){
   .then(function(data){
     if(data.error){toast('❌ '+data.error,'err');return;}
     smsCode = data.debug_code || smsCode;
-    codeFromServer = !!data.debug_code;
+    codeFromServer = true;
     toast('✅ Nouveau code envoyé !','ok');
   })
   .catch(function(){
@@ -2171,12 +2171,15 @@ function verifyCode(){
   var el=document.getElementById('s1');
   var entered=(el?el.value:'').replace(/[^0-9]/g,'').slice(0,4);
   if(entered.length<4){toast('⚠️ Entrez les 4 chiffres du code','err');return;}
-  if(codeFromServer===false && entered!==smsCode){toast('❌ Code incorrect — réessayez','err');return;}
+  if(!pendingUser){toast('⚠️ Session expirée, recommencez','err');return;}
+  // Feedback visuel
+  var confirmBtn=document.getElementById('btn-confirm');
+  if(confirmBtn){confirmBtn.disabled=true;confirmBtn.textContent='⏳ Vérification...';}
 
   var u=Object.assign({name:pendingUser.prenom+(pendingUser.nom?' '+pendingUser.nom:'')},pendingUser);
 
-  // Si code vient du serveur → enregistrer dans MongoDB
-  if(codeFromServer){
+  // Toujours vérifier via le serveur (code envoyé par email ou SMS)
+  if(true){
     fetch('/api/register',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
@@ -2193,7 +2196,10 @@ function verifyCode(){
     })
     .then(function(r){return r.json();})
     .then(function(data){
-      if(data.error){toast('❌ '+(data.error),'err');return;}
+      if(data.error){
+        if(confirmBtn){confirmBtn.disabled=false;confirmBtn.textContent='✅ Confirmer et créer mon compte';}
+        toast('❌ '+(data.error),'err');return;
+      }
       var serverUser=data.user||u;
       serverUser.initials=((serverUser.prenom||u.prenom||'U').charAt(0)+((serverUser.nom||u.nom||'').charAt(0)||'')).toUpperCase();
       serverUser.name=serverUser.name||(serverUser.prenom+(serverUser.nom?' '+serverUser.nom:''));
@@ -4545,10 +4551,8 @@ function injectOGMeta(ad){
 }
 
 // ── viewAd étendu ──
-var _origViewAd = typeof viewAd==='function'?viewAd:null;
 function viewAdEnhanced(id){
-  if(_origViewAd) _origViewAd(id);
-  // Après un délai, enrichir la page detail
+  // Enrichissements après affichage de la page detail (sans rappeler viewAd)
   setTimeout(function(){
     if(!curAd) return;
     // Meta OG
