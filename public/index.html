@@ -2399,7 +2399,7 @@ function sendVerifCode(){
   fetch('/api/auth/send-code',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({phone:'+224'+ph, email:em, method:verifyMethod, prenom:fn})
+    body:JSON.stringify({phone: ph ? '+224'+ph : '', email:em, method:verifyMethod, prenom:fn})
   })
   .then(function(r){return r.json();})
   .then(function(data){
@@ -2497,7 +2497,7 @@ function verifyCode(){
       body:JSON.stringify({
         prenom: pendingUser.prenom,
         nom: pendingUser.nom||'',
-        phone: pendingUser.phone,
+        phone: (pendingUser.phone && pendingUser.phone !== '+224') ? pendingUser.phone : '',
         email: pendingUser.email||'',
         password: pendingUser.password,
         city: pendingUser.city||'',
