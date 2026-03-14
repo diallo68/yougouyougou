@@ -741,7 +741,7 @@ app.get('/api/ads/:id', authOptional, async (req, res) => {
       if (seller) sellerRating = { avg: seller.avgRating, count: seller.ratingCount, isPro: seller.isPro };
     }
 
-    res.json({ ...ad.toObject(), sellerRating });
+    res.json({ ...adObj, sellerRating });
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
