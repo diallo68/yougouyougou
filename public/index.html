@@ -605,6 +605,54 @@ footer{background:transparent;margin-top:0}
 .pmsg-crit{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--brl)}
 .pmsg-crit-label{font-size:12px;color:var(--muted);flex:1}
 .pmsg-crit-val{font-size:12px;font-weight:700;color:var(--ink)}
+
+/* ── Profil Vendeur ── */
+.seller-back{background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:13px;font-family:inherit;padding:0;display:inline-flex;align-items:center;gap:5px;margin-bottom:20px}
+.seller-back:hover{text-decoration:underline}
+.seller-hero-new{display:flex;align-items:center;justify-content:space-between;gap:20px;background:#fff;border:1px solid var(--br);border-radius:14px;padding:24px 28px;margin-bottom:16px;flex-wrap:wrap}
+.seller-hero-left{display:flex;align-items:center;gap:18px}
+.seller-av-big{width:72px;height:72px;border-radius:50%;background:var(--or);color:#fff;font-size:28px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.seller-hero-name{font-size:22px;font-weight:900;color:var(--ink);margin-bottom:4px}
+.seller-hero-meta{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.seller-sep{color:var(--br)}
+.seller-hero-rating{font-size:14px;font-weight:700;margin-top:4px}
+.seller-pro{background:#FFF3EE;color:var(--or);font-size:12px;font-weight:800;padding:3px 10px;border-radius:20px;border:1px solid var(--orm)}
+.seller-hero-actions{display:flex;flex-direction:column;gap:10px}
+.seller-btn-contact{background:var(--or);color:#fff;border:none;border-radius:10px;padding:12px 22px;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px;transition:background .15s}
+.seller-btn-contact:hover{background:var(--or2)}
+.seller-btn-rate{background:#fff;color:var(--ink);border:1.5px solid var(--br);border-radius:10px;padding:12px 22px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px;transition:all .15s}
+.seller-btn-rate:hover{border-color:var(--or);color:var(--or)}
+.seller-stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.seller-stat-card{background:#fff;border:1px solid var(--br);border-radius:10px;padding:16px;text-align:center}
+.seller-stat-n{font-size:22px;font-weight:900;color:var(--or);margin-bottom:4px}
+.seller-stat-l{font-size:12px;color:var(--muted);font-weight:600}
+.seller-body{display:grid;grid-template-columns:1fr 280px;gap:20px;align-items:start}
+.seller-main{}
+.seller-aside{}
+.seller-section{background:#fff;border:1px solid var(--br);border-radius:12px;padding:20px}
+.seller-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.seller-section-head h3{margin:0;font-size:15px;font-weight:800}
+.seller-section-count{background:var(--brl);color:var(--muted);font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px}
+.seller-card{background:#fff;border:1px solid var(--br);border-radius:12px;padding:16px;margin-bottom:14px}
+.seller-card-title{font-size:13px;font-weight:800;color:var(--ink);margin-bottom:12px}
+.seller-card-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink);padding:6px 0;border-bottom:1px solid var(--brl)}
+.seller-card-row:last-child{border-bottom:none}
+.seller-security-card{background:#FFF3EE;border:1px solid var(--orm);border-radius:12px;padding:14px 16px}
+.seller-security-title{font-size:13px;font-weight:800;color:var(--or2);margin-bottom:10px}
+.seller-security-list{margin:0;padding-left:16px;font-size:12px;color:var(--ink);line-height:1.9}
+/* Avis */
+.seller-review{padding:14px 0;border-bottom:1px solid var(--brl)}
+.seller-review:last-child{border-bottom:none}
+.seller-review-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.seller-review-author{font-size:13px;font-weight:700;color:var(--ink)}
+.seller-review-stars{color:#FBBF24;font-size:14px}
+.seller-review-date{font-size:11px;color:var(--muted)}
+.seller-review-text{font-size:13px;color:var(--ink);line-height:1.6}
+@media(max-width:768px){
+  .seller-stats-row{grid-template-columns:repeat(2,1fr)}
+  .seller-body{grid-template-columns:1fr}
+  .seller-hero-actions{flex-direction:row}
+}
 </style>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#FF5C00">
@@ -1237,8 +1285,8 @@ footer{background:transparent;margin-top:0}
 
 
 <!-- ══ PAGE VENDEUR PUBLIC ══ -->
-<div id="page-seller" class="page" style="display:none">
-  <div class="container">
+<div id="page-seller" class="page">
+  <div class="container" style="display:none">
     <button onclick="history.back()" style="background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:14px;padding:10px 0;font-family:inherit">← Retour</button>
     <div class="seller-hero" style="border-radius:16px;margin-bottom:16px">
       <div class="seller-hero-av" id="seller-av">?</div>
@@ -5157,49 +5205,127 @@ function openConversationWithSeller(){
 }
 
 function loadSellerProfile(sellerId){
-  var token=localStorage.getItem('ygy_token');
-  fetch('/api/users/'+sellerId+'/public',{headers:{'Authorization':'Bearer '+(token||'')}})
+  var token = localStorage.getItem('ygy_token');
+  // Afficher état de chargement
+  var grid = document.getElementById('seller-ads-grid');
+  if(grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted)">⏳ Chargement...</div>';
+
+  // Charger profil public
+  fetch('/api/users/'+sellerId+'/public', {headers:{'Authorization':'Bearer '+(token||'')}})
   .then(function(r){return r.json();})
   .then(function(data){
     renderSellerProfile(data);
   }).catch(function(){
-    // Mode démo
     renderSellerProfile({
-      firstName:curAd&&curAd.sellerName||'Vendeur',
-      city:curAd&&curAd.city||'Guinée',
-      rating:{avg:4.2,count:8},
-      adsCount:curAd?3:0,
-      memberSince:'2024',
+      firstName: curAd&&curAd.sellerName||'Vendeur',
+      name:      curAd&&curAd.sellerName||'Vendeur',
+      city:      curAd&&curAd.city||'Guinée',
+      rating:    {avg:0,count:0},
+      reviews:   [],
+      adsCount:  0,
+      memberSince: new Date().getFullYear(),
     });
   });
-  // Charger ses annonces
-  fetch('/api/ads?seller='+sellerId)
+
+  // Charger annonces du vendeur
+  fetch('/api/ads?seller='+sellerId+'&limit=12')
   .then(function(r){return r.json();})
   .then(function(data){
-    var ads=(data.ads||data||[]);
-    var grid=document.getElementById('seller-ads-grid');
-    if(grid) grid.innerHTML=ads.map(function(a){return adCard(a,false);}).join('')||'<p style="color:var(--muted);font-size:13px">Aucune annonce active</p>';
+    var ads = data.ads||data||[];
+    if(grid){
+      if(ads.length){
+        grid.innerHTML = ads.map(function(a){return adCard(a,false);}).join('');
+      } else {
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted)">'+
+          '<div style="font-size:36px;margin-bottom:10px">📋</div>'+
+          '<div style="font-size:14px;font-weight:600">Aucune annonce active</div>'+
+        '</div>';
+      }
+      // Mettre à jour le compteur
+      var count = document.getElementById('seller-ads-count');
+      if(count) count.textContent = ads.length+' annonce'+(ads.length!==1?'s':'');
+      var statAds = document.getElementById('seller-stat-ads');
+      if(statAds) statAds.textContent = ads.length;
+    }
   }).catch(function(){
-    var grid=document.getElementById('seller-ads-grid');
-    if(grid) grid.innerHTML='<p style="color:var(--muted);font-size:13px">Chargement des annonces...</p>';
+    if(grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--muted)">Chargement...</div>';
   });
 }
 
 function renderSellerProfile(seller){
-  var av=document.getElementById('seller-av');
-  var name=document.getElementById('seller-name');
-  var city=document.getElementById('seller-city');
-  var rating=document.getElementById('seller-rating');
-  var since=document.getElementById('seller-since');
-  var initial=(seller.firstName||seller.name||'V').charAt(0).toUpperCase();
-  if(av){ av.textContent=initial; }
-  if(name){ name.textContent=(seller.firstName||seller.name||'Vendeur')+(seller.isPro?' ':' '); }
-  if(city){ city.textContent='📍 '+(seller.city||'Guinée'); }
-  if(since){ since.textContent='Membre depuis '+(seller.memberSince||'2024'); }
-  if(rating && seller.rating){
+  var name    = (seller.firstName||seller.name||'Vendeur').trim();
+  var city    = seller.city||'Guinée';
+  var since   = seller.memberSince||new Date().getFullYear();
+  var initial = name.charAt(0).toUpperCase();
+  var avg     = seller.rating ? (seller.rating.avg||0) : 0;
+  var cnt     = seller.rating ? (seller.rating.count||0) : 0;
+
+  // Avatar + nom
+  var el = document.getElementById('seller-av');
+  if(el) el.textContent = initial;
+  el = document.getElementById('seller-name');
+  if(el) el.textContent = name;
+
+  // Meta
+  el = document.getElementById('seller-city');
+  if(el) el.textContent = '📍 '+city;
+  el = document.getElementById('seller-since');
+  if(el) el.textContent = 'Membre depuis '+since;
+
+  // Aside
+  el = document.getElementById('seller-aside-city');
+  if(el) el.textContent = city;
+  el = document.getElementById('seller-aside-since');
+  if(el) el.textContent = 'Membre depuis '+since;
+  el = document.getElementById('seller-aside-verified');
+  if(el && seller.verified) el.style.display = 'flex';
+
+  // Pro badge
+  el = document.getElementById('seller-pro-badge');
+  if(el) el.style.display = seller.isPro ? 'block' : 'none';
+
+  // Étoiles
+  el = document.getElementById('seller-rating');
+  if(el && avg > 0){
     var stars='';
-    for(var i=1;i<=5;i++) stars+='<span style="color:'+(i<=Math.round(seller.rating.avg)?'#F59E0B':'#E5E7EB')+'">★</span>';
-    rating.innerHTML=stars+' <strong>'+( seller.rating.avg||0).toFixed(1)+'</strong> ('+( seller.rating.count||0)+' avis)';
+    for(var i=1;i<=5;i++) stars+='<span style="color:'+(i<=Math.round(avg)?'#FBBF24':'#E5E7EB')+'">★</span>';
+    el.innerHTML = stars+' <strong>'+avg.toFixed(1)+'</strong> <span style="color:var(--muted);font-weight:400">('+cnt+' avis)</span>';
+  }
+
+  // Stats
+  var statAds = document.getElementById('seller-stat-ads');
+  if(statAds) statAds.textContent = seller.adsCount||0;
+  var statRat = document.getElementById('seller-stat-rating');
+  if(statRat) statRat.textContent = avg>0 ? avg.toFixed(1)+' ★' : '—';
+  var statRev = document.getElementById('seller-stat-reviews');
+  if(statRev) statRev.textContent = cnt;
+  var statViews = document.getElementById('seller-stat-views');
+  if(statViews) statViews.textContent = seller.totalViews||'—';
+  var adsCount = document.getElementById('seller-ads-count');
+  if(adsCount) adsCount.textContent = (seller.adsCount||0)+' annonce'+(seller.adsCount!==1?'s':'');
+
+  // Avis
+  var reviewsList = document.getElementById('seller-reviews-list');
+  var reviewsCount = document.getElementById('seller-reviews-count');
+  if(reviewsList && seller.reviews && seller.reviews.length){
+    if(reviewsCount) reviewsCount.textContent = seller.reviews.length+' avis';
+    reviewsList.innerHTML = seller.reviews.map(function(r){
+      var stars='';
+      for(var i=1;i<=5;i++) stars+='<span style="color:'+(i<=r.rating?'#FBBF24':'#E5E7EB')+'">★</span>';
+      var d = r.createdAt ? new Date(r.createdAt).toLocaleDateString('fr-FR') : '';
+      return '<div class="seller-review">'+
+        '<div class="seller-review-head">'+
+          '<div>'+
+            '<span class="seller-review-author">'+(r.reviewerName||'Anonyme')+'</span>'+
+            '<span class="seller-review-stars" style="margin-left:8px">'+stars+'</span>'+
+          '</div>'+
+          '<div class="seller-review-date">'+d+'</div>'+
+        '</div>'+
+        (r.comment?'<div class="seller-review-text">'+r.comment+'</div>':'')+
+      '</div>';
+    }).join('');
+  } else {
+    if(reviewsCount) reviewsCount.textContent = '0 avis';
   }
 }
 
