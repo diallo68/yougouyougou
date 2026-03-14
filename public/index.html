@@ -2416,47 +2416,69 @@ function sendVerifCode(){
 
 function showCodeForm(dest, icon){
   var body=document.getElementById('auth-body');
-  var codeHint='<p style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:16px">Code envoyé '+(icon==='📧'?'par email':'par SMS')+' à <strong style="color:var(--ink)">'+dest+'</strong><br><span style="font-size:12px">Vérifiez vos spams si nécessaire</span></p>';
   body.innerHTML=
     '<div class="sms-wrap" id="code-box">'+
       '<div class="sw-title">'+icon+' Code de vérification</div>'+
-      '<div class="sw-sub" style="margin-bottom:12px">Destinataire : <strong>'+dest+'</strong></div>'+
-      codeHint+
-      '<div class="sms-digits">'+
-        '<input type="text" maxlength="1" id="s1" oninput="movSms(this,\'s2\')" autocomplete="one-time-code">'+
-        '<input type="text" maxlength="1" id="s2" oninput="movSms(this,\'s3\')">'+
-        '<input type="text" maxlength="1" id="s3" oninput="movSms(this,\'s4\')">'+
-        '<input type="text" maxlength="1" id="s4" oninput="autoVerify()">'+
-      '</div>'+
-      '<button class="btn btn-or btn-full" style="border-radius:12px;margin-bottom:10px" onclick="verifyCode()">✅ Confirmer et créer mon compte</button>'+
-      '<div class="sms-resend">Code oublié ? <a onclick="resendCode()">Générer un nouveau code</a></div>'+
+      '<div class="sw-sub">Code envoyé '+(icon==='📧'?'par email':'par SMS')+' à <strong>'+dest+'</strong></div>'+
+      '<p style="font-size:12px;color:var(--muted);text-align:center;margin:8px 0 16px">Vérifiez vos spams si nécessaire</p>'+
+      '<input type="text" id="sms-code-input" maxlength="4" placeholder="0000"'+
+        ' autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]*"'+
+        ' style="width:100%;text-align:center;font-size:32px;font-weight:900;letter-spacing:12px;'+
+        'padding:14px;border:2px solid var(--br);border-radius:12px;font-family:monospace;'+
+        'outline:none;box-sizing:border-box;transition:border-color .2s"'+
+        ' oninput="this.value=this.value.replace(/[^0-9]/g,\'\').substring(0,4);'+
+        'this.style.borderColor=this.value.length===4?\'var(--or)\':\'var(--br)\';'+
+        'if(this.value.length===4) document.getElementById(\'btn-verify\').focus();"'+
+        ' onkeydown="if(event.key===\'Enter\') verifyCode()">'+
+      '<button id="btn-verify" class="btn btn-or btn-full" style="border-radius:12px;margin-top:14px;margin-bottom:10px" onclick="verifyCode()">✅ Confirmer et créer mon compte</button>'+
+      '<div class="sms-resend">Code oublié ? <a onclick="resendCode()">Renvoyer le code</a></div>'+
     '</div>';
-  var s1=document.getElementById('s1');if(s1)s1.focus();
+  var inp=document.getElementById('sms-code-input');
+  if(inp) setTimeout(function(){inp.focus();},100);
 }
 
 function autoVerify(){
-  var entered=['s1','s2','s3','s4'].map(function(id){return(document.getElementById(id)||{value:''}).value;}).join('');
-  if(entered.length===4) verifyCode();
+  // Gardé pour compatibilité — le nouvel input gère ça via oninput
 }
 
-function movSms(el,nid){if(el.value.length>=1){var n=document.getElementById(nid);if(n)n.focus();}}
+function movSms(el,nid){/* remplacé par input unique */}
 
 function resendCode(){
-  smsCode=Math.floor(1000+Math.random()*9000).toString();
-  // Mettre à jour l'affichage du code
-  var codeBox=document.getElementById('code-box');
-  if(codeBox){
-    var orDiv=codeBox.querySelector('[style*="letter-spacing:8px"]');
-    if(orDiv)orDiv.textContent=smsCode;
-  }
-  ['s1','s2','s3','s4'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
-  toast('🔄 Nouveau code envoyé !','ok');
+  if(!pendingUser){toast('⚠️ Session expirée, recommencez','err');return;}
+  var inp=document.getElementById('sms-code-input');
+  if(inp){inp.value='';inp.style.borderColor='var(--br)';inp.style.background='';inp.focus();}
+  toast('⏳ Envoi en cours...','ok');
+  fetch('/api/auth/send-code',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      phone: pendingUser.phone,
+      email: pendingUser.email||'',
+      method: pendingUser.method||'sms',
+      prenom: pendingUser.prenom
+    })
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(data.error){toast('❌ '+data.error,'err');return;}
+    smsCode = data.debug_code || smsCode;
+    codeFromServer = true;
+    toast('📱 Nouveau code envoyé !','ok');
+  })
+  .catch(function(){
+    toast('❌ Erreur réseau — réessayez','err');
+  });
 }
 
 function verifyCode(){
-  var entered=['s1','s2','s3','s4'].map(function(id){return(document.getElementById(id)||{value:''}).value;}).join('');
-  if(entered.length<4){toast('⚠️ Entrez les 4 chiffres du code','err');return;}
-  if(entered!==smsCode){toast('❌ Code incorrect — réessayez','err');return;}
+  var inp=document.getElementById('sms-code-input');
+  var entered=(inp?inp.value:'').replace(/[^0-9]/g,'').substring(0,4);
+  if(entered.length<4){toast('⚠️ Entrez les 4 chiffres du code','err');if(inp)inp.focus();return;}
+  if(entered!==smsCode){
+    toast('❌ Code incorrect — réessayez','err');
+    if(inp){inp.style.borderColor='#DC2626';inp.style.background='#FFF5F5';inp.select();}
+    return;
+  }
 
   var u=Object.assign({name:pendingUser.prenom+(pendingUser.nom?' '+pendingUser.nom:'')},pendingUser);
 
