@@ -697,15 +697,22 @@ app.get('/api/ads', async (req, res) => {
     const ads   = await Ad.find(filter).sort(sortObj).skip(realSkip).limit(Number(limit))
       .select('-sellerPhone')
       .populate('seller', 'prenom nom phone city avgRating ratingCount verified');
-    // Ajouter sellerName sur chaque annonce pour le frontend
+    // Enrichir chaque annonce avec sellerName + infos vendeur
     const adsWithSeller = ads.map(a => {
       const obj = a.toObject();
       if (a.seller && typeof a.seller === 'object') {
-        obj.sellerName = `${a.seller.prenom||''} ${a.seller.nom||''}`.trim() || obj.sellerName || '';
-        obj.sellerCity = a.seller.city || obj.city || '';
-        obj.sellerVerified = a.seller.verified || false;
-        obj.sellerRating   = a.seller.avgRating || 0;
-        obj.seller         = a.seller._id; // remettre l'ID
+        // Reconstruire sellerName depuis le User populé
+        const fullName = `${a.seller.prenom||''} ${a.seller.nom||''}`.trim();
+        obj.sellerName    = fullName || obj.sellerName || 'Vendeur';
+        obj.sellerPhone   = a.seller.phone || obj.sellerPhone || '';
+        obj.sellerCity    = a.seller.city  || obj.city || '';
+        obj.sellerVerified= a.seller.verified || false;
+        obj.sellerRating  = a.seller.avgRating || 0;
+        obj.sellerCount   = a.seller.ratingCount || 0;
+        obj.seller        = a.seller._id; // remettre l'ID (pas l'objet)
+      } else {
+        // seller non populé : garder sellerName stocké en base
+        obj.sellerName = obj.sellerName || 'Vendeur';
       }
       return obj;
     });
@@ -721,14 +728,20 @@ app.get('/api/ads/:id', authOptional, async (req, res) => {
       req.params.id,
       { $inc: { views: 1 } },
       { new: true }
-    ).select('-sellerPhone').populate('seller', 'prenom nom city avgRating ratingCount verified');
+    ).select('-sellerPhone').populate('seller', 'prenom nom phone city avgRating ratingCount verified');
     if (!ad) return res.status(404).json({ error: 'Annonce introuvable' });
-    // Enrichir sellerName
+    // Enrichir avec toutes les infos vendeur
     const adObj = ad.toObject();
     if (ad.seller && typeof ad.seller === 'object') {
-      adObj.sellerName = `${ad.seller.prenom||''} ${ad.seller.nom||''}`.trim() || adObj.sellerName || '';
-      adObj.sellerVerified = ad.seller.verified || false;
-      adObj.seller = ad.seller._id;
+      const fullName = `${ad.seller.prenom||''} ${ad.seller.nom||''}`.trim();
+      adObj.sellerName    = fullName || adObj.sellerName || 'Vendeur';
+      adObj.sellerPhone   = ad.seller.phone || adObj.sellerPhone || '';
+      adObj.sellerCity    = ad.seller.city  || adObj.city || '';
+      adObj.sellerVerified= ad.seller.verified || false;
+      adObj.sellerRating  = ad.seller.avgRating || 0;
+      adObj.seller        = ad.seller._id;
+    } else {
+      adObj.sellerName = adObj.sellerName || 'Vendeur';
     }
 
     // Incrémenter totalViews du vendeur
