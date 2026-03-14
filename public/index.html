@@ -2461,9 +2461,10 @@ function resendCode(){
   .then(function(r){return r.json();})
   .then(function(data){
     if(data.error){toast('❌ '+data.error,'err');return;}
-    smsCode = data.debug_code || smsCode;
+    // Ne plus stocker debug_code — le serveur vérifie le code
     codeFromServer = true;
-    toast('📱 Nouveau code envoyé !','ok');
+    var msg = data.smsSent ? '📱 Nouveau SMS envoyé !' : (data.emailSent ? '📧 Email envoyé !' : '📱 Code renvoyé !');
+    toast(msg,'ok');
   })
   .catch(function(){
     toast('❌ Erreur réseau — réessayez','err');
@@ -2474,16 +2475,17 @@ function verifyCode(){
   var inp=document.getElementById('sms-code-input');
   var entered=(inp?inp.value:'').replace(/[^0-9]/g,'').substring(0,4);
   if(entered.length<4){toast('⚠️ Entrez les 4 chiffres du code','err');if(inp)inp.focus();return;}
-  if(entered!==smsCode){
-    toast('❌ Code incorrect — réessayez','err');
-    if(inp){inp.style.borderColor='#DC2626';inp.style.background='#FFF5F5';inp.select();}
-    return;
-  }
+  if(!pendingUser){toast('⚠️ Session expirée, recommencez','err');return;}
+
+  // Désactiver le bouton pendant la vérification
+  var btn=document.getElementById('btn-verify');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Vérification...';}
+  function resetBtn(){var b=document.getElementById('btn-verify');if(b){b.disabled=false;b.textContent='✅ Confirmer et créer mon compte';}}
 
   var u=Object.assign({name:pendingUser.prenom+(pendingUser.nom?' '+pendingUser.nom:'')},pendingUser);
 
-  // Si code vient du serveur → enregistrer dans MongoDB
-  if(codeFromServer){
+  // Toujours envoyer au serveur — c'est lui qui vérifie le code
+  {
     fetch('/api/register',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
@@ -2500,7 +2502,12 @@ function verifyCode(){
     })
     .then(function(r){return r.json();})
     .then(function(data){
-      if(data.error){toast('❌ '+(data.error),'err');return;}
+      resetBtn();
+      if(data.error){
+        toast('❌ '+(data.error),'err');
+        if(inp){inp.style.borderColor='#DC2626';inp.style.background='#FFF5F5';inp.select();}
+        return;
+      }
       var serverUser=data.user||u;
       serverUser.initials=((serverUser.prenom||u.prenom||'U').charAt(0)+((serverUser.nom||u.nom||'').charAt(0)||'')).toUpperCase();
       serverUser.name=serverUser.name||(serverUser.prenom+(serverUser.nom?' '+serverUser.nom:''));
@@ -2510,16 +2517,13 @@ function verifyCode(){
       pendingUser=null;smsCode='';codeFromServer=false;
     })
     .catch(function(){
+      resetBtn();
+      // Fallback local si serveur inaccessible
+      u.initials=(u.prenom.charAt(0)+(u.nom?u.nom.charAt(0):'')).toUpperCase();
       DB.addUser(u);DB.login(u);updateNav();closeModal('auth');document.body.style.overflow='';
       toast('🎉 Bienvenue '+u.prenom+' ! (mode hors-ligne)','ok');
       pendingUser=null;smsCode='';codeFromServer=false;
     });
-  } else {
-    // Mode hors-ligne : sauvegarder localement seulement
-    u.initials=(u.prenom.charAt(0)+(u.nom?u.nom.charAt(0):'')).toUpperCase();
-    DB.addUser(u);DB.login(u);updateNav();closeModal('auth');document.body.style.overflow='';
-    toast('🎉 Bienvenue '+u.prenom+' ! Compte créé 🇬🇳','ok');
-    pendingUser=null;smsCode='';codeFromServer=false;
   }
 }
 
