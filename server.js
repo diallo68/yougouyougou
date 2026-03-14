@@ -43,61 +43,60 @@ if (process.env.SENDGRID_API_KEY) {
 }
 
 
-// ── SMS (Twilio ou Africa's Talking) ────────────────────────────
+// ── SMS via Africa's Talking SDK officiel ───────────────────────
 async function sendSMS(phone, message) {
-  // Normaliser le numéro guinéen
+  // Normaliser le numéro
   let to = phone.replace(/\s/g, '');
   if (!to.startsWith('+')) to = '+224' + to.replace(/^00224/, '').replace(/^224/, '');
 
-  // ── Option 1 : Twilio ──
-  if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
-    const sid  = process.env.TWILIO_ACCOUNT_SID;
-    const auth = process.env.TWILIO_AUTH_TOKEN;
-    const from = process.env.TWILIO_PHONE || process.env.TWILIO_FROM;
-    const body = JSON.stringify({
-      To: to, From: from, Body: message
-    });
-    const resp = await fetch(
-      `https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Basic ' + Buffer.from(sid + ':' + auth).toString('base64'),
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: `To=${encodeURIComponent(to)}&From=${encodeURIComponent(from)}&Body=${encodeURIComponent(message)}`
-      }
-    );
-    if (!resp.ok) {
-      const err = await resp.text();
-      throw new Error(`Twilio SMS error: ${err}`);
-    }
-    console.log(`✅ [SMS Twilio] Envoyé à ${to}`);
+  const atApiKey   = process.env.AT_API_KEY;
+  const atUsername = process.env.AT_USERNAME; // 'sandbox' en test, ton username en prod
+
+  if (!atApiKey || !atUsername) {
+    console.warn(`⚠️ [SMS] AT_API_KEY ou AT_USERNAME manquant — code non envoyé à ${to}`);
     return;
   }
 
-  // ── Option 2 : Africa's Talking ──
-  if (process.env.AT_API_KEY && process.env.AT_USERNAME) {
-    const resp = await fetch('https://api.africastalking.com/version1/messaging', {
-      method: 'POST',
-      headers: {
-        'apiKey': process.env.AT_API_KEY,
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Accept': 'application/json'
-      },
-      body: `username=${encodeURIComponent(process.env.AT_USERNAME)}&to=${encodeURIComponent(to)}&message=${encodeURIComponent(message)}`
-    });
-    if (!resp.ok) {
-      const err = await resp.text();
-      throw new Error(`Africa's Talking SMS error: ${err}`);
-    }
-    const data = await resp.json();
-    console.log(`✅ [SMS AT] Envoyé à ${to}:`, data.SMSMessageData?.Message);
-    return;
+  // URL selon le mode : sandbox ou live
+  const isSandbox = atUsername === 'sandbox';
+  const url = isSandbox
+    ? 'https://api.sandbox.africastalking.com/version1/messaging'
+    : 'https://api.africastalking.com/version1/messaging';
+
+  const params = new URLSearchParams();
+  params.append('username', atUsername);
+  params.append('to',       to);
+  params.append('message',  message);
+
+  console.log(`📱 [SMS] Envoi vers ${url} pour ${to}`);
+
+  const resp = await fetch(url, {
+    method:  'POST',
+    headers: {
+      'apiKey':        atApiKey,
+      'Content-Type':  'application/x-www-form-urlencoded',
+      'Accept':        'application/json'
+    },
+    body: params.toString()
+  });
+
+  const text = await resp.text();
+  let data;
+  try { data = JSON.parse(text); } catch { data = { raw: text }; }
+
+  console.log(`📱 [SMS AT] Réponse brute:`, JSON.stringify(data));
+
+  if (!resp.ok) {
+    throw new Error(`Africa's Talking erreur HTTP ${resp.status}: ${text}`);
   }
 
-  // ── Fallback : log seulement ──
-  console.warn(`⚠️ [SMS] Aucun service SMS configuré. Code pour ${to} : ${message}`);
+  const recipients = data?.SMSMessageData?.Recipients || [];
+  const failed = recipients.filter(r => r.statusCode !== 101);
+  if (recipients.length > 0 && failed.length === recipients.length) {
+    throw new Error(`Africa's Talking SMS non délivré: ${JSON.stringify(recipients)}`);
+  }
+
+  console.log(`✅ [SMS AT] Envoyé à ${to}`);
 }
 
 async function sendEmail(to, subject, html, text) {
