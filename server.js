@@ -44,18 +44,24 @@ async function sendSMS(phone, message) {
         'Content-Length': Buffer.byteLength(body),
       }
     };
+    console.log(`[SMS] Envoi → ${host}${path_} | username=${username} | to=${phone} | isLive=${isLive}`);
     const req = require('https').request(options, (res) => {
       let data = '';
       res.on('data', chunk => { data += chunk; });
       res.on('end', () => {
         try {
           const json = JSON.parse(data);
-          const statusCode = json?.SMSMessageData?.Recipients?.[0]?.statusCode;
+          const recipient = json?.SMSMessageData?.Recipients?.[0];
+          const statusCode = recipient?.statusCode;
+          const status = recipient?.status;
           const ok = statusCode === 100 || statusCode === 101;
-          console.log(`[SMS] ${phone} → statusCode=${statusCode} ok=${ok}`);
+          // Log complet pour débug
+          console.log(`[SMS] ${phone} → statusCode=${statusCode} status="${status}" ok=${ok}`);
+          console.log(`[SMS] Réponse AT complète:`, JSON.stringify(json));
           resolve(ok);
         } catch(e) {
-          console.error('[SMS] Parse erreur:', e.message, data);
+          console.error('[SMS] Parse erreur:', e.message);
+          console.error('[SMS] Réponse brute:', data);
           resolve(false);
         }
       });
