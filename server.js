@@ -14,6 +14,46 @@ const path     = require('path');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
+// ── SMS via Africa's Talking ────────────────────────────────
+async function sendSMS(phone, message) {
+  const username = process.env.AT_USERNAME || 'sandbox';
+  const apiKey   = process.env.AT_API_KEY  || '';
+  if (!apiKey) { console.warn('[SMS] AT_API_KEY manquant'); return false; }
+
+  const isLive = username !== 'sandbox';
+  const url    = isLive
+    ? 'https://api.africastalking.com/version1/messaging'
+    : 'https://api.sandbox.africastalking.com/version1/messaging';
+
+  const params = new URLSearchParams();
+  params.append('username', username);
+  params.append('to',       phone);
+  params.append('message',  message);
+  params.append('from',     isLive ? (process.env.AT_SENDER || '') : '');
+
+  try {
+    const fetch = (await import('node-fetch')).default;
+    const resp  = await fetch(url, {
+      method:  'POST',
+      headers: {
+        'Accept':       'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'apiKey':       apiKey,
+      },
+      body: params.toString(),
+    });
+    const data = await resp.json();
+    const statusCode = data?.SMSMessageData?.Recipients?.[0]?.statusCode;
+    const ok = statusCode === 100 || statusCode === 101;
+    console.log(`[SMS] ${phone} → statusCode=${statusCode} ok=${ok}`);
+    return ok;
+  } catch(e) {
+    console.error('[SMS] Erreur:', e.message);
+    return false;
+  }
+}
+
+
 
 // ── MIDDLEWARE ──────────────────────────────────────────────
 try { app.use(require('compression')()); } catch(e) {}
@@ -348,8 +388,11 @@ app.post('/api/auth/send-code', async (req, res) => {
     await User.findOneAndUpdate(query, update, { upsert: true, new: true });
 
     let emailSent = false;
+    let smsSent = false;
     if (method === 'sms') {
-      console.log(`📱 [SMS] Code pour ${phone} : ${code}`);
+      const msg = `Votre code YouGouYou : ${code}. Valable 15 min.`;
+      smsSent = await sendSMS(phone, msg);
+      if (!smsSent) console.warn(`[SMS] Échec envoi vers ${phone} — code: ${code}`);
     } else {
       try {
         await sendEmail(email,
@@ -361,8 +404,15 @@ app.post('/api/auth/send-code', async (req, res) => {
       } catch(e) { console.error('[EMAIL] Échec:', e.message); }
     }
 
-    res.json({ success: true, method, emailSent, debug_code: code,
-      message: emailSent ? `Code envoyé à ${email}` : `Code généré` });
+    res.json({
+      success: true, method,
+      smsSent: smsSent||false,
+      emailSent: emailSent||false,
+      debug_code: process.env.NODE_ENV !== 'production' ? code : undefined,
+      message: method==='sms'
+        ? (smsSent ? `SMS envoyé au ${phone}` : `Code généré (SMS non livré)`)
+        : (emailSent ? `Email envoyé à ${email}` : `Code généré`)
+    });
   } catch(err) {
     res.status(500).json({ error: err.message });
   }
