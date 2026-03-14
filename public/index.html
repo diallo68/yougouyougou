@@ -3117,19 +3117,159 @@ function startInactivityWatch(){
 
 function navGoSearches(){
   if(!DB.user()){openModal('auth');return;}
-  toast('🔔 Alertes de recherche','ok');
   loadDash(); goTo('dashboard');
   setTimeout(function(){ showDashTab('alerts'); }, 300);
 }
+
 function navGoFavs(){
   if(!DB.user()){openModal('auth');return;}
-  loadDash(); goTo('dashboard');
-  setTimeout(function(){ showDashTab('favs'); }, 300);
+  // Charger les favoris dans la page dédiée
+  var favIds = DB.favs();
+  var favAds = DB.ads().filter(function(a){ return favIds.includes(a.id||a._id) || favIds.includes(String(a.id||a._id)); });
+  var grid = document.getElementById('page-favs-grid');
+  if(grid){
+    if(!favAds.length){
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted)">'+
+        '<div style="font-size:48px;margin-bottom:12px">❤️</div>'+
+        '<div style="font-size:15px;font-weight:700;margin-bottom:6px">Aucun favori</div>'+
+        '<div style="font-size:13px">Cliquez sur 🤍 sur une annonce pour l\'ajouter</div>'+
+      '</div>';
+    } else {
+      grid.innerHTML = favAds.map(function(a){ return adCard(a,false); }).join('');
+    }
+  }
+  goTo('favs');
 }
+
 function navGoMessages(){
   if(!DB.user()){openModal('auth');return;}
-  loadDash(); goTo('dashboard');
-  setTimeout(function(){ showDashTab('messages'); }, 300);
+  // Charger les conversations dans la page dédiée
+  var token = localStorage.getItem('ygy_token');
+  var list = document.getElementById('page-msg-list');
+  if(list) list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">⏳ Chargement...</div>';
+  goTo('messages');
+  if(token){
+    fetch('/api/conversations',{headers:{'Authorization':'Bearer '+token}})
+    .then(function(r){return r.json();})
+    .then(function(data){
+      var convs = data.conversations||data||[];
+      renderPageConvList(convs);
+      updateMsgBadge(convs);
+    }).catch(function(){
+      if(list) list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">❌ Erreur de chargement</div>';
+    });
+  }
+}
+
+function renderPageConvList(convs){
+  var list = document.getElementById('page-msg-list');
+  if(!list) return;
+  var user = DB.user();
+  if(!convs.length){
+    list.innerHTML = '<div style="padding:32px 16px;text-align:center;color:var(--muted)">'+
+      '<div style="font-size:40px;margin-bottom:10px">💬</div>'+
+      '<div style="font-size:13px;font-weight:600">Aucune conversation</div>'+
+    '</div>';
+    return;
+  }
+  list.innerHTML = convs.map(function(conv){
+    var isUnread = (conv.unreadCount||0) > 0;
+    var name = String(conv.buyerId)===(user&&String(user._id)) ? conv.sellerName : conv.buyerName;
+    var last = conv.lastMessage||'Nouvelle conversation';
+    var time = conv.updatedAt ? timeAgo(conv.updatedAt) : '';
+    var cid  = conv._id||conv.id||'';
+    return '<div class="msg-list-item" onclick="openPageConv(\''+cid+'\','+JSON.stringify(conv).replace(/'/g,"\'")+')" >'+
+      '<div class="msg-av">'+(name||'?').charAt(0).toUpperCase()+'</div>'+
+      '<div class="msg-info">'+
+        '<div class="msg-name">'+(name||'Utilisateur')+'</div>'+
+        '<div class="msg-preview">'+last.substring(0,40)+'</div>'+
+      '</div>'+
+      '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">'+
+        '<div class="msg-time">'+time+'</div>'+
+        (isUnread?'<div class="msg-badge">'+conv.unreadCount+'</div>':'')+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+var _pageConvId = null;
+function openPageConv(convId, conv){
+  _pageConvId = convId;
+  document.querySelectorAll('#page-msg-list .msg-list-item').forEach(function(i){i.classList.remove('active');});
+  event.currentTarget.classList.add('active');
+  var thread = document.getElementById('page-msg-thread');
+  if(!thread) return;
+  var user = DB.user();
+  var otherName = String(conv.buyerId)===(user&&String(user._id)) ? conv.sellerName : conv.buyerName;
+  var adTitle = conv.adTitle||'';
+  thread.innerHTML =
+    '<div class="msg-thread-head">'+
+      '<div class="msg-av" style="width:38px;height:38px;font-size:15px;flex-shrink:0">'+(otherName||'?').charAt(0).toUpperCase()+'</div>'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="font-size:14px;font-weight:700;color:var(--ink)">'+otherName+'</div>'+
+        (adTitle?'<div style="font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">📦 '+adTitle+'</div>':'')+
+      '</div>'+
+    '</div>'+
+    '<div class="msg-bubbles" id="page-msg-bubbles">'+
+      '<div class="msg-security">🛡️ <strong>Conseils sécurité</strong> — Vérifiez l\'article avant paiement. Échangez en lieu public.</div>'+
+      '<div style="text-align:center;padding:16px;color:var(--muted);font-size:12px">⏳ Chargement...</div>'+
+    '</div>'+
+    '<div class="msg-input-row">'+
+      '<input type="text" id="page-msg-input" placeholder="Votre message..." '+
+        'onkeydown="if(event.key===\'Enter\')sendPageMsg()" '+
+        'onfocus="this.style.borderColor=\'var(--or)\'" onblur="this.style.borderColor=\'var(--br)\'">'+
+      '<button class="msg-send-btn" onclick="sendPageMsg()">'+
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>'+
+      '</button>'+
+    '</div>';
+  // Charger les messages
+  var token = localStorage.getItem('ygy_token');
+  if(token){
+    fetch('/api/conversations/'+convId,{headers:{'Authorization':'Bearer '+token}})
+    .then(function(r){return r.json();})
+    .then(function(data){
+      var msgs = data.messages||[];
+      var container = document.getElementById('page-msg-bubbles');
+      if(!container) return;
+      if(!msgs.length){
+        container.innerHTML = '<div class="msg-security">🛡️ <strong>Conseils sécurité</strong> — Vérifiez l\'article avant paiement. Échangez en lieu public.</div>'+
+          '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Démarrez la conversation 👋</div>';
+        return;
+      }
+      var html = '<div class="msg-security">🛡️ <strong>Conseils sécurité</strong> — Vérifiez l\'article avant paiement. Échangez en lieu public.</div>';
+      msgs.forEach(function(m){
+        var isMine = String(m.senderId)===(user&&String(user._id));
+        var t = m.createdAt?new Date(m.createdAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
+        html += '<div style="display:flex;flex-direction:column;align-items:'+(isMine?'flex-end':'flex-start')+';margin-bottom:4px">'+
+          '<div class="msg-bubble '+(isMine?'mine':'theirs')+'">'+
+            '<div>'+m.text+'</div>'+
+            '<div style="font-size:10px;opacity:.65;margin-top:4px;text-align:'+(isMine?'right':'left')+'">'+t+(isMine?' ✓':'')+'</div>'+
+          '</div></div>';
+      });
+      container.innerHTML = html;
+      container.scrollTop = container.scrollHeight;
+    }).catch(function(){});
+    // Marquer comme lu
+    fetch('/api/conversations/'+convId+'/read',{method:'PATCH',headers:{'Authorization':'Bearer '+token}}).catch(function(){});
+  }
+}
+
+function sendPageMsg(){
+  if(!_pageConvId) return;
+  var inp = document.getElementById('page-msg-input');
+  var text = (inp&&inp.value.trim())||'';
+  if(!text) return;
+  var token = localStorage.getItem('ygy_token');
+  fetch('/api/conversations/'+_pageConvId,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+    body:JSON.stringify({text:text})
+  }).then(function(r){return r.json();})
+  .then(function(){
+    if(inp) inp.value='';
+    // Recharger les messages
+    openPageConv(_pageConvId, {buyerId:'', sellerName:'', adTitle:''});
+  }).catch(function(){ toast('❌ Erreur envoi','err'); });
 }
 function updateNav(){
   var btn=document.getElementById('nav-auth-btn');if(!btn)return;
@@ -5358,6 +5498,55 @@ document.addEventListener('DOMContentLoaded',function(){
   <button class="pwa-install-btn" onclick="installPWA()">Installer</button>
   <button class="pwa-dismiss" onclick="dismissPWA()">✕</button>
 </div>
+
+<!-- ══ PAGE MESSAGES ══ -->
+<div id="page-messages" class="page">
+  <div style="max-width:1100px;margin:0 auto;padding:20px 20px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <button onclick="goTo('home')" style="background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:14px;font-family:inherit">← Retour</button>
+      <h2 style="margin:0;font-size:20px;font-weight:800">💬 Mes messages</h2>
+    </div>
+    <div class="msg-layout">
+      <!-- Colonne gauche : liste conversations -->
+      <div style="display:flex;flex-direction:column;border-right:1px solid var(--br);overflow:hidden">
+        <div class="msg-list-header">Conversations</div>
+        <div id="page-msg-list" style="flex:1;overflow-y:auto">
+          <div style="padding:32px 16px;text-align:center;color:var(--muted)">
+            <div style="font-size:40px;margin-bottom:10px">💬</div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:6px">Aucune conversation</div>
+            <div style="font-size:12px">Contactez un vendeur pour commencer</div>
+          </div>
+        </div>
+      </div>
+      <!-- Colonne droite : thread -->
+      <div id="page-msg-thread" style="display:flex;flex-direction:column;height:100%">
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;color:var(--muted)">
+          <div style="font-size:48px">👈</div>
+          <div style="font-size:14px;font-weight:600">Sélectionnez une conversation</div>
+          <div style="font-size:12px">Vos échanges avec les vendeurs apparaissent ici</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE FAVORIS ══ -->
+<div id="page-favs" class="page">
+  <div style="max-width:1100px;margin:0 auto;padding:20px 20px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <button onclick="goTo('home')" style="background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:14px;font-family:inherit">← Retour</button>
+      <h2 style="margin:0;font-size:20px;font-weight:800">❤️ Mes favoris</h2>
+    </div>
+    <div id="page-favs-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px">
+      <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted)">
+        <div style="font-size:48px;margin-bottom:12px">❤️</div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:6px">Aucun favori</div>
+        <div style="font-size:13px">Cliquez sur 🤍 sur une annonce pour l'ajouter</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </div><!-- /app-wrapper -->
 
 <script>
