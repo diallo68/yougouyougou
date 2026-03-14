@@ -21,36 +21,52 @@ async function sendSMS(phone, message) {
   if (!apiKey) { console.warn('[SMS] AT_API_KEY manquant'); return false; }
 
   const isLive = username !== 'sandbox';
-  const url    = isLive
-    ? 'https://api.africastalking.com/version1/messaging'
-    : 'https://api.sandbox.africastalking.com/version1/messaging';
+  const host   = isLive ? 'api.africastalking.com' : 'api.sandbox.africastalking.com';
+  const path_  = '/version1/messaging';
 
   const params = new URLSearchParams();
   params.append('username', username);
   params.append('to',       phone);
   params.append('message',  message);
-  params.append('from',     isLive ? (process.env.AT_SENDER || '') : '');
+  if (isLive && process.env.AT_SENDER) params.append('from', process.env.AT_SENDER);
 
-  try {
-    const fetch = (await import('node-fetch')).default;
-    const resp  = await fetch(url, {
-      method:  'POST',
+  const body = params.toString();
+
+  return new Promise((resolve) => {
+    const options = {
+      hostname: host,
+      path:     path_,
+      method:   'POST',
       headers: {
         'Accept':       'application/json',
         'Content-Type': 'application/x-www-form-urlencoded',
         'apiKey':       apiKey,
-      },
-      body: params.toString(),
+        'Content-Length': Buffer.byteLength(body),
+      }
+    };
+    const req = require('https').request(options, (res) => {
+      let data = '';
+      res.on('data', chunk => { data += chunk; });
+      res.on('end', () => {
+        try {
+          const json = JSON.parse(data);
+          const statusCode = json?.SMSMessageData?.Recipients?.[0]?.statusCode;
+          const ok = statusCode === 100 || statusCode === 101;
+          console.log(`[SMS] ${phone} → statusCode=${statusCode} ok=${ok}`);
+          resolve(ok);
+        } catch(e) {
+          console.error('[SMS] Parse erreur:', e.message, data);
+          resolve(false);
+        }
+      });
     });
-    const data = await resp.json();
-    const statusCode = data?.SMSMessageData?.Recipients?.[0]?.statusCode;
-    const ok = statusCode === 100 || statusCode === 101;
-    console.log(`[SMS] ${phone} → statusCode=${statusCode} ok=${ok}`);
-    return ok;
-  } catch(e) {
-    console.error('[SMS] Erreur:', e.message);
-    return false;
-  }
+    req.on('error', (e) => {
+      console.error('[SMS] Erreur réseau:', e.message);
+      resolve(false);
+    });
+    req.write(body);
+    req.end();
+  });
 }
 
 
@@ -82,7 +98,7 @@ if (process.env.SENDGRID_API_KEY) {
   console.warn('⚠️ [EMAIL] SENDGRID_API_KEY non défini');
 }
 
-async asasync function sendEmail(to, subject, html, text) {
+async function sendEmail(to, subject, html, text) {
   const apiKey = process.env.SENDGRID_API_KEY;
   if (!apiKey) { console.warn('[EMAIL] SendGrid non configuré →', to, subject); return; }
   const fromEmail = process.env.EMAIL_FROM || 'noreply@yougouyougou.net';
@@ -491,8 +507,9 @@ app.post('/api/auth/resend-code', async (req, res) => {
     await User.findOneAndUpdate({ phone }, { verifyCode: code, codeExpiry: expiry }, { upsert: true });
     if (method === 'email' && email) {
       await sendEmail(email, `${code} — Nouveau code YouGouYou`, emailVerifHTML(prenom, code), `Code : ${code}`);
-    } else {
-      console.log(`📱 [RESEND] Code pour ${phone} : ${code}`);
+    } else if (phone) {
+      const smsSent = await sendSMS(phone, `Votre nouveau code YouGouYou : ${code}. Valable 15 min.`);
+      if (!smsSent) console.warn(`[RESEND] SMS non livré → ${phone} code: ${code}`);
     }
     res.json({ success: true, debug_code: code });
   } catch(err) { res.status(500).json({ error: err.message }); }
