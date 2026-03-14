@@ -42,6 +42,64 @@ if (process.env.SENDGRID_API_KEY) {
   console.warn('⚠️ [EMAIL] SENDGRID_API_KEY non défini');
 }
 
+
+// ── SMS (Twilio ou Africa's Talking) ────────────────────────────
+async function sendSMS(phone, message) {
+  // Normaliser le numéro guinéen
+  let to = phone.replace(/\s/g, '');
+  if (!to.startsWith('+')) to = '+224' + to.replace(/^00224/, '').replace(/^224/, '');
+
+  // ── Option 1 : Twilio ──
+  if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+    const sid  = process.env.TWILIO_ACCOUNT_SID;
+    const auth = process.env.TWILIO_AUTH_TOKEN;
+    const from = process.env.TWILIO_PHONE || process.env.TWILIO_FROM;
+    const body = JSON.stringify({
+      To: to, From: from, Body: message
+    });
+    const resp = await fetch(
+      `https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Basic ' + Buffer.from(sid + ':' + auth).toString('base64'),
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `To=${encodeURIComponent(to)}&From=${encodeURIComponent(from)}&Body=${encodeURIComponent(message)}`
+      }
+    );
+    if (!resp.ok) {
+      const err = await resp.text();
+      throw new Error(`Twilio SMS error: ${err}`);
+    }
+    console.log(`✅ [SMS Twilio] Envoyé à ${to}`);
+    return;
+  }
+
+  // ── Option 2 : Africa's Talking ──
+  if (process.env.AT_API_KEY && process.env.AT_USERNAME) {
+    const resp = await fetch('https://api.africastalking.com/version1/messaging', {
+      method: 'POST',
+      headers: {
+        'apiKey': process.env.AT_API_KEY,
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': 'application/json'
+      },
+      body: `username=${encodeURIComponent(process.env.AT_USERNAME)}&to=${encodeURIComponent(to)}&message=${encodeURIComponent(message)}`
+    });
+    if (!resp.ok) {
+      const err = await resp.text();
+      throw new Error(`Africa's Talking SMS error: ${err}`);
+    }
+    const data = await resp.json();
+    console.log(`✅ [SMS AT] Envoyé à ${to}:`, data.SMSMessageData?.Message);
+    return;
+  }
+
+  // ── Fallback : log seulement ──
+  console.warn(`⚠️ [SMS] Aucun service SMS configuré. Code pour ${to} : ${message}`);
+}
+
 async function sendEmail(to, subject, html, text) {
   const apiKey = process.env.SENDGRID_API_KEY;
   if (!apiKey) { console.warn('[EMAIL] SendGrid non configuré →', to, subject); return; }
@@ -341,23 +399,22 @@ app.post('/api/auth/send-code', async (req, res) => {
     const code   = Math.floor(1000 + Math.random() * 9000).toString();
     const expiry = new Date(Date.now() + 15 * 60 * 1000);
 
-    // Construire la query selon la méthode choisie
-    const isEmailMethod = (method === 'email' && email);
-    const query  = isEmailMethod ? { email: email.toLowerCase() } : { phone };
-
-    // Sauvegarder verifyMethod (champ MongoDB) + nettoyer le phone si mode email
-    const update = {
-      verifyCode:   code,
-      codeExpiry:   expiry,
-      verifyMethod: method          // ← champ correct dans le schéma User
-    };
-    if (phone && phone !== '+224' && phone.length > 4) update.phone = phone;
+    const query  = (method === 'email' && email) ? { email: email.toLowerCase() } : { phone };
+    const update = { verifyCode: code, codeExpiry: expiry, method };
+    if (phone) update.phone = phone;
     if (email) update.email = email.toLowerCase();
     await User.findOneAndUpdate(query, update, { upsert: true, new: true });
 
     let emailSent = false;
     if (method === 'sms') {
-      console.log(`📱 [SMS] Code pour ${phone} : ${code}`);
+      try {
+        const smsMsg = `YouGouYou - Votre code de vérification : ${code}. Valable 15 minutes.`;
+        await sendSMS(phone, smsMsg);
+        console.log(`✅ [SMS] Code envoyé à ${phone}`);
+      } catch(smsErr) {
+        console.error(`❌ [SMS] Échec envoi à ${phone}:`, smsErr.message);
+        // On continue quand même - le code est en DB
+      }
     } else {
       try {
         await sendEmail(email,
@@ -369,17 +426,8 @@ app.post('/api/auth/send-code', async (req, res) => {
       } catch(e) { console.error('[EMAIL] Échec:', e.message); }
     }
 
-    // Ne pas exposer le code en production
-    const isProd = process.env.NODE_ENV === 'production';
-    res.json({
-      success: true,
-      method,
-      emailSent,
-      ...(isProd ? {} : { debug_code: code }),   // code visible seulement en dev
-      message: method === 'email'
-        ? (emailSent ? `Code envoyé à ${email}` : `Erreur envoi email`)
-        : `Code SMS généré pour ${phone}`
-    });
+    res.json({ success: true, method, emailSent, debug_code: code,
+      message: emailSent ? `Code envoyé à ${email}` : `Code généré` });
   } catch(err) {
     res.status(500).json({ error: err.message });
   }
@@ -396,7 +444,7 @@ app.post('/api/register', async (req, res) => {
     if (phone) pending = await User.findOne({ phone });
     if (!pending && email) pending = await User.findOne({ email: email.toLowerCase() });
     if (!pending) return res.status(400).json({ error: "Demandez un code d'abord" });
-    if (pending.verified) return res.status(400).json({ error: 'Ce compte est déjà inscrit' });
+    if (pending.verified) return res.status(400).json({ error: 'Ce numéro est déjà inscrit' });
     if (pending.verifyCode !== code) return res.status(400).json({ error: 'Code incorrect' });
     if (pending.codeExpiry && new Date() > pending.codeExpiry)
       return res.status(400).json({ error: 'Code expiré — demandez un nouveau code' });
@@ -451,26 +499,14 @@ app.post('/api/auth/resend-code', async (req, res) => {
     const { phone, email, method = 'sms', prenom = 'Utilisateur' } = req.body;
     const code   = Math.floor(1000 + Math.random() * 9000).toString();
     const expiry = new Date(Date.now() + 15 * 60 * 1000);
-    // Trouver et mettre à jour le bon user selon la méthode
-    const resendQuery = (method === 'email' && email)
-      ? { email: email.toLowerCase() }
-      : { phone };
-    await User.findOneAndUpdate(resendQuery, {
-      verifyCode:   code,
-      codeExpiry:   expiry,
-      verifyMethod: method
-    }, { upsert: true });
-
+    await User.findOneAndUpdate({ phone }, { verifyCode: code, codeExpiry: expiry }, { upsert: true });
     if (method === 'email' && email) {
-      await sendEmail(
-        email,
-        `${code} — Nouveau code YouGouYou`,
-        emailVerifHTML(prenom, code),
-        `Code : ${code}`
-      );
-      console.log(`✅ [EMAIL] Nouveau code envoyé à ${email}`);
+      await sendEmail(email, `${code} — Nouveau code YouGouYou`, emailVerifHTML(prenom, code), `Code : ${code}`);
     } else {
-      console.log(`📱 [RESEND SMS] Code pour ${phone} : ${code}`);
+      try {
+        await sendSMS(phone, `YouGouYou - Nouveau code : ${code}. Valable 15 minutes.`);
+        console.log(`✅ [SMS Resend] Code envoyé à ${phone}`);
+      } catch(e){ console.error('[SMS Resend] Échec:', e.message); }
     }
     res.json({ success: true, debug_code: code });
   } catch(err) { res.status(500).json({ error: err.message }); }
