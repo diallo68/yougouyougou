@@ -3085,9 +3085,23 @@ function updateNav(){
     btn.textContent='👤 Se connecter';
     btn.onclick=function(){openModal('auth');};
   }
-  // Masquer le lien Admin par défaut - sera affiché seulement si role=admin vérifié
+  // Masquer le lien Admin — toujours masqué ici, affiché uniquement par syncRole
   var adminLink=document.getElementById('nav-admin-link');
   if(adminLink) adminLink.setAttribute('hidden','');
+  // Si connecté, vérifier le rôle depuis le serveur
+  if(u){
+    var _t=localStorage.getItem('ygy_token');
+    if(_t){
+      fetch('/api/me',{headers:{'Authorization':'Bearer '+_t}})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(d){
+        if(d&&d.user&&d.user.role==='admin'){
+          var al=document.getElementById('nav-admin-link');
+          if(al) al.removeAttribute('hidden');
+        }
+      }).catch(function(){});
+    }
+  }
 }
 
 // ══════════════════════════════════════════
@@ -3131,11 +3145,20 @@ function renderDash(){
   document.getElementById('d-nm').textContent=u.name||u.prenom||'Utilisateur';
   document.getElementById('d-ph').textContent=u.phone||u.email||'';
 
-  // Lien Admin visible seulement pour admin
+  // Lien Admin : masquer par défaut, afficher seulement après vérification serveur
   var adminLink=document.getElementById('nav-admin-link');
-  if(adminLink){
-    if(u.role==='admin') adminLink.removeAttribute('hidden');
-    else adminLink.setAttribute('hidden','');
+  if(adminLink) adminLink.setAttribute('hidden','');
+  // Vérifier le rôle depuis MongoDB (source de vérité)
+  var _tok = localStorage.getItem('ygy_token');
+  if(_tok){
+    fetch('/api/me',{headers:{'Authorization':'Bearer '+_tok}})
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(data){
+      if(data&&data.user&&data.user.role==='admin'){
+        var al=document.getElementById('nav-admin-link');
+        if(al) al.removeAttribute('hidden');
+      }
+    }).catch(function(){});
   }
   // Footer admin btn
   var ftAdminBtn=document.getElementById('ft-admin-btn');
