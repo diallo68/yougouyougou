@@ -694,9 +694,23 @@ app.get('/api/ads', async (req, res) => {
     const sortObj = sortMap[sort] || { createdAt: -1 };
 
     const realSkip = page ? (Number(page) - 1) * Number(limit) : Number(skip);
-    const ads   = await Ad.find(filter).sort(sortObj).skip(realSkip).limit(Number(limit)).select('-sellerPhone');
+    const ads   = await Ad.find(filter).sort(sortObj).skip(realSkip).limit(Number(limit))
+      .select('-sellerPhone')
+      .populate('seller', 'prenom nom phone city avgRating ratingCount verified');
+    // Ajouter sellerName sur chaque annonce pour le frontend
+    const adsWithSeller = ads.map(a => {
+      const obj = a.toObject();
+      if (a.seller && typeof a.seller === 'object') {
+        obj.sellerName = `${a.seller.prenom||''} ${a.seller.nom||''}`.trim() || obj.sellerName || '';
+        obj.sellerCity = a.seller.city || obj.city || '';
+        obj.sellerVerified = a.seller.verified || false;
+        obj.sellerRating   = a.seller.avgRating || 0;
+        obj.seller         = a.seller._id; // remettre l'ID
+      }
+      return obj;
+    });
     const total = await Ad.countDocuments(filter);
-    res.json({ ads, total });
+    res.json({ ads: adsWithSeller, total });
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -707,8 +721,15 @@ app.get('/api/ads/:id', authOptional, async (req, res) => {
       req.params.id,
       { $inc: { views: 1 } },
       { new: true }
-    ).select('-sellerPhone');
+    ).select('-sellerPhone').populate('seller', 'prenom nom city avgRating ratingCount verified');
     if (!ad) return res.status(404).json({ error: 'Annonce introuvable' });
+    // Enrichir sellerName
+    const adObj = ad.toObject();
+    if (ad.seller && typeof ad.seller === 'object') {
+      adObj.sellerName = `${ad.seller.prenom||''} ${ad.seller.nom||''}`.trim() || adObj.sellerName || '';
+      adObj.sellerVerified = ad.seller.verified || false;
+      adObj.seller = ad.seller._id;
+    }
 
     // Incrémenter totalViews du vendeur
     if (ad.seller) User.findByIdAndUpdate(ad.seller, { $inc: { totalViews: 1 } }).catch(()=>{});
