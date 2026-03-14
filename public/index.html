@@ -2379,17 +2379,22 @@ function sendVerifCode(){
   if(sendBtn){sendBtn.disabled=true;sendBtn.textContent='⏳ Envoi en cours...';}
 
   // Appel API → génère le code dans MongoDB
-  // Appel API avec timeout de 5 secondes
   var apiDone = false;
+  var dest = verifyMethod==='email' ? em : '+224 '+ph;
+  var icon = verifyMethod==='email' ? '📧' : '📱';
+
+  // Timeout 15s (Render cold start peut être lent)
   var timeout = setTimeout(function(){
     if(!apiDone){
       apiDone = true;
       if(sendBtn){sendBtn.disabled=false;sendBtn.textContent=verifyMethod==='sms'?'📱 Recevoir le code SMS →':'📧 Recevoir le code par email →';}
-      smsCode = Math.floor(1000+Math.random()*9000).toString();
-      codeFromServer = false;
-      showCodeForm(verifyMethod==='email'?em:'+224 '+ph, verifyMethod==='email'?'📧':'📱');
+      // Le serveur a probablement reçu la requête même si on n'a pas la réponse
+      // On affiche le formulaire — /api/register vérifiera le code en MongoDB
+      codeFromServer = true;
+      showCodeForm(dest, icon);
+      toast('⚠️ Délai dépassé — si vous recevez le code, saisissez-le','warn');
     }
-  }, 5000);
+  }, 15000);
 
   fetch('/api/auth/send-code',{
     method:'POST',
@@ -2401,16 +2406,16 @@ function sendVerifCode(){
     if(apiDone) return; apiDone = true; clearTimeout(timeout);
     if(sendBtn){sendBtn.disabled=false;sendBtn.textContent=verifyMethod==='sms'?'📱 Recevoir le code SMS →':'📧 Recevoir le code par email →';}
     if(data.error){toast('❌ '+data.error,'err');return;}
-    smsCode = data.debug_code || Math.floor(1000+Math.random()*9000).toString();
-    codeFromServer = !!data.debug_code;
-    showCodeForm(verifyMethod==='email'?em:'+224 '+ph, verifyMethod==='email'?'📧':'📱');
+    // codeFromServer=true toujours — le serveur a sauvegardé le code dans MongoDB
+    codeFromServer = true;
+    showCodeForm(dest, icon);
   })
   .catch(function(){
     if(apiDone) return; apiDone = true; clearTimeout(timeout);
     if(sendBtn){sendBtn.disabled=false;sendBtn.textContent=verifyMethod==='sms'?'📱 Recevoir le code SMS →':'📧 Recevoir le code par email →';}
-    smsCode = Math.floor(1000+Math.random()*9000).toString();
+    // Erreur réseau — le serveur n'a peut-être pas reçu la requête
     codeFromServer = false;
-    showCodeForm(verifyMethod==='email'?em:'+224 '+ph, verifyMethod==='email'?'📧':'📱');
+    toast('❌ Erreur réseau — vérifiez votre connexion','err');
   });
 }
 
