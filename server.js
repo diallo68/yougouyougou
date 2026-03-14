@@ -91,7 +91,7 @@ async function sendSMS(phone, message) {
   }
 
   const recipients = data?.SMSMessageData?.Recipients || [];
-  const failed = recipients.filter(r => r.statusCode !== 101);
+  const failed = recipients.filter(r => r.status !== "Success" && r.statusCode !== 101 && r.statusCode !== 100);
   if (recipients.length > 0 && failed.length === recipients.length) {
     throw new Error(`Africa's Talking SMS non délivré: ${JSON.stringify(recipients)}`);
   }
