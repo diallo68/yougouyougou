@@ -2825,8 +2825,16 @@ function startInactivityWatch(){
 function updateNav(){
   var btn=document.getElementById('nav-auth-btn');if(!btn)return;
   var u=DB.user();
-  if(u){btn.textContent='👤 '+u.name.split(' ')[0];btn.onclick=function(){loadDash();goTo('dashboard');};}
-  else{btn.textContent='👤 Se connecter';btn.onclick=function(){openModal('auth');};}
+  if(u){
+    btn.textContent='👤 '+u.name.split(' ')[0];
+    btn.onclick=function(){loadDash();goTo('dashboard');};
+  } else {
+    btn.textContent='👤 Se connecter';
+    btn.onclick=function(){openModal('auth');};
+  }
+  // Masquer le lien Admin par défaut - sera affiché seulement si role=admin vérifié
+  var adminLink=document.getElementById('nav-admin-link');
+  if(adminLink) adminLink.setAttribute('hidden','');
 }
 
 // ══════════════════════════════════════════
@@ -4680,6 +4688,27 @@ goTo=function(page){
 
 document.addEventListener('DOMContentLoaded',function(){
   DB.load();
+  // Sync rôle depuis MongoDB au chargement
+  (function(){
+    var token = localStorage.getItem('ygy_token');
+    if(token){
+      fetch('/api/me',{headers:{'Authorization':'Bearer '+token}})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(data){
+        if(data && data.user){
+          var u = DB.user() || {};
+          u.role = data.user.role; // toujours prendre le rôle depuis MongoDB
+          DB.login(u);
+          // Mettre à jour le lien Admin selon le vrai rôle
+          var adminLink = document.getElementById('nav-admin-link');
+          if(adminLink){
+            if(u.role==='admin') adminLink.removeAttribute('hidden');
+            else adminLink.setAttribute('hidden','');
+          }
+        }
+      }).catch(function(){});
+    }
+  })();
 
   // Reset mdp via lien email
   (function(){
