@@ -194,7 +194,7 @@ function emailAlertHTML(alert, ad) {
 const UserSchema = new mongoose.Schema({
   prenom:       { type: String, required: true, trim: true },
   nom:          { type: String, trim: true },
-  phone:        { type: String, required: true, unique: true },
+  phone:        { type: String, unique: true, sparse: true },
   email:        { type: String, trim: true, lowercase: true },
   password:     { type: String, required: true },
   city:         { type: String },
@@ -412,7 +412,18 @@ app.post('/api/auth/send-code', async (req, res) => {
     const update = { verifyCode: code, codeExpiry: expiry, method };
     if (phone) update.phone = phone;
     if (email) update.email = email.toLowerCase();
-    await User.findOneAndUpdate(query, update, { upsert: true, new: true });
+    // Pour email sans phone : fournir un phone unique pour respecter le schéma
+    const setOnInsert = {};
+    if (method === 'email' && !phone) {
+      setOnInsert.phone = 'email_' + email.toLowerCase().replace(/[^a-z0-9]/g,'_');
+      setOnInsert.prenom = prenom;
+      setOnInsert.password = 'pending'; // sera remplacé à l'inscription
+    }
+    await User.findOneAndUpdate(
+      query,
+      { $set: update, $setOnInsert: Object.keys(setOnInsert).length ? setOnInsert : { _created: new Date() } },
+      { upsert: true, new: true }
+    );
 
     let emailSent = false;
     let smsSent = false;
@@ -453,8 +464,15 @@ app.post('/api/register', async (req, res) => {
       return res.status(400).json({ error: 'Champs requis : prenom, password, code' });
 
     let pending = null;
-    if (phone) pending = await User.findOne({ phone });
+    // Mode email : chercher par email en priorité
+    if (method === 'email' && email) {
+      pending = await User.findOne({ email: email.toLowerCase() });
+    } else if (phone) {
+      pending = await User.findOne({ phone });
+    }
     if (!pending && email) pending = await User.findOne({ email: email.toLowerCase() });
+    if (!pending && phone) pending = await User.findOne({ phone });
+    console.log(`[REGISTER] method=${method} phone="${phone}" email="${email}" pending=${pending?pending._id:'null'} verifyCode=${pending?.verifyCode}`);
     if (!pending) return res.status(400).json({ error: "Demandez d'abord un code de vérification" });
     // Vérifier le code AVANT de vérifier si déjà inscrit
     if (!pending.verifyCode) return res.status(400).json({ error: "Code expiré — demandez un nouveau code" });
