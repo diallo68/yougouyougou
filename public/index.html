@@ -436,6 +436,58 @@ footer{background:transparent;margin-top:0}
 .msg-security strong{color:#E65100}
 .msg-send-btn{background:var(--or);color:#fff;border:none;border-radius:50%;width:38px;height:38px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s}
 .msg-send-btn:hover{background:var(--or2)}
+
+/* ── Page Messages dédiée ── */
+#page-messages.active{display:flex !important;flex-direction:column}
+.pmsg-wrap{display:grid;grid-template-columns:320px 1fr;flex:1;height:100%;border-top:1px solid var(--br);background:#fff}
+.pmsg-left{display:flex;flex-direction:column;border-right:1px solid var(--br);background:#fff;overflow:hidden}
+.pmsg-left-head{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--br);background:#fff}
+.pmsg-back{background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:13px;font-family:inherit;padding:0}
+.pmsg-back:hover{text-decoration:underline}
+.pmsg-filters{display:flex;gap:8px;padding:10px 14px;border-bottom:1px solid var(--br);background:#fafafa}
+.pmsg-filter{background:#fff;border:1.5px solid var(--br);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--ink);transition:all .15s}
+.pmsg-filter.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.pmsg-list{flex:1;overflow-y:auto}
+.pmsg-conv{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--brl);cursor:pointer;transition:background .12s;position:relative}
+.pmsg-conv:hover{background:#fafafa}
+.pmsg-conv.active{background:#FFF3EE;border-left:3px solid var(--or)}
+.pmsg-conv:not(.active){border-left:3px solid transparent}
+.pmsg-conv-thumb{width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;background:var(--brl);display:flex;align-items:center;justify-content:center;font-size:20px;overflow:hidden}
+.pmsg-conv-thumb img{width:100%;height:100%;object-fit:cover}
+.pmsg-conv-info{flex:1;min-width:0}
+.pmsg-conv-title{font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.pmsg-conv-preview{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.pmsg-conv-meta{display:flex;align-items:center;gap:6px}
+.pmsg-conv-who{font-size:11px;color:var(--muted)}
+.pmsg-conv-date{font-size:11px;color:var(--muted)}
+.pmsg-conv-unread{background:var(--or);color:#fff;border-radius:50%;min-width:18px;height:18px;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;padding:0 3px;position:absolute;right:12px;top:50%;transform:translateY(-50%)}
+/* Colonne droite */
+.pmsg-right{display:flex;flex-direction:column;background:#fff;overflow:hidden}
+.pmsg-thread-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--muted);padding:40px}
+.pmsg-thread-head{display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid var(--br);background:#fff;flex-shrink:0}
+.pmsg-thread-av{width:44px;height:44px;border-radius:50%;background:var(--or);color:#fff;font-weight:800;font-size:17px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pmsg-thread-info{flex:1;min-width:0}
+.pmsg-thread-name{font-size:15px;font-weight:800;color:var(--ink)}
+.pmsg-thread-ad{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pmsg-seller-card{margin:12px 20px;padding:12px 16px;border:1px solid var(--br);border-radius:10px;background:#fff}
+.pmsg-seller-card-title{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:6px}
+.pmsg-seller-since{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.pmsg-bubbles{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:8px;background:#f8f8f8}
+.pmsg-security{background:#FFF9E6;border:1px solid #FFE082;border-radius:10px;padding:12px 16px;font-size:12px;color:#795548;line-height:1.7;margin-bottom:4px}
+.pmsg-security strong{color:#E65100;display:block;margin-bottom:4px}
+.pmsg-security a{color:var(--or);font-weight:700;text-decoration:none}
+.pmsg-bubble-wrap{display:flex;flex-direction:column}
+.pmsg-bubble-wrap.mine{align-items:flex-end}
+.pmsg-bubble-wrap.theirs{align-items:flex-start}
+.pmsg-bubble{max-width:72%;padding:10px 14px;border-radius:18px;font-size:13px;line-height:1.6;word-break:break-word}
+.pmsg-bubble.mine{background:var(--or);color:#fff;border-radius:18px 18px 4px 18px}
+.pmsg-bubble.theirs{background:#fff;color:var(--ink);border-radius:18px 18px 18px 4px;border:1px solid var(--br)}
+.pmsg-bubble-time{font-size:10px;color:var(--muted);margin-top:4px;padding:0 4px}
+.pmsg-input-wrap{display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid var(--br);background:#fff;flex-shrink:0}
+.pmsg-input{flex:1;border:1.5px solid var(--br);border-radius:24px;padding:10px 18px;font-size:13px;font-family:inherit;outline:none;transition:border-color .2s;background:#fafafa}
+.pmsg-input:focus{border-color:var(--or);background:#fff}
+.pmsg-send{background:var(--or);color:#fff;border:none;border-radius:50%;width:42px;height:42px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s}
+.pmsg-send:hover{background:var(--or2)}
 </style>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#FF5C00">
@@ -3153,6 +3205,7 @@ function navGoMessages(){
     .then(function(r){return r.json();})
     .then(function(data){
       var convs = data.conversations||data||[];
+      _pageConvs = convs;
       renderPageConvList(convs);
       updateMsgBadge(convs);
     }).catch(function(){
@@ -3165,60 +3218,91 @@ function renderPageConvList(convs){
   var list = document.getElementById('page-msg-list');
   if(!list) return;
   var user = DB.user();
-  if(!convs.length){
+  if(!convs||!convs.length){
     list.innerHTML = '<div style="padding:32px 16px;text-align:center;color:var(--muted)">'+
-      '<div style="font-size:40px;margin-bottom:10px">💬</div>'+
+      '<div style="font-size:36px;margin-bottom:8px">💬</div>'+
       '<div style="font-size:13px;font-weight:600">Aucune conversation</div>'+
     '</div>';
     return;
   }
   list.innerHTML = convs.map(function(conv){
     var isUnread = (conv.unreadCount||0) > 0;
-    var name = String(conv.buyerId)===(user&&String(user._id)) ? conv.sellerName : conv.buyerName;
-    var last = conv.lastMessage||'Nouvelle conversation';
-    var time = conv.updatedAt ? timeAgo(conv.updatedAt) : '';
-    var cid  = conv._id||conv.id||'';
-    return '<div class="msg-list-item" onclick="openPageConv(\''+cid+'\','+JSON.stringify(conv).replace(/'/g,"\'")+')" >'+
-      '<div class="msg-av">'+(name||'?').charAt(0).toUpperCase()+'</div>'+
-      '<div class="msg-info">'+
-        '<div class="msg-name">'+(name||'Utilisateur')+'</div>'+
-        '<div class="msg-preview">'+last.substring(0,40)+'</div>'+
+    var isBuyer  = String(conv.buyerId)===(user&&String(user._id));
+    var name     = isBuyer ? (conv.sellerName||'Vendeur') : (conv.buyerName||'Acheteur');
+    var last     = conv.lastMessage||'Nouvelle conversation';
+    var time     = conv.updatedAt ? timeAgo(conv.updatedAt) : '';
+    var cid      = conv._id||conv.id||'';
+    var adTitle  = conv.adTitle||'';
+    return '<div class="pmsg-conv" onclick="openPageConvById(\''+cid+'\')">'+
+      '<div class="pmsg-conv-thumb">'+name.charAt(0).toUpperCase()+'</div>'+
+      '<div class="pmsg-conv-info">'+
+        '<div class="pmsg-conv-title">'+(adTitle||name)+'</div>'+
+        '<div class="pmsg-conv-preview">'+last.substring(0,45)+'</div>'+
+        '<div class="pmsg-conv-meta">'+
+          '<span class="pmsg-conv-who">'+name+'</span>'+
+          '<span class="pmsg-conv-date">· '+time+'</span>'+
+        '</div>'+
       '</div>'+
-      '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">'+
-        '<div class="msg-time">'+time+'</div>'+
-        (isUnread?'<div class="msg-badge">'+conv.unreadCount+'</div>':'')+
-      '</div>'+
+      (isUnread?'<div class="pmsg-conv-unread">'+conv.unreadCount+'</div>':'')+
     '</div>';
   }).join('');
 }
 
 var _pageConvId = null;
-function openPageConv(convId, conv){
+var _pageConvs  = [];
+function openPageConvById(cid){
+  var conv = _pageConvs.find(function(c){return (c._id||c.id)===cid;})||{_id:cid};
+  // Marquer actif
+  document.querySelectorAll('.pmsg-conv').forEach(function(i){i.classList.remove('active');});
+  document.querySelectorAll('.pmsg-conv').forEach(function(el){
+    if(el.getAttribute('onclick')&&el.getAttribute('onclick').includes(cid)) el.classList.add('active');
+  });
+  openPageConv(cid, conv);
+}
+function filterConvs(type, btn){
+  document.querySelectorAll('.pmsg-filter').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  var convs = _pageConvs;
+  if(type==='unread') convs = convs.filter(function(c){return (c.unreadCount||0)>0;});
+  renderPageConvList(convs);
+}
+function openPageConv(convId, convData){
   _pageConvId = convId;
-  document.querySelectorAll('#page-msg-list .msg-list-item').forEach(function(i){i.classList.remove('active');});
-  event.currentTarget.classList.add('active');
+  // actif géré par openPageConvById
   var thread = document.getElementById('page-msg-thread');
   if(!thread) return;
   var user = DB.user();
-  var otherName = String(conv.buyerId)===(user&&String(user._id)) ? conv.sellerName : conv.buyerName;
+  var conv = convData || {};
+  var otherName = String(conv.buyerId)===(user&&String(user._id)) ? (conv.sellerName||'Vendeur') : (conv.buyerName||'Acheteur');
   var adTitle = conv.adTitle||'';
+  thread.className = '';
   thread.innerHTML =
-    '<div class="msg-thread-head">'+
-      '<div class="msg-av" style="width:38px;height:38px;font-size:15px;flex-shrink:0">'+(otherName||'?').charAt(0).toUpperCase()+'</div>'+
-      '<div style="flex:1;min-width:0">'+
-        '<div style="font-size:14px;font-weight:700;color:var(--ink)">'+otherName+'</div>'+
-        (adTitle?'<div style="font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">📦 '+adTitle+'</div>':'')+
+    '<div class="pmsg-thread-head">'+
+      '<div class="pmsg-thread-av">'+(otherName||'?').charAt(0).toUpperCase()+'</div>'+
+      '<div class="pmsg-thread-info">'+
+        '<div class="pmsg-thread-name">'+otherName+'</div>'+
+        (adTitle?'<div class="pmsg-thread-ad">📦 '+adTitle+'</div>':'')+
       '</div>'+
     '</div>'+
-    '<div class="msg-bubbles" id="page-msg-bubbles">'+
-      '<div class="msg-security">🛡️ <strong>Conseils sécurité</strong> — Vérifiez l\'article avant paiement. Échangez en lieu public.</div>'+
-      '<div style="text-align:center;padding:16px;color:var(--muted);font-size:12px">⏳ Chargement...</div>'+
+    '<div class="pmsg-seller-card">'+
+      '<div class="pmsg-seller-card-title">À propos de ce vendeur</div>'+
+      '<div class="pmsg-seller-since">'+
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'+
+        'Membre YouGouYou'+
+      '</div>'+
     '</div>'+
-    '<div class="msg-input-row">'+
-      '<input type="text" id="page-msg-input" placeholder="Votre message..." '+
-        'onkeydown="if(event.key===\'Enter\')sendPageMsg()" '+
-        'onfocus="this.style.borderColor=\'var(--or)\'" onblur="this.style.borderColor=\'var(--br)\'">'+
-      '<button class="msg-send-btn" onclick="sendPageMsg()">'+
+    '<div class="pmsg-bubbles" id="page-msg-bubbles">'+
+      '<div class="pmsg-security">'+
+        '<strong>Soyez prudent lorsque votre interlocuteur vous demande ou vous envoie un numéro de téléphone / e-mail</strong>'+
+        'Ici nous garantissons la sécurité de vos échanges, c\'est pourquoi nous vous conseillons de rester sur la messagerie pour discuter et passer par le paiement sécurisé pour vos transactions.<br>'+
+        '<a href="#">→ En savoir plus</a>'+
+      '</div>'+
+      '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">⏳ Chargement...</div>'+
+    '</div>'+
+    '<div class="pmsg-input-wrap">'+
+      '<input class="pmsg-input" type="text" id="page-msg-input" placeholder="Votre message..." '+
+        'onkeydown="if(event.key===\'Enter\')sendPageMsg()">'+
+      '<button class="pmsg-send" onclick="sendPageMsg()">'+
         '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>'+
       '</button>'+
     '</div>';
@@ -3236,15 +3320,17 @@ function openPageConv(convId, conv){
           '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Démarrez la conversation 👋</div>';
         return;
       }
-      var html = '<div class="msg-security">🛡️ <strong>Conseils sécurité</strong> — Vérifiez l\'article avant paiement. Échangez en lieu public.</div>';
+      var html = '<div class="pmsg-security">'+
+        '<strong>Soyez prudent lorsque votre interlocuteur vous demande un numéro de téléphone / e-mail</strong>'+
+        'Restez sur la messagerie YouGouYou pour vos échanges. Passez par le paiement sécurisé pour vos transactions.'+
+      '</div>';
       msgs.forEach(function(m){
         var isMine = String(m.senderId)===(user&&String(user._id));
         var t = m.createdAt?new Date(m.createdAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
-        html += '<div style="display:flex;flex-direction:column;align-items:'+(isMine?'flex-end':'flex-start')+';margin-bottom:4px">'+
-          '<div class="msg-bubble '+(isMine?'mine':'theirs')+'">'+
-            '<div>'+m.text+'</div>'+
-            '<div style="font-size:10px;opacity:.65;margin-top:4px;text-align:'+(isMine?'right':'left')+'">'+t+(isMine?' ✓':'')+'</div>'+
-          '</div></div>';
+        html += '<div class="pmsg-bubble-wrap '+(isMine?'mine':'theirs')+'">'+
+          '<div class="pmsg-bubble '+(isMine?'mine':'theirs')+'">'+m.text+'</div>'+
+          '<div class="pmsg-bubble-time">'+t+(isMine?' · ✓✓':'')+'</div>'+
+        '</div>';
       });
       container.innerHTML = html;
       container.scrollTop = container.scrollHeight;
@@ -5500,34 +5586,34 @@ document.addEventListener('DOMContentLoaded',function(){
 </div>
 
 <!-- ══ PAGE MESSAGES ══ -->
-<div id="page-messages" class="page">
-  <div style="max-width:1100px;margin:0 auto;padding:20px 20px">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
-      <button onclick="goTo('home')" style="background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:14px;font-family:inherit">← Retour</button>
-      <h2 style="margin:0;font-size:20px;font-weight:800">💬 Mes messages</h2>
+<div id="page-messages" class="page" style="height:calc(100vh - 110px);display:none">
+<div class="pmsg-wrap">
+  <!-- Colonne gauche -->
+  <div class="pmsg-left">
+    <div class="pmsg-left-head">
+      <button onclick="goTo('home')" class="pmsg-back">← Retour</button>
+      <span style="font-weight:800;font-size:15px">Messages</span>
     </div>
-    <div class="msg-layout">
-      <!-- Colonne gauche : liste conversations -->
-      <div style="display:flex;flex-direction:column;border-right:1px solid var(--br);overflow:hidden">
-        <div class="msg-list-header">Conversations</div>
-        <div id="page-msg-list" style="flex:1;overflow-y:auto">
-          <div style="padding:32px 16px;text-align:center;color:var(--muted)">
-            <div style="font-size:40px;margin-bottom:10px">💬</div>
-            <div style="font-size:13px;font-weight:600;margin-bottom:6px">Aucune conversation</div>
-            <div style="font-size:12px">Contactez un vendeur pour commencer</div>
-          </div>
-        </div>
-      </div>
-      <!-- Colonne droite : thread -->
-      <div id="page-msg-thread" style="display:flex;flex-direction:column;height:100%">
-        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;color:var(--muted)">
-          <div style="font-size:48px">👈</div>
-          <div style="font-size:14px;font-weight:600">Sélectionnez une conversation</div>
-          <div style="font-size:12px">Vos échanges avec les vendeurs apparaissent ici</div>
-        </div>
+    <div class="pmsg-filters">
+      <button class="pmsg-filter active" onclick="filterConvs('all',this)">Tout</button>
+      <button class="pmsg-filter" onclick="filterConvs('unread',this)">Non lus</button>
+    </div>
+    <div id="page-msg-list" class="pmsg-list">
+      <div style="padding:32px 16px;text-align:center;color:var(--muted)">
+        <div style="font-size:36px;margin-bottom:8px">💬</div>
+        <div style="font-size:13px">Aucune conversation</div>
       </div>
     </div>
   </div>
+  <!-- Colonne droite -->
+  <div class="pmsg-right">
+    <div id="page-msg-thread" class="pmsg-thread-empty">
+      <div style="font-size:48px;margin-bottom:12px">👈</div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:6px">Sélectionnez une conversation</div>
+      <div style="font-size:13px">Vos échanges avec les vendeurs apparaissent ici</div>
+    </div>
+  </div>
+</div>
 </div>
 
 <!-- ══ PAGE FAVORIS ══ -->
