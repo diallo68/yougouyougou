@@ -42,63 +42,6 @@ if (process.env.SENDGRID_API_KEY) {
   console.warn('⚠️ [EMAIL] SENDGRID_API_KEY non défini');
 }
 
-
-// ── SMS via Africa's Talking SDK officiel ───────────────────────
-async function sendSMS(phone, message) {
-  // Normaliser le numéro
-  let to = phone.replace(/\s/g, '');
-  if (!to.startsWith('+')) to = '+224' + to.replace(/^00224/, '').replace(/^224/, '');
-
-  const atApiKey   = process.env.AT_API_KEY;
-  const atUsername = process.env.AT_USERNAME; // 'sandbox' en test, ton username en prod
-
-  if (!atApiKey || !atUsername) {
-    console.warn(`⚠️ [SMS] AT_API_KEY ou AT_USERNAME manquant — code non envoyé à ${to}`);
-    return;
-  }
-
-  // URL selon le mode : sandbox ou live
-  const isSandbox = atUsername === 'sandbox';
-  const url = isSandbox
-    ? 'https://api.sandbox.africastalking.com/version1/messaging'
-    : 'https://api.africastalking.com/version1/messaging';
-
-  const params = new URLSearchParams();
-  params.append('username', atUsername);
-  params.append('to',       to);
-  params.append('message',  message);
-
-  console.log(`📱 [SMS] Envoi vers ${url} pour ${to}`);
-
-  const resp = await fetch(url, {
-    method:  'POST',
-    headers: {
-      'apiKey':        atApiKey,
-      'Content-Type':  'application/x-www-form-urlencoded',
-      'Accept':        'application/json'
-    },
-    body: params.toString()
-  });
-
-  const text = await resp.text();
-  let data;
-  try { data = JSON.parse(text); } catch { data = { raw: text }; }
-
-  console.log(`📱 [SMS AT] Réponse brute:`, JSON.stringify(data));
-
-  if (!resp.ok) {
-    throw new Error(`Africa's Talking erreur HTTP ${resp.status}: ${text}`);
-  }
-
-  const recipients = data?.SMSMessageData?.Recipients || [];
-  const failed = recipients.filter(r => r.status !== "Success" && r.statusCode !== 101 && r.statusCode !== 100);
-  if (recipients.length > 0 && failed.length === recipients.length) {
-    throw new Error(`Africa's Talking SMS non délivré: ${JSON.stringify(recipients)}`);
-  }
-
-  console.log(`✅ [SMS AT] Envoyé à ${to}`);
-}
-
 async function sendEmail(to, subject, html, text) {
   const apiKey = process.env.SENDGRID_API_KEY;
   if (!apiKey) { console.warn('[EMAIL] SendGrid non configuré →', to, subject); return; }
@@ -406,14 +349,7 @@ app.post('/api/auth/send-code', async (req, res) => {
 
     let emailSent = false;
     if (method === 'sms') {
-      try {
-        const smsMsg = `YouGouYou - Votre code de vérification : ${code}. Valable 15 minutes.`;
-        await sendSMS(phone, smsMsg);
-        console.log(`✅ [SMS] Code envoyé à ${phone}`);
-      } catch(smsErr) {
-        console.error(`❌ [SMS] Échec envoi à ${phone}:`, smsErr.message);
-        // On continue quand même - le code est en DB
-      }
+      console.log(`📱 [SMS] Code pour ${phone} : ${code}`);
     } else {
       try {
         await sendEmail(email,
@@ -502,10 +438,7 @@ app.post('/api/auth/resend-code', async (req, res) => {
     if (method === 'email' && email) {
       await sendEmail(email, `${code} — Nouveau code YouGouYou`, emailVerifHTML(prenom, code), `Code : ${code}`);
     } else {
-      try {
-        await sendSMS(phone, `YouGouYou - Nouveau code : ${code}. Valable 15 minutes.`);
-        console.log(`✅ [SMS Resend] Code envoyé à ${phone}`);
-      } catch(e){ console.error('[SMS Resend] Échec:', e.message); }
+      console.log(`📱 [RESEND] Code pour ${phone} : ${code}`);
     }
     res.json({ success: true, debug_code: code });
   } catch(err) { res.status(500).json({ error: err.message }); }
@@ -552,30 +485,6 @@ app.post('/api/auth/reset-password/confirm', async (req, res) => {
     await User.findByIdAndUpdate(resetDoc.userId, { password: hashed });
     await ResetToken.findByIdAndUpdate(resetDoc._id, { used: true });
     res.json({ success: true, message: 'Mot de passe mis à jour' });
-  } catch(err) { res.status(500).json({ error: err.message }); }
-});
-
-
-// ── Noter une annonce ──────────────────────────────────────────
-app.post('/api/ads/:id/rate', auth, async (req, res) => {
-  try {
-    const { rating } = req.body;
-    if (!rating || rating < 1 || rating > 5)
-      return res.status(400).json({ error: 'Note invalide (1-5)' });
-
-    const ad = await Ad.findById(req.params.id);
-    if (!ad) return res.status(404).json({ error: 'Annonce introuvable' });
-
-    // Recalculer la moyenne
-    const newCount = (ad.ratingCount || 0) + 1;
-    const newAvg   = ((ad.avgRating || 0) * (ad.ratingCount || 0) + rating) / newCount;
-
-    await Ad.findByIdAndUpdate(req.params.id, {
-      avgRating:   Math.round(newAvg * 10) / 10,
-      ratingCount: newCount
-    });
-
-    res.json({ success: true, avgRating: Math.round(newAvg*10)/10, ratingCount: newCount });
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -694,30 +603,24 @@ app.get('/api/ads', async (req, res) => {
     const sortObj = sortMap[sort] || { createdAt: -1 };
 
     const realSkip = page ? (Number(page) - 1) * Number(limit) : Number(skip);
-    const ads   = await Ad.find(filter).sort(sortObj).skip(realSkip).limit(Number(limit))
+    const ads = await Ad.find(filter)
+      .sort(sortObj).skip(realSkip).limit(Number(limit))
       .select('-sellerPhone')
       .populate('seller', 'prenom nom phone city avgRating ratingCount verified');
-    // Enrichir chaque annonce avec sellerName + infos vendeur
-    const adsWithSeller = ads.map(a => {
+    const total = await Ad.countDocuments(filter);
+    // Enrichir sellerName depuis le User populé
+    const adsOut = ads.map(a => {
       const obj = a.toObject();
       if (a.seller && typeof a.seller === 'object') {
-        // Reconstruire sellerName depuis le User populé
-        const fullName = `${a.seller.prenom||''} ${a.seller.nom||''}`.trim();
-        obj.sellerName    = fullName || obj.sellerName || 'Vendeur';
-        obj.sellerPhone   = a.seller.phone || obj.sellerPhone || '';
-        obj.sellerCity    = a.seller.city  || obj.city || '';
-        obj.sellerVerified= a.seller.verified || false;
-        obj.sellerRating  = a.seller.avgRating || 0;
-        obj.sellerCount   = a.seller.ratingCount || 0;
-        obj.seller        = a.seller._id; // remettre l'ID (pas l'objet)
+        obj.sellerName  = (`${a.seller.prenom||''} ${a.seller.nom||''}`).trim() || obj.sellerName || 'Vendeur';
+        obj.sellerPhone = a.seller.phone || '';
+        obj.seller      = a.seller._id;
       } else {
-        // seller non populé : garder sellerName stocké en base
-        obj.sellerName = obj.sellerName || 'Vendeur';
+        obj.sellerName  = obj.sellerName || 'Vendeur';
       }
       return obj;
     });
-    const total = await Ad.countDocuments(filter);
-    res.json({ ads: adsWithSeller, total });
+    res.json({ ads: adsOut, total });
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -728,20 +631,16 @@ app.get('/api/ads/:id', authOptional, async (req, res) => {
       req.params.id,
       { $inc: { views: 1 } },
       { new: true }
-    ).select('-sellerPhone').populate('seller', 'prenom nom phone city avgRating ratingCount verified');
+    ).select('-sellerPhone')
+     .populate('seller', 'prenom nom phone city avgRating ratingCount verified isPro');
     if (!ad) return res.status(404).json({ error: 'Annonce introuvable' });
-    // Enrichir avec toutes les infos vendeur
-    const adObj = ad.toObject();
+    const adOut = ad.toObject();
     if (ad.seller && typeof ad.seller === 'object') {
-      const fullName = `${ad.seller.prenom||''} ${ad.seller.nom||''}`.trim();
-      adObj.sellerName    = fullName || adObj.sellerName || 'Vendeur';
-      adObj.sellerPhone   = ad.seller.phone || adObj.sellerPhone || '';
-      adObj.sellerCity    = ad.seller.city  || adObj.city || '';
-      adObj.sellerVerified= ad.seller.verified || false;
-      adObj.sellerRating  = ad.seller.avgRating || 0;
-      adObj.seller        = ad.seller._id;
+      adOut.sellerName  = (`${ad.seller.prenom||''} ${ad.seller.nom||''}`).trim() || adOut.sellerName || 'Vendeur';
+      adOut.sellerPhone = ad.seller.phone || '';
+      adOut.seller      = ad.seller._id;
     } else {
-      adObj.sellerName = adObj.sellerName || 'Vendeur';
+      adOut.sellerName  = adOut.sellerName || 'Vendeur';
     }
 
     // Incrémenter totalViews du vendeur
@@ -754,7 +653,7 @@ app.get('/api/ads/:id', authOptional, async (req, res) => {
       if (seller) sellerRating = { avg: seller.avgRating, count: seller.ratingCount, isPro: seller.isPro };
     }
 
-    res.json({ ...adObj, sellerRating });
+    res.json({ ...adOut, sellerRating });
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
