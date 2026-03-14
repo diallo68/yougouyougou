@@ -83,7 +83,7 @@ nav{background:#fff;border-bottom:1px solid var(--br);position:sticky;top:0;z-in
 .nav-sc-loc:hover{color:var(--or)}
 .nav-sc-btn{background:var(--or);border:none;width:46px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:background .12s}
 .nav-sc-btn:hover{background:var(--or2)}
-.nav-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:2px;flex-shrink:0}
 .nav-cats{background:#fff;border-top:1px solid var(--br);position:relative;z-index:300;overflow:visible}
 .nav-cats-in{max-width:1100px;margin:0 auto;padding:0 16px;display:flex;align-items:stretch;overflow-x:visible;}
 .nav-cats-in::-webkit-scrollbar{display:none}
@@ -410,6 +410,16 @@ footer{background:transparent;margin-top:0}
 .bubble.sent{background:var(--or);color:#fff;align-self:flex-end;border-radius:10px 10px 2px 10px}
 .bubble.recv{background:var(--brl);color:var(--ink);align-self:flex-start;border-radius:10px 10px 10px 2px}
 .bubble-time{font-size:10px;opacity:.7;margin-top:3px;text-align:right}
+
+.nav-icon-btn{position:relative;background:none;border:none;cursor:pointer;padding:7px 8px;border-radius:8px;color:var(--ink);display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-icon-btn:hover{background:var(--brl)}
+.nav-icon-btn svg{display:block}
+.nav-lbc-btn{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;cursor:pointer;padding:6px 10px;border-radius:8px;color:var(--ink);font-family:inherit;font-size:11px;font-weight:600;line-height:1;transition:background .15s;white-space:nowrap;min-width:52px}
+.nav-lbc-btn:hover{background:var(--brl);color:var(--or)}
+.nav-lbc-btn svg{flex-shrink:0}
+.nav-lbc-btn span{margin-top:1px}
+.nav-lbc-auth{font-weight:700}
+@media(max-width:900px){.nav-lbc-btn span{display:none}.nav-lbc-btn{min-width:36px;padding:6px 8px}}
 </style>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#FF5C00">
@@ -479,9 +489,22 @@ footer{background:transparent;margin-top:0}
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Déposer une annonce
     </button>
-    <button class="btn btn-ghost" id="nav-auth-btn" onclick="openModal('auth')">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <span id="nav-user-label">Connexion</span>
+    <button class="nav-lbc-btn" onclick="navGoSearches()" title="Mes recherches">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <span>Mes recherches</span>
+    </button>
+    <button class="nav-lbc-btn" id="nav-favs-btn" onclick="navGoFavs()" title="Favoris">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <span>Favoris</span>
+    </button>
+    <button class="nav-lbc-btn" id="nav-msgs-btn" onclick="navGoMessages()" title="Messages">
+      <span id="nav-msg-badge" style="display:none;position:absolute;top:3px;right:3px;background:var(--or);color:#fff;border-radius:50%;width:15px;height:15px;font-size:9px;font-weight:900;align-items:center;justify-content:center;line-height:15px">0</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>Messages</span>
+    </button>
+    <button class="nav-lbc-btn nav-lbc-auth" id="nav-auth-btn" onclick="openModal('auth')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span id="nav-user-label">Se connecter</span>
     </button>
   </div>
 </div>
@@ -3075,14 +3098,34 @@ function startInactivityWatch(){
   // Démarrer le premier timer
   resetInactivityTimer();
 }
+
+function navGoSearches(){
+  if(!DB.user()){openModal('auth');return;}
+  toast('🔔 Alertes de recherche','ok');
+  loadDash(); goTo('dashboard');
+  setTimeout(function(){ showDashTab('alerts'); }, 300);
+}
+function navGoFavs(){
+  if(!DB.user()){openModal('auth');return;}
+  loadDash(); goTo('dashboard');
+  setTimeout(function(){ showDashTab('favs'); }, 300);
+}
+function navGoMessages(){
+  if(!DB.user()){openModal('auth');return;}
+  loadDash(); goTo('dashboard');
+  setTimeout(function(){ showDashTab('messages'); }, 300);
+}
 function updateNav(){
   var btn=document.getElementById('nav-auth-btn');if(!btn)return;
   var u=DB.user();
+  var favsBtn=document.getElementById('nav-favs-btn');
+  var msgsBtn=document.getElementById('nav-msgs-btn');
   if(u){
-    btn.textContent='👤 '+u.name.split(' ')[0];
+    var firstName = (u.name||u.prenom||'Moi').split(' ')[0];
+    btn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>'+firstName+'</span>';
     btn.onclick=function(){loadDash();goTo('dashboard');};
   } else {
-    btn.textContent='👤 Se connecter';
+    btn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span id="nav-user-label">Se connecter</span>';
     btn.onclick=function(){openModal('auth');};
   }
   // Masquer le lien Admin — toujours masqué ici, affiché uniquement par syncRole
@@ -4602,10 +4645,12 @@ function sendQuickMessage(){
 
 function updateMsgBadge(convs){
   var total=(convs||[]).reduce(function(acc,c){return acc+(c.unreadCount||0);},0);
+  // Badge dans le dashboard
   var badge=document.getElementById('msg-badge');
-  if(!badge) return;
-  if(total>0){ badge.textContent=total; badge.style.display='flex'; }
-  else badge.style.display='none';
+  if(badge){ if(total>0){badge.textContent=total;badge.style.display='flex';}else badge.style.display='none'; }
+  // Badge dans la nav top
+  var navBadge=document.getElementById('nav-msg-badge');
+  if(navBadge){ if(total>0){navBadge.textContent=total;navBadge.style.display='flex';}else navBadge.style.display='none'; }
 }
 
 // Polling messages non lus
