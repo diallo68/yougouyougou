@@ -408,29 +408,44 @@ app.post('/api/auth/send-code', async (req, res) => {
     const code   = Math.floor(1000 + Math.random() * 9000).toString();
     const expiry = new Date(Date.now() + 15 * 60 * 1000);
 
-    const query  = (method === 'email' && email) ? { email: email.toLowerCase() } : { phone };
-    const update = { verifyCode: code, codeExpiry: expiry, method };
-    if (phone) update.phone = phone;
-    if (email) update.email = email.toLowerCase();
-    // Pour email sans phone : fournir un phone unique pour respecter le schéma
-    const setOnInsert = {};
-    if (method === 'email' && !phone) {
-      setOnInsert.phone = 'email_' + email.toLowerCase().replace(/[^a-z0-9]/g,'_');
-      setOnInsert.prenom = prenom;
-      setOnInsert.password = 'pending'; // sera remplacé à l'inscription
-    }
-    await User.findOneAndUpdate(
-      query,
-      { $set: update, $setOnInsert: Object.keys(setOnInsert).length ? setOnInsert : { _created: new Date() } },
-      { upsert: true, new: true }
-    );
+    // Chercher un user existant
+    let existing = null;
+    if (method === 'sms' && phone)   existing = await User.findOne({ phone });
+    if (method === 'email' && email) existing = await User.findOne({ email: email.toLowerCase() });
 
+    if (existing) {
+      // Mettre à jour le code sur l'user existant
+      existing.verifyCode  = code;
+      existing.codeExpiry  = expiry;
+      existing.method      = method;
+      await existing.save();
+    } else {
+      // Créer un document temporaire avec les infos minimales
+      const tempUser = {
+        prenom: prenom,
+        nom: '',
+        verifyCode: code,
+        codeExpiry: expiry,
+        method,
+        password: 'pending_' + code, // sera remplacé à l'inscription
+        verified: false,
+      };
+      if (method === 'sms') {
+        tempUser.phone = phone;
+      } else {
+        // Mode email : phone fictif unique basé sur l'email
+        tempUser.email = email.toLowerCase();
+        tempUser.phone = 'em_' + Date.now(); // phone unique temporaire
+      }
+      await User.create(tempUser);
+    }
+
+    // Envoyer le code
     let emailSent = false;
-    let smsSent = false;
+    let smsSent   = false;
     if (method === 'sms') {
-      const msg = `Votre code YouGouYou : ${code}. Valable 15 min.`;
-      smsSent = await sendSMS(phone, msg);
-      if (!smsSent) console.warn(`[SMS] Échec envoi vers ${phone} — code: ${code}`);
+      smsSent = await sendSMS(phone, `Votre code YouGouYou : ${code}. Valable 15 min.`);
+      if (!smsSent) console.warn(`[SMS] Échec → ${phone} code=${code}`);
     } else {
       try {
         await sendEmail(email,
@@ -439,19 +454,20 @@ app.post('/api/auth/send-code', async (req, res) => {
           `Bonjour ${prenom}, votre code YouGouYou : ${code} (expire dans 15 min)`
         );
         emailSent = true;
+        console.log(`[EMAIL] Code envoyé à ${email}`);
       } catch(e) { console.error('[EMAIL] Échec:', e.message); }
     }
 
     res.json({
       success: true, method,
-      smsSent: smsSent||false,
-      emailSent: emailSent||false,
+      smsSent, emailSent,
       debug_code: process.env.NODE_ENV !== 'production' ? code : undefined,
-      message: method==='sms'
-        ? (smsSent ? `SMS envoyé au ${phone}` : `Code généré (SMS non livré)`)
-        : (emailSent ? `Email envoyé à ${email}` : `Code généré`)
+      message: method === 'sms'
+        ? (smsSent ? `SMS envoyé au ${phone}` : `Code généré`)
+        : (emailSent ? `Email envoyé à ${email}` : `Erreur envoi email`)
     });
   } catch(err) {
+    console.error('[SEND-CODE] Erreur:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
