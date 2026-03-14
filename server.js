@@ -555,6 +555,30 @@ app.post('/api/auth/reset-password/confirm', async (req, res) => {
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
+
+// ── Noter une annonce ──────────────────────────────────────────
+app.post('/api/ads/:id/rate', auth, async (req, res) => {
+  try {
+    const { rating } = req.body;
+    if (!rating || rating < 1 || rating > 5)
+      return res.status(400).json({ error: 'Note invalide (1-5)' });
+
+    const ad = await Ad.findById(req.params.id);
+    if (!ad) return res.status(404).json({ error: 'Annonce introuvable' });
+
+    // Recalculer la moyenne
+    const newCount = (ad.ratingCount || 0) + 1;
+    const newAvg   = ((ad.avgRating || 0) * (ad.ratingCount || 0) + rating) / newCount;
+
+    await Ad.findByIdAndUpdate(req.params.id, {
+      avgRating:   Math.round(newAvg * 10) / 10,
+      ratingCount: newCount
+    });
+
+    res.json({ success: true, avgRating: Math.round(newAvg*10)/10, ratingCount: newCount });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
 // ═══════════════════════════════════════════════════════════
 //  UTILISATEURS
 // ═══════════════════════════════════════════════════════════
