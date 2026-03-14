@@ -82,7 +82,7 @@ if (process.env.SENDGRID_API_KEY) {
   console.warn('⚠️ [EMAIL] SENDGRID_API_KEY non défini');
 }
 
-async function sendEmail(to, subject, html, text) {
+async asasync function sendEmail(to, subject, html, text) {
   const apiKey = process.env.SENDGRID_API_KEY;
   if (!apiKey) { console.warn('[EMAIL] SendGrid non configuré →', to, subject); return; }
   const fromEmail = process.env.EMAIL_FROM || 'noreply@yougouyougou.net';
@@ -100,7 +100,11 @@ async function sendEmail(to, subject, html, text) {
     headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
     body
   });
-  if (!response.ok) throw new Error(`SendGrid ${response.status}: ${await response.text()}`);
+  if (!response.ok) {
+    const errBody = await response.text();
+    console.error(`[EMAIL] SendGrid erreur ${response.status}:`, errBody);
+    throw new Error(`SendGrid ${response.status}: ${errBody}`);
+  }
   console.log('✅ [EMAIL] Envoyé à', to);
 }
 
