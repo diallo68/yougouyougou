@@ -85,9 +85,9 @@ nav{background:#fff;border-bottom:1px solid var(--br);position:sticky;top:0;z-in
 .nav-sc-btn:hover{background:var(--or2)}
 .nav-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0}
 .nav-cats{background:#fff;border-top:1px solid var(--br);position:relative;z-index:300;overflow:visible}
-.nav-cats-in{max-width:1100px;margin:0 auto;padding:0 28px;display:flex;align-items:stretch;overflow-x:visible;scrollbar-width:none}
+.nav-cats-in{max-width:1100px;margin:0 auto;padding:0 16px;display:flex;align-items:stretch;overflow-x:visible;}
 .nav-cats-in::-webkit-scrollbar{display:none}
-.ncat{position:relative;display:inline-flex;align-items:center;gap:4px;padding:8px 12px;cursor:pointer;border-bottom:2px solid transparent;font-size:12px;font-weight:500;color:var(--muted);white-space:nowrap;flex-shrink:0;transition:color .12s,border-color .12s}
+.ncat{position:relative;display:inline-flex;align-items:center;gap:4px;padding:7px 9px;cursor:pointer;border-bottom:2px solid transparent;font-size:12px;font-weight:500;color:var(--muted);white-space:nowrap;flex-shrink:0;transition:color .12s,border-color .12s}
 .ncat:hover,.ncat.active{color:var(--or);border-bottom-color:var(--or)}
 .ncat.active{font-weight:600}
 .ncat .em{font-size:13px}
@@ -610,14 +610,11 @@ footer{background:var(--ink);margin-top:0}
       <div class="det-photos">
         <div style="position:relative">
           <div id="det-main-img"><div class="det-emoji">📦</div></div>
-          <button id="btn-ph-prev" onclick="navPhoto(-1)"
-            style="display:none;position:absolute;left:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.45);border:none;color:#fff;font-size:26px;cursor:pointer;border-radius:50%;width:42px;height:42px;z-index:10;line-height:1;align-items:center;justify-content:center">‹</button>
-          <button id="btn-ph-next" onclick="navPhoto(1)"
-            style="display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.45);border:none;color:#fff;font-size:26px;cursor:pointer;border-radius:50%;width:42px;height:42px;z-index:10;line-height:1;align-items:center;justify-content:center">›</button>
-          <div id="det-ph-counter"
-            style="display:none;position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.55);color:#fff;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;z-index:10">1/1</div>
+          <button id="btn-ph-prev" onclick="navPhoto(-1)" style="display:none;position:absolute;left:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.45);border:none;color:#fff;font-size:26px;cursor:pointer;border-radius:50%;width:42px;height:42px;z-index:10;align-items:center;justify-content:center">‹</button>
+          <button id="btn-ph-next" onclick="navPhoto(1)"  style="display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.45);border:none;color:#fff;font-size:26px;cursor:pointer;border-radius:50%;width:42px;height:42px;z-index:10;align-items:center;justify-content:center">›</button>
+          <div id="det-ph-ctr" style="display:none;position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.55);color:#fff;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;z-index:10">1/1</div>
         </div>
-        <div id="det-thumbs-wrap" style="display:flex;gap:6px;padding:8px;background:#fafafa;overflow-x:auto"></div>
+        <div id="det-thumbs" style="display:flex;gap:6px;padding:8px;background:#fafafa;overflow-x:auto"></div>
       </div>
 
       <!-- Infos -->
@@ -1640,7 +1637,6 @@ function viewAd_display(ad){
   DB.save();
   // ── Galerie photos ──
   var mainImg = document.getElementById('det-main-img');
-  var thumbsWrap = document.getElementById('det-thumbs-wrap');
   var photos = ad.photos && ad.photos.length ? ad.photos : [];
 
   if(mainImg){
@@ -1652,29 +1648,25 @@ function viewAd_display(ad){
       mainImg.style.background = ad.bg||'linear-gradient(135deg,#FFF3EE,#FFB899)';
     }
   }
-  // Init flèches et compteur au premier affichage
-  window._detPhotos   = photos;
-  window._curPhotoIdx = 0;
-  (function(){
-    var prevB=document.getElementById('btn-ph-prev');
-    var nextB=document.getElementById('btn-ph-next');
-    var ctr  =document.getElementById('det-ph-counter');
-    var multi=photos.length>1;
-    if(prevB){ prevB.style.display=multi?'flex':'none'; }
-    if(nextB){ nextB.style.display=multi?'flex':'none'; }
-    if(ctr)  { ctr.style.display=multi?'block':'none'; if(multi) ctr.textContent='1/'+photos.length; }
-  })();
 
-  if(thumbsWrap){
-    window._detPhotos = photos;
-    if(photos.length > 0){
-      thumbsWrap.innerHTML = photos.map(function(p,i){
+  var tw=document.getElementById('det-thumbs');
+  window._detPhotos=photos; window._curPhotoIdx=0;
+  var pv=document.getElementById('btn-ph-prev');
+  var nx=document.getElementById('btn-ph-next');
+  var ct=document.getElementById('det-ph-ctr');
+  var multi=photos.length>1;
+  if(pv) pv.style.display=multi?'flex':'none';
+  if(nx) nx.style.display=multi?'flex':'none';
+  if(ct){ ct.style.display=multi?'block':'none'; ct.textContent='1/'+photos.length; }
+  if(tw){
+    if(photos.length>0){
+      tw.innerHTML=photos.map(function(p,i){
         return '<div class="det-thumb'+(i===0?' active':'')+'" onclick="switchPhotoIdx('+i+',this)" '
-          +'style="overflow:hidden;padding:0;cursor:pointer;border:'+(i===0?'2px solid var(--or)':'2px solid var(--br)')+'">'
+          +'style="overflow:hidden;padding:0;cursor:pointer;flex-shrink:0;border:'+(i===0?'2px solid var(--or)':'2px solid var(--br)')+'">'
           +'<img src="'+p+'" style="width:100%;height:100%;object-fit:cover"></div>';
       }).join('');
     } else {
-      thumbsWrap.innerHTML = '<div class="det-thumb active" style="font-size:32px">'+(ad.e||'📦')+'</div>';
+      tw.innerHTML='<div class="det-thumb active" style="font-size:32px">'+(ad.e||'📦')+'</div>';
     }
   }
   document.getElementById('bc-cat').textContent=ad.cat;
@@ -1813,24 +1805,21 @@ function editMyAd(){
 function navPhoto(dir){
   var photos=window._detPhotos||[];
   if(photos.length<2) return;
-  var cur=(window._curPhotoIdx||0)+dir;
-  if(cur<0) cur=photos.length-1;
-  if(cur>=photos.length) cur=0;
-  switchPhotoIdx(cur,null);
+  var idx=((window._curPhotoIdx||0)+dir+photos.length)%photos.length;
+  switchPhotoIdx(idx,null);
 }
-
 function switchPhotoIdx(idx, el){
   var photos = window._detPhotos || [];
   if(idx<0) idx=photos.length-1;
   if(idx>=photos.length) idx=0;
   var src = photos[idx];
   if(!src) return;
-  window._curPhotoIdx = idx;
+  window._curPhotoIdx=idx;
   var main = document.getElementById('det-main-img');
   if(main) main.innerHTML = '<img src="'+src+'" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in" onclick="zoomPhoto('+idx+')">';
-  var counter=document.getElementById('det-ph-counter');
-  if(counter) counter.textContent=(idx+1)+'/'+photos.length;
-  document.querySelectorAll('#det-thumbs-wrap .det-thumb, #det-thumbs .det-thumb').forEach(function(t){
+  var ct=document.getElementById('det-ph-ctr');
+  if(ct) ct.textContent=(idx+1)+'/'+photos.length;
+  document.querySelectorAll('#det-thumbs .det-thumb').forEach(function(t){
     t.classList.remove('active');
     t.style.border='2px solid var(--br)';
   });
@@ -2126,19 +2115,13 @@ function loginToggle(mode){
   if(lte)Object.assign(lte.style,mode==='email'?active:inactive);
 }
 
-
-// ── Utilitaire validation champs ──
-function markField(el, isValid){
-  if(!el) return;
-  el.style.borderColor = isValid ? '' : '#DC2626';
-  el.style.background  = isValid ? '' : '#FFF5F5';
-  if(!isValid){
-    el.addEventListener('input',function fix(){
-      el.style.borderColor=''; el.style.background='';
-      el.removeEventListener('input',fix);
-    });
-  }
+function markField(el,valid){
+  if(!el)return;
+  el.style.borderColor=valid?'':'#DC2626';
+  el.style.background=valid?'':'#FFF5F5';
+  if(!valid) el.addEventListener('input',function f(){el.style.borderColor='';el.style.background='';el.removeEventListener('input',f);});
 }
+
 function sendVerifCode(){
   var fn=(document.getElementById('rfn')||{value:''}).value.trim();
   var ph=(document.getElementById('rph')||{value:''}).value.trim();
@@ -2148,22 +2131,13 @@ function sendVerifCode(){
   var city=(document.getElementById('rct')||{value:''}).value;
 
   var ok=true;
-  var fnEl =document.getElementById('rfn');
-  var phEl =document.getElementById('rph');
-  var emEl =document.getElementById('rem');
-  var pwEl =document.getElementById('rpw');
-  var pw2El=document.getElementById('rpw2');
-  var ctEl =document.getElementById('rct');
-  if(!fn)     { markField(fnEl,false);  ok=false; }
-  if(regMode==='phone'){
-    if(!ph||ph.length<8){ markField(phEl,false); ok=false; }
-  } else {
-    if(!em||!em.includes('@')){ markField(emEl,false); ok=false; }
-  }
-  if(!pw||pw.length<8){ markField(pwEl,false);  ok=false; }
-  if(!pw2||pw!==pw2)  { markField(pw2El,false); ok=false; }
-  if(!city)           { markField(ctEl,false);  ok=false; }
-  if(!ok){ toast('⚠️ Remplissez les champs en rouge','err'); return; }
+  if(!fn){markField(document.getElementById('rfn'),false);ok=false;}
+  if(regMode==='phone'){if(!ph||ph.length<8){markField(document.getElementById('rph'),false);ok=false;}}
+  else{if(!em||!em.includes('@')){markField(document.getElementById('rem'),false);ok=false;}}
+  if(!pw||pw.length<8){markField(document.getElementById('rpw'),false);ok=false;}
+  if(!pw2||pw!==pw2){markField(document.getElementById('rpw2'),false);ok=false;}
+  if(!city){markField(document.getElementById('rct'),false);ok=false;}
+  if(!ok){toast('⚠️ Remplissez les champs en rouge','err');return;}
 
   pendingUser={
     prenom:fn,
@@ -2434,10 +2408,8 @@ function doLogin(){
   if(loginMode==='phone'){id=(document.getElementById('li-phone')||{value:''}).value.trim();}
   else{id=(document.getElementById('li-email')||{value:''}).value.trim();}
   var pw=(document.getElementById('lp')||{value:''}).value.trim();
-  var liEl=document.getElementById(loginMode==='phone'?'li-phone':'li-email');
-  var lpEl=document.getElementById('lp');
-  if(!id){ markField(liEl,false); toast('⚠️ Remplissez votre '+(loginMode==='phone'?'téléphone':'email'),'err'); return; }
-  if(!pw){ markField(lpEl,false); toast('⚠️ Entrez votre mot de passe','err'); return; }
+  if(!id){toast('⚠️ Remplissez votre '+(loginMode==='phone'?'téléphone':'email'),'err');return;}
+  if(!pw){toast('⚠️ Entrez votre mot de passe','err');return;}
 
   // Désactiver le bouton pendant l'appel
   var btns=document.querySelectorAll('#auth-body .btn-ink');
@@ -2545,19 +2517,47 @@ function showForgotPassword(){
   title.textContent='🔑 Mot de passe oublié';
   body.innerHTML=
     '<div style="text-align:center;margin-bottom:20px">'+
-      '<div style="font-size:44px;margin-bottom:10px">🔒</div>'+
-      '<p style="font-size:14px;color:var(--muted);line-height:1.7">Entrez votre adresse email.<br>Vous recevrez un lien sécurisé pour réinitialiser votre mot de passe.</p>'+
+      '<div style="font-size:44px;margin-bottom:8px">🔒</div>'+
+      '<p style="font-size:14px;color:var(--muted);line-height:1.7">Entrez votre adresse email.<br>Vous recevrez un lien sécurisé valable 1h.</p>'+
     '</div>'+
-    '<div class="fg">'+
-      '<label>📧 Adresse email *</label>'+
+    '<div class="fg"><label>📧 Adresse email *</label>'+
       '<input type="email" id="fp-email" placeholder="votre@email.com" '+
-      'style="width:100%;padding:11px 13px;border:1.5px solid var(--br);border-radius:6px;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s" '+
-      'onfocus="this.style.borderColor=\'var(--or)\'" onblur="this.style.borderColor=\'var(--br)\'" '+
-      'onkeydown="if(event.key===\'Enter\')fpSendResetLink()">'+
+      'style="width:100%;padding:11px 13px;border:1.5px solid var(--br);border-radius:6px;font-size:14px;font-family:inherit;outline:none" '+
+      'onfocus="this.style.borderColor=\'var(--or)\'" onblur="this.style.borderColor=\'var(--br)\'">'+
     '</div>'+
     '<button class="btn btn-or btn-full" style="border-radius:8px;margin-top:4px" id="fp-send-btn" onclick="fpSendResetLink()">📨 Envoyer le lien →</button>'+
     '<p style="text-align:center;font-size:13px;color:var(--muted);margin-top:14px"><a style="color:var(--or);cursor:pointer;font-weight:700" onclick="authTab(&apos;login&apos;)">← Retour à la connexion</a></p>';
   setTimeout(function(){var f=document.getElementById('fp-email');if(f)f.focus();},100);
+}
+
+function fpSendResetLink(){
+  var emailEl=document.getElementById('fp-email');
+  var email=(emailEl?emailEl.value:'').trim().toLowerCase();
+  if(!email||!email.includes('@')){
+    if(emailEl){emailEl.style.borderColor='#DC2626';emailEl.style.background='#FFF5F5';}
+    toast('⚠️ Email invalide','err'); return;
+  }
+  if(emailEl) emailEl.style.borderColor='var(--or)';
+  var btn=document.getElementById('fp-send-btn');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Envoi...';}
+  fetch('/api/auth/reset-password',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({email:email})
+  }).then(function(r){return r.json();}).then(function(){
+    var b2=document.getElementById('auth-body');
+    var t2=document.getElementById('auth-tt');
+    if(t2) t2.textContent='📨 Email envoyé';
+    if(b2) b2.innerHTML=
+      '<div style="text-align:center;padding:16px 0">'+
+        '<div style="font-size:52px;margin-bottom:12px">✅</div>'+
+        '<p style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:8px">Lien envoyé !</p>'+
+        '<p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px">Lien envoyé à <strong>'+email+'</strong><br><span style="font-size:12px">Vérifiez vos spams. Expire dans 1h.</span></p>'+
+        '<button class="btn btn-ghost btn-full" onclick="authTab(&apos;login&apos;)">← Retour connexion</button>'+
+      '</div>';
+  }).catch(function(){
+    if(btn){btn.disabled=false;btn.textContent='📨 Envoyer le lien →';}
+    toast('❌ Erreur réseau','err');
+  });
 }
 
 function fpToggle(mode){
@@ -2577,47 +2577,49 @@ function fpToggle(mode){
   }
 }
 
-function fpSendCode(){ fpSendResetLink(); } // alias pour compatibilité
-
-function fpSendResetLink(){
-  var emailEl=document.getElementById('fp-email');
-  var email=(emailEl?emailEl.value:'').trim().toLowerCase();
-  if(!email||!email.includes('@')){
-    if(emailEl){emailEl.style.borderColor='#DC2626';emailEl.style.background='#FFF5F5';}
-    toast('⚠️ Adresse email invalide','err');
-    return;
+function fpSendCode(){
+  var identifier='';
+  if(fpMode==='email'){
+    identifier=(document.getElementById('fp-email')||{}).value||'';
+    if(!identifier||!identifier.includes('@')){toast('⚠️ Email invalide','err');return;}
+  } else {
+    var ph=(document.getElementById('fp-phone')||{}).value||'';
+    if(ph.length<8){toast('⚠️ Numéro invalide','err');return;}
+    identifier='+224'+ph.replace(/[\s]/g,'');
   }
-  if(emailEl){emailEl.style.borderColor='var(--or)';}
-  fpIdentifier=email;
+  fpIdentifier=identifier;
 
-  var btn=document.getElementById('fp-send-btn');
-  if(btn){btn.disabled=true;btn.textContent='⏳ Envoi en cours...';}
+  // Générer code 4 chiffres local (fallback garanti)
+  // Note: on ne bloque plus sur vérification locale — l'utilisateur peut être dans MongoDB uniquement
+  fpResetCode=Math.floor(1000+Math.random()*9000).toString();
 
-  fetch('/api/auth/reset-password',{
+  // Montrer bouton d'envoi désactivé
+  var btn=document.querySelector('#auth-body .btn-or');
+  if(btn){btn.disabled=true;btn.textContent='Envoi en cours...';}
+
+  // Tenter l'API
+  fetch('/api/auth/send-code',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({email:email})
+    body:JSON.stringify(fpMode==='email'
+      ? {method:'email', email:identifier, prenom:'Utilisateur'}
+      : {method:'sms',   phone:identifier.replace('+224',''), prenom:'Utilisateur'}
+    )
   })
-  .then(function(r){return r.json();})
+  .then(function(r){return r.ok?r.json():Promise.reject(r.status);})
   .then(function(d){
-    var body=document.getElementById('auth-body');
-    var title=document.getElementById('auth-tt');
-    if(title) title.textContent='📨 Email envoyé';
-    if(body) body.innerHTML=
-      '<div style="text-align:center;padding:16px 0">'+
-        '<div style="font-size:52px;margin-bottom:16px">✅</div>'+
-        '<p style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:8px">Lien envoyé !</p>'+
-        '<p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px">'+
-          'Un lien de réinitialisation a été envoyé à<br>'+
-          '<strong style="color:var(--ink)">'+email+'</strong><br>'+
-          '<span style="font-size:12px">Consultez vos spams si nécessaire. Le lien expire dans 1h.</span>'+
-        '</p>'+
-        '<button class="btn btn-ghost btn-full" onclick="authTab(&apos;login&apos;)">← Retour à la connexion</button>'+
-      '</div>';
+    if(d.error){toast('❌ '+d.error,'err');
+      var b=document.querySelector('#auth-body .btn-or');
+      if(b){b.disabled=false;b.textContent='Envoyer le code →';}
+      return;
+    }
+    // Utiliser le code du serveur (debug_code toujours renvoyé)
+    if(d.debug_code) fpResetCode=d.debug_code;
+    fpShowCodeStep();
   })
   .catch(function(){
-    if(btn){btn.disabled=false;btn.textContent='📨 Envoyer le lien →';}
-    toast('❌ Erreur réseau, réessayez','err');
+    // API inaccessible — code local affiché sur la page
+    fpShowCodeStep();
   });
 }
 
@@ -2721,42 +2723,25 @@ function checkFpPw(){
 function fpSavePassword(){
   var p1=(document.getElementById('fp-pw1')||{}).value||'';
   var p2=(document.getElementById('fp-pw2')||{}).value||'';
-  var pw1El=document.getElementById('fp-pw1');
-  var pw2El=document.getElementById('fp-pw2');
-  if(p1.length<8){
-    if(pw1El){pw1El.style.borderColor='#DC2626';}
-    toast('⚠️ Minimum 8 caractères','err');return;
-  }
-  if(p1!==p2){
-    if(pw2El){pw2El.style.borderColor='#DC2626';}
-    toast('❌ Mots de passe différents','err');return;
-  }
-  var btn=document.querySelector('#auth-body .btn-or');
-  if(btn){btn.disabled=true;btn.textContent='⏳ Enregistrement...';}
+  if(p1.length<8){toast('⚠️ Minimum 8 caractères','err');return;}
+  if(p1!==p2){toast('❌ Mots de passe différents','err');return;}
 
-  // Utiliser le token de l'URL si disponible, sinon code 4 chiffres (legacy)
-  var resetToken=window._resetToken||'';
-  var endpoint=resetToken?'/api/auth/reset-password/confirm':'/api/auth/reset-password';
-  var payload=resetToken
-    ? {token:resetToken,password:p1}
-    : {identifier:fpIdentifier,code:fpResetCode,newPassword:p1};
-
-  fetch(endpoint,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(payload)
+  // Tenter via API
+  var _tok=window._resetToken||'';
+  fetch(_tok?'/api/auth/reset-password/confirm':'/api/auth/reset-password',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(_tok?{token:_tok,password:p1}:{identifier:fpIdentifier,newPassword:p1})
   }).then(function(r){return r.json();}).then(function(d){
     if(d.ok||d.success){
-      window._resetToken='';
       toast('✅ Mot de passe réinitialisé ! Connectez-vous.','ok');
       authTab('login');
     } else {
-      if(btn){btn.disabled=false;btn.textContent='Enregistrer →';}
-      toast('❌ '+(d.error||'Lien invalide ou expiré'),'err');
+      toast(d.error||'Erreur serveur','err');
+      // Fallback local
+      fpSaveLocal(p1);
     }
   }).catch(function(){
-    if(btn){btn.disabled=false;btn.textContent='Enregistrer →';}
-    toast('❌ Erreur réseau','err');
+    fpSaveLocal(p1);
   });
 }
 
@@ -4654,10 +4639,8 @@ function injectOGMeta(ad){
 }
 
 // ── viewAd étendu ──
-var _origViewAd = typeof viewAd==='function'?viewAd:null;
 function viewAdEnhanced(id){
-  if(_origViewAd) _origViewAd(id);
-  // Après un délai, enrichir la page detail
+  // Enrichissements visuels uniquement (pas d'appel récursif à viewAd)
   setTimeout(function(){
     if(!curAd) return;
     // Meta OG
@@ -4697,10 +4680,10 @@ goTo=function(page){
 
 document.addEventListener('DOMContentLoaded',function(){
   DB.load();
-  // ── Réinitialisation mot de passe via lien email ──
+
+  // Reset mdp via lien email
   (function(){
-    var params=new URLSearchParams(window.location.search);
-    var tok=params.get('reset');
+    var tok=new URLSearchParams(window.location.search).get('reset');
     if(tok){
       history.replaceState({},'',window.location.pathname);
       window._resetToken=tok;
@@ -4708,30 +4691,21 @@ document.addEventListener('DOMContentLoaded',function(){
         openModal('auth');
         var title=document.getElementById('auth-tt');
         var body=document.getElementById('auth-body');
-        var tabs=document.getElementById('auth-tabs');
-        if(tabs) tabs.style.display='none';
         if(title) title.textContent='🔒 Nouveau mot de passe';
         if(body) body.innerHTML=
-          '<div style="text-align:center;margin-bottom:20px">'+
-            '<div style="font-size:36px">🔒</div>'+
-            '<p style="font-size:14px;color:var(--muted);margin-top:8px">Choisissez un nouveau mot de passe.</p>'+
-          '</div>'+
+          '<div style="text-align:center;margin-bottom:16px"><div style="font-size:36px">🔒</div>'+
+          '<p style="font-size:14px;color:var(--muted);margin-top:6px">Choisissez un nouveau mot de passe.</p></div>'+
           '<div class="fg"><label>Nouveau mot de passe</label>'+
-            '<input type="password" id="fp-pw1" placeholder="8 caractères minimum" '+
-            'style="width:100%;padding:11px 13px;border:1.5px solid var(--br);border-radius:6px;font-size:14px;font-family:inherit;outline:none" '+
-            'oninput="checkFpPw()">'+
-          '</div>'+
-          '<div class="fg"><label>Confirmer le mot de passe</label>'+
-            '<input type="password" id="fp-pw2" placeholder="Répétez le mot de passe" '+
-            'style="width:100%;padding:11px 13px;border:1.5px solid var(--br);border-radius:6px;font-size:14px;font-family:inherit;outline:none" '+
-            'oninput="checkFpPw()">'+
-          '</div>'+
-          '<div id="fp-pw-match" style="font-size:12px;margin:-8px 0 12px;min-height:18px"></div>'+
-          '<button class="btn btn-or btn-full" style="border-radius:8px" onclick="fpSavePassword()">✅ Enregistrer le mot de passe</button>';
+          '<input type="password" id="fp-pw1" placeholder="8 caractères minimum" style="width:100%;padding:10px 12px;border:1.5px solid var(--br);border-radius:6px;font-size:14px;font-family:inherit;outline:none" oninput="checkFpPw()"></div>'+
+          '<div class="fg"><label>Confirmer</label>'+
+          '<input type="password" id="fp-pw2" placeholder="Répétez" style="width:100%;padding:10px 12px;border:1.5px solid var(--br);border-radius:6px;font-size:14px;font-family:inherit;outline:none" oninput="checkFpPw()"></div>'+
+          '<div id="fp-pw-match" style="font-size:12px;margin:-6px 0 10px;min-height:16px"></div>'+
+          '<button class="btn btn-or btn-full" onclick="fpSavePassword()">✅ Enregistrer</button>';
         setTimeout(function(){var f=document.getElementById('fp-pw1');if(f)f.focus();},200);
       },400);
     }
   })();
+
   // ── Emojis flottants autour du logo ──
   (function(){
     var container = document.getElementById('logo-particles');
@@ -5018,30 +4992,41 @@ document.addEventListener('DOMContentLoaded',function(){
 })();
 </script>
 
-
 <script>
-// ── Swipe tactile galerie photo ──
 (function(){
-  var startX=0, startEl=null;
+  var sx=0;
   document.addEventListener('touchstart',function(e){
     var m=document.getElementById('det-main-img');
-    if(m&&m.contains(e.target)){startX=e.touches[0].clientX;startEl=m;}
+    if(m&&m.contains(e.target)) sx=e.touches[0].clientX;
   },{passive:true});
   document.addEventListener('touchend',function(e){
-    if(!startEl) return;
-    var diff=startX-e.changedTouches[0].clientX;
-    if(Math.abs(diff)>40) navPhoto(diff>0?1:-1);
-    startEl=null;
+    var m=document.getElementById('det-main-img');
+    if(!m||!m.contains(e.changedTouches[0].target)) return;
+    if(Math.abs(sx-e.changedTouches[0].clientX)>40) navPhoto(sx>e.changedTouches[0].clientX?1:-1);
   },{passive:true});
   document.addEventListener('keydown',function(e){
     var pg=document.getElementById('page-detail');
-    if(!pg||!pg.classList.contains('active')) return;
-    if(e.key==='ArrowLeft') navPhoto(-1);
-    if(e.key==='ArrowRight') navPhoto(1);
+    if(pg&&pg.classList.contains('active')){
+      if(e.key==='ArrowLeft') navPhoto(-1);
+      if(e.key==='ArrowRight') navPhoto(1);
+    }
   });
 })();
 </script>
-
+<script>
+// ── Repositionnement dropdowns catégories (fix overflow parent) ──
+document.addEventListener('mouseover', function(e){
+  var ncat = e.target.closest('.ncat.has-sub');
+  if(!ncat) return;
+  var dd = ncat.querySelector('.cat-dropdown');
+  if(!dd) return;
+  var rect = ncat.getBoundingClientRect();
+  dd.style.position = 'fixed';
+  dd.style.top = rect.bottom + 'px';
+  dd.style.left = rect.left + 'px';
+  dd.style.zIndex = '99999';
+});
+</script>
 </body>
 </html<div id="dyn-fields-container"></div>
         >
