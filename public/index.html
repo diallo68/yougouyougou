@@ -165,8 +165,8 @@ nav{background:#fff;border-bottom:1px solid var(--br);position:sticky;top:0;z-in
 .map-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 
 /* ══ FOOTER ══ */
-footer{background:var(--ink);margin-top:0}
-.ft{max-width:1100px;margin:0 auto;padding:48px 28px 32px;display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:40px}
+footer{background:transparent;margin-top:0}
+.ft{width:100%;padding:40px 32px 28px;display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:32px}
 .adm-tab{background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);border:none;padding:6px 12px;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
 .adm-tab.active,.adm-tab:hover{background:var(--or);color:#fff}
 .ft-brand p{font-size:13px;line-height:1.8;color:rgba(255,255,255,.38);margin:12px 0 18px}
@@ -179,7 +179,7 @@ footer{background:var(--ink);margin-top:0}
 .ft-col a{color:rgba(255,255,255,.42);text-decoration:none;font-size:13px;cursor:pointer;transition:color .12s}
 .ft-col a:hover{color:var(--or)}
 .ft-bottom{border-top:1px solid rgba(255,255,255,.06);padding:16px 20px}
-.ft-bottom-in{max-width:1100px;margin:0 auto;padding:0 28px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.2);flex-wrap:wrap;gap:6px}
+.ft-bottom-in{width:100%;padding:0 32px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.2);flex-wrap:wrap;gap:6px;}
 .ft-gn{background:rgba(255,92,0,.12);color:var(--or);padding:3px 10px;border-radius:3px;font-size:11px;font-weight:600}
 
 /* ══ OVERLAYS / MODAUX ══ */
@@ -549,37 +549,44 @@ footer{background:var(--ink);margin-top:0}
       <span style="font-size:12px;font-weight:700;color:var(--muted);cursor:pointer" onclick="clearMapFilter()" onmouseover="this.style.color='#D91C0C'" onmouseout="this.style.color='var(--muted)'">✕ Effacer le filtre</span>
     </div>
     <div class="map-legend" id="map-legend" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:7px;margin-top:12px"></div>
-    <div style="background:var(--ink);border-radius:8px;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:16px;overflow:hidden">
-      <div style="padding:18px 20px;text-align:center;border-right:1px solid rgba(255,255,255,.08)">
-        <div style="font-family:var(--font);font-size:22px;font-weight:800;color:var(--or)" id="sb-ads2">1 679</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:3px;font-weight:600">Annonces actives</div>
+    
+
+<!-- ══ BLOC SOMBRE : Stats + App + Footer ══ -->
+<section style="background:#1A1A1A;margin-top:0">
+
+  <!-- Stats band -->
+  <div style="padding:28px 0 0">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);overflow:hidden;border-radius:0;border-left:none;border-right:none;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)">
+      <div style="padding:24px;text-align:center;border-right:1px solid rgba(255,255,255,.08)">
+        <div style="font-size:28px;font-weight:800;color:var(--or);margin-bottom:4px" id="sb-ads2">1 679</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.45);letter-spacing:.2px">Annonces actives</div>
       </div>
-      <div style="padding:18px 20px;text-align:center;border-right:1px solid rgba(255,255,255,.08)">
-        <div style="font-family:var(--font);font-size:22px;font-weight:800;color:var(--or)">8</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:3px;font-weight:600">Régions couvertes</div>
+      <div style="padding:24px;text-align:center;border-right:1px solid rgba(255,255,255,.08)">
+        <div style="font-size:28px;font-weight:800;color:var(--or);margin-bottom:4px">8</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.45);letter-spacing:.2px">Régions couvertes</div>
       </div>
-      <div style="padding:18px 20px;text-align:center;border-right:1px solid rgba(255,255,255,.08)">
-        <div style="font-family:var(--font);font-size:22px;font-weight:800;color:var(--or)">12 400+</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:3px;font-weight:600">Utilisateurs inscrits</div>
+      <div style="padding:24px;text-align:center;border-right:1px solid rgba(255,255,255,.08)">
+        <div style="font-size:28px;font-weight:800;color:var(--or);margin-bottom:4px">12 400+</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.45);letter-spacing:.2px">Utilisateurs inscrits</div>
       </div>
-      <div style="padding:18px 20px;text-align:center">
-        <div style="font-family:var(--font);font-size:22px;font-weight:800;color:var(--or)">Gratuit</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:3px;font-weight:600">Pour déposer</div>
+      <div style="padding:24px;text-align:center">
+        <div style="font-size:28px;font-weight:800;color:var(--or);margin-bottom:4px">Gratuit</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.45);letter-spacing:.2px">Pour déposer</div>
       </div>
     </div>
-  </div></section>
+  </div>
 
-  <!-- APP BANNER -->
-  <section style="background:#F6F6F6;padding:0 0 36px"><div style="max-width:1100px;margin:0 auto;padding:0 24px">
-    <div style="background:linear-gradient(135deg,#1A1A1A,#2a2a2a);border-radius:8px;padding:28px 36px;display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center;position:relative;overflow:hidden">
+  <!-- App banner -->
+  <div style="padding:20px 0 28px">
+    <div style="background:rgba(255,255,255,.04);border-left:none;border-right:none;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08);border-radius:0;padding:28px 32px;display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center;position:relative;overflow:hidden">
       <div style="position:absolute;top:-40px;right:200px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(255,92,0,.12),transparent 70%);pointer-events:none"></div>
       <div>
         <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,92,0,.2);color:var(--or);font-size:11px;font-weight:800;padding:4px 10px;border-radius:4px;margin-bottom:12px;text-transform:uppercase;letter-spacing:.4px">📲 Bientôt disponible</div>
         <h2 style="font-family:var(--font);font-size:20px;font-weight:800;color:#fff;margin-bottom:8px;line-height:1.3">YouGouYou sur votre smartphone</h2>
         <p style="font-size:13px;color:rgba(255,255,255,.65);margin-bottom:20px;line-height:1.7;max-width:420px">Notifications instantanées, messagerie intégrée, paiement Orange Money en un tap. Disponible iOS & Android.</p>
         <div style="display:flex;gap:10px">
-          <button onclick="toast('🍎 Bientôt sur App Store !')" style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:9px 16px;border-radius:6px;font-weight:700;font-size:13px;cursor:pointer;transition:all .2s;font-family:inherit" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">🍎 App Store</button>
-          <button onclick="toast('▶️ Bientôt sur Google Play !')" style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:9px 16px;border-radius:6px;font-weight:700;font-size:13px;cursor:pointer;transition:all .2s;font-family:inherit" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">▶️ Google Play</button>
+          <button onclick="toast('🍎 Bientôt sur App Store !')" style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:9px 16px;border-radius:6px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit">🍎 App Store</button>
+          <button onclick="toast('▶️ Bientôt sur Google Play !')" style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:9px 16px;border-radius:6px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit">▶️ Google Play</button>
         </div>
       </div>
       <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:20px 28px;text-align:center;min-width:160px">
@@ -590,7 +597,94 @@ footer{background:var(--ink);margin-top:0}
         </div>
       </div>
     </div>
-  </div></section>
+  </div>
+
+  <!-- Séparateur -->
+  <div style="border-top:1px solid rgba(255,255,255,.08);margin:0 0 0 0"></div>
+
+
+  <!-- Footer -->
+  <div class="ft">
+
+    <!-- COL 1 : Brand -->
+    <div class="ft-brand">
+      <div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:-.5px">
+        <span style="color:var(--or)">Y</span>ougou<span style="color:var(--or)">Y</span>ougou 🇬🇳
+      </div>
+      <p>Le marché de toute la Guinée.<br>Achetez, vendez et payez avec Orange Money.<br>Gratuit · Sécurisé · 100% guinéen.</p>
+      <div class="soc">
+        <div class="soc-btn" onclick="window.open('https://facebook.com','_blank')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+        </div>
+        <div class="soc-btn" onclick="window.open('https://wa.me/224','_blank')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        </div>
+        <div class="soc-btn" onclick="window.open('https://instagram.com','_blank')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        </div>
+      </div>
+      <div style="margin-top:16px;display:flex;gap:6px;flex-wrap:wrap">
+        <button class="adm-tab" onclick="goTo('dashboard')">Mon compte</button>
+        <button class="adm-tab" id="ft-admin-btn" onclick="goAdmin()" style="display:none">Administration</button>
+      </div>
+    </div>
+
+    <!-- COL 2 : À propos -->
+    <div class="ft-col">
+      <h4>À propos</h4>
+      <ul>
+        <li><a onclick="toast('Bientôt disponible')">Qui sommes-nous ?</a></li>
+        <li><a onclick="toast('Bientôt disponible')">Comment ça marche ?</a></li>
+        <li><a onclick="toast('Bientôt disponible')">Nous contacter</a></li>
+        <li><a onclick="toast('Bientôt disponible')">Presse</a></li>
+        <li><a onclick="toast('Bientôt disponible')">Recrutement</a></li>
+      </ul>
+    </div>
+
+    <!-- COL 3 : Légal -->
+    <div class="ft-col">
+      <h4>Informations légales</h4>
+      <ul>
+        <li><a onclick="toast('Bientôt disponible')">Conditions générales</a></li>
+        <li><a onclick="toast('Bientôt disponible')">Politique de confidentialité</a></li>
+        <li><a onclick="toast('Bientôt disponible')">Gestion des cookies</a></li>
+        <li><a onclick="toast('Bientôt disponible')">Vos droits</a></li>
+        <li><a onclick="toast('Bientôt disponible')">Sécurité</a></li>
+      </ul>
+    </div>
+
+    <!-- COL 4 : Aide -->
+    <div class="ft-col">
+      <h4>Aide &amp; Services</h4>
+      <ul>
+        <li><a onclick="toast('Bientôt disponible')">Centre d'aide</a></li>
+        <li><a onclick="toast('Bientôt disponible')">Déposer une annonce</a></li>
+        <li><a onclick="toast('Bientôt disponible')">Paiement Orange Money</a></li>
+        <li><a onclick="toast('Bientôt disponible')">Signaler une annonce</a></li>
+      </ul>
+
+    </div>
+
+  </div>
+
+  <!-- Barre du bas -->
+  <div class="ft-bottom">
+    <div class="ft-bottom-in">
+      <span>© 2025 YouGouYougou · Conakry, Guinée</span>
+      <div style="display:flex;align-items:center;gap:16px">
+        <span class="ft-gn">🇬🇳 Made in Guinea</span>
+        <span style="display:flex;gap:8px">
+          <a style="color:rgba(255,255,255,.3);font-size:11px;cursor:pointer" onclick="toast('Bientôt disponible')">CGU</a>
+          <a style="color:rgba(255,255,255,.3);font-size:11px;cursor:pointer" onclick="toast('Bientôt disponible')">Confidentialité</a>
+          <a style="color:rgba(255,255,255,.3);font-size:11px;cursor:pointer" onclick="toast('Bientôt disponible')">Cookies</a>
+        </span>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+
 </div>
 
 <!-- ══ PAGE DETAIL ══ -->
@@ -2884,6 +2978,9 @@ function renderDash(){
     if(u.role==='admin') adminLink.removeAttribute('hidden');
     else adminLink.setAttribute('hidden','');
   }
+  // Footer admin btn
+  var ftAdminBtn=document.getElementById('ft-admin-btn');
+  if(ftAdminBtn) ftAdminBtn.style.display=(u&&u.role==='admin')?'block':'none';
 
   // Onglet Profil — infos personnelles
   var av=document.getElementById('p-avatar');
