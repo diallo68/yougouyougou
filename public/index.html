@@ -35,7 +35,7 @@ body{
   color:var(--ink);font-size:14px;line-height:1.5;
   -webkit-font-smoothing:antialiased;
 }
-.page{display:none;min-height:0}.page.active{display:block;min-height:100%;overflow-y:auto}
+.page{display:none}.page.active{display:block}
 #app-wrapper{background:#fff;max-width:1100px;margin:0 auto;min-height:100vh;box-shadow:0 2px 12px rgba(0,0,0,.08)}
 
 /* ── DÉSACTIVÉS ── */
@@ -166,7 +166,7 @@ nav{background:#fff;border-bottom:1px solid var(--br);position:sticky;top:0;z-in
 
 /* ══ FOOTER ══ */
 footer{background:transparent;margin-top:0}
-.ft{width:100%;padding:40px 32px 28px;display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:32px}
+.ft{max-width:1100px;margin:0 auto;padding:48px 28px 32px;display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:40px}
 .adm-tab{background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);border:none;padding:6px 12px;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
 .adm-tab.active,.adm-tab:hover{background:var(--or);color:#fff}
 .ft-brand p{font-size:13px;line-height:1.8;color:rgba(255,255,255,.38);margin:12px 0 18px}
@@ -179,7 +179,7 @@ footer{background:transparent;margin-top:0}
 .ft-col a{color:rgba(255,255,255,.42);text-decoration:none;font-size:13px;cursor:pointer;transition:color .12s}
 .ft-col a:hover{color:var(--or)}
 .ft-bottom{border-top:1px solid rgba(255,255,255,.06);padding:16px 20px}
-.ft-bottom-in{width:100%;padding:0 32px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.2);flex-wrap:wrap;gap:6px;}
+.ft-bottom-in{max-width:1100px;margin:0 auto;padding:0 28px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.2);flex-wrap:wrap;gap:6px}
 .ft-gn{background:rgba(255,92,0,.12);color:var(--or);padding:3px 10px;border-radius:3px;font-size:11px;font-weight:600}
 
 /* ══ OVERLAYS / MODAUX ══ */
@@ -387,6 +387,19 @@ footer{background:transparent;margin-top:0}
   .ft{grid-template-columns:1fr!important;padding:24px 12px!important}
   .sec-hd h2{font-size:16px!important}
 }
+
+.rating-section{background:#fff;border:1px solid var(--br);border-radius:6px;padding:14px;margin-top:10px}
+.rating-title{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:10px}
+.stars-display{display:flex;gap:3px;margin-bottom:4px;font-size:20px;color:#FBBF24}
+.rating-avg{font-size:13px;color:var(--muted);margin-top:2px}
+.user-rating-wrap{margin-top:12px;padding-top:12px;border-top:1px solid var(--brl)}
+.user-rating-label{font-size:12px;color:var(--muted);margin-bottom:6px}
+.user-stars{display:flex;gap:6px}
+.user-star{font-size:28px;cursor:pointer;transition:transform .1s;line-height:1;filter:grayscale(1);opacity:.35}
+.user-star.lit{filter:grayscale(0);opacity:1}
+.user-star:hover{transform:scale(1.2)}
+.rating-done{font-size:13px;color:var(--gr);font-weight:600;margin-top:8px;display:none}
+
 </style>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#FF5C00">
@@ -549,14 +562,55 @@ footer{background:transparent;margin-top:0}
       <span style="font-size:12px;font-weight:700;color:var(--muted);cursor:pointer" onclick="clearMapFilter()" onmouseover="this.style.color='#D91C0C'" onmouseout="this.style.color='var(--muted)'">✕ Effacer le filtre</span>
     </div>
     <div class="map-legend" id="map-legend" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:7px;margin-top:12px"></div>
-    
+    <div style="background:var(--ink);border-radius:8px;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:16px;overflow:hidden">
+      <div style="padding:18px 20px;text-align:center;border-right:1px solid rgba(255,255,255,.08)">
+        <div style="font-family:var(--font);font-size:22px;font-weight:800;color:var(--or)" id="sb-ads2">1 679</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:3px;font-weight:600">Annonces actives</div>
+      </div>
+      <div style="padding:18px 20px;text-align:center;border-right:1px solid rgba(255,255,255,.08)">
+        <div style="font-family:var(--font);font-size:22px;font-weight:800;color:var(--or)">8</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:3px;font-weight:600">Régions couvertes</div>
+      </div>
+      <div style="padding:18px 20px;text-align:center;border-right:1px solid rgba(255,255,255,.08)">
+        <div style="font-family:var(--font);font-size:22px;font-weight:800;color:var(--or)">12 400+</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:3px;font-weight:600">Utilisateurs inscrits</div>
+      </div>
+      <div style="padding:18px 20px;text-align:center">
+        <div style="font-family:var(--font);font-size:22px;font-weight:800;color:var(--or)">Gratuit</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:3px;font-weight:600">Pour déposer</div>
+      </div>
+    </div>
+  </div></section>
+
+  <!-- APP BANNER -->
+  <section style="background:#F6F6F6;padding:0 0 36px"><div style="max-width:1100px;margin:0 auto;padding:0 24px">
+    <div style="background:linear-gradient(135deg,#1A1A1A,#2a2a2a);border-radius:8px;padding:28px 36px;display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-40px;right:200px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(255,92,0,.12),transparent 70%);pointer-events:none"></div>
+      <div>
+        <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,92,0,.2);color:var(--or);font-size:11px;font-weight:800;padding:4px 10px;border-radius:4px;margin-bottom:12px;text-transform:uppercase;letter-spacing:.4px">📲 Bientôt disponible</div>
+        <h2 style="font-family:var(--font);font-size:20px;font-weight:800;color:#fff;margin-bottom:8px;line-height:1.3">YouGouYou sur votre smartphone</h2>
+        <p style="font-size:13px;color:rgba(255,255,255,.65);margin-bottom:20px;line-height:1.7;max-width:420px">Notifications instantanées, messagerie intégrée, paiement Orange Money en un tap. Disponible iOS & Android.</p>
+        <div style="display:flex;gap:10px">
+          <button onclick="toast('🍎 Bientôt sur App Store !')" style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:9px 16px;border-radius:6px;font-weight:700;font-size:13px;cursor:pointer;transition:all .2s;font-family:inherit" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">🍎 App Store</button>
+          <button onclick="toast('▶️ Bientôt sur Google Play !')" style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:9px 16px;border-radius:6px;font-weight:700;font-size:13px;cursor:pointer;transition:all .2s;font-family:inherit" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">▶️ Google Play</button>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:20px 28px;text-align:center;min-width:160px">
+        <span style="font-size:32px;display:block;margin-bottom:12px">📲</span>
+        <div style="display:flex;gap:20px;justify-content:center">
+          <div><div style="font-family:var(--font);font-size:22px;font-weight:800;color:#fff">4.8</div><div style="font-size:10px;color:rgba(255,255,255,.5);font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-top:2px">Note</div></div>
+          <div><div style="font-family:var(--font);font-size:22px;font-weight:800;color:#fff">10K+</div><div style="font-size:10px;color:rgba(255,255,255,.5);font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-top:2px">Téléch.</div></div>
+        </div>
+      </div>
+    </div>
+  </div></section>
 
 <!-- ══ BLOC SOMBRE : Stats + App + Footer ══ -->
-<section style="background:#1A1A1A;margin-top:0">
+<section style="background:#2D2D2D;margin-top:0">
 
   <!-- Stats band -->
-  <div style="padding:28px 0 0">
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);overflow:hidden;border-radius:0;border-left:none;border-right:none;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)">
+  <div style="max-width:1100px;margin:0 auto;padding:32px 24px 0">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);overflow:hidden;border-radius:8px;border:1px solid rgba(255,255,255,.08)">
       <div style="padding:24px;text-align:center;border-right:1px solid rgba(255,255,255,.08)">
         <div style="font-size:28px;font-weight:800;color:var(--or);margin-bottom:4px" id="sb-ads2">1 679</div>
         <div style="font-size:11px;color:rgba(255,255,255,.45);letter-spacing:.2px">Annonces actives</div>
@@ -577,8 +631,8 @@ footer{background:transparent;margin-top:0}
   </div>
 
   <!-- App banner -->
-  <div style="padding:20px 0 28px">
-    <div style="background:rgba(255,255,255,.04);border-left:none;border-right:none;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08);border-radius:0;padding:28px 32px;display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center;position:relative;overflow:hidden">
+  <div style="max-width:1100px;margin:0 auto;padding:24px 24px 32px">
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:28px 36px;display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center;position:relative;overflow:hidden">
       <div style="position:absolute;top:-40px;right:200px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(255,92,0,.12),transparent 70%);pointer-events:none"></div>
       <div>
         <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,92,0,.2);color:var(--or);font-size:11px;font-weight:800;padding:4px 10px;border-radius:4px;margin-bottom:12px;text-transform:uppercase;letter-spacing:.4px">📲 Bientôt disponible</div>
@@ -600,7 +654,9 @@ footer{background:transparent;margin-top:0}
   </div>
 
   <!-- Séparateur -->
-  <div style="border-top:1px solid rgba(255,255,255,.08);margin:0 0 0 0"></div>
+  <div style="max-width:1100px;margin:0 auto;padding:0 24px">
+    <div style="border-top:1px solid rgba(255,255,255,.08)"></div>
+  </div>
 
 
   <!-- Footer -->
@@ -662,7 +718,10 @@ footer{background:transparent;margin-top:0}
         <li><a onclick="toast('Bientôt disponible')">Paiement Orange Money</a></li>
         <li><a onclick="toast('Bientôt disponible')">Signaler une annonce</a></li>
       </ul>
-
+      <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+        <button onclick="toast('🍎 Bientôt !')" style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:7px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">🍎 App Store</button>
+        <button onclick="toast('▶️ Bientôt !')" style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:7px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">▶️ Google Play</button>
+      </div>
     </div>
 
   </div>
@@ -726,6 +785,24 @@ footer{background:transparent;margin-top:0}
         </div>
         <div class="det-desc" id="det-desc"></div>
         <div class="det-tags" id="det-tags"></div>
+
+        <!-- Notation -->
+        <div class="rating-section" id="rating-section">
+          <div class="rating-title">⭐ Note de cet article</div>
+          <div class="stars-display" id="avg-stars">☆☆☆☆☆</div>
+          <div class="rating-avg" id="avg-rating-text">Aucune note pour l'instant</div>
+          <div class="user-rating-wrap" id="user-rating-wrap" style="display:none">
+            <div class="user-rating-label">Votre note (après achat) :</div>
+            <div class="user-stars" id="user-stars">
+              <span class="user-star" data-v="1" onclick="rateAd(1)" onmouseover="hoverStar(1)" onmouseout="unhoverStar()">★</span>
+              <span class="user-star" data-v="2" onclick="rateAd(2)" onmouseover="hoverStar(2)" onmouseout="unhoverStar()">★</span>
+              <span class="user-star" data-v="3" onclick="rateAd(3)" onmouseover="hoverStar(3)" onmouseout="unhoverStar()">★</span>
+              <span class="user-star" data-v="4" onclick="rateAd(4)" onmouseover="hoverStar(4)" onmouseout="unhoverStar()">★</span>
+              <span class="user-star" data-v="5" onclick="rateAd(5)" onmouseover="hoverStar(5)" onmouseout="unhoverStar()">★</span>
+            </div>
+            <div class="rating-done" id="rating-done">✅ Merci pour votre note !</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1317,7 +1394,7 @@ function goTo(page){
   // Changer de page
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   var el=document.getElementById('page-'+page);
-  if(el){el.classList.add('active');el.scrollTop=0;window.scrollTo({top:0,behavior:'smooth'});}
+  if(el){el.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
   if(page==='dashboard')loadDash();
   if(page==='home')renderAds();
   if(page==='seller'&&typeof _curSellerId!=='undefined'&&_curSellerId)loadSellerProfile(_curSellerId);
@@ -1527,6 +1604,84 @@ function applyZoneFilter(val){
   if(input && name){
     input.placeholder = 'Rechercher à ' + name + '...';
   }
+}
+
+// ── Notation article ──────────────────────────────────────────
+var _myRating = 0;
+
+function renderAdRating(ad){
+  var avgEl  = document.getElementById('avg-stars');
+  var txtEl  = document.getElementById('avg-rating-text');
+  var wrap   = document.getElementById('user-rating-wrap');
+  var doneEl = document.getElementById('rating-done');
+  if(!avgEl) return;
+  var avg   = parseFloat(ad.avgRating)||0;
+  var count = parseInt(ad.ratingCount)||0;
+  var stars = '';
+  for(var i=1;i<=5;i++) stars += i<=Math.round(avg)?'★':'☆';
+  avgEl.textContent  = stars;
+  avgEl.style.color  = avg>0?'#FBBF24':'#ccc';
+  txtEl.textContent  = count>0 ? avg.toFixed(1)+'/5 — '+count+' avis' : "Aucune note pour l'instant";
+  _myRating = 0;
+  var u = DB.user();
+  if(u && wrap){
+    wrap.style.display='block';
+    var key = 'r_'+(ad._id||ad.id)+'_'+u.id;
+    var saved = localStorage.getItem(key);
+    if(saved){
+      _myRating = parseInt(saved);
+      hoverStar(_myRating);
+      if(doneEl) doneEl.style.display='block';
+      document.querySelectorAll('.user-star').forEach(function(s){s.style.pointerEvents='none';});
+    } else {
+      unhoverStar();
+      if(doneEl) doneEl.style.display='none';
+      document.querySelectorAll('.user-star').forEach(function(s){s.style.pointerEvents='';});
+    }
+  } else if(wrap){
+    wrap.style.display='none';
+  }
+}
+
+function hoverStar(n){
+  document.querySelectorAll('.user-star').forEach(function(s,i){
+    s.classList.toggle('lit', i<n);
+  });
+}
+
+function unhoverStar(){
+  document.querySelectorAll('.user-star').forEach(function(s,i){
+    s.classList.toggle('lit', i<_myRating);
+  });
+}
+
+function rateAd(n){
+  var u=DB.user();
+  if(!u){toast('🔒 Connectez-vous pour noter','err');return;}
+  if(!curAd) return;
+  _myRating=n;
+  hoverStar(n);
+  document.querySelectorAll('.user-star').forEach(function(s){s.style.pointerEvents='none';});
+  var doneEl=document.getElementById('rating-done');
+  if(doneEl) doneEl.style.display='block';
+  var adId = curAd._id||curAd.id;
+  localStorage.setItem('r_'+adId+'_'+u.id, n);
+  var token=localStorage.getItem('ygy_token');
+  fetch('/api/ads/'+adId+'/rate',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+    body:JSON.stringify({rating:n})
+  }).then(function(r){return r.json();}).then(function(d){
+    if(d.avgRating!==undefined){
+      var stars='';
+      for(var i=1;i<=5;i++) stars+=i<=Math.round(d.avgRating)?'★':'☆';
+      var avgEl=document.getElementById('avg-stars');
+      var txtEl=document.getElementById('avg-rating-text');
+      if(avgEl){avgEl.textContent=stars;avgEl.style.color='#FBBF24';}
+      if(txtEl) txtEl.textContent=d.avgRating.toFixed(1)+'/5 — '+d.ratingCount+' avis';
+    }
+    toast('⭐ Note enregistrée, merci !','ok');
+  }).catch(function(){ toast('⭐ Note sauvegardée localement','ok'); });
 }
 
 function doSearch(query){
@@ -1809,6 +1964,7 @@ function viewAd_display(ad){
       }
     }
   }
+  if(typeof renderAdRating==='function') renderAdRating(ad);
   goTo('detail');
 }
 function zoomPhoto(idx){
