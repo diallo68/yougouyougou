@@ -108,6 +108,7 @@ async function sendEmail(to, subject, html, text) {
   const apiKey = process.env.SENDGRID_API_KEY;
   if (!apiKey) { console.warn('[EMAIL] SendGrid non configuré →', to, subject); return; }
   const fromEmail = process.env.EMAIL_FROM || 'noreply@yougouyougou.net';
+  console.log(`[EMAIL] Tentative envoi | from=${fromEmail} | to=${to} | subject="${subject}"`);
   const body = JSON.stringify({
     personalizations: [{ to: [{ email: to }] }],
     from: { email: fromEmail, name: 'YouGouYou 🇬🇳' },
@@ -122,12 +123,12 @@ async function sendEmail(to, subject, html, text) {
     headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
     body
   });
+  const responseText = await response.text();
   if (!response.ok) {
-    const errBody = await response.text();
-    console.error(`[EMAIL] SendGrid erreur ${response.status}:`, errBody);
-    throw new Error(`SendGrid ${response.status}: ${errBody}`);
+    console.error(`[EMAIL] SendGrid erreur ${response.status} | from=${fromEmail} | to=${to}:`, responseText);
+    throw new Error(`SendGrid ${response.status}: ${responseText}`);
   }
-  console.log('✅ [EMAIL] Envoyé à', to);
+  console.log(`✅ [EMAIL] Envoyé | from=${fromEmail} | to=${to} | status=${response.status}`);
 }
 
 function emailVerifHTML(prenom, code) {
@@ -454,11 +455,24 @@ app.post('/api/register', async (req, res) => {
     let pending = null;
     if (phone) pending = await User.findOne({ phone });
     if (!pending && email) pending = await User.findOne({ email: email.toLowerCase() });
-    if (!pending) return res.status(400).json({ error: "Demandez un code d'abord" });
-    if (pending.verified) return res.status(400).json({ error: 'Ce numéro est déjà inscrit' });
-    if (pending.verifyCode !== code) return res.status(400).json({ error: 'Code incorrect' });
+    if (!pending) return res.status(400).json({ error: "Demandez d'abord un code de vérification" });
+    // Vérifier le code AVANT de vérifier si déjà inscrit
+    if (!pending.verifyCode) return res.status(400).json({ error: "Code expiré — demandez un nouveau code" });
+    if (pending.verifyCode !== code) return res.status(400).json({ error: 'Code incorrect — vérifiez votre email ou SMS' });
     if (pending.codeExpiry && new Date() > pending.codeExpiry)
       return res.status(400).json({ error: 'Code expiré — demandez un nouveau code' });
+    // Si déjà inscrit avec ce code valide → permettre la reconnexion/mise à jour
+    if (pending.verified) {
+      // Compte existe déjà — connexion automatique
+      const token = jwt.sign({ id: pending._id, role: pending.role }, JWT_SECRET, { expiresIn: '30d' });
+      return res.json({
+        success: true, token,
+        user: { id: pending._id, name: `${pending.prenom} ${pending.nom||''}`.trim(),
+                prenom: pending.prenom, nom: pending.nom||'',
+                phone: pending.phone||'', email: pending.email||'',
+                city: pending.city||'', role: pending.role }
+      });
+    }
 
     const hashed = await bcrypt.hash(password, 10);
     const query  = phone ? { phone } : { email: email.toLowerCase() };
