@@ -1180,7 +1180,7 @@ footer{background:transparent;margin-top:0}
         <a onclick="showDashTab('ads')" id="dtab-ads">📋 Mes annonces <span id="p-count-ads" style="background:var(--orl);color:var(--or);font-size:11px;padding:1px 6px;border-radius:10px;margin-left:auto">0</span></a>
         <a onclick="showDashTab('history')" id="dtab-history">🕐 Historique</a>
         <a onclick="showDashTab('payments')" id="dtab-payments">💳 Paiements</a>
-        <a onclick="showDashTab('alerts')" id="dtab-alerts">🔔 Alertes</a>
+
         <a id="nav-admin-link" hidden onclick="goAdmin()">👑 Admin</a>
         <a onclick="logout()" style="color:var(--re)!important;margin-top:20px">🚪 Déconnexion</a>
       </nav>
@@ -1274,12 +1274,7 @@ footer{background:transparent;margin-top:0}
 
 
       <!-- ═══ TAB ALERTES ═══ -->
-      <div class="dash-section" id="dsec-alerts" >
-        <h3 style="margin-bottom:8px;font-size:15px">🔔 Mes alertes de recherche</h3>
-        <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Recevez un email dès qu'une nouvelle annonce correspond à vos critères.</p>
-        <button onclick="showAlertModal()" style="background:var(--or);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;margin-bottom:16px">➕ Créer une alerte</button>
-        <div id="alerts-list"><div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">⏳ Chargement...</div></div>
-      </div>
+      
     </div>
   </div>
 </div>
@@ -1499,7 +1494,7 @@ footer{background:transparent;margin-top:0}
         <!-- Sécurité -->
         <div style="margin-top:12px;text-align:center;font-size:11px;color:var(--muted);line-height:1.6">
           🔒 Paiement sécurisé · Votre PIN n'est jamais stocké<br>
-          En cas de problème : <strong>support.yougouyougou@gmail.com</strong>
+          En cas de problème : <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="394a4c4949564b4d1740564c5e564c40564c5e564c795e54585055175a5654">[email&#160;protected]</a></strong>
         </div>
       </div>
 
@@ -1559,7 +1554,7 @@ footer{background:transparent;margin-top:0}
   <button onclick="zoomPhoto(window._zoomIdx+1)" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:none;color:#fff;font-size:28px;cursor:pointer;border-radius:50%;width:46px;height:46px">›</button>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 
 // ══════════════════════════════════════════
 //  DONNÉES
@@ -4083,10 +4078,25 @@ function adminApiGet(path, cb){
 function goAdmin(){
   var u=DB.user();
   if(!u){openModal('auth');return;}
-  if(u.role!=='admin'){toast('🚫 Accès refusé','err');return;}
-  goTo('admin');
-  adminTab('stats');
-  loadAdmin();
+  var token=localStorage.getItem('ygy_token');
+  if(!token){openModal('auth');return;}
+  // Vérifier le rôle depuis MongoDB (source de vérité)
+  fetch('/api/me',{headers:{'Authorization':'Bearer '+token}})
+  .then(function(r){return r.ok?r.json():null;})
+  .then(function(data){
+    if(!data||!data.user||data.user.role!=='admin'){
+      toast('🚫 Accès refusé','err');
+      return;
+    }
+    // Mettre à jour le rôle local
+    var u2=DB.user()||{};
+    u2.role=data.user.role;
+    DB.login(u2);
+    goTo('admin');
+    adminTab('stats');
+    loadAdmin();
+  })
+  .catch(function(){ toast('❌ Erreur de connexion','err'); });
 }
 
 function adminTab(name){
@@ -6034,13 +6044,4 @@ document.addEventListener('mouseover', function(e){
   if(!ncat) return;
   var dd = ncat.querySelector('.cat-dropdown');
   if(!dd) return;
-  var rect = ncat.getBoundingClientRect();
-  dd.style.position = 'fixed';
-  dd.style.top = rect.bottom + 'px';
-  dd.style.left = rect.left + 'px';
-  dd.style.zIndex = '99999';
-});
-</script>
-</body>
-</html<div id="dyn-fields-container"></div>
-        >
+  var rect
