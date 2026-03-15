@@ -477,27 +477,26 @@ app.post('/api/register', async (req, res) => {
   try {
     const { prenom, nom, phone, email, password, city, code, method = 'sms' } = req.body;
     if (!prenom || !password || !code)
-      return res.status(400).json({ error: 'Champs requis : prenom, password, code' });
+      return res.status(400).json({ error: 'Champs requis manquants' });
 
+    // Chercher le user temporaire créé lors du send-code
     let pending = null;
-    // Mode email : chercher par email en priorité
     if (method === 'email' && email) {
       pending = await User.findOne({ email: email.toLowerCase() });
     } else if (phone) {
       pending = await User.findOne({ phone });
     }
-    if (!pending && email) pending = await User.findOne({ email: email.toLowerCase() });
-    if (!pending && phone) pending = await User.findOne({ phone });
-    console.log(`[REGISTER] method=${method} phone="${phone}" email="${email}" pending=${pending?pending._id:'null'} verifyCode=${pending?.verifyCode}`);
+
+    console.log(`[REGISTER] method=${method} email="${email}" phone="${phone}" found=${!!pending} code_stored=${pending?.verifyCode} code_sent=${code}`);
+
     if (!pending) return res.status(400).json({ error: "Demandez d'abord un code de vérification" });
-    // Vérifier le code AVANT de vérifier si déjà inscrit
-    if (!pending.verifyCode) return res.status(400).json({ error: "Code expiré — demandez un nouveau code" });
-    if (pending.verifyCode !== code) return res.status(400).json({ error: 'Code incorrect — vérifiez votre email ou SMS' });
+    if (!pending.verifyCode) return res.status(400).json({ error: 'Code expiré — demandez un nouveau code' });
+    if (pending.verifyCode !== code) return res.status(400).json({ error: 'Code incorrect' });
     if (pending.codeExpiry && new Date() > pending.codeExpiry)
       return res.status(400).json({ error: 'Code expiré — demandez un nouveau code' });
-    // Si déjà inscrit avec ce code valide → permettre la reconnexion/mise à jour
+
+    // Compte déjà vérifié → connexion directe
     if (pending.verified) {
-      // Compte existe déjà — connexion automatique
       const token = jwt.sign({ id: pending._id, role: pending.role }, JWT_SECRET, { expiresIn: '30d' });
       return res.json({
         success: true, token,
@@ -508,22 +507,33 @@ app.post('/api/register', async (req, res) => {
       });
     }
 
+    // Finaliser l'inscription — mettre à jour le document temporaire
     const hashed = await bcrypt.hash(password, 10);
-    const query  = phone ? { phone } : { email: email.toLowerCase() };
-    const user   = await User.findOneAndUpdate(query, {
-      prenom, nom: nom||'', phone: phone||'', email: (email||'').toLowerCase(),
-      password: hashed, city: city||'', verified: true,
-      verifyCode: null, codeExpiry: null
-    }, { upsert: true, new: true });
+    pending.prenom    = prenom;
+    pending.nom       = nom || '';
+    pending.password  = hashed;
+    pending.city      = city || '';
+    pending.verified  = true;
+    pending.verifyCode  = null;
+    pending.codeExpiry  = null;
+    pending.email     = (email || pending.email || '').toLowerCase();
+    // Ne mettre à jour phone que si fourni (éviter d'écraser le phone fictif par '')
+    if (phone) pending.phone = phone;
+    await pending.save();
 
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '30d' });
+    const token = jwt.sign({ id: pending._id, role: pending.role }, JWT_SECRET, { expiresIn: '30d' });
+    console.log(`[REGISTER] ✅ Compte créé: ${pending._id} email=${pending.email}`);
     res.json({
       success: true, token,
-      user: { id: user._id, name: `${prenom} ${nom||''}`.trim(),
-              prenom, nom: nom||'', phone: phone||'', email: (email||'').toLowerCase(),
-              city: city||'', role: user.role }
+      user: { id: pending._id, name: `${prenom} ${nom||''}`.trim(),
+              prenom, nom: nom||'',
+              phone: pending.phone||'', email: pending.email||'',
+              city: city||'', role: pending.role }
     });
-  } catch(err) { res.status(500).json({ error: err.message }); }
+  } catch(err) {
+    console.error('[REGISTER] Erreur:', err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Connexion
@@ -583,14 +593,42 @@ app.post('/api/auth/reset-password', async (req, res) => {
 
     const resetUrl = `https://yougouyougou.net?reset=${token}`;
     if (email) {
-      const html = `<div style="font-family:Arial;max-width:500px;margin:0 auto;padding:30px">
-        <h2 style="color:#FF5C00">Réinitialisation de mot de passe</h2>
-        <p>Bonjour ${user.prenom},</p>
-        <p>Cliquez sur le lien ci-dessous pour réinitialiser votre mot de passe :</p>
-        <a href="${resetUrl}" style="display:inline-block;background:#FF5C00;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;margin:16px 0">Réinitialiser mon mot de passe</a>
-        <p style="color:#999;font-size:12px">Ce lien expire dans 1 heure.</p>
-      </div>`;
-      await sendEmail(email, 'Réinitialisation de votre mot de passe YouGouYou', html, `Lien : ${resetUrl}`);
+      const textBody = `Bonjour ${user.prenom},\n\nVous avez demandé la réinitialisation de votre mot de passe YouGouYou.\n\nCliquez sur ce lien pour créer un nouveau mot de passe :\n${resetUrl}\n\nCe lien expire dans 1 heure.\n\nSi vous n'avez pas fait cette demande, ignorez cet email.\n\n— L'équipe YouGouYou`;
+      const htmlBody = `<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:30px 0">
+<tr><td align="center">
+<table width="520" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08)">
+  <tr><td style="background:#FF5C00;padding:28px 36px;text-align:center">
+    <div style="font-size:24px;font-weight:900;color:#ffffff;letter-spacing:-0.5px">YouGouYou 🇬🇳</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.8);margin-top:4px">Le marché de toute la Guinée</div>
+  </td></tr>
+  <tr><td style="padding:32px 36px">
+    <h2 style="margin:0 0 16px;font-size:20px;color:#1a1a1a">Réinitialisation de mot de passe</h2>
+    <p style="margin:0 0 12px;font-size:15px;color:#333">Bonjour <strong>${user.prenom}</strong>,</p>
+    <p style="margin:0 0 24px;font-size:14px;color:#666;line-height:1.6">Vous avez demandé la réinitialisation de votre mot de passe. Cliquez sur le bouton ci-dessous pour en créer un nouveau.</p>
+    <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:8px 0 28px">
+      <a href="${resetUrl}" style="display:inline-block;background:#FF5C00;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:15px">
+        🔒 Réinitialiser mon mot de passe
+      </a>
+    </td></tr></table>
+    <p style="margin:0 0 8px;font-size:13px;color:#999">Ou copiez ce lien dans votre navigateur :</p>
+    <p style="margin:0 0 24px;font-size:12px;color:#FF5C00;word-break:break-all">${resetUrl}</p>
+    <div style="background:#fff8f0;border-left:4px solid #FF5C00;padding:12px 16px;border-radius:0 8px 8px 0;margin-bottom:24px">
+      <p style="margin:0;font-size:12px;color:#666">⏱️ Ce lien expire dans <strong>1 heure</strong>.<br>Si vous n'avez pas fait cette demande, ignorez cet email.</p>
+    </div>
+  </td></tr>
+  <tr><td style="background:#f9f9f9;padding:16px 36px;text-align:center;border-top:1px solid #eee">
+    <p style="margin:0;font-size:12px;color:#aaa">© ${new Date().getFullYear()} YouGouYou · Conakry, Guinée</p>
+  </td></tr>
+</table>
+</td></tr>
+</table>
+</body></html>`;
+      console.log(`[RESET] Envoi lien reset à ${email} — URL: ${resetUrl}`);
+      await sendEmail(email, 'Réinitialisez votre mot de passe YouGouYou', htmlBody, textBody);
     }
     res.json({ success: true, message: 'Email envoyé si le compte existe' });
   } catch(err) { res.status(500).json({ error: err.message }); }
@@ -1255,29 +1293,64 @@ app.post('/api/payment/orange-money', auth, async (req, res) => {
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
-// Commission 5% pour révéler le numéro
+// Commission 5% pour révéler le numéro — avec tentative Orange Money API
 app.post('/api/payment/commission', auth, async (req, res) => {
   try {
-    const { adId, buyerPhone, pin } = req.body;
-    if (!adId || !buyerPhone) return res.status(400).json({ error: 'Données manquantes' });
+    const { adId, buyerPhone, pin, phone } = req.body;
+    const payerPhone = buyerPhone || phone;
+    if (!adId || !payerPhone) return res.status(400).json({ error: 'Données manquantes' });
 
     const ad = await Ad.findById(adId);
     if (!ad) return res.status(404).json({ error: 'Annonce introuvable' });
 
-    const commission = Math.max(Math.round(ad.price * 0.05), 1000); // 5%, min 1000 GNF
-
+    const commission = Math.max(Math.round(ad.price * 0.05), 1000);
     const ref = genRef();
-    await Payment.create({
-      type: 'commission', buyer: req.user.id, buyerPhone,
-      ad: ad._id, adTitle: ad.title,
-      amount: commission, commission, reference: ref, status: 'success'
+
+    // ── Tentative paiement Orange Money Guinée ──────────────────
+    // L'API Orange Money Guinée n'est pas encore disponible publiquement.
+    // En attendant l'accès API officiel, on enregistre le paiement
+    // et on révèle le numéro (le vendeur recevra la commission manuellement).
+    // 
+    // Quand vous aurez accès à l'API OM Guinée, remplacez ce bloc par :
+    // const omResult = await callOrangeMoney(payerPhone, pin, commission, ref);
+    // if (!omResult.success) return res.status(402).json({ error: omResult.message });
+    // ─────────────────────────────────────────────────────────────
+
+    console.log(`[PAYMENT] Commission ${commission} GNF | ref=${ref} | payer=${payerPhone} | ad=${adId}`);
+
+    // Enregistrer le paiement
+    const payment = await Payment.create({
+      type: 'commission',
+      buyer: req.user.id,
+      buyerPhone: payerPhone,
+      ad: ad._id,
+      adTitle: ad.title,
+      amount: commission,
+      commission,
+      reference: ref,
+      status: 'success'
     });
 
     // Incrémenter contacts du vendeur
     User.findByIdAndUpdate(ad.seller, { $inc: { totalContacts: 1 } }).catch(()=>{});
 
-    res.json({ success: true, reference: ref, commission, sellerPhone: ad.sellerPhone });
-  } catch(err) { res.status(500).json({ error: err.message }); }
+    // Récupérer le vrai numéro du vendeur
+    const seller = await User.findById(ad.seller).select('phone');
+    const sellerPhone = ad.sellerPhone || (seller && seller.phone) || '';
+
+    console.log(`[PAYMENT] ✅ Commission ref=${ref} — numéro révélé: ${sellerPhone}`);
+
+    res.json({
+      success: true,
+      reference: ref,
+      commission,
+      sellerPhone,
+      message: 'Paiement enregistré — numéro révélé'
+    });
+  } catch(err) {
+    console.error('[PAYMENT] Erreur:', err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Mes paiements
