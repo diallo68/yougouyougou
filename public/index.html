@@ -4182,39 +4182,52 @@ function loadAdminReports(status){
   adminApiGet('/api/admin/reports?status='+status+'&limit=100', function(d){
     var reports = d.reports||[];
     var ct = document.getElementById('admin-reports-count');
-    if(ct) ct.textContent = d.total + ' signalement'+(d.total!==1?'s':'');
+    if(ct) ct.textContent = (d.total||reports.length) + ' signalement(s)';
     var tbody = document.getElementById('admin-reports-body');
     if(!tbody) return;
-    if(!reports.length){ tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Aucun signalement</td></tr>'; return; }
-    tbody.innerHTML = reports.map(function(r){
+    if(!reports.length){
+      tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Aucun signalement</td></tr>';
+      return;
+    }
+    var reasons = {arnaque:'🚨 Arnaque',interdit:'🚫 Interdit',doublon:'📋 Doublon',prix:'💰 Prix abusif',photo:'📷 Fausses photos',autre:'❓ Autre'};
+    var rows = '';
+    for(var i=0;i<reports.length;i++){
+      var r = reports[i];
       var date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('fr-FR') : '—';
       var adTitle = (r.adId&&r.adId.title)||'Annonce supprimée';
-      var reporter = (r.reporterId&&(r.reporterId.prenom+' '+r.reporterId.nom))||'Anonyme';
+      var reporter = r.reporterId ? ((r.reporterId.prenom||'')+' '+(r.reporterId.nom||'')).trim() : 'Anonyme';
       var statusBadge = r.status==='pending'
         ? '<span style="background:#FEF3C7;color:#92400E;font-size:11px;padding:2px 8px;border-radius:10px">En attente</span>'
         : '<span style="background:#D1FAE5;color:#065F46;font-size:11px;padding:2px 8px;border-radius:10px">Traité</span>';
-      var reasons = {arnaque:'🚨 Arnaque',interdit:'🚫 Interdit',doublon:'📋 Doublon',prix:'💰 Prix abusif',photo:'📷 Fausses photos',autre:'❓ Autre'};
-      return '<tr>'+
-        '<td>'+adTitle+'</td>'+
-        '<td>'+(reasons[r.reason]||r.reason)+'</td>'+
-        '<td>'+reporter+'</td>'+
-        '<td>'+date+'</td>'+
-        '<td>'+statusBadge+'</td>'+
-        '<td><button onclick="dismissReport(''+r._id+'')" style="background:var(--brl);border:1px solid var(--br);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer">Traiter</button></td>'+
-      '</tr>';
-    }).join('');
+      var rid = r._id||'';
+      rows += '<tr>';
+      rows += '<td>'+adTitle+'</td>';
+      rows += '<td>'+(reasons[r.reason]||r.reason||'—')+'</td>';
+      rows += '<td>'+reporter+'</td>';
+      rows += '<td>'+date+'</td>';
+      rows += '<td>'+statusBadge+'</td>';
+      rows += '<td><button data-rid="'+rid+'" onclick="dismissReport(this)" style="background:var(--brl);border:1px solid var(--br);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit">✓ Traiter</button></td>';
+      rows += '</tr>';
+    }
+    tbody.innerHTML = rows;
   });
 }
 
-function dismissReport(id){
+function dismissReport(btn){
+  var id = btn ? btn.getAttribute('data-rid') : '';
+  if(!id) return;
+  if(btn){ btn.disabled=true; btn.textContent='...'; }
   var token = localStorage.getItem('ygy_token');
   fetch('/api/admin/reports/'+id, {
     method:'PATCH',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
     body: JSON.stringify({status:'reviewed'})
-  }).then(function(){ toast('✅ Signalement traité','ok'); loadAdminReports('pending'); })
-  .catch(function(){ toast('❌ Erreur','err'); });
+  }).then(function(){
+    toast('✅ Signalement traité','ok');
+    loadAdminReports('pending');
+  }).catch(function(){ toast('❌ Erreur','err'); if(btn){btn.disabled=false;btn.textContent='✓ Traiter';} });
 }
+
 
 function loadAdmin(){
   // Vérifier que l'admin est bien authentifié avant de charger
