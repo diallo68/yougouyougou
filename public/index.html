@@ -1818,7 +1818,8 @@ function renderNavCats(){
   var allItems=CATS;
   el.innerHTML=allItems.map(function(cat,i){
     var subs=cat.sub?cat.sub.map(function(s){
-      return '<div class="cat-sub-item" onclick="filterSubCat(event,\''+cat.n+'\',\''+s+'\')">'+s+'</div>';
+      var sName=typeof s==='string'?s:s.n;
+      return '<div class="cat-sub-item" onclick="filterSubCat(event,\''+cat.n+'\',\''+sName+'\')">'+sName+'</div>';
     }).join(''):'';
     var arrow=cat.sub?' <span class="cat-arrow">▾</span>':'';
     return '<div class="ncat'+(i===0?' active':'')+(cat.sub?' has-sub':'')+'" onclick="filterCat(this,\''+cat.n+'\')">'
@@ -2138,11 +2139,12 @@ function clearSearch(){
 function renderPostCats(){
   var el=document.getElementById('post-cats');if(!el)return;
   el.innerHTML=CATS.map(function(c){
-    return '<div class="cat-opt" onclick="pickCat(this,\''+c.n+'\')"><span class="em">'+(c.e||'📦')+'</span>'+c.n+'</div>';
+    return '<div class="cat-opt" data-name="'+c.n.replace(/"/g,'&quot;')+'" onclick="pickCat(this)"><span class="em">'+(c.e||'📦')+'</span>'+c.n+'</div>';
   }).join('');
 }
 
-function pickCat(el, name){
+function pickCat(el){
+  var name=el.getAttribute('data-name')||el.textContent.trim();
   selCat=name; selSubCat=''; selSubSubCat='';
   document.querySelectorAll('.cat-opt').forEach(function(c){c.classList.remove('sel');});
   el.classList.add('sel');
@@ -2157,7 +2159,7 @@ function pickCat(el, name){
     if(grid){
       grid.innerHTML=cat.sub.map(function(s){
         var sName=typeof s==='string'?s:s.n;
-        return '<div class="cat-opt" onclick="pickSubCat(this,\''+sName+'\')">'+sName+'</div>';
+        return '<div class="cat-opt" data-name="'+sName.replace(/"/g,'&quot;')+'" onclick="pickSubCat(this)">'+sName+'</div>';
       }).join('');
     }
     if(sec) sec.style.display='';
@@ -2173,7 +2175,8 @@ function pickCat(el, name){
   }
 }
 
-function pickSubCat(el, name){
+function pickSubCat(el){
+  var name=el.getAttribute('data-name')||el.textContent.trim();
   selSubCat=name; selSubSubCat='';
   document.querySelectorAll('#post-subcats .cat-opt').forEach(function(c){c.classList.remove('sel');});
   el.classList.add('sel');
@@ -2198,7 +2201,8 @@ function pickSubCat(el, name){
   }
 }
 
-function pickSubSubCat(el, name){
+function pickSubSubCat(el){
+  var name=el.getAttribute('data-name')||el.textContent.trim();
   selSubSubCat=name;
   document.querySelectorAll('#post-subsubcats .cat-opt').forEach(function(c){c.classList.remove('sel');});
   el.classList.add('sel');
