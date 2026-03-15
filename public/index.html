@@ -441,15 +441,8 @@ footer{background:transparent;margin-top:0}
 #page-messages.active{
   display:flex !important;
   flex-direction:column;
-  position:fixed;
-  top:104px;           /* nav-top 62px + nav-cats 42px */
-  left:50%;
-  transform:translateX(-50%);
-  width:100%;
-  max-width:1100px;
   height:calc(100vh - 104px);
   background:#fff;
-  z-index:200;
   overflow:hidden;
 }
 .pmsg-wrap{
@@ -1664,8 +1657,11 @@ function goTo(page){
   // Fermer tous les overlays ouverts et libérer le scroll
   document.querySelectorAll('.overlay.open').forEach(function(o){o.classList.remove('open');});
   document.body.style.overflow='';
-  // Changer de page
-  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  // Changer de page — retirer active de toutes les pages
+  document.querySelectorAll('.page').forEach(function(p){
+    p.classList.remove('active');
+    p.style.display=''; // reset inline style au cas où
+  });
   var el=document.getElementById('page-'+page);
   if(el){el.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
   if(page==='dashboard')loadDash();
