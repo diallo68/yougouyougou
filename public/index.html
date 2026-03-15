@@ -355,11 +355,11 @@ footer{background:transparent;margin-top:0}
 .msg-input-row input{flex:1;border:1.5px solid var(--br);border-radius:22px;padding:10px 16px;font-size:13px;font-family:var(--font);outline:none}
 .msg-input-row input:focus{border-color:var(--or)}
 .boost-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-.boost-card-old{display:none.15s}
-.boost-card-old2{display:none}
-.boost-card-name-old{display:none}
-.boost-card-price-old{display:none}
-.boost-card-desc-old{display:none}
+.boost-card{border:1.5px solid var(--br);border-radius:6px;padding:12px;text-align:center;cursor:pointer;transition:all .15s}
+.boost-card:hover,.boost-card.selected{border-color:var(--or);background:var(--orl)}
+.boost-card-name{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:3px}
+.boost-card-price{font-size:15px;font-weight:800;color:var(--or);margin-bottom:3px}
+.boost-card-desc{font-size:11px;color:var(--muted)}
 .load-spinner{width:24px;height:24px;border:3px solid var(--br);border-top-color:var(--or);border-radius:50%;animation:spin .7s linear infinite}
 .skel{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:4px}
 .results-count{font-size:12px;color:var(--muted)}
@@ -656,37 +656,6 @@ footer{background:transparent;margin-top:0}
 
 .om-pin{width:52px;height:52px;border:2px solid var(--br);border-radius:10px;text-align:center;font-size:22px;font-family:inherit;outline:none;transition:border-color .2s;background:#fff}
 .om-pin:focus{border-color:var(--or)}
-
-/* ── Boost options ── */
-.boost-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
-.boost-opt{border:2px solid var(--br);border-radius:12px;padding:12px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden;background:#fff}
-.boost-opt:hover{border-color:var(--or);transform:translateY(-1px);box-shadow:0 4px 12px rgba(255,92,0,.12)}
-.boost-opt.selected{border-color:var(--or);background:#FFF3EE;box-shadow:0 4px 12px rgba(255,92,0,.15)}
-.boost-opt-badge{font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;display:inline-block;margin-bottom:6px;letter-spacing:.3px}
-.boost-opt-icon{font-size:24px;margin-bottom:4px}
-.boost-opt-name{font-size:13px;font-weight:800;color:var(--ink);margin-bottom:1px}
-.boost-opt-duration{font-size:11px;color:var(--muted);margin-bottom:6px}
-.boost-opt-price{font-size:16px;font-weight:900;color:var(--or);margin-bottom:4px}
-.boost-opt-desc{font-size:10px;color:var(--muted);line-height:1.5}
-
-/* ── Alertes de recherche ── */
-.alert-create-btn{background:var(--or);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:background .15s}
-.alert-create-btn:hover{background:var(--or2)}
-.alert-limit-bar{display:flex;align-items:center;gap:10px;margin:10px 0 16px;font-size:12px;color:var(--muted)}
-.alert-limit-track{flex:1;height:4px;background:var(--brl);border-radius:2px;max-width:120px}
-.alert-limit-fill{height:100%;background:var(--or);border-radius:2px;transition:width .3s}
-.alert-card{display:flex;align-items:flex-start;gap:14px;padding:14px 16px;border:1.5px solid var(--br);border-radius:12px;margin-bottom:10px;background:#fff;transition:border-color .15s}
-.alert-card:hover{border-color:var(--or)}
-.alert-card-icon{width:40px;height:40px;border-radius:10px;background:#FFF3EE;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-.alert-card-body{flex:1;min-width:0}
-.alert-card-title{font-size:14px;font-weight:800;color:var(--ink);margin-bottom:4px}
-.alert-card-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
-.alert-tag{background:var(--brl);color:var(--ink);font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
-.alert-card-meta{font-size:11px;color:var(--muted)}
-.alert-card-actions{display:flex;flex-direction:column;gap:6px;flex-shrink:0}
-.alert-del-btn{background:none;border:1px solid #fee;color:#dc2626;border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s}
-.alert-del-btn:hover{background:#fee}
-.alert-toggle{background:none;border:1px solid var(--br);border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:inherit;color:var(--muted)}
 </style>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#FF5C00">
@@ -1211,7 +1180,7 @@ footer{background:transparent;margin-top:0}
         <a onclick="showDashTab('ads')" id="dtab-ads">📋 Mes annonces <span id="p-count-ads" style="background:var(--orl);color:var(--or);font-size:11px;padding:1px 6px;border-radius:10px;margin-left:auto">0</span></a>
         <a onclick="showDashTab('history')" id="dtab-history">🕐 Historique</a>
         <a onclick="showDashTab('payments')" id="dtab-payments">💳 Paiements</a>
-
+        <a onclick="showDashTab('alerts')" id="dtab-alerts">🔔 Alertes</a>
         <a id="nav-admin-link" hidden onclick="goAdmin()">👑 Admin</a>
         <a onclick="logout()" style="color:var(--re)!important;margin-top:20px">🚪 Déconnexion</a>
       </nav>
@@ -1305,7 +1274,12 @@ footer{background:transparent;margin-top:0}
 
 
       <!-- ═══ TAB ALERTES ═══ -->
-      
+      <div class="dash-section" id="dsec-alerts" >
+        <h3 style="margin-bottom:8px;font-size:15px">🔔 Mes alertes de recherche</h3>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Recevez un email dès qu'une nouvelle annonce correspond à vos critères.</p>
+        <button onclick="showAlertModal()" style="background:var(--or);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;margin-bottom:16px">➕ Créer une alerte</button>
+        <div id="alerts-list"><div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">⏳ Chargement...</div></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1349,8 +1323,6 @@ footer{background:transparent;margin-top:0}
       <div class="admin-nav-item" id="adm-tab-ads" onclick="adminTab('ads')">📋 Annonces</div>
       <div class="admin-nav-item" id="adm-tab-users" onclick="adminTab('users')">👥 Utilisateurs</div>
       <div class="admin-nav-item" id="adm-tab-payments" onclick="adminTab('payments')">💰 Paiements</div>
-      <div class="admin-nav-item" id="adm-tab-messages" onclick="adminTab('messages')">💬 Messages</div>
-      <div class="admin-nav-item" id="adm-tab-reports" onclick="adminTab('reports')">🚩 Signalements</div>
       <div style="margin-top:auto;padding-top:20px;border-top:1px solid rgba(255,255,255,.1)">
         <div class="admin-nav-item" onclick="goTo('home')" style="margin-top:10px">← Retour au site</div>
       </div>
@@ -1388,33 +1360,6 @@ footer{background:transparent;margin-top:0}
         </div>
         <table class="admin-table"><thead><tr><th>Réf.</th><th>Acheteur</th><th>Article</th><th>Montant</th><th>Type</th><th>Date</th><th>Statut</th></tr></thead><tbody id="admin-payments-body"></tbody></table>
       </div>
-
-      <!-- Messages (conversations) -->
-      <div class="admin-pane" id="adm-pane-messages">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-          <div class="admin-title" style="margin-bottom:0">Messages <span id="admin-msg-count" style="font-size:14px;color:var(--muted)"></span></div>
-        </div>
-        <table class="admin-table">
-          <thead><tr><th>Acheteur</th><th>Vendeur</th><th>Annonce</th><th>Dernier message</th><th>Non lus</th><th>Date</th></tr></thead>
-          <tbody id="admin-messages-body"></tbody>
-        </table>
-      </div>
-
-      <!-- Signalements -->
-      <div class="admin-pane" id="adm-pane-reports">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-          <div class="admin-title" style="margin-bottom:0">Signalements <span id="admin-reports-count" style="font-size:14px;color:var(--muted)"></span></div>
-          <div style="display:flex;gap:8px">
-            <button onclick="loadAdminReports('pending')" style="background:var(--or);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit">En attente</button>
-            <button onclick="loadAdminReports('all')" style="background:var(--brl);color:var(--ink);border:1px solid var(--br);border-radius:6px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit">Tous</button>
-          </div>
-        </div>
-        <table class="admin-table">
-          <thead><tr><th>Annonce</th><th>Raison</th><th>Signalé par</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
-          <tbody id="admin-reports-body"></tbody>
-        </table>
-      </div>
-
     </div>
   </div>
 </div>
@@ -1554,7 +1499,7 @@ footer{background:transparent;margin-top:0}
         <!-- Sécurité -->
         <div style="margin-top:12px;text-align:center;font-size:11px;color:var(--muted);line-height:1.6">
           🔒 Paiement sécurisé · Votre PIN n'est jamais stocké<br>
-          En cas de problème : <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="bac9cfcacad5c8ce94c3d5cfddd5cfc3d5cfddd5cffaddd7dbd3d694d9d5d7">[email&#160;protected]</a></strong>
+          En cas de problème : <strong>support.yougouyougou@gmail.com</strong>
         </div>
       </div>
 
@@ -1614,7 +1559,7 @@ footer{background:transparent;margin-top:0}
   <button onclick="zoomPhoto(window._zoomIdx+1)" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:none;color:#fff;font-size:28px;cursor:pointer;border-radius:50%;width:46px;height:46px">›</button>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 
 // ══════════════════════════════════════════
 //  DONNÉES
@@ -3664,11 +3609,23 @@ function updateNav(){
     btn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span id="nav-user-label">Se connecter</span>';
     btn.onclick=function(){openModal('auth');};
   }
-  // Admin : toujours masqué ici — géré uniquement par syncRoleNow()
+  // Masquer le lien Admin — toujours masqué ici, affiché uniquement par syncRole
   var adminLink=document.getElementById('nav-admin-link');
   if(adminLink) adminLink.setAttribute('hidden','');
-  // Re-synchroniser si connecté
-  if(u) syncRoleNow();
+  // Si connecté, vérifier le rôle depuis le serveur
+  if(u){
+    var _t=localStorage.getItem('ygy_token');
+    if(_t){
+      fetch('/api/me',{headers:{'Authorization':'Bearer '+_t}})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(d){
+        if(d&&d.user&&d.user.role==='admin'){
+          var al=document.getElementById('nav-admin-link');
+          if(al) al.removeAttribute('hidden');
+        }
+      }).catch(function(){});
+    }
+  }
 }
 
 // ══════════════════════════════════════════
@@ -3712,10 +3669,21 @@ function renderDash(){
   document.getElementById('d-nm').textContent=u.name||u.prenom||'Utilisateur';
   document.getElementById('d-ph').textContent=u.phone||u.email||'';
 
-  // Admin : géré uniquement par syncRoleNow()
+  // Lien Admin : masquer par défaut, afficher seulement après vérification serveur
   var adminLink=document.getElementById('nav-admin-link');
   if(adminLink) adminLink.setAttribute('hidden','');
-  syncRoleNow();
+  // Vérifier le rôle depuis MongoDB (source de vérité)
+  var _tok = localStorage.getItem('ygy_token');
+  if(_tok){
+    fetch('/api/me',{headers:{'Authorization':'Bearer '+_tok}})
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(data){
+      if(data&&data.user&&data.user.role==='admin'){
+        var al=document.getElementById('nav-admin-link');
+        if(al) al.removeAttribute('hidden');
+      }
+    }).catch(function(){});
+  }
   // Footer admin btn
   var ftAdminBtn=document.getElementById('ft-admin-btn');
   if(ftAdminBtn) ftAdminBtn.style.display=(u&&u.role==='admin')?'block':'none';
@@ -4115,9 +4083,7 @@ function adminApiGet(path, cb){
 function goAdmin(){
   var u=DB.user();
   if(!u){openModal('auth');return;}
-  var token=localStorage.getItem('ygy_token');
-  if(!token){openModal('auth');return;}
-  // Ouvrir la page immédiatement, le serveur refusera si non-admin
+  if(u.role!=='admin'){toast('🚫 Accès refusé','err');return;}
   goTo('admin');
   adminTab('stats');
   loadAdmin();
@@ -4125,9 +4091,7 @@ function goAdmin(){
 
 function adminTab(name){
   _adminTab = name;
-  if(name==='messages') loadAdminMessages();
-  if(name==='reports')  loadAdminReports('pending');
-  ['stats','ads','users','payments','messages','reports'].forEach(function(t){
+  ['stats','ads','users','payments'].forEach(function(t){
     var pane = document.getElementById('adm-pane-'+t);
     var tab  = document.getElementById('adm-tab-'+t);
     if(pane) pane.style.display = (t===name)?'block':'none';
@@ -4135,83 +4099,7 @@ function adminTab(name){
   });
 }
 
-function loadAdminMessages(){
-  adminApiGet('/api/admin/conversations', function(d){
-    var convs = d.conversations||d||[];
-    var ct = document.getElementById('admin-msg-count');
-    if(ct) ct.textContent = convs.length + ' conversations';
-    var tbody = document.getElementById('admin-messages-body');
-    if(!tbody) return;
-    if(!convs.length){ tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Aucune conversation</td></tr>'; return; }
-    tbody.innerHTML = convs.map(function(c){
-      var date = c.updatedAt ? new Date(c.updatedAt).toLocaleDateString('fr-FR') : '—';
-      var unread = (c.unreadBuyer||0)+(c.unreadSeller||0);
-      return '<tr>'+
-        '<td>'+( c.buyerName||'—')+'</td>'+
-        '<td>'+(c.sellerName||'—')+'</td>'+
-        '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(c.adTitle||'—')+'</td>'+
-        '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(c.lastMessage||'—')+'</td>'+
-        '<td>'+(unread>0?'<span style="background:var(--or);color:#fff;border-radius:50%;padding:1px 6px;font-size:11px">'+unread+'</span>':'0')+'</td>'+
-        '<td>'+date+'</td>'+
-      '</tr>';
-    }).join('');
-  });
-}
-
-function loadAdminReports(status){
-  status = status || 'pending';
-  adminApiGet('/api/admin/reports?status='+status+'&limit=100', function(d){
-    var reports = d.reports||[];
-    var ct = document.getElementById('admin-reports-count');
-    if(ct) ct.textContent = (d.total||reports.length) + ' signalement(s)';
-    var tbody = document.getElementById('admin-reports-body');
-    if(!tbody) return;
-    if(!reports.length){
-      tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Aucun signalement</td></tr>';
-      return;
-    }
-    var reasons = {arnaque:'🚨 Arnaque',interdit:'🚫 Interdit',doublon:'📋 Doublon',prix:'💰 Prix abusif',photo:'📷 Fausses photos',autre:'❓ Autre'};
-    var rows = '';
-    for(var i=0;i<reports.length;i++){
-      var r = reports[i];
-      var date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('fr-FR') : '—';
-      var adTitle = (r.adId&&r.adId.title)||'Annonce supprimée';
-      var reporter = r.reporterId ? ((r.reporterId.prenom||'')+' '+(r.reporterId.nom||'')).trim() : 'Anonyme';
-      var statusBadge = r.status==='pending'
-        ? '<span style="background:#FEF3C7;color:#92400E;font-size:11px;padding:2px 8px;border-radius:10px">En attente</span>'
-        : '<span style="background:#D1FAE5;color:#065F46;font-size:11px;padding:2px 8px;border-radius:10px">Traité</span>';
-      var rid = r._id||'';
-      rows += '<tr>';
-      rows += '<td>'+adTitle+'</td>';
-      rows += '<td>'+(reasons[r.reason]||r.reason||'—')+'</td>';
-      rows += '<td>'+reporter+'</td>';
-      rows += '<td>'+date+'</td>';
-      rows += '<td>'+statusBadge+'</td>';
-      rows += '<td><button data-rid="'+rid+'" onclick="dismissReport(this)" style="background:var(--brl);border:1px solid var(--br);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit">✓ Traiter</button></td>';
-      rows += '</tr>';
-    }
-    tbody.innerHTML = rows;
-  });
-}
-
-function dismissReport(btn){
-  var id = btn ? btn.getAttribute('data-rid') : '';
-  if(!id) return;
-  if(btn){ btn.disabled=true; btn.textContent='...'; }
-  var token = localStorage.getItem('ygy_token');
-  fetch('/api/admin/reports/'+id, {
-    method:'PATCH',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-    body: JSON.stringify({status:'reviewed'})
-  }).then(function(){
-    toast('✅ Signalement traité','ok');
-    loadAdminReports('pending');
-  }).catch(function(){ toast('❌ Erreur','err'); if(btn){btn.disabled=false;btn.textContent='✓ Traiter';} });
-}
-
-
 function loadAdmin(){
-  console.log('[ADMIN] Chargement du panel admin...');
   // 1. Stats globales
   adminApiGet('/api/admin/stats', function(d){
     _adminData.stats = d;
@@ -4227,8 +4115,8 @@ function loadAdmin(){
     _adminData.users = d.users||[];
     renderAdminUsers();
   });
-  // 4. Annonces (toutes, actives et inactives)
-  adminApiGet('/api/admin/ads?limit=500', function(d){
+  // 4. Annonces
+  adminApiGet('/api/admin/ads?limit=200', function(d){
     _adminData.ads = d.ads||[];
     renderAdminAds();
   });
@@ -4237,7 +4125,7 @@ function loadAdmin(){
     _adminData.payments = d.payments||[];
     renderAdminPayments(d.revenue||0);
   });
-  // 6. Contacts (commissions)
+  // 6. Contacts (depuis paiements de type commission)
   adminApiGet('/api/admin/payments?type=commission&limit=500', function(d){
     renderAdminContacts(d.payments||[]);
   });
@@ -5009,11 +4897,6 @@ function submitRating(){
 
 // ── Alertes de recherche ──
 function showAlertModal(){
-  var user=DB.user();
-  if(!user){ toast('🔒 Connectez-vous pour créer une alerte','err'); openModal('auth'); return; }
-  // Afficher l'email
-  var emailDisp=document.getElementById('alert-email-display');
-  if(emailDisp) emailDisp.textContent=user.email||user.phone||'votre adresse';
   // Pré-remplir depuis la recherche courante
   var q=(document.getElementById('search-input')||{}).value||'';
   var ainput=document.getElementById('alert-query');
@@ -5032,12 +4915,12 @@ function showAlertModal(){
 function saveAlert(){
   var user=DB.user();
   if(!user){ toast('🔒 Connectez-vous','err'); openModal('auth'); return; }
-  var q=(document.getElementById('alert-query')||{}).value.trim()||'';
+  var q=(document.getElementById('alert-query')||{}).value||'';
   var cat=(document.getElementById('alert-cat')||{}).value||'';
   var city=(document.getElementById('alert-city')||{}).value||'';
   var pmin=parseInt((document.getElementById('alert-pmin')||{}).value)||0;
   var pmax=parseInt((document.getElementById('alert-pmax')||{}).value)||0;
-  if(!q&&!cat){ toast('⚠️ Entrez des mots-clés ou choisissez une catégorie','warn'); return; }
+  if(!q&&!cat){ toast('Entrez au moins un critere','warn'); return; }
   var token=localStorage.getItem('ygy_token');
   fetch('/api/alerts',{
     method:'POST',
@@ -5075,42 +4958,26 @@ function loadAlerts(){
 function renderAlerts(alerts){
   var list=document.getElementById('alerts-list');
   if(!list) return;
-  var n=alerts.length;
-  var countLabel=document.getElementById('alerts-count-label');
-  var fill=document.getElementById('alerts-limit-fill');
-  if(countLabel) countLabel.textContent=n+' / 5 alerte'+(n!==1?'s':'')+' utilisée'+(n!==1?'s':'');
-  if(fill) fill.style.width=(n/5*100)+'%';
-  if(!n){
-    list.innerHTML='<div style="text-align:center;color:var(--muted);padding:40px 20px">'+
-      '<div style="font-size:48px;margin-bottom:12px">🔔</div>'+
-      '<div style="font-size:15px;font-weight:700;margin-bottom:6px">Aucune alerte active</div>'+
-      '<div style="font-size:13px;margin-bottom:16px">Créez une alerte pour être notifié par email.</div>'+
-      '<button onclick="showAlertModal()" class="alert-create-btn" style="margin:0 auto">➕ Créer ma première alerte</button>'+
-    '</div>';
+  if(!alerts.length){
+    list.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:30px"><div style="font-size:32px;margin-bottom:8px">🔔</div>Aucune alerte créée<br><small>Cliquez sur "Créer une alerte" pour commencer</small></div>';
     return;
   }
   list.innerHTML=alerts.map(function(a){
-    var id=a._id||a.id||'';
-    var title=a.query?'"'+a.query+'"':(a.category||'Toutes catégories');
-    var tags=[];
-    if(a.query) tags.push('🔍 '+a.query);
-    if(a.category) tags.push('📂 '+a.category);
-    if(a.city) tags.push('📍 '+a.city);
-    if(a.priceMin>0) tags.push('Min '+a.priceMin.toLocaleString('fr-FR')+' GNF');
-    if(a.priceMax>0) tags.push('Max '+a.priceMax.toLocaleString('fr-FR')+' GNF');
-    var date=a.createdAt?new Date(a.createdAt).toLocaleDateString('fr-FR'):'—';
-    return '<div class="alert-card">'+
-      '<div class="alert-card-icon">🔔</div>'+
-      '<div class="alert-card-body">'+
-        '<div class="alert-card-title">'+title+'</div>'+
-        '<div class="alert-card-tags">'+tags.map(function(t){return '<span class="alert-tag">'+t+'</span>';}).join('')+'</div>'+
-        '<div class="alert-card-meta">📧 Email · Créée le '+date+'</div>'+
-      '</div>'+
-      '<button class="alert-del-btn" onclick="deleteAlert(\''+ id +'\')">🗑️ Supprimer</button>'+
-    '</div>';
+    var parts=[];
+    if(a.query) parts.push('"'+a.query+'"');
+    if(a.category) parts.push(a.category);
+    if(a.city) parts.push(a.city);
+    if(a.priceMax) parts.push('max '+a.priceMax.toLocaleString('fr-FR')+' GNF');
+    return '<div class="alert-item">'
+      +'<div style="font-size:24px">🔔</div>'
+      +'<div class="alert-info">'
+      +'<div class="alert-query">'+parts.join(' · ')+'</div>'
+      +'<div class="alert-meta">Notification par email · Créée le '+(a.createdAt?new Date(a.createdAt).toLocaleDateString('fr-FR'):'—')+'</div>'
+      +'</div>'
+      +'<button class="alert-del" onclick="deleteAlert(\''+(a._id||a.id||'')+'\')">🗑️</button>'
+      +'</div>';
   }).join('');
 }
-
 function deleteAlert(id){
   if(!confirm('Supprimer cette alerte ?')) return;
   var token=localStorage.getItem('ygy_token');
@@ -5359,64 +5226,37 @@ function sendOffer(){
 // ── Options Premium (boost) ──
 var _boostOption='',_boostPrice=0;
 function selectBoost(el,option,price){
-  document.querySelectorAll('.boost-opt').forEach(function(c){c.classList.remove('selected');});
+  document.querySelectorAll('.boost-card').forEach(function(c){c.classList.remove('selected');});
   el.classList.add('selected');
   _boostOption=option; _boostPrice=parseInt(price);
-  var names={feature:'⭐ À la une — 7 jours',boost:'🔝 Remontée immédiate',urgent:'🚨 Badge Urgent — 3 jours',whatsapp:'📲 Partage WhatsApp'};
   var lbl=document.getElementById('boost-option-label');
-  if(lbl) lbl.textContent=names[option]||option;
   var plbl=document.getElementById('boost-price-label');
+  var names={feature:'À la une 7j',boost:'Remontée',urgent:'Badge URGENT',whatsapp:'Partage WhatsApp'};
+  if(lbl) lbl.textContent=names[option]||option;
   if(plbl) plbl.textContent=_boostPrice.toLocaleString('fr-FR')+' GNF';
   var ps=document.getElementById('boost-pay-section');
   if(ps) ps.style.display='block';
-  ['bp1','bp2','bp3','bp4'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
-  var phoneEl=document.getElementById('boost-phone');
-  if(phoneEl) phoneEl.focus();
-  // Scroll vers section paiement
-  setTimeout(function(){if(ps) ps.scrollIntoView({behavior:'smooth',block:'nearest'});},100);
+  ['bp1','bp2','bp3','bp4'].forEach(function(id){var el2=document.getElementById(id);if(el2)el2.value='';});
 }
 function payBoost(){
   if(!_boostOption){ toast('⚠️ Choisissez une option','warn'); return; }
   var phone=(document.getElementById('boost-phone')||{}).value||'';
-  if(!phone||phone.length<8){ toast('📱 Entrez votre numéro Orange Money','err'); return; }
+  if(!phone||phone.length<8){ toast('📱 Numéro Orange Money requis','err'); return; }
   var token=localStorage.getItem('ygy_token');
   var adId=curAd&&(curAd._id||curAd.id);
-  if(!adId){ toast('⚠️ Annonce non sélectionnée','err'); return; }
-  var btn=document.getElementById('boost-pay-btn');
-  if(btn){btn.disabled=true;btn.textContent='⏳ Traitement...';}
   fetch('/api/ads/'+adId+'/boost',{
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},
     body:JSON.stringify({type:_boostOption,amount:_boostPrice,phone:'224'+phone})
   }).then(function(r){return r.json();})
   .then(function(data){
-    if(btn){btn.disabled=false;btn.textContent='🟠 Payer et activer le boost';}
     if(data.error){toast('❌ '+data.error,'err');return;}
-    // Afficher succès
-    var step1=document.getElementById('boost-step1');
-    var succ=document.getElementById('boost-success');
-    if(step1) step1.style.display='none';
-    if(succ){
-      succ.style.display='block';
-      var msgs={feature:'Votre annonce est en tête de catégorie pendant 7 jours.',boost:'Votre annonce a remonté en tête des résultats.',urgent:'Le badge URGENT est affiché pendant 3 jours.',whatsapp:'Votre annonce est partagée sur les groupes WhatsApp locaux.'};
-      var msgEl=document.getElementById('boost-success-msg');
-      if(msgEl) msgEl.textContent=msgs[_boostOption]||'Boost activé avec succès.';
-      var refEl=document.getElementById('boost-ref-display');
-      if(refEl) refEl.textContent=data.reference||'—';
-    }
+    closeModal('boost');
+    toast('🚀 Annonce boostée avec succès !','ok');
     fetchAdsFromAPI(function(){renderAds();});
   }).catch(function(){
-    if(btn){btn.disabled=false;btn.textContent='🟠 Payer et activer le boost';}
-    // Mode démo
-    var step1=document.getElementById('boost-step1');
-    var succ=document.getElementById('boost-success');
-    if(step1) step1.style.display='none';
-    if(succ){
-      succ.style.display='block';
-      var refEl=document.getElementById('boost-ref-display');
-      if(refEl) refEl.textContent='DEMO-'+Date.now().toString(36).toUpperCase();
-    }
-    toast('🚀 Boost activé !','ok');
+    closeModal('boost');
+    toast('🚀 Boost activé (mode démo)','ok');
   });
 }
 
@@ -5591,25 +5431,6 @@ function boostMyAd(adId){
   var adObj=(DB._d.ads||[]).find(function(a){return String(a._id||a.id)===String(adId);});
   if(adObj) curAd=adObj;
   openModal('boost');
-  // Remplir résumé annonce dans le modal
-  var thumb=document.getElementById('boost-ad-thumb');
-  var titleEl=document.getElementById('boost-ad-title');
-  var priceEl=document.getElementById('boost-ad-price');
-  if(curAd){
-    var photo=(curAd.photos&&curAd.photos[0])||(curAd.ph&&curAd.ph[0])||'';
-    if(thumb) thumb.innerHTML=photo?'<img src="'+photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:8px">':'📦';
-    if(titleEl) titleEl.textContent=curAd.t||curAd.title||'Annonce';
-    if(priceEl) priceEl.textContent=((curAd.p||curAd.price||0).toLocaleString('fr-FR'))+' GNF';
-  }
-  // Reset
-  _boostOption=null; _boostPrice=0;
-  document.querySelectorAll('.boost-opt').forEach(function(c){c.classList.remove('selected');});
-  var ps=document.getElementById('boost-pay-section');
-  if(ps) ps.style.display='none';
-  var step1=document.getElementById('boost-step1');
-  var succ=document.getElementById('boost-success');
-  if(step1) step1.style.display='';
-  if(succ) succ.style.display='none';
 }
 
 // ── Champs dynamiques formulaire ──
@@ -5726,7 +5547,7 @@ var _origShowDashTab = showDashTab;
 showDashTab = function(tab){
   _origShowDashTab(tab);
   if(tab==='messages'){ loadConversations(); }
-
+  if(tab==='alerts'){ loadAlerts(); }
   if(tab==='profil'){ loadVendorStats(); }
 };
 
@@ -5793,8 +5614,27 @@ goTo=function(page){
 
 document.addEventListener('DOMContentLoaded',function(){
   DB.load();
-  // Sync rôle depuis MongoDB au chargement (source de vérité = serveur)
-  syncRoleNow();
+  // Sync rôle depuis MongoDB au chargement
+  (function(){
+    var token = localStorage.getItem('ygy_token');
+    if(token){
+      fetch('/api/me',{headers:{'Authorization':'Bearer '+token}})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(data){
+        if(data && data.user){
+          var u = DB.user() || {};
+          u.role = data.user.role; // toujours prendre le rôle depuis MongoDB
+          DB.login(u);
+          // Mettre à jour le lien Admin selon le vrai rôle
+          var adminLink = document.getElementById('nav-admin-link');
+          if(adminLink){
+            if(u.role==='admin') adminLink.removeAttribute('hidden');
+            else adminLink.setAttribute('hidden','');
+          }
+        }
+      }).catch(function(){});
+    }
+  })();
 
   // Reset mdp via lien email
   (function(){
@@ -5946,208 +5786,261 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <!-- Modal Créer une alerte -->
 <div class="overlay" id="overlay-alert" onclick="maybeClose(event,'alert')">
-  <div class="modal" style="max-width:440px">
+  <div class="modal">
     <div class="modal-head">
-      <div class="modal-title">🔔 Nouvelle alerte</div>
+      <div class="modal-title">🔔 Créer une alerte</div>
       <button class="modal-close" onclick="closeModal('alert')">✕</button>
     </div>
     <div class="modal-body">
-      <div style="background:#FFF3EE;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#555;line-height:1.6">
-        📧 Vous recevrez un email à <strong id="alert-email-display">votre adresse</strong> dès qu'une annonce correspond.
-      </div>
-
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Soyez notifié par email dès qu'une nouvelle annonce correspond.</p>
       <div class="fg">
-        <label style="font-size:13px;font-weight:700">🔍 Mots-clés <span style="color:var(--muted);font-weight:400">(requis si pas de catégorie)</span></label>
-        <input type="text" id="alert-query" placeholder="Ex: Toyota Hilux, iPhone 14, Samsung TV..."
-          style="width:100%;padding:10px 12px;border:1.5px solid var(--br);border-radius:8px;font-family:inherit;font-size:13px;outline:none;box-sizing:border-box"
-          onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'">
+        <label>Mots-clés</label>
+        <input type="text" id="alert-query" placeholder="Ex: Toyota Hilux, iPhone 14..." style="width:100%">
       </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-        <div class="fg" style="margin:0">
-          <label style="font-size:13px;font-weight:700">📂 Catégorie</label>
-          <select id="alert-cat" style="width:100%;padding:10px;border:1.5px solid var(--br);border-radius:8px;font-family:inherit;font-size:13px;outline:none"
-            onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'">
-            <option value="">Toutes catégories</option>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="fg">
+          <label>Catégorie</label>
+          <select id="alert-cat" style="width:100%;padding:10px;border:1.5px solid var(--br);border-radius:8px;font-family:inherit">
+            <option value="">Toutes</option>
           </select>
         </div>
-        <div class="fg" style="margin:0">
-          <label style="font-size:13px;font-weight:700">📍 Ville</label>
-          <select id="alert-city" style="width:100%;padding:10px;border:1.5px solid var(--br);border-radius:8px;font-family:inherit;font-size:13px;outline:none"
-            onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'">
-            <option value="">Toute la Guinée</option>
+        <div class="fg">
+          <label>Ville</label>
+          <select id="alert-city" style="width:100%;padding:10px;border:1.5px solid var(--br);border-radius:8px;font-family:inherit">
+            <option value="">Toutes</option>
           </select>
         </div>
       </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-        <div class="fg" style="margin:0">
-          <label style="font-size:13px;font-weight:700">💰 Prix min</label>
-          <div style="position:relative">
-            <input type="number" id="alert-pmin" placeholder="0" min="0"
-              style="width:100%;padding:10px 40px 10px 12px;border:1.5px solid var(--br);border-radius:8px;font-family:inherit;font-size:13px;outline:none;box-sizing:border-box"
-              onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'">
-            <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--muted);pointer-events:none">GNF</span>
-          </div>
-        </div>
-        <div class="fg" style="margin:0">
-          <label style="font-size:13px;font-weight:700">💰 Prix max</label>
-          <div style="position:relative">
-            <input type="number" id="alert-pmax" placeholder="Sans limite" min="0"
-              style="width:100%;padding:10px 40px 10px 12px;border:1.5px solid var(--br);border-radius:8px;font-family:inherit;font-size:13px;outline:none;box-sizing:border-box"
-              onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'">
-            <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--muted);pointer-events:none">GNF</span>
-          </div>
-        </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="fg"><label>Prix min (GNF)</label><input type="number" id="alert-pmin" placeholder="0"></div>
+        <div class="fg"><label>Prix max (GNF)</label><input type="number" id="alert-pmax" placeholder="Max"></div>
       </div>
-
-      <button class="btn btn-or btn-full" style="border-radius:10px;padding:13px;font-size:14px" onclick="saveAlert()">
-        🔔 Créer cette alerte
-      </button>
-      <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:8px">Maximum 5 alertes actives par compte</div>
+      <button class="btn btn-full" style="background:var(--or);color:#fff;border-radius:10px;margin-top:8px" onclick="saveAlert()">🔔 Créer l'alerte</button>
     </div>
   </div>
 </div>
 
 <!-- Modal Boost / Options Premium -->
 <div class="overlay" id="overlay-boost" onclick="maybeClose(event,'boost')">
-  <div class="modal" style="max-width:480px">
+  <div class="modal">
     <div class="modal-head">
-      <div class="modal-title">🚀 Booster mon annonce</div>
+      <div class="modal-title">🚀 Mettre en avant mon annonce</div>
       <button class="modal-close" onclick="closeModal('boost')">✕</button>
     </div>
-    <div class="modal-body" style="padding:0">
-
-      <!-- Résumé annonce -->
-      <div id="boost-ad-summary" style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--br);background:#fafafa">
-        <div id="boost-ad-thumb" style="width:48px;height:48px;border-radius:8px;background:var(--brl);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;overflow:hidden">📦</div>
-        <div style="flex:1;min-width:0">
-          <div id="boost-ad-title" style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Annonce</div>
-          <div id="boost-ad-price" style="font-size:12px;color:var(--muted)">0 GNF</div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Choisissez une option pour augmenter la visibilité de votre annonce :</p>
+      <div class="boost-options">
+        <div class="boost-card" onclick="selectBoost(this,'feature','10000')">
+          <div style="font-size:24px;margin-bottom:6px">⭐</div>
+          <div class="boost-card-name">À la une — 7 jours</div>
+          <div class="boost-card-price">10 000 GNF</div>
+          <div class="boost-card-desc">Épinglée en tête de catégorie</div>
+        </div>
+        <div class="boost-card" onclick="selectBoost(this,'boost','5000')">
+          <div style="font-size:24px;margin-bottom:6px">🔝</div>
+          <div class="boost-card-name">Remontée d'annonce</div>
+          <div class="boost-card-price">5 000 GNF</div>
+          <div class="boost-card-desc">Repasse en tête des résultats</div>
+        </div>
+        <div class="boost-card" onclick="selectBoost(this,'urgent','3000')">
+          <div style="font-size:24px;margin-bottom:6px">🔴</div>
+          <div class="boost-card-name">Badge URGENT</div>
+          <div class="boost-card-price">3 000 GNF</div>
+          <div class="boost-card-desc">Bandeau rouge visible sur la carte</div>
+        </div>
+        <div class="boost-card" onclick="selectBoost(this,'whatsapp','2000')">
+          <div style="font-size:24px;margin-bottom:6px">📲</div>
+          <div class="boost-card-name">Partage WhatsApp</div>
+          <div class="boost-card-price">2 000 GNF</div>
+          <div class="boost-card-desc">Partage auto sur groupes locaux</div>
         </div>
       </div>
-
-      <div id="boost-step1">
-        <!-- Options boost -->
-        <div style="padding:16px 18px 8px">
-          <div style="font-size:13px;font-weight:700;margin-bottom:12px;color:var(--ink)">Choisissez une option :</div>
-          <div class="boost-grid">
-
-            <div class="boost-opt" onclick="selectBoost(this,'feature','10000')">
-              <div class="boost-opt-badge" style="background:#FFF3CD;color:#856404">⭐ RECOMMANDÉ</div>
-              <div class="boost-opt-icon">⭐</div>
-              <div class="boost-opt-name">À la une</div>
-              <div class="boost-opt-duration">7 jours</div>
-              <div class="boost-opt-price">10 000 GNF</div>
-              <div class="boost-opt-desc">Épinglée en tête de catégorie<br>Visible en premier</div>
-            </div>
-
-            <div class="boost-opt" onclick="selectBoost(this,'boost','5000')">
-              <div class="boost-opt-badge" style="background:#E8F5E9;color:#2E7D32">🔝 POPULAIRE</div>
-              <div class="boost-opt-icon">🔝</div>
-              <div class="boost-opt-name">Remontée</div>
-              <div class="boost-opt-duration">Immédiate</div>
-              <div class="boost-opt-price">5 000 GNF</div>
-              <div class="boost-opt-desc">Repasse en tête des résultats<br>Comme une nouvelle annonce</div>
-            </div>
-
-            <div class="boost-opt" onclick="selectBoost(this,'urgent','3000')">
-              <div class="boost-opt-badge" style="background:#FFEBEE;color:#C62828">🔴 URGENT</div>
-              <div class="boost-opt-icon">🚨</div>
-              <div class="boost-opt-name">Badge Urgent</div>
-              <div class="boost-opt-duration">3 jours</div>
-              <div class="boost-opt-price">3 000 GNF</div>
-              <div class="boost-opt-desc">Bandeau rouge sur la carte<br>Attire l'attention</div>
-            </div>
-
-            <div class="boost-opt" onclick="selectBoost(this,'whatsapp','2000')">
-              <div class="boost-opt-badge" style="background:#E8F5E9;color:#1B5E20">📲 RÉSEAU</div>
-              <div class="boost-opt-icon">📲</div>
-              <div class="boost-opt-name">Partage WhatsApp</div>
-              <div class="boost-opt-duration">Groupes locaux</div>
-              <div class="boost-opt-price">2 000 GNF</div>
-              <div class="boost-opt-desc">Partagé sur groupes WhatsApp<br>de ta région</div>
-            </div>
-
+      <div id="boost-pay-section" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--br)">
+        <div style="font-size:13px;margin-bottom:10px">
+          Option choisie : <strong id="boost-option-label"></strong> — <strong id="boost-price-label" style="color:var(--or)"></strong>
+        </div>
+        <div class="fg"><label>Numéro Orange Money</label>
+          <div class="ph-row"><span class="ph-pfx">🇬🇳 +224</span><input type="tel" id="boost-phone" placeholder="620 00 00 00" maxlength="9"></div>
+        </div>
+        <div class="fg"><label>Code PIN</label>
+          <div class="pin-row">
+            <input class="pin-box" type="password" id="bp1" maxlength="1" oninput="pinNext(this,'bp2')">
+            <input class="pin-box" type="password" id="bp2" maxlength="1" oninput="pinNext(this,'bp3')">
+            <input class="pin-box" type="password" id="bp3" maxlength="1" oninput="pinNext(this,'bp4')">
+            <input class="pin-box" type="password" id="bp4" maxlength="1">
           </div>
         </div>
-
-        <!-- Section paiement -->
-        <div id="boost-pay-section" style="display:none;padding:14px 18px;border-top:1px solid var(--br);background:#fafafa">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-            <div>
-              <div style="font-size:12px;color:var(--muted)">Option sélectionnée</div>
-              <div style="font-size:14px;font-weight:800;color:var(--ink)" id="boost-option-label">—</div>
-            </div>
-            <div style="text-align:right">
-              <div style="font-size:12px;color:var(--muted)">Total</div>
-              <div style="font-size:18px;font-weight:900;color:var(--or)" id="boost-price-label">0 GNF</div>
-            </div>
-          </div>
-
-          <div style="display:flex;align-items:center;border:1.5px solid var(--br);border-radius:8px;overflow:hidden;margin-bottom:10px">
-            <span style="padding:10px 12px;background:#f5f5f5;font-size:13px;font-weight:700;border-right:1px solid var(--br);white-space:nowrap">🇬🇳 +224</span>
-            <input type="tel" id="boost-phone" placeholder="Numéro Orange Money" maxlength="9"
-              style="flex:1;border:none;padding:10px 12px;font-size:14px;font-family:inherit;outline:none"
-              oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-          </div>
-
-          <div style="display:flex;gap:8px;justify-content:center;margin-bottom:14px">
-            <input class="om-pin" type="password" id="bp1" maxlength="1" oninput="movPin(this,'bp2')" inputmode="numeric">
-            <input class="om-pin" type="password" id="bp2" maxlength="1" oninput="movPin(this,'bp3')" inputmode="numeric">
-            <input class="om-pin" type="password" id="bp3" maxlength="1" oninput="movPin(this,'bp4')" inputmode="numeric">
-            <input class="om-pin" type="password" id="bp4" maxlength="1" inputmode="numeric">
-          </div>
-
-          <button class="btn btn-or btn-full" id="boost-pay-btn" onclick="payBoost()" style="border-radius:10px;font-size:15px;padding:13px">
-            🟠 Payer et activer le boost
-          </button>
-          <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:8px">🔒 Paiement sécurisé Orange Money</div>
-        </div>
+        <button class="btn btn-full" style="background:var(--or);color:#fff;border-radius:10px" onclick="payBoost()">🟠 Payer et activer</button>
       </div>
-
-      <!-- Succès -->
-      <div id="boost-success" style="display:none;text-align:center;padding:32px 24px">
-        <div style="width:72px;height:72px;background:#D1FAE5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:32px">🚀</div>
-        <div style="font-size:20px;font-weight:900;color:var(--ink);margin-bottom:8px">Boost activé !</div>
-        <div style="font-size:14px;color:var(--muted);margin-bottom:20px" id="boost-success-msg">Votre annonce est maintenant mise en avant.</div>
-        <div style="background:#FFF3EE;border-radius:10px;padding:12px 16px;margin-bottom:20px;display:inline-block">
-          <div style="font-size:12px;color:var(--muted)">Référence</div>
-          <div id="boost-ref-display" style="font-family:monospace;font-weight:700;color:var(--or)">—</div>
-        </div>
-        <button class="btn btn-or btn-full" onclick="closeModal('boost')" style="border-radius:10px">Fermer</button>
-      </div>
-
     </div>
   </div>
-// ── Rôle vérifié depuis le serveur (source de vérité absolue) ──
-var _verifiedAdminRole = false; // mis à jour par syncRoleNow()
+</div>
 
-function syncRoleNow(callback){
-  var token = localStorage.getItem('ygy_token');
-  if(!token){ _verifiedAdminRole=false; if(callback) callback(false); return; }
-  fetch('/api/me', {headers:{'Authorization':'Bearer '+token}})
-  .then(function(r){ return r.ok ? r.json() : null; })
-  .then(function(data){
-    var isAdmin = !!(data && data.user && data.user.role === 'admin');
-    _verifiedAdminRole = isAdmin;
-    // Synchroniser le user local avec le vrai rôle
-    if(data && data.user){
-      var u = DB.user() || {};
-      u.role  = data.user.role;
-      u.email = data.user.email || u.email;
-      u.phone = data.user.phone || u.phone;
-      DB.login(u);
-    }
-    // Afficher/masquer lien Admin dans la nav
-    var al = document.getElementById('nav-admin-link');
-    if(al){ if(isAdmin) al.removeAttribute('hidden'); else al.setAttribute('hidden',''); }
-    if(callback) callback(isAdmin);
-  })
-  .catch(function(){
-    _verifiedAdminRole = false;
-    if(callback) callback(false);
+<!-- Modal Contre-offre -->
+<div class="overlay" id="overlay-offer" onclick="maybeClose(event,'offer')">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">💰 Faire une offre</div>
+      <button class="modal-close" onclick="closeModal('offer')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:8px">Prix demandé : <strong id="offer-asked-price" style="color:var(--or)"></strong></p>
+      <div class="fg">
+        <label>Votre offre (GNF)</label>
+        <input type="number" id="offer-amount" placeholder="Entrez votre proposition" style="width:100%;font-size:16px">
+      </div>
+      <div class="fg">
+        <label>Message au vendeur (optionnel)</label>
+        <textarea id="offer-message" rows="2" style="width:100%;border:1.5px solid var(--br);border-radius:8px;padding:8px;font-family:inherit;font-size:13px" placeholder="Expliquez votre offre..."></textarea>
+      </div>
+      <button class="btn btn-full" style="background:var(--or);color:#fff;border-radius:10px;margin-top:8px" onclick="sendOffer()">💰 Envoyer l'offre</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Envoyer un message rapide depuis detail -->
+<div class="overlay" id="overlay-message" onclick="maybeClose(event,'message')">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">💬 Envoyer un message</div>
+      <button class="modal-close" onclick="closeModal('message')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:var(--brl);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:13px" id="msg-ad-preview"></div>
+      <div class="fg">
+        <label>Votre message</label>
+        <textarea id="quick-msg-text" rows="4" style="width:100%;border:1.5px solid var(--br);border-radius:8px;padding:10px;font-family:inherit;font-size:13px" placeholder="Bonjour, votre annonce m'intéresse. Est-elle toujours disponible ?"></textarea>
+      </div>
+      <button class="btn btn-full" style="background:var(--or);color:#fff;border-radius:10px;margin-top:8px" onclick="sendQuickMessage()">💬 Envoyer</button>
+      <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">Ou <a style="color:var(--or);cursor:pointer;font-weight:700" onclick="closeModal('message');openCommission()">payez 5% pour voir le numéro directement</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- PWA Install Banner -->
+<div class="pwa-banner" id="pwa-banner">
+  <div style="font-size:28px">📲</div>
+  <div style="flex:1">
+    <div style="font-weight:800;font-size:13px">Installer YouGouYou</div>
+    <div style="font-size:11px;color:var(--muted)">Accès rapide depuis votre écran d'accueil</div>
+  </div>
+  <button class="pwa-install-btn" onclick="installPWA()">Installer</button>
+  <button class="pwa-dismiss" onclick="dismissPWA()">✕</button>
+</div>
+
+<!-- ══ PAGE MESSAGES ══ -->
+<div id="page-messages" class="page">
+<div class="pmsg-wrap">
+  <!-- COL 1 : liste conversations -->
+  <div class="pmsg-left">
+    <div class="pmsg-left-head">
+      <button onclick="goTo('home')" class="pmsg-back">← Retour</button>
+      <span style="font-weight:800;font-size:15px">Messages</span>
+    </div>
+    <div class="pmsg-filters">
+      <button class="pmsg-filter active" onclick="filterConvs('all',this)">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Tout
+      </button>
+      <button class="pmsg-filter" onclick="filterConvs('unread',this)">Non lus</button>
+    </div>
+    <div id="page-msg-list" class="pmsg-list">
+      <div style="padding:32px 16px;text-align:center;color:var(--muted)">
+        <div style="font-size:36px;margin-bottom:8px">💬</div>
+        <div style="font-size:13px">Aucune conversation</div>
+      </div>
+    </div>
+  </div>
+  <!-- COL 2 : fil messages -->
+  <div class="pmsg-center">
+    <div id="page-msg-thread" class="pmsg-thread-empty">
+      <div style="font-size:48px;margin-bottom:12px">👈</div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:6px">Sélectionnez une conversation</div>
+      <div style="font-size:13px;color:var(--muted)">Vos échanges apparaissent ici</div>
+    </div>
+  </div>
+  <!-- COL 3 : infos vendeur -->
+  <div class="pmsg-right-panel" id="page-msg-panel">
+    <div style="padding:40px 16px;text-align:center;color:var(--muted)">
+      <div style="font-size:36px;margin-bottom:8px">ℹ️</div>
+      <div style="font-size:13px">Infos vendeur</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ PAGE FAVORIS ══ -->
+<div id="page-favs" class="page">
+  <div style="max-width:1100px;margin:0 auto;padding:20px 20px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <button onclick="goTo('home')" style="background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:14px;font-family:inherit">← Retour</button>
+      <h2 style="margin:0;font-size:20px;font-weight:800">❤️ Mes favoris</h2>
+    </div>
+    <div id="page-favs-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px">
+      <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted)">
+        <div style="font-size:48px;margin-bottom:12px">❤️</div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:6px">Aucun favori</div>
+        <div style="font-size:13px">Cliquez sur 🤍 sur une annonce pour l'ajouter</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app-wrapper -->
+
+<script>
+// Désactivation définitive du search-banner
+(function(){
+  var _orig = document.getElementById.bind(document);
+  // Override : si un script tente d'afficher le banner, on bloque
+  var _MutObs = window.MutationObserver;
+  document.addEventListener('DOMContentLoaded', function(){
+    var killBanner = function(){
+      var b = document.getElementById('search-banner');
+      if(b){ b.style.setProperty('display','none','important'); b.innerHTML=''; }
+    };
+    killBanner();
+    var obs = new MutationObserver(killBanner);
+    obs.observe(document.body, {childList:true, subtree:true, attributes:true, attributeFilter:['style']});
   });
-}
+})();
+</script>
 
-t
+<script>
+(function(){
+  var sx=0;
+  document.addEventListener('touchstart',function(e){
+    var m=document.getElementById('det-main-img');
+    if(m&&m.contains(e.target)) sx=e.touches[0].clientX;
+  },{passive:true});
+  document.addEventListener('touchend',function(e){
+    var m=document.getElementById('det-main-img');
+    if(!m||!m.contains(e.changedTouches[0].target)) return;
+    if(Math.abs(sx-e.changedTouches[0].clientX)>40) navPhoto(sx>e.changedTouches[0].clientX?1:-1);
+  },{passive:true});
+  document.addEventListener('keydown',function(e){
+    var pg=document.getElementById('page-detail');
+    if(pg&&pg.classList.contains('active')){
+      if(e.key==='ArrowLeft') navPhoto(-1);
+      if(e.key==='ArrowRight') navPhoto(1);
+    }
+  });
+})();
+</script>
+<script>
+// ── Repositionnement dropdowns catégories (fix overflow parent) ──
+document.addEventListener('mouseover', function(e){
+  var ncat = e.target.closest('.ncat.has-sub');
+  if(!ncat) return;
+  var dd = ncat.querySelector('.cat-dropdown');
+  if(!dd) return;
+  var rect = ncat.getBoundingClientRect();
+  dd.style.position = 'fixed';
+  dd.style.top = rect.bottom + 'px';
+  dd.style.left = rect.left + 'px';
+  dd.style.zIndex = '99999';
+});
+</script>
+</body>
+</html<div id="dyn-fields-container"></div>
+        >
