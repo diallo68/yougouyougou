@@ -298,7 +298,7 @@ footer{background:transparent;margin-top:0}
 .stat-card{background:#fff;border-radius:6px;padding:14px;border:1px solid var(--br);display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
 .stat-card-val{font-size:22px;font-weight:800;color:var(--or)}
 .stat-card-label{font-size:11px;color:var(--muted);font-weight:500}
-.admin-layout{display:grid;grid-template-columns:190px 1fr;min-height:calc(100vh - 62px)}
+.admin-layout{display:grid;grid-template-columns:190px 1fr;height:100%}
 .admin-side{background:#1A1A1A;padding:14px 10px;position:sticky;top:62px;height:calc(100vh - 62px)}
 .admin-nav-item{display:flex;align-items:center;gap:7px;padding:8px 10px;border-radius:5px;font-size:12px;font-weight:400;color:rgba(255,255,255,.45);cursor:pointer;transition:all .12s;margin-bottom:2px}
 .admin-nav-item:hover,.admin-nav-item.active{background:rgba(255,255,255,.08);color:#fff}
@@ -649,6 +649,36 @@ footer{background:transparent;margin-top:0}
 
 .om-pin{width:52px;height:52px;border:2px solid var(--br);border-radius:10px;text-align:center;font-size:22px;font-family:inherit;outline:none;transition:border-color .2s;background:#fff}
 .om-pin:focus{border-color:var(--or)}
+
+/* ── Panel Admin — fixe, plein écran sous la nav ── */
+#page-admin.active{
+  display:block !important;
+  position:fixed;
+  top:104px;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:1100px;
+  height:calc(100vh - 104px);
+  overflow:hidden;
+  z-index:100;
+  background:#fff;
+}
+#page-admin.active .admin-layout{
+  height:100%;
+  min-height:unset;
+  overflow:hidden;
+}
+#page-admin.active .admin-side{
+  position:relative;
+  top:0;
+  height:100%;
+  overflow-y:auto;
+}
+#page-admin.active .admin-main{
+  height:100%;
+  overflow-y:auto;
+}
 </style>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#FF5C00">
