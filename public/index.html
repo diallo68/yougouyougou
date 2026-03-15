@@ -10,7 +10,6 @@
 <title>YouGouYou — Marketplace N°1 de Guinée</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -67,15 +66,15 @@ nav{background:#fff;border-bottom:1px solid var(--br);position:sticky;top:0;z-in
 .nav-top{max-width:1100px;margin:0 auto;padding:0 28px;height:62px;display:flex;align-items:center;gap:14px}
 .logo{display:flex;align-items:center;gap:6px;cursor:pointer;text-decoration:none;flex-shrink:0}
 .logo-anim-wrap{display:flex;align-items:center;position:relative;line-height:1;overflow:visible}
-.logo-block{display:inline-flex;align-items:baseline;font-family:'Nunito',var(--font);font-weight:900;letter-spacing:-.8px;line-height:1}
-.logo-b1{font-size:30px;animation:logoZoom1 .5s ease both,logoPulse 5s ease-in-out 1s infinite}
-.logo-b2{font-size:30px;animation:logoZoom2 .5s .15s ease both,logoPulse 5s ease-in-out 1.6s infinite}
-.logo-y{font-size:38px;font-weight:900;font-family:'Nunito',var(--font);color:var(--or);display:inline-block;letter-spacing:-1px}
-.logo-rest{color:var(--ink);font-size:28px;font-weight:900;font-family:'Nunito',var(--font);letter-spacing:-.8px}
-.logo-sep{font-size:28px;font-family:'Nunito';color:var(--or);opacity:.3;margin:0 1px}
+.logo-block{display:inline-flex;align-items:baseline;font-family:var(--font);font-weight:800;letter-spacing:-.8px;line-height:1}
+.logo-b1{font-size:24px;animation:logoZoom1 .5s ease both,logoPulse 5s ease-in-out 1s infinite}
+.logo-b2{font-size:24px;animation:logoZoom2 .5s .15s ease both,logoPulse 5s ease-in-out 1.6s infinite}
+.logo-y{font-size:30px;font-weight:800;color:var(--or);display:inline-block;letter-spacing:-1px}
+.logo-rest{color:var(--ink);font-size:22px;font-weight:800;letter-spacing:-.8px}
+.logo-sep{font-size:22px;color:var(--or);opacity:.3;margin:0 1px}
 .logo-particles{position:absolute;inset:-14px;pointer-events:none;overflow:visible}
 .lp{position:absolute;animation:lpFloat var(--dur,2.5s) ease-in-out var(--del,0s) infinite alternate;opacity:0}
-.logo-flag{font-size:18px;margin-left:5px;animation:flagFloat 3s ease-in-out infinite;display:inline-block}
+.logo-flag{font-size:16px;margin-left:5px;animation:flagFloat 3s ease-in-out infinite;display:inline-block}
 .nav-sc{flex:1;max-width:500px;display:flex;align-items:stretch;border:2px solid var(--br);border-radius:6px;overflow:hidden;height:42px;background:#fff;transition:border-color .15s}
 .nav-sc:focus-within{border-color:var(--or)}
 .nav-sc input{flex:1;border:none;background:transparent;font-family:var(--font);font-size:13px;color:var(--ink);padding:0 14px;outline:none}
@@ -299,7 +298,7 @@ footer{background:transparent;margin-top:0}
 .stat-card{background:#fff;border-radius:6px;padding:14px;border:1px solid var(--br);display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
 .stat-card-val{font-size:22px;font-weight:800;color:var(--or)}
 .stat-card-label{font-size:11px;color:var(--muted);font-weight:500}
-.admin-layout{display:grid;grid-template-columns:190px 1fr;height:100%}
+.admin-layout{display:grid;grid-template-columns:190px 1fr;min-height:calc(100vh - 62px)}
 .admin-side{background:#1A1A1A;padding:14px 10px;position:sticky;top:62px;height:calc(100vh - 62px)}
 .admin-nav-item{display:flex;align-items:center;gap:7px;padding:8px 10px;border-radius:5px;font-size:12px;font-weight:400;color:rgba(255,255,255,.45);cursor:pointer;transition:all .12s;margin-bottom:2px}
 .admin-nav-item:hover,.admin-nav-item.active{background:rgba(255,255,255,.08);color:#fff}
@@ -442,8 +441,15 @@ footer{background:transparent;margin-top:0}
 #page-messages.active{
   display:flex !important;
   flex-direction:column;
+  position:fixed;
+  top:104px;           /* nav-top 62px + nav-cats 42px */
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:1100px;
   height:calc(100vh - 104px);
   background:#fff;
+  z-index:200;
   overflow:hidden;
 }
 .pmsg-wrap{
@@ -650,71 +656,6 @@ footer{background:transparent;margin-top:0}
 
 .om-pin{width:52px;height:52px;border:2px solid var(--br);border-radius:10px;text-align:center;font-size:22px;font-family:inherit;outline:none;transition:border-color .2s;background:#fff}
 .om-pin:focus{border-color:var(--or)}
-
-/* ── Panel Admin — fixe, plein écran sous la nav ── */
-#page-admin.active{
-  display:block !important;
-  position:fixed;
-  top:104px;
-  left:50%;
-  transform:translateX(-50%);
-  width:100%;
-  max-width:1100px;
-  height:calc(100vh - 104px);
-  overflow:hidden;
-  z-index:100;
-  background:#fff;
-}
-#page-admin.active .admin-layout{
-  height:100%;
-  min-height:unset;
-  overflow:hidden;
-}
-#page-admin.active .admin-side{
-  position:relative;
-  top:0;
-  height:100%;
-  overflow-y:auto;
-}
-#page-admin.active .admin-main{
-  height:100%;
-  overflow-y:auto;
-}
-
-/* ── Dropdown 3ème niveau nav ── */
-.cat-sub-item{position:relative}
-.cat-sub-dropdown{
-  display:none;
-  position:absolute;
-  left:100%;
-  top:0;
-  min-width:180px;
-  background:#fff;
-  border:1px solid var(--br);
-  border-radius:0 8px 8px 8px;
-  box-shadow:4px 4px 16px rgba(0,0,0,.1);
-  z-index:600;
-  padding:4px 0;
-}
-.cat-sub-item.has-subsub:hover > .cat-sub-dropdown{display:block}
-.cat-sub-item.has-subsub:hover{background:var(--orl);color:var(--or)}
-.cat-sub-sub-item{
-  display:block;
-  padding:8px 14px;
-  font-size:12px;
-  color:var(--ink);
-  cursor:pointer;
-  white-space:nowrap;
-  transition:background .1s;
-}
-.cat-sub-sub-item:hover{background:var(--orl);color:var(--or)}
-
-@media(max-width:600px){
-  .logo-y{font-size:28px}
-  .logo-rest{font-size:20px}
-  .logo-b1,.logo-b2{font-size:22px}
-  .logo-sep{font-size:20px}
-}
 </style>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#FF5C00">
@@ -900,7 +841,7 @@ footer{background:transparent;margin-top:0}
   <!-- Stats -->
     <div style="background:var(--ink);border-radius:8px;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:16px;overflow:hidden">
       <div style="padding:18px 20px;text-align:center;border-right:1px solid rgba(255,255,255,.08)">
-        <div style="font-family:var(--font);font-size:22px;font-weight:800;color:var(--or)" id="sb-ads2">—</div>
+        <div style="font-family:var(--font);font-size:22px;font-weight:800;color:var(--or)" id="sb-ads2">1 679</div>
         <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:3px;font-weight:600">Annonces actives</div>
       </div>
       <div style="padding:18px 20px;text-align:center;border-right:1px solid rgba(255,255,255,.08)">
@@ -970,11 +911,11 @@ footer{background:transparent;margin-top:0}
     <div class="ft-col">
       <h4>À propos</h4>
       <ul>
-        <li><a onclick="openPage('about')" style="cursor:pointer">Qui sommes-nous ?</a></li>
-        <li><a onclick="openPage('howto')" style="cursor:pointer">Comment ça marche ?</a></li>
-        <li><a onclick="openPage('contact')" style="cursor:pointer">Nous contacter</a></li>
-        <li><a onclick="openPage('press')" style="cursor:pointer">Presse</a></li>
-        <li><a onclick="openPage('jobs')" style="cursor:pointer">Recrutement</a></li>
+        <li><a onclick="openPage('about')">Qui sommes-nous ?</a></li>
+        <li><a onclick="openPage('howto')">Comment ça marche ?</a></li>
+        <li><a onclick="openPage('contact')">Nous contacter</a></li>
+        <li><a onclick="openPage('press')">Presse</a></li>
+        <li><a onclick="openPage('jobs')">Recrutement</a></li>
       </ul>
     </div>
 
@@ -982,11 +923,11 @@ footer{background:transparent;margin-top:0}
     <div class="ft-col">
       <h4>Informations légales</h4>
       <ul>
-        <li><a onclick="openPage('cgu')" style="cursor:pointer">Conditions générales</a></li>
-        <li><a onclick="openPage('privacy')" style="cursor:pointer">Politique de confidentialité</a></li>
-        <li><a onclick="openPage('cookies')" style="cursor:pointer">Gestion des cookies</a></li>
-        <li><a onclick="openPage('rights')" style="cursor:pointer">Vos droits</a></li>
-        <li><a onclick="openPage('security')" style="cursor:pointer">Sécurité</a></li>
+        <li><a onclick="openPage('cgu')">Conditions générales</a></li>
+        <li><a onclick="openPage('privacy')">Politique de confidentialité</a></li>
+        <li><a onclick="openPage('cookies')">Gestion des cookies</a></li>
+        <li><a onclick="openPage('rights')">Vos droits</a></li>
+        <li><a onclick="openPage('security')">Sécurité</a></li>
       </ul>
     </div>
 
@@ -994,10 +935,10 @@ footer{background:transparent;margin-top:0}
     <div class="ft-col">
       <h4>Aide &amp; Services</h4>
       <ul>
-        <li><a onclick="openPage('help')" style="cursor:pointer">Centre d'aide</a></li>
-        <li><a onclick="requireLoginThenPost()" style="cursor:pointer">Déposer une annonce</a></li>
-        <li><a onclick="openPage('orange-money')" style="cursor:pointer">Paiement Orange Money</a></li>
-        <li><a onclick="openPage('report-info')" style="cursor:pointer">Signaler une annonce</a></li>
+        <li><a onclick="openPage('help')">Centre d'aide</a></li>
+        <li><a onclick="toast('Bientôt disponible')">Déposer une annonce</a></li>
+        <li><a onclick="openPage('orange-money')">Paiement Orange Money</a></li>
+        <li><a onclick="openPage('report-info')">Signaler une annonce</a></li>
       </ul>
       <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
         <button onclick="toast('🍎 Bientôt !')" style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:7px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">🍎 App Store</button>
@@ -1139,34 +1080,9 @@ footer{background:transparent;margin-top:0}
     </div>
 
     <!-- Catégorie -->
-    <div class="post-section" id="section-cat">
+    <div class="post-section">
       <div class="post-section-title">📂 Catégorie *</div>
       <div class="cat-grid" id="post-cats"></div>
-    </div>
-
-    <!-- Sous-catégorie -->
-    <div class="post-section" id="section-subcat" style="display:none">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-        <button onclick="resetCat()" style="background:none;border:none;cursor:pointer;color:var(--or);font-size:13px;font-weight:700;font-family:inherit;padding:0">← Retour</button>
-        <div class="post-section-title" style="margin:0">📂 <span id="subcat-cat-label"></span> › Sous-catégorie *</div>
-      </div>
-      <div class="cat-grid" id="post-subcats"></div>
-    </div>
-
-    <!-- Sous-sous-catégorie -->
-    <div class="post-section" id="section-subsubcat" style="display:none">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-        <button onclick="resetSubCat()" style="background:none;border:none;cursor:pointer;color:var(--or);font-size:13px;font-weight:700;font-family:inherit;padding:0">← Retour</button>
-        <div class="post-section-title" style="margin:0">📂 <span id="subsubcat-label"></span> › Type *</div>
-      </div>
-      <div class="cat-grid" id="post-subsubcats"></div>
-    </div>
-
-    <!-- Fil d'Ariane sélection -->
-    <div id="cat-breadcrumb" style="display:none;padding:10px 14px;background:#FFF3EE;border-radius:10px;margin-bottom:8px;font-size:13px;color:var(--ink)">
-      <span style="color:var(--muted)">Catégorie choisie :</span>
-      <strong id="cat-breadcrumb-text" style="color:var(--or)"></strong>
-      <button onclick="resetCat()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:12px;font-family:inherit;margin-left:8px">✏️ Modifier</button>
     </div>
 
     <!-- Infos -->
@@ -1264,7 +1180,7 @@ footer{background:transparent;margin-top:0}
         <a onclick="showDashTab('ads')" id="dtab-ads">📋 Mes annonces <span id="p-count-ads" style="background:var(--orl);color:var(--or);font-size:11px;padding:1px 6px;border-radius:10px;margin-left:auto">0</span></a>
         <a onclick="showDashTab('history')" id="dtab-history">🕐 Historique</a>
         <a onclick="showDashTab('payments')" id="dtab-payments">💳 Paiements</a>
-
+        <a onclick="showDashTab('alerts')" id="dtab-alerts">🔔 Alertes</a>
         <a id="nav-admin-link" hidden onclick="goAdmin()">👑 Admin</a>
         <a onclick="logout()" style="color:var(--re)!important;margin-top:20px">🚪 Déconnexion</a>
       </nav>
@@ -1358,7 +1274,12 @@ footer{background:transparent;margin-top:0}
 
 
       <!-- ═══ TAB ALERTES ═══ -->
-      
+      <div class="dash-section" id="dsec-alerts" >
+        <h3 style="margin-bottom:8px;font-size:15px">🔔 Mes alertes de recherche</h3>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Recevez un email dès qu'une nouvelle annonce correspond à vos critères.</p>
+        <button onclick="showAlertModal()" style="background:var(--or);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;margin-bottom:16px">➕ Créer une alerte</button>
+        <div id="alerts-list"><div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">⏳ Chargement...</div></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1369,7 +1290,7 @@ footer{background:transparent;margin-top:0}
 <!-- ══ PAGE VENDEUR PUBLIC ══ -->
 <div id="page-seller" class="page">
   <div class="container" style="display:none">
-    <button onclick="goTo('home')" style="background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:14px;padding:10px 0;font-family:inherit">← Retour</button>
+    <button onclick="history.back()" style="background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:14px;padding:10px 0;font-family:inherit">← Retour</button>
     <div class="seller-hero" style="border-radius:16px;margin-bottom:16px">
       <div class="seller-hero-av" id="seller-av">?</div>
       <div style="font-size:20px;font-weight:900;margin-bottom:4px" id="seller-name">Vendeur</div>
@@ -1578,7 +1499,7 @@ footer{background:transparent;margin-top:0}
         <!-- Sécurité -->
         <div style="margin-top:12px;text-align:center;font-size:11px;color:var(--muted);line-height:1.6">
           🔒 Paiement sécurisé · Votre PIN n'est jamais stocké<br>
-          En cas de problème : <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="394a4c4949564b4d1740564c5e564c40564c5e564c795e54585055175a5654">[email&#160;protected]</a></strong>
+          En cas de problème : <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="20535550504f52540e594f55474f55594f55474f5560474d41494c0e434f4d">[email&#160;protected]</a></strong>
         </div>
       </div>
 
@@ -1679,92 +1600,17 @@ var PREFS=[
 ];
 
 var CATS=[
-  {n:'Véhicules',e:'🚗',sub:[
-    {n:'Voitures',sub:['Berlines','SUV & 4x4','Minivans','Coupés','Cabriolets','Autres']},
-    {n:'Motos & Scooters',sub:['Motos sportives','Scooters','Motos de ville','Tout-terrain','Autres']},
-    {n:'Camions & Utilitaires',sub:['Camions','Pick-up','Fourgonnettes','Remorques','Autres']},
-    {n:'Bus & Minibus',sub:['Bus scolaires','Minibus','Cars de transport','Autres']},
-    {n:'Pièces & Accessoires',sub:['Moteurs','Carrosserie','Jantes & Pneus','Électronique auto','Autres']},
-    {n:'Engins agricoles',sub:['Tracteurs','Moissonneuses','Motopompes','Autres']},
-    {n:'Autres véhicules',sub:['Vélos','Tricycles','Barques','Autres']}
-  ]},
-  {n:'Immobilier',e:'🏠',sub:[
-    {n:'Appartements',sub:['Studio','F1','F2','F3','F4 et plus','Autres']},
-    {n:'Maisons',sub:['Villa','Maison simple','Duplex','Concession','Autres']},
-    {n:'Terrains',sub:['Terrain nu','Terrain constructible','Terrain agricole','Autres']},
-    {n:'Immeubles & Bureaux',sub:['Immeuble','Bureau','Commerce','Entrepôt','Autres']},
-    {n:'Location saisonnière',sub:['Chambre d\'hôtel','Appartement meublé','Villa vacances','Autres']},
-    {n:'Colocation',sub:['Chambre en colocation','Appartement partagé','Autres']}
-  ]},
-  {n:'Taxi',e:'🚕',sub:[
-    {n:'Taxi Moto',sub:['Zémidjan','Moto-taxi','Autres']},
-    {n:'Taxi Voiture',sub:['Taxi compteur','Taxi de nuit','VTC','Autres']},
-    {n:'Transport collectif',sub:['Taxi communal','Minibus','Car rapide','Autres']},
-    {n:'Location & Covoiturage',sub:['Location avec chauffeur','Covoiturage longue distance','Autres']}
-  ]},
-  {n:'Électronique',e:'📱',sub:[
-    {n:'Téléphones',sub:['iPhone','Samsung','Xiaomi','Tecno','Infinix','Huawei','Autres']},
-    {n:'Ordinateurs',sub:['PC portables','PC de bureau','MacBook','Tablettes','Accessoires PC','Autres']},
-    {n:'TV & Audio',sub:['Télévisions','Enceintes','Systèmes home cinéma','Casques','Autres']},
-    {n:'Électroménager',sub:['Réfrigérateurs','Climatiseurs','Machines à laver','Cuisinières','Autres']},
-    {n:'Jeux & Consoles',sub:['PlayStation','Xbox','Nintendo','Jeux PC','Autres']},
-    {n:'Accessoires',sub:['Câbles & Chargeurs','Coques & Protections','Batteries','Autres']}
-  ]},
-  {n:'Ouvriers',e:'🔨',sub:[
-    {n:'Bâtiment',sub:['Maçon','Carreleur','Plâtrier','Coffreur','Autres']},
-    {n:'Plomberie & Électricité',sub:['Plombier','Électricien','Climatisation','Autres']},
-    {n:'Menuiserie & Métallurgie',sub:['Menuisier bois','Soudeur','Forgeron','Serrurier','Autres']},
-    {n:'Finitions',sub:['Peintre','Carreleur','Vitrier','Décorateur','Autres']},
-    {n:'Mécanique',sub:['Mécanicien auto','Mécanicien moto','Électricien auto','Autres']},
-    {n:'Autres ouvriers',sub:['Couvreur','Jardinier','Agent de sécurité','Autres']}
-  ]},
-  {n:'Mode',e:'👗',sub:[
-    {n:'Vêtements Homme',sub:['Chemises','Pantalons','Costumes','T-shirts','Vestes','Traditionnels','Autres']},
-    {n:'Vêtements Femme',sub:['Robes','Tailleurs','Blouses','Jupes','Pagnes cousus','Traditionnels','Autres']},
-    {n:'Vêtements Enfant',sub:['Bébé (0-2 ans)','Garçon (3-12 ans)','Fille (3-12 ans)','Adolescents','Autres']},
-    {n:'Chaussures Homme',sub:['Mocassins','Sneakers','Sandales','Boots','Autres']},
-    {n:'Chaussures Femme',sub:['Escarpins','Sandales','Sneakers','Ballerines','Autres']},
-    {n:'Chaussures Enfant',sub:['Sandales','Baskets','Chaussures école','Autres']},
-    {n:'Accessoires Mode',sub:['Sacs à main','Ceintures','Bijoux','Montres','Lunettes','Autres']},
-    {n:'Pagnes & Tissus',sub:['Wax','Bazin','Kente','Bogolan','Autres tissus']}
-  ]},
-  {n:'Maison',e:'🛋️',sub:[
-    {n:'Meubles',sub:['Armoires','Lits','Canapés','Tables','Chaises','Bureaux','Autres']},
-    {n:'Décoration',sub:['Rideaux','Tapis','Tableaux','Luminaires','Vases','Autres']},
-    {n:'Cuisine & Repas',sub:['Réfrigérateurs','Fours','Micro-ondes','Gazinières','Ustensiles','Autres']},
-    {n:'Linge de maison',sub:['Draps','Couettes','Serviettes','Nappes','Autres']},
-    {n:'Jardinage',sub:['Plantes','Outils jardin','Terrasse & Jardin','Autres']},
-    {n:'Bricolage',sub:['Outils','Peinture','Quincaillerie','Autres']}
-  ]},
-  {n:'Tourisme',e:'✈️',sub:[
-    {n:'Conakry',sub:['Kaloum','Dixinn','Matam','Ratoma','Matoto','Autres']},
-    {n:'Kindia',sub:['Kindia centre','Coyah','Dubréka','Forécariah','Autres']},
-    {n:'Labé',sub:['Labé centre','Pita','Dalaba','Mali','Autres']},
-    {n:'Kankan',sub:['Kankan centre','Siguiri','Kérouané','Mandiana','Autres']},
-    {n:'N\'Zérékoré',sub:['N\'Zérékoré centre','Guéckédou','Macenta','Yomou','Autres']},
-    {n:'Autres régions',sub:['Boké','Mamou','Faranah','Fria','Kamsar','Autres']}
-  ]},
-  {n:'Loisirs',e:'🎮',sub:[
-    {n:'Sports',sub:['Football','Basket','Musculation','Arts martiaux','Natation','Autres']},
-    {n:'Culture & Art',sub:['Livres','Instruments de musique','Art & Peinture','Artisanat','Autres']},
-    {n:'Jeux & Jouets',sub:['Jouets enfants','Jeux de société','Jeux vidéo','Collections','Autres']},
-    {n:'Vélos & Mobilité',sub:['Vélos adultes','Vélos enfants','Trottinettes','Autres']}
-  ]},
-  {n:'Cuisine',e:'🍽️',sub:[
-    {n:'Restauration',sub:['Traiteur','Restauration rapide','Cuisine à domicile','Boissons','Autres']},
-    {n:'Pâtisserie',sub:['Gâteaux','Viennoiseries','Beignets','Autres']},
-    {n:'Produits alimentaires',sub:['Épices','Fruits & Légumes','Céréales','Huiles','Autres']},
-    {n:'Matériel cuisine',sub:['Ustensiles','Appareils','Vaisselle','Autres']}
-  ]},
-  {n:'Services',e:'🤝',sub:[
-    {n:'Services à domicile',sub:['Femme de ménage','Cuisinière','Garde enfants','Blanchisserie','Autres']},
-    {n:'Beauté & Bien-être',sub:['Coiffure homme','Coiffure femme','Manucure','Massage','Spa','Autres']},
-    {n:'Couture & Mode',sub:['Tailleur','Couturière','Broderie','Retouches','Autres']},
-    {n:'Informatique',sub:['Dépannage PC','Création site web','Design','Impression','Autres']},
-    {n:'Transport & Livraison',sub:['Livraison colis','Déménagement','Chauffeur','Autres']},
-    {n:'Enseignement',sub:['Cours particuliers','Langues','Musique','Soutien scolaire','Autres']},
-    {n:'Autres services',sub:['Gardien','Traduction','Comptabilité','Juridique','Autres']}
-  ]}
+  {n:'Véhicules',e:'🚗',c:234,sub:['Voitures','Motos & Scooters','Camions & Utilitaires','Bus & Minibus','Pièces & Accessoires','Engins agricoles','Autres véhicules']},
+  {n:'Immobilier',e:'🏠',c:189,sub:['Appartement','Maison','Terrain','Immeuble','Villa','Bureau & Commerce','Location saisonnière','Colocation','Autres']},
+  {n:'Taxi',e:'🚕',c:78,sub:['Taxi Moto','Taxi Voiture','Taxi communal','Location avec chauffeur','Covoiturage']},
+  {n:'Électronique',e:'📱',c:312,sub:['Téléphones','Ordinateurs portables','Télévisions','Enceintes & Audio','Casques & Écouteurs','Jeux vidéo','Tablettes','Climatiseurs','Accessoires','Autres']},
+  {n:'Ouvriers',e:'🔨',c:156,sub:['Maçon','Plombier','Carreleur','Mécanicien','Menuisier','Électricien','Peintre','Soudeur','Forgeron','Couvreur','Autres']},
+  {n:'Mode',e:'👗',c:278,sub:['Vêtements Homme','Vêtements Femme','Vêtements Enfant','Chaussures Homme','Chaussures Femme','Bijoux & Montres','Sacs','Pagnes & Tissus','Autres']},
+  {n:'Maison',e:'🛋️',c:145,sub:['Armoires','Canapés & Divans','Fauteuils','Chaises','Lits & Matelas','Congélateurs','Fours','Micro-ondes','Aspirateurs','Tables','Autres']},
+  {n:'Tourisme',e:'✈️',c:43,sub:['Conakry','Kindia','Labé','Mamou','Kankan','Faranah','N’Zérékoré','Boké','Siguiri','Guéckédou','Dalaba','Pita','Fria','Kamsar','Autres']},
+  {n:'Loisirs',e:'🎮',c:167,sub:['Livres & BD','Collections','Vélos','Sports & Fitness','Instruments','Films & Séries','Art & Artisanat','Jouets','Autres']},
+  {n:'Cuisine',e:'🍽️',c:89,sub:['Traiteur & Repas','Gâteaux & Pâtisseries','Boissons','Ustensiles','Épices','Fruits & Légumes','Autres']},
+  {n:'Services',e:'🤝',c:120,sub:['Femme de ménage','Garde enfants','Cuisinière','Chauffeur','Gardien','Livraison','Coiffure & Beauté','Couture','Informatique','Autres']}
 ];
 
 var DEMO_ADS=[
@@ -1823,10 +1669,8 @@ function goTo(page){
   // Fermer tous les overlays ouverts et libérer le scroll
   document.querySelectorAll('.overlay.open').forEach(function(o){o.classList.remove('open');});
   document.body.style.overflow='';
-  // Changer de page — retirer active de toutes les pages
-  document.querySelectorAll('.page').forEach(function(p){
-    p.classList.remove('active');
-  });
+  // Changer de page
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   var el=document.getElementById('page-'+page);
   if(el){el.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
   if(page==='dashboard')loadDash();
@@ -1853,15 +1697,7 @@ function renderNavCats(){
   var allItems=CATS;
   el.innerHTML=allItems.map(function(cat,i){
     var subs=cat.sub?cat.sub.map(function(s){
-      var sName=typeof s==='string'?s:s.n;
-      var hasSub=typeof s==='object'&&s.sub&&s.sub.length>0;
-      var subSubs='';
-      if(hasSub){
-        subSubs='<div class="cat-sub-dropdown">'+s.sub.map(function(ss){
-          return '<div class="cat-sub-sub-item" onclick="filterSubCat(event,\''+cat.n+'\',\''+sName+'\')" >'+ss+'</div>';
-        }).join('')+'</div>';
-      }
-      return '<div class="cat-sub-item'+(hasSub?' has-subsub':'')+'" onclick="filterSubCat(event,\''+cat.n+'\',\''+sName+'\')">'+sName+(hasSub?' <span style="float:right;opacity:.5;font-size:10px;margin-left:8px">›</span>':'')+subSubs+'</div>';
+      return '<div class="cat-sub-item" onclick="filterSubCat(event,\''+cat.n+'\',\''+s+'\')">'+s+'</div>';
     }).join(''):'';
     var arrow=cat.sub?' <span class="cat-arrow">▾</span>':'';
     return '<div class="ncat'+(i===0?' active':'')+(cat.sub?' has-sub':'')+'" onclick="filterCat(this,\''+cat.n+'\')">'
@@ -2181,110 +2017,8 @@ function clearSearch(){
 function renderPostCats(){
   var el=document.getElementById('post-cats');if(!el)return;
   el.innerHTML=CATS.map(function(c){
-    return '<div class="cat-opt" data-name="'+c.n.replace(/"/g,'&quot;')+'" onclick="pickCat(this)"><span class="em">'+(c.e||'📦')+'</span>'+c.n+'</div>';
+    return '<div class="cat-opt" onclick="pickCat(this,\''+c.n+'\')"><span class="em">'+c.e+'</span>'+c.n+'</div>';
   }).join('');
-}
-
-function pickCat(el){
-  var name=el.getAttribute('data-name')||el.textContent.trim();
-  selCat=name; selSubCat=''; selSubSubCat='';
-  document.querySelectorAll('.cat-opt').forEach(function(c){c.classList.remove('sel');});
-  el.classList.add('sel');
-  // Chercher les sous-catégories
-  var cat=CATS.find(function(c){return c.n===name;});
-  if(cat&&cat.sub&&cat.sub.length){
-    // Afficher la section sous-catégorie
-    var sec=document.getElementById('section-subcat');
-    var lbl=document.getElementById('subcat-cat-label');
-    var grid=document.getElementById('post-subcats');
-    if(lbl) lbl.textContent=(cat.e||'')+ ' ' +name;
-    if(grid){
-      grid.innerHTML=cat.sub.map(function(s){
-        var sName=typeof s==='string'?s:s.n;
-        return '<div class="cat-opt" data-name="'+sName.replace(/"/g,'&quot;')+'" onclick="pickSubCat(this)">'+sName+'</div>';
-      }).join('');
-    }
-    if(sec) sec.style.display='';
-    // Cacher section principale et breadcrumb
-    var sec1=document.getElementById('section-cat');
-    if(sec1) sec1.style.display='none';
-    var sss=document.getElementById('section-subsubcat');
-    if(sss) sss.style.display='none';
-    var bc=document.getElementById('cat-breadcrumb');
-    if(bc) bc.style.display='none';
-  } else {
-    showBreadcrumb(name,'','');
-  }
-}
-
-function pickSubCat(el){
-  var name=el.getAttribute('data-name')||el.textContent.trim();
-  selSubCat=name; selSubSubCat='';
-  document.querySelectorAll('#post-subcats .cat-opt').forEach(function(c){c.classList.remove('sel');});
-  el.classList.add('sel');
-  // Chercher les sous-sous-catégories
-  var cat=CATS.find(function(c){return c.n===selCat;});
-  var sub=cat&&cat.sub&&cat.sub.find(function(s){return (typeof s==='string'?s:s.n)===name;});
-  if(sub&&typeof sub==='object'&&sub.sub&&sub.sub.length){
-    var sec=document.getElementById('section-subsubcat');
-    var lbl=document.getElementById('subsubcat-label');
-    var grid=document.getElementById('post-subsubcats');
-    if(lbl) lbl.textContent=selCat+' / '+name;
-    if(grid){
-      grid.innerHTML=sub.sub.map(function(ss){
-        return '<div class="cat-opt" onclick="pickSubSubCat(this,\''+ss+'\')">'+ss+'</div>';
-      }).join('');
-    }
-    if(sec) sec.style.display='';
-    var sec2=document.getElementById('section-subcat');
-    if(sec2) sec2.style.display='none';
-  } else {
-    showBreadcrumb(selCat, name, '');
-  }
-}
-
-function pickSubSubCat(el){
-  var name=el.getAttribute('data-name')||el.textContent.trim();
-  selSubSubCat=name;
-  document.querySelectorAll('#post-subsubcats .cat-opt').forEach(function(c){c.classList.remove('sel');});
-  el.classList.add('sel');
-  showBreadcrumb(selCat, selSubCat, name);
-}
-
-function showBreadcrumb(cat, sub, subsub){
-  var parts=[cat];
-  if(sub) parts.push(sub);
-  if(subsub) parts.push(subsub);
-  var bc=document.getElementById('cat-breadcrumb');
-  var bcText=document.getElementById('cat-breadcrumb-text');
-  if(bc) bc.style.display='block';
-  if(bcText) bcText.textContent=parts.join(' › ');
-  // Cacher toutes les sections de sélection
-  ['section-cat','section-subcat','section-subsubcat'].forEach(function(id){
-    var s=document.getElementById(id); if(s) s.style.display='none';
-  });
-}
-
-function resetCat(){
-  selCat=''; selSubCat=''; selSubSubCat='';
-  var sec1=document.getElementById('section-cat');
-  var sec2=document.getElementById('section-subcat');
-  var sec3=document.getElementById('section-subsubcat');
-  var bc=document.getElementById('cat-breadcrumb');
-  if(sec1) sec1.style.display='';
-  if(sec2) sec2.style.display='none';
-  if(sec3) sec3.style.display='none';
-  if(bc) bc.style.display='none';
-  document.querySelectorAll('.cat-opt').forEach(function(c){c.classList.remove('sel');});
-}
-
-function resetSubCat(){
-  selSubCat=''; selSubSubCat='';
-  var sec2=document.getElementById('section-subcat');
-  var sec3=document.getElementById('section-subsubcat');
-  if(sec2) sec2.style.display='';
-  if(sec3) sec3.style.display='none';
-  document.querySelectorAll('#post-subcats .cat-opt').forEach(function(c){c.classList.remove('sel');});
 }
 
 // ══════════════════════════════════════════
@@ -2625,8 +2359,8 @@ function addFav(){if(curAd){DB.addFav(curAd.id);toast('❤️ Ajouté aux favori
 // ══════════════════════════════════════════
 //  POST AD
 // ══════════════════════════════════════════
-var selCat='', selSubCat='', selSubSubCat='';
-
+var selCat='';
+function pickCat(el,name){document.querySelectorAll('.cat-opt').forEach(function(c){c.classList.remove('sel');});el.classList.add('sel');selCat=name;}
 var selectedPhotos = []; // stockage base64 des photos
 
 function handlePhotos(input){
@@ -2697,8 +2431,7 @@ function submitAd(){
 
   if(!title){toast('⚠️ Le titre est obligatoire','err');document.getElementById('pt').focus();return;}
   if(!price){toast('⚠️ Le prix est obligatoire','err');document.getElementById('pp').focus();return;}
-  if(!selCat){toast('⚠️ Choisissez une catégorie','err');document.getElementById('section-cat').style.display='';return;}
-  var fullCat = selCat + (selSubCat ? ' / '+selSubCat : '') + (selSubSubCat ? ' / '+selSubSubCat : '');
+  if(!selCat){toast('⚠️ Choisissez une catégorie','err');return;}
   if(!city){toast('⚠️ Choisissez une ville','err');return;}
 
   var cat=CATS.find(function(ct){return ct.n===selCat;});
@@ -4350,25 +4083,10 @@ function adminApiGet(path, cb){
 function goAdmin(){
   var u=DB.user();
   if(!u){openModal('auth');return;}
-  var token=localStorage.getItem('ygy_token');
-  if(!token){openModal('auth');return;}
-  // Vérifier le rôle depuis MongoDB (source de vérité)
-  fetch('/api/me',{headers:{'Authorization':'Bearer '+token}})
-  .then(function(r){return r.ok?r.json():null;})
-  .then(function(data){
-    if(!data||!data.user||data.user.role!=='admin'){
-      toast('🚫 Accès refusé','err');
-      return;
-    }
-    // Mettre à jour le rôle local
-    var u2=DB.user()||{};
-    u2.role=data.user.role;
-    DB.login(u2);
-    goTo('admin');
-    adminTab('stats');
-    loadAdmin();
-  })
-  .catch(function(){ toast('❌ Erreur de connexion','err'); });
+  if(u.role!=='admin'){toast('🚫 Accès refusé','err');return;}
+  goTo('admin');
+  adminTab('stats');
+  loadAdmin();
 }
 
 function adminTab(name){
@@ -5982,10 +5700,9 @@ document.addEventListener('DOMContentLoaded',function(){
   populateCities();
   populateHeroCats();
   renderNavCats();
-  renderPostCats(); resetCat();
+  renderPostCats();
   updateNav();
   // Charger les annonces depuis l'API MongoDB
-  updateFooterStats();
   fetchAdsFromAPI(function(){ 
     renderAds();
     setTimeout(initInfiniteScroll, 500);
@@ -6270,295 +5987,163 @@ document.addEventListener('DOMContentLoaded',function(){
 </div>
 
 
-<!-- ══ PAGES STATIQUES FOOTER ══ -->
-<div id="page-static-about" class="page">
-  <div style="max-width:700px;margin:0 auto;padding:30px 20px">
-    <button onclick="goTo('home')" style="background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:14px;font-family:inherit;margin-bottom:20px;display:flex;align-items:center;gap:6px">← Retour</button>
-    <div style="font-size:32px;margin-bottom:10px">🇬🇳</div>
-    <h2 style="font-size:24px;font-weight:900;margin-bottom:20px;color:var(--ink)">Qui sommes-nous ?</h2>
-    <p style="font-size:15px;line-height:1.8;margin-bottom:16px">
-          <strong>YouGouYou</strong> est le premier marketplace guinéen, fondé à Conakry en 2024.
-          Notre mission : permettre à chaque Guinéen d'acheter, vendre et échanger en toute sécurité,
-          partout en Guinée.
-        </p>
-        <p style="font-size:14px;line-height:1.8;margin-bottom:16px">
-          Nous couvrons les 38 préfectures de la Guinée, avec des milliers d'annonces dans toutes les catégories :
-          véhicules, immobilier, mode, électronique, services et bien plus.
-        </p>
-        <div style="background:#FFF3EE;border-radius:12px;padding:16px;margin-bottom:16px">
-          <div style="font-weight:800;margin-bottom:8px">🎯 Notre vision</div>
-          <p style="font-size:13px;color:#555;line-height:1.7">Devenir la plateforme de référence pour le commerce
-          en Afrique de l'Ouest, en commençant par la Guinée. Faciliter les échanges économiques et contribuer
-          au développement local.</p>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div style="background:#f9f9f9;border-radius:10px;padding:14px;text-align:center">
-            <div style="font-size:28px;font-weight:900;color:var(--or)">2024</div>
-            <div style="font-size:12px;color:#777">Année de création</div>
-          </div>
-          <div style="background:#f9f9f9;border-radius:10px;padding:14px;text-align:center">
-            <div style="font-size:28px;font-weight:900;color:var(--or)">38</div>
-            <div style="font-size:12px;color:#777">Préfectures couvertes</div>
-          </div>
-        </div>
-  </div>
-</div>
-<div id="page-static-howto" class="page">
-  <div style="max-width:700px;margin:0 auto;padding:30px 20px">
-    <button onclick="goTo('home')" style="background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:14px;font-family:inherit;margin-bottom:20px;display:flex;align-items:center;gap:6px">← Retour</button>
-    <div style="font-size:32px;margin-bottom:10px">💡</div>
-    <h2 style="font-size:24px;font-weight:900;margin-bottom:20px;color:var(--ink)">Comment ça marche ?</h2>
-    <div style="display:flex;flex-direction:column;gap:16px">
-          <div style="display:flex;gap:14px;align-items:flex-start">
-            <div style="width:36px;height:36px;border-radius:50%;background:var(--or);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;flex-shrink:0">1</div>
-            <div><div style="font-weight:800;margin-bottom:4px">Créez votre compte gratuitement</div>
-            <p style="font-size:13px;color:#666;line-height:1.6">Inscrivez-vous avec votre numéro de téléphone ou email. Vérification en 30 secondes.</p></div>
-          </div>
-          <div style="display:flex;gap:14px;align-items:flex-start">
-            <div style="width:36px;height:36px;border-radius:50%;background:var(--or);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;flex-shrink:0">2</div>
-            <div><div style="font-weight:800;margin-bottom:4px">Déposez votre annonce</div>
-            <p style="font-size:13px;color:#666;line-height:1.6">Photos, description, prix — votre annonce est visible en quelques minutes dans toute la Guinée.</p></div>
-          </div>
-          <div style="display:flex;gap:14px;align-items:flex-start">
-            <div style="width:36px;height:36px;border-radius:50%;background:var(--or);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;flex-shrink:0">3</div>
-            <div><div style="font-weight:800;margin-bottom:4px">Contactez le vendeur</div>
-            <p style="font-size:13px;color:#666;line-height:1.6">Envoyez un message via la messagerie intégrée. Payez un petit frais pour voir le numéro du vendeur.</p></div>
-          </div>
-          <div style="display:flex;gap:14px;align-items:flex-start">
-            <div style="width:36px;height:36px;border-radius:50%;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;flex-shrink:0">✓</div>
-            <div><div style="font-weight:800;margin-bottom:4px">Achetez en sécurité</div>
-            <p style="font-size:13px;color:#666;line-height:1.6">Échangez en lieu public, vérifiez l'article avant paiement. Utilisez Orange Money pour sécuriser vos transactions.</p></div>
-          </div>
-        </div>
-  </div>
-</div>
-<div id="page-static-contact" class="page">
-  <div style="max-width:700px;margin:0 auto;padding:30px 20px">
-    <button onclick="goTo('home')" style="background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:14px;font-family:inherit;margin-bottom:20px;display:flex;align-items:center;gap:6px">← Retour</button>
-    <div style="font-size:32px;margin-bottom:10px">📩</div>
-    <h2 style="font-size:24px;font-weight:900;margin-bottom:20px;color:var(--ink)">Nous contacter</h2>
-    <!-- Infos contact -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:28px">
-      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px;background:#f9f9f9;border-radius:12px;text-align:center">
-        <span style="font-size:28px">📧</span>
-        <div style="font-weight:700;font-size:13px">Email</div>
-        <a href="/cdn-cgi/l/email-protection#dcafa9acacb3aea8f2a5b3a9bbb3a9a5b3a9bbb3a99cbbb1bdb5b0f2bfb3b1" style="color:var(--or);font-size:12px;word-break:break-all"><span class="__cf_email__" data-cfemail="8cfff9fcfce3fef8a2f5e3f9ebe3f9f5e3f9ebe3f9ccebe1ede5e0a2efe3e1">[email&#160;protected]</span></a>
+<!-- ══ MODAL PAGES STATIQUES ══ -->
+<div id="static-page-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:3000;overflow-y:auto;padding:20px">
+  <div style="max-width:700px;margin:40px auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <div style="background:var(--or);padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span id="static-page-icon" style="font-size:22px"></span>
+        <span id="static-page-title" style="font-size:16px;font-weight:800;color:#fff"></span>
       </div>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px;background:#f9f9f9;border-radius:12px;text-align:center;cursor:pointer" onclick="window.open('https://wa.me/224','_blank')">
-        <span style="font-size:28px">💬</span>
-        <div style="font-weight:700;font-size:13px">WhatsApp</div>
-        <div style="color:var(--or);font-size:12px">Écrire maintenant</div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px;background:#f9f9f9;border-radius:12px;text-align:center">
-        <span style="font-size:28px">📍</span>
-        <div style="font-weight:700;font-size:13px">Adresse</div>
-        <div style="color:#666;font-size:12px">Conakry, Guinée</div>
-      </div>
+      <button onclick="closeStaticPage()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center">✕</button>
     </div>
-
-    <!-- Formulaire -->
-    <div style="background:#f9f9f9;border-radius:14px;padding:24px" id="contact-form-wrap">
-      <h3 style="font-size:16px;font-weight:800;margin-bottom:18px">✉️ Envoyer un message</h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-        <div>
-          <label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px">Votre nom *</label>
-          <input id="ct-name" type="text" placeholder="Prénom Nom" style="width:100%;padding:10px 12px;border:1.5px solid var(--br);border-radius:8px;font-family:inherit;font-size:13px;outline:none;box-sizing:border-box" onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'">
-        </div>
-        <div>
-          <label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px">Email</label>
-          <input id="ct-email" type="email" placeholder="votre@email.com" style="width:100%;padding:10px 12px;border:1.5px solid var(--br);border-radius:8px;font-family:inherit;font-size:13px;outline:none;box-sizing:border-box" onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'">
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-        <div>
-          <label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px">Téléphone</label>
-          <input id="ct-phone" type="tel" placeholder="+224 6XX XX XX XX" style="width:100%;padding:10px 12px;border:1.5px solid var(--br);border-radius:8px;font-family:inherit;font-size:13px;outline:none;box-sizing:border-box" onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'">
-        </div>
-        <div>
-          <label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px">Sujet</label>
-          <select id="ct-subject" style="width:100%;padding:10px 12px;border:1.5px solid var(--br);border-radius:8px;font-family:inherit;font-size:13px;outline:none;background:#fff;box-sizing:border-box" onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'">
-            <option value="">Choisir un sujet...</option>
-            <option value="Problème avec mon compte">Problème avec mon compte</option>
-            <option value="Annonce signalée">Annonce signalée</option>
-            <option value="Problème de paiement">Problème de paiement</option>
-            <option value="Partenariat / Presse">Partenariat / Presse</option>
-            <option value="Suggestion">Suggestion</option>
-            <option value="Autre">Autre</option>
-          </select>
-        </div>
-      </div>
-      <div style="margin-bottom:16px">
-        <label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px">Votre message *</label>
-        <textarea id="ct-message" rows="5" placeholder="Décrivez votre demande en détail..." style="width:100%;padding:10px 12px;border:1.5px solid var(--br);border-radius:8px;font-family:inherit;font-size:13px;outline:none;resize:vertical;box-sizing:border-box" onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'"></textarea>
-      </div>
-      <button onclick="submitContact()" id="ct-submit-btn" style="width:100%;background:var(--or);color:#fff;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;transition:background .15s">
-        📩 Envoyer le message
-      </button>
-      <p style="text-align:center;font-size:12px;color:#aaa;margin-top:10px">Réponse garantie sous 24h ouvrées</p>
-    </div>
-
-    <!-- Succès -->
-    <div id="contact-success" style="display:none;text-align:center;padding:40px 20px">
-      <div style="font-size:64px;margin-bottom:16px">✅</div>
-      <h3 style="font-size:20px;font-weight:900;margin-bottom:8px">Message envoyé !</h3>
-      <p style="font-size:14px;color:#666;margin-bottom:20px">Nous vous répondrons dans les 24 heures ouvrées.<br>Un email de confirmation vous a été envoyé.</p>
-      <button onclick="document.getElementById('contact-form-wrap').style.display='';document.getElementById('contact-success').style.display='none'" style="background:var(--or);color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Envoyer un autre message</button>
-    </div>
+    <div id="static-page-body" style="padding:28px 28px 36px"></div>
   </div>
 </div>
-<div id="page-static-cgu" class="page">
-  <div style="max-width:700px;margin:0 auto;padding:30px 20px">
-    <button onclick="goTo('home')" style="background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:14px;font-family:inherit;margin-bottom:20px;display:flex;align-items:center;gap:6px">← Retour</button>
-    <div style="font-size:32px;margin-bottom:10px">📄</div>
-    <h2 style="font-size:24px;font-weight:900;margin-bottom:20px;color:var(--ink)">Conditions Générales d'Utilisation</h2>
-    <div style="font-size:13px;line-height:1.8;color:#444">
-          <h4 style="font-size:14px;font-weight:800;margin:0 0 8px">1. Objet</h4>
-          <p style="margin-bottom:14px">YouGouYou est une plateforme de petites annonces en ligne permettant aux utilisateurs de publier et consulter des annonces de vente, d'achat et de services en Guinée.</p>
-          <h4 style="font-size:14px;font-weight:800;margin:0 0 8px">2. Inscription</h4>
-          <p style="margin-bottom:14px">L'inscription est gratuite. Chaque utilisateur doit fournir des informations exactes et s'engage à maintenir la confidentialité de ses identifiants.</p>
-          <h4 style="font-size:14px;font-weight:800;margin:0 0 8px">3. Annonces</h4>
-          <p style="margin-bottom:14px">Les annonces doivent être conformes à la législation guinéenne. Il est interdit de publier des produits illicites, contrefaits ou dangereux. YouGouYou se réserve le droit de supprimer toute annonce non conforme.</p>
-          <h4 style="font-size:14px;font-weight:800;margin:0 0 8px">4. Responsabilité</h4>
-          <p style="margin-bottom:14px">YouGouYou est une plateforme de mise en relation. Nous ne sommes pas parties aux transactions entre acheteurs et vendeurs et déclinons toute responsabilité quant à leur issue.</p>
-          <h4 style="font-size:14px;font-weight:800;margin:0 0 8px">5. Contact</h4>
-          <p>Pour toute question : <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ccbfb9bcbca3beb8e2b5a3b9aba3b9b5a3b9aba3b98caba1ada5a0e2afa3a1">[email&#160;protected]</a></p>
-        </div>
-  </div>
+<div id="static-content-about" style="display:none">
+<p style="font-size:15px;line-height:1.8;margin-bottom:16px"><strong>YouGouYou</strong> est le premier marketplace guinéen, fondé à Conakry en 2024. Notre mission : permettre à chaque Guinéen d'acheter, vendre et échanger en toute sécurité, partout en Guinée.</p>
+<p style="font-size:14px;line-height:1.8;margin-bottom:16px">Nous couvrons les 38 préfectures de la Guinée, avec des milliers d'annonces dans toutes les catégories : véhicules, immobilier, mode, électronique, services et bien plus.</p>
+<div style="background:#FFF3EE;border-radius:12px;padding:16px;margin-bottom:16px"><div style="font-weight:800;margin-bottom:8px">🎯 Notre vision</div><p style="font-size:13px;color:#555;line-height:1.7">Devenir la plateforme de référence pour le commerce en Afrique de l'Ouest, en commençant par la Guinée.</p></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+  <div style="background:#f9f9f9;border-radius:10px;padding:14px;text-align:center"><div style="font-size:28px;font-weight:900;color:var(--or)">2024</div><div style="font-size:12px;color:#777">Année de création</div></div>
+  <div style="background:#f9f9f9;border-radius:10px;padding:14px;text-align:center"><div style="font-size:28px;font-weight:900;color:var(--or)">38</div><div style="font-size:12px;color:#777">Préfectures couvertes</div></div>
+</div></div>
+<div id="static-content-howto" style="display:none">
+<div style="display:flex;flex-direction:column;gap:16px">
+  <div style="display:flex;gap:14px;align-items:flex-start"><div style="width:36px;height:36px;border-radius:50%;background:var(--or);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;flex-shrink:0">1</div><div><div style="font-weight:800;margin-bottom:4px">Créez votre compte gratuitement</div><p style="font-size:13px;color:#666;line-height:1.6">Inscrivez-vous avec votre numéro de téléphone ou email. Vérification en 30 secondes.</p></div></div>
+  <div style="display:flex;gap:14px;align-items:flex-start"><div style="width:36px;height:36px;border-radius:50%;background:var(--or);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;flex-shrink:0">2</div><div><div style="font-weight:800;margin-bottom:4px">Déposez votre annonce</div><p style="font-size:13px;color:#666;line-height:1.6">Photos, description, prix — votre annonce est visible en quelques minutes dans toute la Guinée.</p></div></div>
+  <div style="display:flex;gap:14px;align-items:flex-start"><div style="width:36px;height:36px;border-radius:50%;background:var(--or);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;flex-shrink:0">3</div><div><div style="font-weight:800;margin-bottom:4px">Contactez le vendeur</div><p style="font-size:13px;color:#666;line-height:1.6">Messagerie intégrée gratuite. Payez une petite commission pour voir le numéro direct du vendeur.</p></div></div>
+  <div style="display:flex;gap:14px;align-items:flex-start"><div style="width:36px;height:36px;border-radius:50%;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;flex-shrink:0">✓</div><div><div style="font-weight:800;margin-bottom:4px">Achetez en sécurité</div><p style="font-size:13px;color:#666;line-height:1.6">Échangez en lieu public, vérifiez avant paiement. Utilisez Orange Money pour sécuriser vos transactions.</p></div></div>
+</div></div>
+<div id="static-content-contact" style="display:none">
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:24px">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px;background:#f9f9f9;border-radius:12px;text-align:center"><span style="font-size:28px">📧</span><div style="font-weight:700;font-size:13px">Email</div><a href="mailto:support.yougouyougou@gmail.com" style="color:var(--or);font-size:11px;word-break:break-all">support.yougouyougou@gmail.com</a></div>
+  <div onclick="window.open('https://wa.me/224','_blank')" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px;background:#f9f9f9;border-radius:12px;text-align:center;cursor:pointer"><span style="font-size:28px">💬</span><div style="font-weight:700;font-size:13px">WhatsApp</div><div style="color:var(--or);font-size:12px">Écrire maintenant</div></div>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px;background:#f9f9f9;border-radius:12px;text-align:center"><span style="font-size:28px">📍</span><div style="font-weight:700;font-size:13px">Adresse</div><div style="color:#666;font-size:12px">Conakry, Guinée</div></div>
 </div>
-<div id="page-static-privacy" class="page">
-  <div style="max-width:700px;margin:0 auto;padding:30px 20px">
-    <button onclick="goTo('home')" style="background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:14px;font-family:inherit;margin-bottom:20px;display:flex;align-items:center;gap:6px">← Retour</button>
-    <div style="font-size:32px;margin-bottom:10px">🔒</div>
-    <h2 style="font-size:24px;font-weight:900;margin-bottom:20px;color:var(--ink)">Politique de Confidentialité</h2>
-    <div style="font-size:13px;line-height:1.8;color:#444">
-          <h4 style="font-size:14px;font-weight:800;margin:0 0 8px">Données collectées</h4>
-          <p style="margin-bottom:14px">Nous collectons : nom, prénom, numéro de téléphone ou email, ville, et les annonces que vous publiez.</p>
-          <h4 style="font-size:14px;font-weight:800;margin:0 0 8px">Utilisation des données</h4>
-          <p style="margin-bottom:14px">Vos données sont utilisées uniquement pour le fonctionnement de la plateforme : affichage des annonces, messagerie, notifications. Nous ne vendons jamais vos données à des tiers.</p>
-          <h4 style="font-size:14px;font-weight:800;margin:0 0 8px">Sécurité</h4>
-          <p style="margin-bottom:14px">Vos mots de passe sont chiffrés (bcrypt). Les communications sont sécurisées par HTTPS. Votre numéro de téléphone n'est visible qu'après paiement de la commission.</p>
-          <h4 style="font-size:14px;font-weight:800;margin:0 0 8px">Vos droits</h4>
-          <p>Vous pouvez demander la suppression de votre compte et de vos données à tout moment en nous contactant.</p>
-        </div>
+<div id="contact-form-wrap">
+  <h3 style="font-size:15px;font-weight:800;margin-bottom:16px">✉️ Envoyer un message</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+    <div><label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:4px">Nom *</label><input id="ct-name" type="text" placeholder="Prénom Nom" style="width:100%;padding:9px 12px;border:1.5px solid var(--br);border-radius:8px;font-family:inherit;font-size:13px;outline:none;box-sizing:border-box" onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'"></div>
+    <div><label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:4px">Email</label><input id="ct-email" type="email" placeholder="votre@email.com" style="width:100%;padding:9px 12px;border:1.5px solid var(--br);border-radius:8px;font-family:inherit;font-size:13px;outline:none;box-sizing:border-box" onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'"></div>
   </div>
-</div>
-<div id="page-static-help" class="page">
-  <div style="max-width:700px;margin:0 auto;padding:30px 20px">
-    <button onclick="goTo('home')" style="background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:14px;font-family:inherit;margin-bottom:20px;display:flex;align-items:center;gap:6px">← Retour</button>
-    <div style="font-size:32px;margin-bottom:10px">❓</div>
-    <h2 style="font-size:24px;font-weight:900;margin-bottom:20px;color:var(--ink)">Centre d'aide</h2>
-    <div style="display:flex;flex-direction:column;gap:10px">
-          <details style="border:1px solid var(--br);border-radius:10px;padding:12px 16px">
-            <summary style="font-weight:700;cursor:pointer;font-size:14px">Comment déposer une annonce ?</summary>
-            <p style="font-size:13px;color:#666;margin-top:8px;line-height:1.7">Cliquez sur "+ Déposer une annonce", choisissez une catégorie, remplissez le formulaire avec titre, description, prix et photos. Votre annonce sera visible immédiatement.</p>
-          </details>
-          <details style="border:1px solid var(--br);border-radius:10px;padding:12px 16px">
-            <summary style="font-weight:700;cursor:pointer;font-size:14px">Comment contacter un vendeur ?</summary>
-            <p style="font-size:13px;color:#666;margin-top:8px;line-height:1.7">Cliquez sur une annonce, puis sur "Envoyer un message" pour la messagerie gratuite, ou "Voir le numéro" (commission 5%) pour appeler directement.</p>
-          </details>
-          <details style="border:1px solid var(--br);border-radius:10px;padding:12px 16px">
-            <summary style="font-weight:700;cursor:pointer;font-size:14px">Comment payer avec Orange Money ?</summary>
-            <p style="font-size:13px;color:#666;margin-top:8px;line-height:1.7">Entrez votre numéro Orange Money et votre code PIN de 4 chiffres. Le paiement est sécurisé — votre PIN n'est jamais stocké.</p>
-          </details>
-          <details style="border:1px solid var(--br);border-radius:10px;padding:12px 16px">
-            <summary style="font-weight:700;cursor:pointer;font-size:14px">Mon annonce n'apparaît pas, pourquoi ?</summary>
-            <p style="font-size:13px;color:#666;margin-top:8px;line-height:1.7">Vérifiez que votre compte est vérifié. Si l'annonce a été signalée par des utilisateurs, elle peut être temporairement masquée. Contactez-nous si le problème persiste.</p>
-          </details>
-          <details style="border:1px solid var(--br);border-radius:10px;padding:12px 16px">
-            <summary style="font-weight:700;cursor:pointer;font-size:14px">Comment signaler une arnaque ?</summary>
-            <p style="font-size:13px;color:#666;margin-top:8px;line-height:1.7">Sur chaque annonce, cliquez sur "🚩 Signaler". Notre équipe examine les signalements sous 24h. En cas d'urgence, contactez-nous directement.</p>
-          </details>
-        </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+    <div><label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:4px">Téléphone</label><input id="ct-phone" type="tel" placeholder="+224 6XX XX XX" style="width:100%;padding:9px 12px;border:1.5px solid var(--br);border-radius:8px;font-family:inherit;font-size:13px;outline:none;box-sizing:border-box" onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'"></div>
+    <div><label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:4px">Sujet</label><select id="ct-subject" style="width:100%;padding:9px 12px;border:1.5px solid var(--br);border-radius:8px;font-family:inherit;font-size:13px;outline:none;background:#fff;box-sizing:border-box"><option value="">Choisir...</option><option>Problème avec mon compte</option><option>Annonce signalée</option><option>Problème de paiement</option><option>Partenariat / Presse</option><option>Suggestion</option><option>Autre</option></select></div>
   </div>
+  <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:4px">Message *</label><textarea id="ct-message" rows="4" placeholder="Décrivez votre demande..." style="width:100%;padding:9px 12px;border:1.5px solid var(--br);border-radius:8px;font-family:inherit;font-size:13px;outline:none;resize:vertical;box-sizing:border-box" onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'"></textarea></div>
+  <button onclick="submitContact()" id="ct-submit-btn" style="width:100%;background:var(--or);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit">📩 Envoyer</button>
+  <p style="text-align:center;font-size:12px;color:#aaa;margin-top:8px">Réponse sous 24h ouvrées</p>
 </div>
-<div id="page-static-orange-money" class="page">
-  <div style="max-width:700px;margin:0 auto;padding:30px 20px">
-    <button onclick="goTo('home')" style="background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:14px;font-family:inherit;margin-bottom:20px;display:flex;align-items:center;gap:6px">← Retour</button>
-    <div style="font-size:32px;margin-bottom:10px">🟠</div>
-    <h2 style="font-size:24px;font-weight:900;margin-bottom:20px;color:var(--ink)">Paiement Orange Money</h2>
-    <div>
-          <div style="background:#FF6B00;border-radius:12px;padding:20px;margin-bottom:16px;text-align:center">
-            <div style="font-size:40px;margin-bottom:8px">🟠</div>
-            <div style="color:#fff;font-weight:800;font-size:16px">Orange Money Guinée</div>
-            <div style="color:rgba(255,255,255,.8);font-size:13px;margin-top:4px">Paiement sécurisé intégré</div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;line-height:1.7">
-            <div style="padding:12px;background:#f9f9f9;border-radius:8px">
-              <strong>📞 Révéler un numéro</strong><br>
-              <span style="color:#666">Commission de 5% du prix de l'annonce (minimum 1 000 GNF) pour voir le numéro du vendeur.</span>
-            </div>
-            <div style="padding:12px;background:#f9f9f9;border-radius:8px">
-              <strong>🚀 Booster une annonce</strong><br>
-              <span style="color:#666">À la une (10 000 GNF), Remontée (5 000 GNF), Badge Urgent (3 000 GNF).</span>
-            </div>
-            <div style="padding:12px;background:#FFF3EE;border-radius:8px;border:1px solid #FFB899">
-              <strong>🔒 Sécurité</strong><br>
-              <span style="color:#666">Votre code PIN n'est jamais stocké. Transactions chiffrées.</span>
-            </div>
-          </div>
-        </div>
-  </div>
-</div>
-<div id="page-static-security" class="page">
-  <div style="max-width:700px;margin:0 auto;padding:30px 20px">
-    <button onclick="goTo('home')" style="background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:14px;font-family:inherit;margin-bottom:20px;display:flex;align-items:center;gap:6px">← Retour</button>
-    <div style="font-size:32px;margin-bottom:10px">🛡️</div>
-    <h2 style="font-size:24px;font-weight:900;margin-bottom:20px;color:var(--ink)">Conseils de Sécurité</h2>
-    <div style="display:flex;flex-direction:column;gap:12px">
-          <div style="display:flex;gap:12px;padding:14px;background:#D1FAE5;border-radius:10px">
-            <span style="font-size:20px">✅</span>
-            <div><strong style="font-size:13px">Échangez en lieu public</strong><br>
-            <span style="font-size:12px;color:#444">Préférez un lieu animé (marché, centre commercial) pour la remise en main propre.</span></div>
-          </div>
-          <div style="display:flex;gap:12px;padding:14px;background:#D1FAE5;border-radius:10px">
-            <span style="font-size:20px">✅</span>
-            <div><strong style="font-size:13px">Vérifiez l'article avant de payer</strong><br>
-            <span style="font-size:12px;color:#444">Ne payez jamais avant d'avoir vu et testé l'article en personne.</span></div>
-          </div>
-          <div style="display:flex;gap:12px;padding:14px;background:#FEE2E2;border-radius:10px">
-            <span style="font-size:20px">❌</span>
-            <div><strong style="font-size:13px">Méfiez-vous des prix trop bas</strong><br>
-            <span style="font-size:12px;color:#444">Un prix anormalement bas est souvent signe d'arnaque. Faites confiance à votre instinct.</span></div>
-          </div>
-          <div style="display:flex;gap:12px;padding:14px;background:#FEE2E2;border-radius:10px">
-            <span style="font-size:20px">❌</span>
-            <div><strong style="font-size:13px">Ne payez jamais à l'avance</strong><br>
-            <span style="font-size:12px;color:#444">Aucun vendeur sérieux ne demande un virement avant la remise de l'article.</span></div>
-          </div>
-        </div>
-  </div>
-</div>
-
+<div id="contact-success" style="display:none;text-align:center;padding:30px 0">
+  <div style="font-size:56px;margin-bottom:12px">✅</div>
+  <h3 style="font-size:18px;font-weight:900;margin-bottom:8px">Message envoyé !</h3>
+  <p style="font-size:13px;color:#666">Nous vous répondrons dans les 24h ouvrées.</p>
+</div></div>
+<div id="static-content-cgu" style="display:none">
+<div style="font-size:13px;line-height:1.8;color:#444">
+  <h4 style="font-weight:800;margin:0 0 8px">1. Objet</h4>
+  <p style="margin-bottom:14px">YouGouYou est une plateforme de petites annonces en ligne permettant aux utilisateurs de publier et consulter des annonces en Guinée.</p>
+  <h4 style="font-weight:800;margin:0 0 8px">2. Inscription</h4>
+  <p style="margin-bottom:14px">L'inscription est gratuite. Chaque utilisateur doit fournir des informations exactes et maintenir la confidentialité de ses identifiants.</p>
+  <h4 style="font-weight:800;margin:0 0 8px">3. Annonces</h4>
+  <p style="margin-bottom:14px">Les annonces doivent être conformes à la législation guinéenne. Il est interdit de publier des produits illicites. YouGouYou se réserve le droit de supprimer toute annonce non conforme.</p>
+  <h4 style="font-weight:800;margin:0 0 8px">4. Responsabilité</h4>
+  <p style="margin-bottom:14px">YouGouYou est une plateforme de mise en relation. Nous déclinons toute responsabilité quant à l'issue des transactions entre utilisateurs.</p>
+  <h4 style="font-weight:800;margin:0 0 8px">5. Contact</h4>
+  <p>support.yougouyougou@gmail.com</p>
+</div></div>
+<div id="static-content-privacy" style="display:none">
+<div style="font-size:13px;line-height:1.8;color:#444">
+  <h4 style="font-weight:800;margin:0 0 8px">Données collectées</h4>
+  <p style="margin-bottom:14px">Nous collectons : nom, prénom, numéro de téléphone ou email, ville, et les annonces publiées.</p>
+  <h4 style="font-weight:800;margin:0 0 8px">Utilisation</h4>
+  <p style="margin-bottom:14px">Vos données sont utilisées uniquement pour le fonctionnement de la plateforme. Nous ne vendons jamais vos données à des tiers.</p>
+  <h4 style="font-weight:800;margin:0 0 8px">Sécurité</h4>
+  <p style="margin-bottom:14px">Mots de passe chiffrés (bcrypt). Communications sécurisées HTTPS. Numéro de téléphone visible uniquement après paiement.</p>
+  <h4 style="font-weight:800;margin:0 0 8px">Vos droits</h4>
+  <p>Suppression de compte possible à tout moment. Contact : support.yougouyougou@gmail.com</p>
+</div></div>
+<div id="static-content-help" style="display:none">
+<div style="display:flex;flex-direction:column;gap:8px">
+  <details style="border:1px solid var(--br);border-radius:10px;padding:12px 16px"><summary style="font-weight:700;cursor:pointer;font-size:13px">Comment déposer une annonce ?</summary><p style="font-size:13px;color:#666;margin-top:8px;line-height:1.7">Cliquez sur "+ Déposer une annonce", choisissez une catégorie, remplissez le formulaire. Votre annonce sera visible immédiatement.</p></details>
+  <details style="border:1px solid var(--br);border-radius:10px;padding:12px 16px"><summary style="font-weight:700;cursor:pointer;font-size:13px">Comment contacter un vendeur ?</summary><p style="font-size:13px;color:#666;margin-top:8px;line-height:1.7">Cliquez sur une annonce puis sur "Envoyer un message" (gratuit) ou "Voir le numéro" (commission 5%).</p></details>
+  <details style="border:1px solid var(--br);border-radius:10px;padding:12px 16px"><summary style="font-weight:700;cursor:pointer;font-size:13px">Comment payer avec Orange Money ?</summary><p style="font-size:13px;color:#666;margin-top:8px;line-height:1.7">Entrez votre numéro Orange Money et votre code PIN. Votre PIN n'est jamais stocké.</p></details>
+  <details style="border:1px solid var(--br);border-radius:10px;padding:12px 16px"><summary style="font-weight:700;cursor:pointer;font-size:13px">Comment signaler une arnaque ?</summary><p style="font-size:13px;color:#666;margin-top:8px;line-height:1.7">Sur chaque annonce, cliquez sur "🚩 Signaler". Notre équipe examine les signalements sous 24h.</p></details>
+  <details style="border:1px solid var(--br);border-radius:10px;padding:12px 16px"><summary style="font-weight:700;cursor:pointer;font-size:13px">Mon annonce n'apparaît pas ?</summary><p style="font-size:13px;color:#666;margin-top:8px;line-height:1.7">Vérifiez que votre compte est vérifié. Contactez-nous si le problème persiste.</p></details>
+</div></div>
+<div id="static-content-security" style="display:none">
+<div style="display:flex;flex-direction:column;gap:10px">
+  <div style="display:flex;gap:12px;padding:14px;background:#D1FAE5;border-radius:10px"><span style="font-size:20px">✅</span><div><strong style="font-size:13px">Échangez en lieu public</strong><br><span style="font-size:12px;color:#444">Préférez un lieu animé pour la remise en main propre.</span></div></div>
+  <div style="display:flex;gap:12px;padding:14px;background:#D1FAE5;border-radius:10px"><span style="font-size:20px">✅</span><div><strong style="font-size:13px">Vérifiez avant de payer</strong><br><span style="font-size:12px;color:#444">Ne payez jamais avant d'avoir vu et testé l'article en personne.</span></div></div>
+  <div style="display:flex;gap:12px;padding:14px;background:#FEE2E2;border-radius:10px"><span style="font-size:20px">❌</span><div><strong style="font-size:13px">Méfiez-vous des prix trop bas</strong><br><span style="font-size:12px;color:#444">Un prix anormalement bas est souvent signe d'arnaque.</span></div></div>
+  <div style="display:flex;gap:12px;padding:14px;background:#FEE2E2;border-radius:10px"><span style="font-size:20px">❌</span><div><strong style="font-size:13px">Ne payez jamais à l'avance</strong><br><span style="font-size:12px;color:#444">Aucun vendeur sérieux ne demande un virement avant la remise de l'article.</span></div></div>
+</div></div>
+<div id="static-content-orange-money" style="display:none">
+<div style="background:#FF6B00;border-radius:12px;padding:20px;margin-bottom:16px;text-align:center"><div style="font-size:40px;margin-bottom:8px">🟠</div><div style="color:#fff;font-weight:800;font-size:16px">Orange Money Guinée</div></div>
+<div style="display:flex;flex-direction:column;gap:10px;font-size:13px;line-height:1.7">
+  <div style="padding:12px;background:#f9f9f9;border-radius:8px"><strong>📞 Révéler un numéro</strong><br><span style="color:#666">Commission 5% du prix (min 1 000 GNF) pour voir le numéro du vendeur.</span></div>
+  <div style="padding:12px;background:#f9f9f9;border-radius:8px"><strong>🚀 Booster une annonce</strong><br><span style="color:#666">À la une 10 000 GNF · Remontée 5 000 GNF · Badge Urgent 3 000 GNF.</span></div>
+  <div style="padding:12px;background:#FFF3EE;border-radius:8px;border:1px solid #FFB899"><strong>🔒 Sécurité</strong><br><span style="color:#666">Votre code PIN n'est jamais stocké. Transactions chiffrées.</span></div>
+</div></div>
 </div><!-- /app-wrapper -->
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 // Désactivation définitive du search-banner
 (function(){
   var _orig = document.getElementById.bind(document);
   // Override : si un script tente d'afficher le banner, on bloque
   var _MutObs = window.MutationObserver;
   
-function updateFooterStats(){
-  fetch('/api/admin/stats').then(function(r){return r.ok?r.json():null;}).then(function(d){
-    if(!d) return;
-    var el=document.getElementById('sb-ads2');
-    if(el) el.textContent=(d.totalAds||0).toLocaleString('fr-FR');
-  }).catch(function(){
-    // Fallback: compter les annonces locales
-    var ads=DB.ads();
-    var el=document.getElementById('sb-ads2');
-    if(el) el.textContent=(ads.length||0).toLocaleString('fr-FR');
-  });
+function openPage(pageId){
+  var overlay = document.getElementById('static-page-overlay');
+  var body    = document.getElementById('static-page-body');
+  var icon    = document.getElementById('static-page-icon');
+  var title   = document.getElementById('static-page-title');
+  var content = document.getElementById('static-content-'+pageId);
+
+  if(!overlay || !content){
+    toast('Cette page sera bientôt disponible','ok');
+    return;
+  }
+
+  var pages = {
+    about:        {icon:'🇬🇳', title:'Qui sommes-nous ?'},
+    howto:        {icon:'💡',  title:'Comment ça marche ?'},
+    contact:      {icon:'📩',  title:'Nous contacter'},
+    cgu:          {icon:'📄',  title:'Conditions Générales'},
+    privacy:      {icon:'🔒',  title:'Politique de Confidentialité'},
+    help:         {icon:'❓',  title:"Centre d'aide"},
+    security:     {icon:'🛡️', title:'Conseils de Sécurité'},
+    'orange-money':{icon:'🟠', title:'Paiement Orange Money'},
+    press:        {icon:'📰',  title:'Presse'},
+    jobs:         {icon:'💼',  title:'Recrutement'},
+    cookies:      {icon:'🍪',  title:'Gestion des cookies'},
+    rights:       {icon:'⚖️', title:'Vos droits'},
+    'report-info':{icon:'🚩',  title:'Signaler une annonce'},
+  };
+
+  var p = pages[pageId] || {icon:'📄', title:'Information'};
+  if(icon)  icon.textContent  = p.icon;
+  if(title) title.textContent = p.title;
+  if(body)  body.innerHTML    = content.innerHTML;
+
+  // Reset formulaire contact si besoin
+  if(pageId === 'contact'){
+    var fw = document.getElementById('contact-form-wrap');
+    var fs = document.getElementById('contact-success');
+    if(fw) fw.style.display = '';
+    if(fs) fs.style.display = 'none';
+  }
+
+  overlay.style.display = 'block';
+  document.body.style.overflow = 'hidden';
 }
 
-function openPage(pageId){
-  var el = document.getElementById('page-static-'+pageId);
-  if(!el){ toast('Cette page sera bientôt disponible','ok'); return; }
-  // Masquer toutes les pages
-  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
-  // Afficher la page statique
-  el.classList.add('active');
-  window.scrollTo({top:0,behavior:'smooth'});
+function closeStaticPage(){
+  var overlay = document.getElementById('static-page-overlay');
+  if(overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
 }
 
 function submitContact(){
@@ -6567,37 +6152,28 @@ function submitContact(){
   var phone   = (document.getElementById('ct-phone')||{}).value||'';
   var subject = (document.getElementById('ct-subject')||{}).value||'';
   var message = (document.getElementById('ct-message')||{}).value||'';
-
   if(!name.trim()){toast('⚠️ Entrez votre nom','err');return;}
   if(!message.trim()){toast('⚠️ Entrez votre message','err');return;}
   if(!email.trim()&&!phone.trim()){toast('⚠️ Email ou téléphone requis','err');return;}
-
-  var btn = document.getElementById('ct-submit-btn');
-  if(btn){btn.disabled=true;btn.textContent='⏳ Envoi en cours...';}
-
+  var btn=document.getElementById('ct-submit-btn');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Envoi...';}
   fetch('/api/contact',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
+    method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({name:name.trim(),email:email.trim(),phone:phone.trim(),subject:subject,message:message.trim()})
-  })
-  .then(function(r){return r.json();})
+  }).then(function(r){return r.json();})
   .then(function(data){
-    if(btn){btn.disabled=false;btn.textContent='📩 Envoyer le message';}
+    if(btn){btn.disabled=false;btn.textContent='📩 Envoyer';}
     if(data.error){toast('❌ '+data.error,'err');return;}
-    // Afficher succès
-    document.getElementById('contact-form-wrap').style.display='none';
-    document.getElementById('contact-success').style.display='block';
-    // Vider le formulaire
-    ['ct-name','ct-email','ct-phone','ct-message'].forEach(function(id){
-      var el=document.getElementById(id); if(el) el.value='';
-    });
-    var sel=document.getElementById('ct-subject'); if(sel) sel.value='';
-  })
-  .catch(function(){
-    if(btn){btn.disabled=false;btn.textContent='📩 Envoyer le message';}
-    toast('❌ Erreur réseau — réessayez','err');
+    var fw=document.getElementById('contact-form-wrap');
+    var fs=document.getElementById('contact-success');
+    if(fw) fw.style.display='none';
+    if(fs) fs.style.display='block';
+  }).catch(function(){
+    if(btn){btn.disabled=false;btn.textContent='📩 Envoyer';}
+    toast('❌ Erreur réseau','err');
   });
 }
+
 document.addEventListener('DOMContentLoaded', function(){
     var killBanner = function(){
       var b = document.getElementById('search-banner');
@@ -6625,4 +6201,17 @@ document.addEventListener('DOMContentLoaded', function(){
   document.addEventListener('keydown',function(e){
     var pg=document.getElementById('page-detail');
     if(pg&&pg.classList.contains('active')){
- 
+      if(e.key==='ArrowLeft') navPhoto(-1);
+      if(e.key==='ArrowRight') navPhoto(1);
+    }
+  });
+})();
+</script>
+<script>
+// ── Repositionnement dropdowns catégories (fix overflow parent) ──
+document.addEventListener('mouseover', function(e){
+  var ncat = e.target.closest('.ncat.has-sub');
+  if(!ncat) return;
+  var dd = ncat.querySelector('.cat-dropdown');
+  if(!dd) return;
+  var rect
