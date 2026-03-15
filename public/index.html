@@ -679,6 +679,34 @@ footer{background:transparent;margin-top:0}
   height:100%;
   overflow-y:auto;
 }
+
+/* ── Dropdown 3ème niveau nav ── */
+.cat-sub-item{position:relative}
+.cat-sub-dropdown{
+  display:none;
+  position:absolute;
+  left:100%;
+  top:0;
+  min-width:180px;
+  background:#fff;
+  border:1px solid var(--br);
+  border-radius:0 8px 8px 8px;
+  box-shadow:4px 4px 16px rgba(0,0,0,.1);
+  z-index:600;
+  padding:4px 0;
+}
+.cat-sub-item.has-subsub:hover > .cat-sub-dropdown{display:block}
+.cat-sub-item.has-subsub:hover{background:var(--orl);color:var(--or)}
+.cat-sub-sub-item{
+  display:block;
+  padding:8px 14px;
+  font-size:12px;
+  color:var(--ink);
+  cursor:pointer;
+  white-space:nowrap;
+  transition:background .1s;
+}
+.cat-sub-sub-item:hover{background:var(--orl);color:var(--or)}
 </style>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#FF5C00">
@@ -1819,7 +1847,14 @@ function renderNavCats(){
   el.innerHTML=allItems.map(function(cat,i){
     var subs=cat.sub?cat.sub.map(function(s){
       var sName=typeof s==='string'?s:s.n;
-      return '<div class="cat-sub-item" onclick="filterSubCat(event,\''+cat.n+'\',\''+sName+'\')">'+sName+'</div>';
+      var hasSub=typeof s==='object'&&s.sub&&s.sub.length>0;
+      var subSubs='';
+      if(hasSub){
+        subSubs='<div class="cat-sub-dropdown">'+s.sub.map(function(ss){
+          return '<div class="cat-sub-sub-item" onclick="filterSubCat(event,\''+cat.n+'\',\''+sName+'\')" >'+ss+'</div>';
+        }).join('')+'</div>';
+      }
+      return '<div class="cat-sub-item'+(hasSub?' has-subsub':'')+'" onclick="filterSubCat(event,\''+cat.n+'\',\''+sName+'\')">'+sName+(hasSub?' <span style="float:right;opacity:.5;font-size:10px;margin-left:8px">›</span>':'')+subSubs+'</div>';
     }).join(''):'';
     var arrow=cat.sub?' <span class="cat-arrow">▾</span>':'';
     return '<div class="ncat'+(i===0?' active':'')+(cat.sub?' has-sub':'')+'" onclick="filterCat(this,\''+cat.n+'\')">'
