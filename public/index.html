@@ -1211,7 +1211,7 @@ footer{background:transparent;margin-top:0}
         <a onclick="showDashTab('ads')" id="dtab-ads">📋 Mes annonces <span id="p-count-ads" style="background:var(--orl);color:var(--or);font-size:11px;padding:1px 6px;border-radius:10px;margin-left:auto">0</span></a>
         <a onclick="showDashTab('history')" id="dtab-history">🕐 Historique</a>
         <a onclick="showDashTab('payments')" id="dtab-payments">💳 Paiements</a>
-        <a onclick="showDashTab('alerts')" id="dtab-alerts">🔔 Alertes</a>
+
         <a id="nav-admin-link" hidden onclick="goAdmin()">👑 Admin</a>
         <a onclick="logout()" style="color:var(--re)!important;margin-top:20px">🚪 Déconnexion</a>
       </nav>
@@ -1305,25 +1305,7 @@ footer{background:transparent;margin-top:0}
 
 
       <!-- ═══ TAB ALERTES ═══ -->
-      <div class="dash-section" id="dsec-alerts">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-          <div>
-            <h3 style="margin:0;font-size:16px;font-weight:800">🔔 Mes alertes de recherche</h3>
-            <p style="font-size:13px;color:var(--muted);margin:4px 0 0">Recevez un email dès qu'une annonce correspond à vos critères.</p>
-          </div>
-          <button onclick="showAlertModal()" class="alert-create-btn">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Créer une alerte
-          </button>
-        </div>
-        <div class="alert-limit-bar">
-          <span id="alerts-count-label">0 / 5 alertes utilisées</span>
-          <div class="alert-limit-track"><div class="alert-limit-fill" id="alerts-limit-fill" style="width:0%"></div></div>
-        </div>
-        <div id="alerts-list">
-          <div style="text-align:center;color:var(--muted);font-size:13px;padding:30px">⏳ Chargement...</div>
-        </div>
-      </div>
+      
     </div>
   </div>
 </div>
@@ -4133,13 +4115,12 @@ function adminApiGet(path, cb){
 function goAdmin(){
   var u=DB.user();
   if(!u){openModal('auth');return;}
-  // Re-vérifier le rôle depuis le serveur avant d'accorder l'accès
-  syncRoleNow(function(isAdmin){
-    if(!isAdmin){toast('🚫 Accès refusé — rôle admin requis','err');return;}
-    goTo('admin');
-    adminTab('stats');
-    loadAdmin();
-  });
+  var token=localStorage.getItem('ygy_token');
+  if(!token){openModal('auth');return;}
+  // Ouvrir la page immédiatement, le serveur refusera si non-admin
+  goTo('admin');
+  adminTab('stats');
+  loadAdmin();
 }
 
 function adminTab(name){
@@ -4230,13 +4211,6 @@ function dismissReport(btn){
 
 
 function loadAdmin(){
-  // Vérifier que l'admin est bien authentifié avant de charger
-  if(!_verifiedAdminRole){
-    syncRoleNow(function(isAdmin){
-      if(isAdmin) loadAdmin();
-    });
-    return;
-  }
   console.log('[ADMIN] Chargement du panel admin...');
   // 1. Stats globales
   adminApiGet('/api/admin/stats', function(d){
@@ -5752,7 +5726,7 @@ var _origShowDashTab = showDashTab;
 showDashTab = function(tab){
   _origShowDashTab(tab);
   if(tab==='messages'){ loadConversations(); }
-  if(tab==='alerts'){ loadAlerts(); }
+
   if(tab==='profil'){ loadVendorStats(); }
 };
 
@@ -6151,9 +6125,6 @@ var _verifiedAdminRole = false; // mis à jour par syncRoleNow()
 
 function syncRoleNow(callback){
   var token = localStorage.getItem('ygy_token');
-  var adminLink = document.getElementById('nav-admin-link');
-  // Masquer par défaut
-  if(adminLink) adminLink.setAttribute('hidden','');
   if(!token){ _verifiedAdminRole=false; if(callback) callback(false); return; }
   fetch('/api/me', {headers:{'Authorization':'Bearer '+token}})
   .then(function(r){ return r.ok ? r.json() : null; })
@@ -6168,7 +6139,7 @@ function syncRoleNow(callback){
       u.phone = data.user.phone || u.phone;
       DB.login(u);
     }
-    // Afficher/masquer Admin
+    // Afficher/masquer lien Admin dans la nav
     var al = document.getElementById('nav-admin-link');
     if(al){ if(isAdmin) al.removeAttribute('hidden'); else al.setAttribute('hidden',''); }
     if(callback) callback(isAdmin);
