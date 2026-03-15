@@ -1103,9 +1103,34 @@ footer{background:transparent;margin-top:0}
     </div>
 
     <!-- Catégorie -->
-    <div class="post-section">
+    <div class="post-section" id="section-cat">
       <div class="post-section-title">📂 Catégorie *</div>
       <div class="cat-grid" id="post-cats"></div>
+    </div>
+
+    <!-- Sous-catégorie -->
+    <div class="post-section" id="section-subcat" style="display:none">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <button onclick="resetCat()" style="background:none;border:none;cursor:pointer;color:var(--or);font-size:13px;font-weight:700;font-family:inherit;padding:0">← Retour</button>
+        <div class="post-section-title" style="margin:0">📂 <span id="subcat-cat-label"></span> › Sous-catégorie *</div>
+      </div>
+      <div class="cat-grid" id="post-subcats"></div>
+    </div>
+
+    <!-- Sous-sous-catégorie -->
+    <div class="post-section" id="section-subsubcat" style="display:none">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <button onclick="resetSubCat()" style="background:none;border:none;cursor:pointer;color:var(--or);font-size:13px;font-weight:700;font-family:inherit;padding:0">← Retour</button>
+        <div class="post-section-title" style="margin:0">📂 <span id="subsubcat-label"></span> › Type *</div>
+      </div>
+      <div class="cat-grid" id="post-subsubcats"></div>
+    </div>
+
+    <!-- Fil d'Ariane sélection -->
+    <div id="cat-breadcrumb" style="display:none;padding:10px 14px;background:#FFF3EE;border-radius:10px;margin-bottom:8px;font-size:13px;color:var(--ink)">
+      <span style="color:var(--muted)">Catégorie choisie :</span>
+      <strong id="cat-breadcrumb-text" style="color:var(--or)"></strong>
+      <button onclick="resetCat()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:12px;font-family:inherit;margin-left:8px">✏️ Modifier</button>
     </div>
 
     <!-- Infos -->
@@ -1618,17 +1643,92 @@ var PREFS=[
 ];
 
 var CATS=[
-  {n:'Véhicules',e:'🚗',c:234,sub:['Voitures','Motos & Scooters','Camions & Utilitaires','Bus & Minibus','Pièces & Accessoires','Engins agricoles','Autres véhicules']},
-  {n:'Immobilier',e:'🏠',c:189,sub:['Appartement','Maison','Terrain','Immeuble','Villa','Bureau & Commerce','Location saisonnière','Colocation','Autres']},
-  {n:'Taxi',e:'🚕',c:78,sub:['Taxi Moto','Taxi Voiture','Taxi communal','Location avec chauffeur','Covoiturage']},
-  {n:'Électronique',e:'📱',c:312,sub:['Téléphones','Ordinateurs portables','Télévisions','Enceintes & Audio','Casques & Écouteurs','Jeux vidéo','Tablettes','Climatiseurs','Accessoires','Autres']},
-  {n:'Ouvriers',e:'🔨',c:156,sub:['Maçon','Plombier','Carreleur','Mécanicien','Menuisier','Électricien','Peintre','Soudeur','Forgeron','Couvreur','Autres']},
-  {n:'Mode',e:'👗',c:278,sub:['Vêtements Homme','Vêtements Femme','Vêtements Enfant','Chaussures Homme','Chaussures Femme','Bijoux & Montres','Sacs','Pagnes & Tissus','Autres']},
-  {n:'Maison',e:'🛋️',c:145,sub:['Armoires','Canapés & Divans','Fauteuils','Chaises','Lits & Matelas','Congélateurs','Fours','Micro-ondes','Aspirateurs','Tables','Autres']},
-  {n:'Tourisme',e:'✈️',c:43,sub:['Conakry','Kindia','Labé','Mamou','Kankan','Faranah','N’Zérékoré','Boké','Siguiri','Guéckédou','Dalaba','Pita','Fria','Kamsar','Autres']},
-  {n:'Loisirs',e:'🎮',c:167,sub:['Livres & BD','Collections','Vélos','Sports & Fitness','Instruments','Films & Séries','Art & Artisanat','Jouets','Autres']},
-  {n:'Cuisine',e:'🍽️',c:89,sub:['Traiteur & Repas','Gâteaux & Pâtisseries','Boissons','Ustensiles','Épices','Fruits & Légumes','Autres']},
-  {n:'Services',e:'🤝',c:120,sub:['Femme de ménage','Garde enfants','Cuisinière','Chauffeur','Gardien','Livraison','Coiffure & Beauté','Couture','Informatique','Autres']}
+  {n:'Véhicules',e:'🚗',sub:[
+    {n:'Voitures',sub:['Berlines','SUV & 4x4','Minivans','Coupés','Cabriolets','Autres']},
+    {n:'Motos & Scooters',sub:['Motos sportives','Scooters','Motos de ville','Tout-terrain','Autres']},
+    {n:'Camions & Utilitaires',sub:['Camions','Pick-up','Fourgonnettes','Remorques','Autres']},
+    {n:'Bus & Minibus',sub:['Bus scolaires','Minibus','Cars de transport','Autres']},
+    {n:'Pièces & Accessoires',sub:['Moteurs','Carrosserie','Jantes & Pneus','Électronique auto','Autres']},
+    {n:'Engins agricoles',sub:['Tracteurs','Moissonneuses','Motopompes','Autres']},
+    {n:'Autres véhicules',sub:['Vélos','Tricycles','Barques','Autres']}
+  ]},
+  {n:'Immobilier',e:'🏠',sub:[
+    {n:'Appartements',sub:['Studio','F1','F2','F3','F4 et plus','Autres']},
+    {n:'Maisons',sub:['Villa','Maison simple','Duplex','Concession','Autres']},
+    {n:'Terrains',sub:['Terrain nu','Terrain constructible','Terrain agricole','Autres']},
+    {n:'Immeubles & Bureaux',sub:['Immeuble','Bureau','Commerce','Entrepôt','Autres']},
+    {n:'Location saisonnière',sub:['Chambre d\'hôtel','Appartement meublé','Villa vacances','Autres']},
+    {n:'Colocation',sub:['Chambre en colocation','Appartement partagé','Autres']}
+  ]},
+  {n:'Taxi',e:'🚕',sub:[
+    {n:'Taxi Moto',sub:['Zémidjan','Moto-taxi','Autres']},
+    {n:'Taxi Voiture',sub:['Taxi compteur','Taxi de nuit','VTC','Autres']},
+    {n:'Transport collectif',sub:['Taxi communal','Minibus','Car rapide','Autres']},
+    {n:'Location & Covoiturage',sub:['Location avec chauffeur','Covoiturage longue distance','Autres']}
+  ]},
+  {n:'Électronique',e:'📱',sub:[
+    {n:'Téléphones',sub:['iPhone','Samsung','Xiaomi','Tecno','Infinix','Huawei','Autres']},
+    {n:'Ordinateurs',sub:['PC portables','PC de bureau','MacBook','Tablettes','Accessoires PC','Autres']},
+    {n:'TV & Audio',sub:['Télévisions','Enceintes','Systèmes home cinéma','Casques','Autres']},
+    {n:'Électroménager',sub:['Réfrigérateurs','Climatiseurs','Machines à laver','Cuisinières','Autres']},
+    {n:'Jeux & Consoles',sub:['PlayStation','Xbox','Nintendo','Jeux PC','Autres']},
+    {n:'Accessoires',sub:['Câbles & Chargeurs','Coques & Protections','Batteries','Autres']}
+  ]},
+  {n:'Ouvriers',e:'🔨',sub:[
+    {n:'Bâtiment',sub:['Maçon','Carreleur','Plâtrier','Coffreur','Autres']},
+    {n:'Plomberie & Électricité',sub:['Plombier','Électricien','Climatisation','Autres']},
+    {n:'Menuiserie & Métallurgie',sub:['Menuisier bois','Soudeur','Forgeron','Serrurier','Autres']},
+    {n:'Finitions',sub:['Peintre','Carreleur','Vitrier','Décorateur','Autres']},
+    {n:'Mécanique',sub:['Mécanicien auto','Mécanicien moto','Électricien auto','Autres']},
+    {n:'Autres ouvriers',sub:['Couvreur','Jardinier','Agent de sécurité','Autres']}
+  ]},
+  {n:'Mode',e:'👗',sub:[
+    {n:'Vêtements Homme',sub:['Chemises','Pantalons','Costumes','T-shirts','Vestes','Traditionnels','Autres']},
+    {n:'Vêtements Femme',sub:['Robes','Tailleurs','Blouses','Jupes','Pagnes cousus','Traditionnels','Autres']},
+    {n:'Vêtements Enfant',sub:['Bébé (0-2 ans)','Garçon (3-12 ans)','Fille (3-12 ans)','Adolescents','Autres']},
+    {n:'Chaussures Homme',sub:['Mocassins','Sneakers','Sandales','Boots','Autres']},
+    {n:'Chaussures Femme',sub:['Escarpins','Sandales','Sneakers','Ballerines','Autres']},
+    {n:'Chaussures Enfant',sub:['Sandales','Baskets','Chaussures école','Autres']},
+    {n:'Accessoires Mode',sub:['Sacs à main','Ceintures','Bijoux','Montres','Lunettes','Autres']},
+    {n:'Pagnes & Tissus',sub:['Wax','Bazin','Kente','Bogolan','Autres tissus']}
+  ]},
+  {n:'Maison',e:'🛋️',sub:[
+    {n:'Meubles',sub:['Armoires','Lits','Canapés','Tables','Chaises','Bureaux','Autres']},
+    {n:'Décoration',sub:['Rideaux','Tapis','Tableaux','Luminaires','Vases','Autres']},
+    {n:'Cuisine & Repas',sub:['Réfrigérateurs','Fours','Micro-ondes','Gazinières','Ustensiles','Autres']},
+    {n:'Linge de maison',sub:['Draps','Couettes','Serviettes','Nappes','Autres']},
+    {n:'Jardinage',sub:['Plantes','Outils jardin','Terrasse & Jardin','Autres']},
+    {n:'Bricolage',sub:['Outils','Peinture','Quincaillerie','Autres']}
+  ]},
+  {n:'Tourisme',e:'✈️',sub:[
+    {n:'Conakry',sub:['Kaloum','Dixinn','Matam','Ratoma','Matoto','Autres']},
+    {n:'Kindia',sub:['Kindia centre','Coyah','Dubréka','Forécariah','Autres']},
+    {n:'Labé',sub:['Labé centre','Pita','Dalaba','Mali','Autres']},
+    {n:'Kankan',sub:['Kankan centre','Siguiri','Kérouané','Mandiana','Autres']},
+    {n:'N\'Zérékoré',sub:['N\'Zérékoré centre','Guéckédou','Macenta','Yomou','Autres']},
+    {n:'Autres régions',sub:['Boké','Mamou','Faranah','Fria','Kamsar','Autres']}
+  ]},
+  {n:'Loisirs',e:'🎮',sub:[
+    {n:'Sports',sub:['Football','Basket','Musculation','Arts martiaux','Natation','Autres']},
+    {n:'Culture & Art',sub:['Livres','Instruments de musique','Art & Peinture','Artisanat','Autres']},
+    {n:'Jeux & Jouets',sub:['Jouets enfants','Jeux de société','Jeux vidéo','Collections','Autres']},
+    {n:'Vélos & Mobilité',sub:['Vélos adultes','Vélos enfants','Trottinettes','Autres']}
+  ]},
+  {n:'Cuisine',e:'🍽️',sub:[
+    {n:'Restauration',sub:['Traiteur','Restauration rapide','Cuisine à domicile','Boissons','Autres']},
+    {n:'Pâtisserie',sub:['Gâteaux','Viennoiseries','Beignets','Autres']},
+    {n:'Produits alimentaires',sub:['Épices','Fruits & Légumes','Céréales','Huiles','Autres']},
+    {n:'Matériel cuisine',sub:['Ustensiles','Appareils','Vaisselle','Autres']}
+  ]},
+  {n:'Services',e:'🤝',sub:[
+    {n:'Services à domicile',sub:['Femme de ménage','Cuisinière','Garde enfants','Blanchisserie','Autres']},
+    {n:'Beauté & Bien-être',sub:['Coiffure homme','Coiffure femme','Manucure','Massage','Spa','Autres']},
+    {n:'Couture & Mode',sub:['Tailleur','Couturière','Broderie','Retouches','Autres']},
+    {n:'Informatique',sub:['Dépannage PC','Création site web','Design','Impression','Autres']},
+    {n:'Transport & Livraison',sub:['Livraison colis','Déménagement','Chauffeur','Autres']},
+    {n:'Enseignement',sub:['Cours particuliers','Langues','Musique','Soutien scolaire','Autres']},
+    {n:'Autres services',sub:['Gardien','Traduction','Comptabilité','Juridique','Autres']}
+  ]}
 ];
 
 var DEMO_ADS=[
@@ -2038,8 +2138,107 @@ function clearSearch(){
 function renderPostCats(){
   var el=document.getElementById('post-cats');if(!el)return;
   el.innerHTML=CATS.map(function(c){
-    return '<div class="cat-opt" onclick="pickCat(this,\''+c.n+'\')"><span class="em">'+c.e+'</span>'+c.n+'</div>';
+    return '<div class="cat-opt" onclick="pickCat(this,\''+c.n+'\')"><span class="em">'+(c.e||'📦')+'</span>'+c.n+'</div>';
   }).join('');
+}
+
+function pickCat(el, name){
+  selCat=name; selSubCat=''; selSubSubCat='';
+  document.querySelectorAll('.cat-opt').forEach(function(c){c.classList.remove('sel');});
+  el.classList.add('sel');
+  // Chercher les sous-catégories
+  var cat=CATS.find(function(c){return c.n===name;});
+  if(cat&&cat.sub&&cat.sub.length){
+    // Afficher la section sous-catégorie
+    var sec=document.getElementById('section-subcat');
+    var lbl=document.getElementById('subcat-cat-label');
+    var grid=document.getElementById('post-subcats');
+    if(lbl) lbl.textContent=(cat.e||'')+ ' ' +name;
+    if(grid){
+      grid.innerHTML=cat.sub.map(function(s){
+        var sName=typeof s==='string'?s:s.n;
+        return '<div class="cat-opt" onclick="pickSubCat(this,\''+sName+'\')">'+sName+'</div>';
+      }).join('');
+    }
+    if(sec) sec.style.display='';
+    // Cacher section principale et breadcrumb
+    var sec1=document.getElementById('section-cat');
+    if(sec1) sec1.style.display='none';
+    var sss=document.getElementById('section-subsubcat');
+    if(sss) sss.style.display='none';
+    var bc=document.getElementById('cat-breadcrumb');
+    if(bc) bc.style.display='none';
+  } else {
+    showBreadcrumb(name,'','');
+  }
+}
+
+function pickSubCat(el, name){
+  selSubCat=name; selSubSubCat='';
+  document.querySelectorAll('#post-subcats .cat-opt').forEach(function(c){c.classList.remove('sel');});
+  el.classList.add('sel');
+  // Chercher les sous-sous-catégories
+  var cat=CATS.find(function(c){return c.n===selCat;});
+  var sub=cat&&cat.sub&&cat.sub.find(function(s){return (typeof s==='string'?s:s.n)===name;});
+  if(sub&&typeof sub==='object'&&sub.sub&&sub.sub.length){
+    var sec=document.getElementById('section-subsubcat');
+    var lbl=document.getElementById('subsubcat-label');
+    var grid=document.getElementById('post-subsubcats');
+    if(lbl) lbl.textContent=selCat+' / '+name;
+    if(grid){
+      grid.innerHTML=sub.sub.map(function(ss){
+        return '<div class="cat-opt" onclick="pickSubSubCat(this,\''+ss+'\')">'+ss+'</div>';
+      }).join('');
+    }
+    if(sec) sec.style.display='';
+    var sec2=document.getElementById('section-subcat');
+    if(sec2) sec2.style.display='none';
+  } else {
+    showBreadcrumb(selCat, name, '');
+  }
+}
+
+function pickSubSubCat(el, name){
+  selSubSubCat=name;
+  document.querySelectorAll('#post-subsubcats .cat-opt').forEach(function(c){c.classList.remove('sel');});
+  el.classList.add('sel');
+  showBreadcrumb(selCat, selSubCat, name);
+}
+
+function showBreadcrumb(cat, sub, subsub){
+  var parts=[cat];
+  if(sub) parts.push(sub);
+  if(subsub) parts.push(subsub);
+  var bc=document.getElementById('cat-breadcrumb');
+  var bcText=document.getElementById('cat-breadcrumb-text');
+  if(bc) bc.style.display='block';
+  if(bcText) bcText.textContent=parts.join(' › ');
+  // Cacher toutes les sections de sélection
+  ['section-cat','section-subcat','section-subsubcat'].forEach(function(id){
+    var s=document.getElementById(id); if(s) s.style.display='none';
+  });
+}
+
+function resetCat(){
+  selCat=''; selSubCat=''; selSubSubCat='';
+  var sec1=document.getElementById('section-cat');
+  var sec2=document.getElementById('section-subcat');
+  var sec3=document.getElementById('section-subsubcat');
+  var bc=document.getElementById('cat-breadcrumb');
+  if(sec1) sec1.style.display='';
+  if(sec2) sec2.style.display='none';
+  if(sec3) sec3.style.display='none';
+  if(bc) bc.style.display='none';
+  document.querySelectorAll('.cat-opt').forEach(function(c){c.classList.remove('sel');});
+}
+
+function resetSubCat(){
+  selSubCat=''; selSubSubCat='';
+  var sec2=document.getElementById('section-subcat');
+  var sec3=document.getElementById('section-subsubcat');
+  if(sec2) sec2.style.display='';
+  if(sec3) sec3.style.display='none';
+  document.querySelectorAll('#post-subcats .cat-opt').forEach(function(c){c.classList.remove('sel');});
 }
 
 // ══════════════════════════════════════════
@@ -2380,8 +2579,8 @@ function addFav(){if(curAd){DB.addFav(curAd.id);toast('❤️ Ajouté aux favori
 // ══════════════════════════════════════════
 //  POST AD
 // ══════════════════════════════════════════
-var selCat='';
-function pickCat(el,name){document.querySelectorAll('.cat-opt').forEach(function(c){c.classList.remove('sel');});el.classList.add('sel');selCat=name;}
+var selCat='', selSubCat='', selSubSubCat='';
+
 var selectedPhotos = []; // stockage base64 des photos
 
 function handlePhotos(input){
@@ -2452,7 +2651,8 @@ function submitAd(){
 
   if(!title){toast('⚠️ Le titre est obligatoire','err');document.getElementById('pt').focus();return;}
   if(!price){toast('⚠️ Le prix est obligatoire','err');document.getElementById('pp').focus();return;}
-  if(!selCat){toast('⚠️ Choisissez une catégorie','err');return;}
+  if(!selCat){toast('⚠️ Choisissez une catégorie','err');document.getElementById('section-cat').style.display='';return;}
+  var fullCat = selCat + (selSubCat ? ' / '+selSubCat : '') + (selSubSubCat ? ' / '+selSubSubCat : '');
   if(!city){toast('⚠️ Choisissez une ville','err');return;}
 
   var cat=CATS.find(function(ct){return ct.n===selCat;});
@@ -5736,7 +5936,7 @@ document.addEventListener('DOMContentLoaded',function(){
   populateCities();
   populateHeroCats();
   renderNavCats();
-  renderPostCats();
+  renderPostCats(); resetCat();
   updateNav();
   // Charger les annonces depuis l'API MongoDB
   fetchAdsFromAPI(function(){ 
