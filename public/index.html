@@ -668,6 +668,25 @@ footer{background:transparent;margin-top:0}
 .boost-opt-duration{font-size:11px;color:var(--muted);margin-bottom:6px}
 .boost-opt-price{font-size:16px;font-weight:900;color:var(--or);margin-bottom:4px}
 .boost-opt-desc{font-size:10px;color:var(--muted);line-height:1.5}
+
+/* ── Alertes de recherche ── */
+.alert-create-btn{background:var(--or);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:background .15s}
+.alert-create-btn:hover{background:var(--or2)}
+.alert-limit-bar{display:flex;align-items:center;gap:10px;margin:10px 0 16px;font-size:12px;color:var(--muted)}
+.alert-limit-track{flex:1;height:4px;background:var(--brl);border-radius:2px;max-width:120px}
+.alert-limit-fill{height:100%;background:var(--or);border-radius:2px;transition:width .3s}
+.alert-card{display:flex;align-items:flex-start;gap:14px;padding:14px 16px;border:1.5px solid var(--br);border-radius:12px;margin-bottom:10px;background:#fff;transition:border-color .15s}
+.alert-card:hover{border-color:var(--or)}
+.alert-card-icon{width:40px;height:40px;border-radius:10px;background:#FFF3EE;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.alert-card-body{flex:1;min-width:0}
+.alert-card-title{font-size:14px;font-weight:800;color:var(--ink);margin-bottom:4px}
+.alert-card-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.alert-tag{background:var(--brl);color:var(--ink);font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
+.alert-card-meta{font-size:11px;color:var(--muted)}
+.alert-card-actions{display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.alert-del-btn{background:none;border:1px solid #fee;color:#dc2626;border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s}
+.alert-del-btn:hover{background:#fee}
+.alert-toggle{background:none;border:1px solid var(--br);border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:inherit;color:var(--muted)}
 </style>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#FF5C00">
@@ -1286,11 +1305,24 @@ footer{background:transparent;margin-top:0}
 
 
       <!-- ═══ TAB ALERTES ═══ -->
-      <div class="dash-section" id="dsec-alerts" >
-        <h3 style="margin-bottom:8px;font-size:15px">🔔 Mes alertes de recherche</h3>
-        <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Recevez un email dès qu'une nouvelle annonce correspond à vos critères.</p>
-        <button onclick="showAlertModal()" style="background:var(--or);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;margin-bottom:16px">➕ Créer une alerte</button>
-        <div id="alerts-list"><div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">⏳ Chargement...</div></div>
+      <div class="dash-section" id="dsec-alerts">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <div>
+            <h3 style="margin:0;font-size:16px;font-weight:800">🔔 Mes alertes de recherche</h3>
+            <p style="font-size:13px;color:var(--muted);margin:4px 0 0">Recevez un email dès qu'une annonce correspond à vos critères.</p>
+          </div>
+          <button onclick="showAlertModal()" class="alert-create-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Créer une alerte
+          </button>
+        </div>
+        <div class="alert-limit-bar">
+          <span id="alerts-count-label">0 / 5 alertes utilisées</span>
+          <div class="alert-limit-track"><div class="alert-limit-fill" id="alerts-limit-fill" style="width:0%"></div></div>
+        </div>
+        <div id="alerts-list">
+          <div style="text-align:center;color:var(--muted);font-size:13px;padding:30px">⏳ Chargement...</div>
+        </div>
       </div>
     </div>
   </div>
@@ -4909,6 +4941,11 @@ function submitRating(){
 
 // ── Alertes de recherche ──
 function showAlertModal(){
+  var user=DB.user();
+  if(!user){ toast('🔒 Connectez-vous pour créer une alerte','err'); openModal('auth'); return; }
+  // Afficher l'email
+  var emailDisp=document.getElementById('alert-email-display');
+  if(emailDisp) emailDisp.textContent=user.email||user.phone||'votre adresse';
   // Pré-remplir depuis la recherche courante
   var q=(document.getElementById('search-input')||{}).value||'';
   var ainput=document.getElementById('alert-query');
@@ -4927,12 +4964,12 @@ function showAlertModal(){
 function saveAlert(){
   var user=DB.user();
   if(!user){ toast('🔒 Connectez-vous','err'); openModal('auth'); return; }
-  var q=(document.getElementById('alert-query')||{}).value||'';
+  var q=(document.getElementById('alert-query')||{}).value.trim()||'';
   var cat=(document.getElementById('alert-cat')||{}).value||'';
   var city=(document.getElementById('alert-city')||{}).value||'';
   var pmin=parseInt((document.getElementById('alert-pmin')||{}).value)||0;
   var pmax=parseInt((document.getElementById('alert-pmax')||{}).value)||0;
-  if(!q&&!cat){ toast('Entrez au moins un critere','warn'); return; }
+  if(!q&&!cat){ toast('⚠️ Entrez des mots-clés ou choisissez une catégorie','warn'); return; }
   var token=localStorage.getItem('ygy_token');
   fetch('/api/alerts',{
     method:'POST',
@@ -4970,26 +5007,42 @@ function loadAlerts(){
 function renderAlerts(alerts){
   var list=document.getElementById('alerts-list');
   if(!list) return;
-  if(!alerts.length){
-    list.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:30px"><div style="font-size:32px;margin-bottom:8px">🔔</div>Aucune alerte créée<br><small>Cliquez sur "Créer une alerte" pour commencer</small></div>';
+  var n=alerts.length;
+  var countLabel=document.getElementById('alerts-count-label');
+  var fill=document.getElementById('alerts-limit-fill');
+  if(countLabel) countLabel.textContent=n+' / 5 alerte'+(n!==1?'s':'')+' utilisée'+(n!==1?'s':'');
+  if(fill) fill.style.width=(n/5*100)+'%';
+  if(!n){
+    list.innerHTML='<div style="text-align:center;color:var(--muted);padding:40px 20px">'+
+      '<div style="font-size:48px;margin-bottom:12px">🔔</div>'+
+      '<div style="font-size:15px;font-weight:700;margin-bottom:6px">Aucune alerte active</div>'+
+      '<div style="font-size:13px;margin-bottom:16px">Créez une alerte pour être notifié par email.</div>'+
+      '<button onclick="showAlertModal()" class="alert-create-btn" style="margin:0 auto">➕ Créer ma première alerte</button>'+
+    '</div>';
     return;
   }
   list.innerHTML=alerts.map(function(a){
-    var parts=[];
-    if(a.query) parts.push('"'+a.query+'"');
-    if(a.category) parts.push(a.category);
-    if(a.city) parts.push(a.city);
-    if(a.priceMax) parts.push('max '+a.priceMax.toLocaleString('fr-FR')+' GNF');
-    return '<div class="alert-item">'
-      +'<div style="font-size:24px">🔔</div>'
-      +'<div class="alert-info">'
-      +'<div class="alert-query">'+parts.join(' · ')+'</div>'
-      +'<div class="alert-meta">Notification par email · Créée le '+(a.createdAt?new Date(a.createdAt).toLocaleDateString('fr-FR'):'—')+'</div>'
-      +'</div>'
-      +'<button class="alert-del" onclick="deleteAlert(\''+(a._id||a.id||'')+'\')">🗑️</button>'
-      +'</div>';
+    var id=a._id||a.id||'';
+    var title=a.query?'"'+a.query+'"':(a.category||'Toutes catégories');
+    var tags=[];
+    if(a.query) tags.push('🔍 '+a.query);
+    if(a.category) tags.push('📂 '+a.category);
+    if(a.city) tags.push('📍 '+a.city);
+    if(a.priceMin>0) tags.push('Min '+a.priceMin.toLocaleString('fr-FR')+' GNF');
+    if(a.priceMax>0) tags.push('Max '+a.priceMax.toLocaleString('fr-FR')+' GNF');
+    var date=a.createdAt?new Date(a.createdAt).toLocaleDateString('fr-FR'):'—';
+    return '<div class="alert-card">'+
+      '<div class="alert-card-icon">🔔</div>'+
+      '<div class="alert-card-body">'+
+        '<div class="alert-card-title">'+title+'</div>'+
+        '<div class="alert-card-tags">'+tags.map(function(t){return '<span class="alert-tag">'+t+'</span>';}).join('')+'</div>'+
+        '<div class="alert-card-meta">📧 Email · Créée le '+date+'</div>'+
+      '</div>'+
+      '<button class="alert-del-btn" onclick="deleteAlert(\''+ id +'\')">🗑️ Supprimer</button>'+
+    '</div>';
   }).join('');
 }
+
 function deleteAlert(id){
   if(!confirm('Supprimer cette alerte ?')) return;
   var token=localStorage.getItem('ygy_token');
@@ -5844,36 +5897,65 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <!-- Modal Créer une alerte -->
 <div class="overlay" id="overlay-alert" onclick="maybeClose(event,'alert')">
-  <div class="modal">
+  <div class="modal" style="max-width:440px">
     <div class="modal-head">
-      <div class="modal-title">🔔 Créer une alerte</div>
+      <div class="modal-title">🔔 Nouvelle alerte</div>
       <button class="modal-close" onclick="closeModal('alert')">✕</button>
     </div>
     <div class="modal-body">
-      <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Soyez notifié par email dès qu'une nouvelle annonce correspond.</p>
+      <div style="background:#FFF3EE;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#555;line-height:1.6">
+        📧 Vous recevrez un email à <strong id="alert-email-display">votre adresse</strong> dès qu'une annonce correspond.
+      </div>
+
       <div class="fg">
-        <label>Mots-clés</label>
-        <input type="text" id="alert-query" placeholder="Ex: Toyota Hilux, iPhone 14..." style="width:100%">
+        <label style="font-size:13px;font-weight:700">🔍 Mots-clés <span style="color:var(--muted);font-weight:400">(requis si pas de catégorie)</span></label>
+        <input type="text" id="alert-query" placeholder="Ex: Toyota Hilux, iPhone 14, Samsung TV..."
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--br);border-radius:8px;font-family:inherit;font-size:13px;outline:none;box-sizing:border-box"
+          onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'">
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="fg">
-          <label>Catégorie</label>
-          <select id="alert-cat" style="width:100%;padding:10px;border:1.5px solid var(--br);border-radius:8px;font-family:inherit">
-            <option value="">Toutes</option>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div class="fg" style="margin:0">
+          <label style="font-size:13px;font-weight:700">📂 Catégorie</label>
+          <select id="alert-cat" style="width:100%;padding:10px;border:1.5px solid var(--br);border-radius:8px;font-family:inherit;font-size:13px;outline:none"
+            onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'">
+            <option value="">Toutes catégories</option>
           </select>
         </div>
-        <div class="fg">
-          <label>Ville</label>
-          <select id="alert-city" style="width:100%;padding:10px;border:1.5px solid var(--br);border-radius:8px;font-family:inherit">
-            <option value="">Toutes</option>
+        <div class="fg" style="margin:0">
+          <label style="font-size:13px;font-weight:700">📍 Ville</label>
+          <select id="alert-city" style="width:100%;padding:10px;border:1.5px solid var(--br);border-radius:8px;font-family:inherit;font-size:13px;outline:none"
+            onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'">
+            <option value="">Toute la Guinée</option>
           </select>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="fg"><label>Prix min (GNF)</label><input type="number" id="alert-pmin" placeholder="0"></div>
-        <div class="fg"><label>Prix max (GNF)</label><input type="number" id="alert-pmax" placeholder="Max"></div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+        <div class="fg" style="margin:0">
+          <label style="font-size:13px;font-weight:700">💰 Prix min</label>
+          <div style="position:relative">
+            <input type="number" id="alert-pmin" placeholder="0" min="0"
+              style="width:100%;padding:10px 40px 10px 12px;border:1.5px solid var(--br);border-radius:8px;font-family:inherit;font-size:13px;outline:none;box-sizing:border-box"
+              onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'">
+            <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--muted);pointer-events:none">GNF</span>
+          </div>
+        </div>
+        <div class="fg" style="margin:0">
+          <label style="font-size:13px;font-weight:700">💰 Prix max</label>
+          <div style="position:relative">
+            <input type="number" id="alert-pmax" placeholder="Sans limite" min="0"
+              style="width:100%;padding:10px 40px 10px 12px;border:1.5px solid var(--br);border-radius:8px;font-family:inherit;font-size:13px;outline:none;box-sizing:border-box"
+              onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'">
+            <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--muted);pointer-events:none">GNF</span>
+          </div>
+        </div>
       </div>
-      <button class="btn btn-full" style="background:var(--or);color:#fff;border-radius:10px;margin-top:8px" onclick="saveAlert()">🔔 Créer l'alerte</button>
+
+      <button class="btn btn-or btn-full" style="border-radius:10px;padding:13px;font-size:14px" onclick="saveAlert()">
+        🔔 Créer cette alerte
+      </button>
+      <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:8px">Maximum 5 alertes actives par compte</div>
     </div>
   </div>
 </div>
