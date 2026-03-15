@@ -1367,6 +1367,8 @@ footer{background:transparent;margin-top:0}
       <div class="admin-nav-item" id="adm-tab-ads" onclick="adminTab('ads')">📋 Annonces</div>
       <div class="admin-nav-item" id="adm-tab-users" onclick="adminTab('users')">👥 Utilisateurs</div>
       <div class="admin-nav-item" id="adm-tab-payments" onclick="adminTab('payments')">💰 Paiements</div>
+      <div class="admin-nav-item" id="adm-tab-messages" onclick="adminTab('messages')">💬 Messages</div>
+      <div class="admin-nav-item" id="adm-tab-reports" onclick="adminTab('reports')">🚩 Signalements</div>
       <div style="margin-top:auto;padding-top:20px;border-top:1px solid rgba(255,255,255,.1)">
         <div class="admin-nav-item" onclick="goTo('home')" style="margin-top:10px">← Retour au site</div>
       </div>
@@ -1404,6 +1406,33 @@ footer{background:transparent;margin-top:0}
         </div>
         <table class="admin-table"><thead><tr><th>Réf.</th><th>Acheteur</th><th>Article</th><th>Montant</th><th>Type</th><th>Date</th><th>Statut</th></tr></thead><tbody id="admin-payments-body"></tbody></table>
       </div>
+
+      <!-- Messages (conversations) -->
+      <div class="admin-pane" id="adm-pane-messages">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div class="admin-title" style="margin-bottom:0">Messages <span id="admin-msg-count" style="font-size:14px;color:var(--muted)"></span></div>
+        </div>
+        <table class="admin-table">
+          <thead><tr><th>Acheteur</th><th>Vendeur</th><th>Annonce</th><th>Dernier message</th><th>Non lus</th><th>Date</th></tr></thead>
+          <tbody id="admin-messages-body"></tbody>
+        </table>
+      </div>
+
+      <!-- Signalements -->
+      <div class="admin-pane" id="adm-pane-reports">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div class="admin-title" style="margin-bottom:0">Signalements <span id="admin-reports-count" style="font-size:14px;color:var(--muted)"></span></div>
+          <div style="display:flex;gap:8px">
+            <button onclick="loadAdminReports('pending')" style="background:var(--or);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit">En attente</button>
+            <button onclick="loadAdminReports('all')" style="background:var(--brl);color:var(--ink);border:1px solid var(--br);border-radius:6px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit">Tous</button>
+          </div>
+        </div>
+        <table class="admin-table">
+          <thead><tr><th>Annonce</th><th>Raison</th><th>Signalé par</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="admin-reports-body"></tbody>
+        </table>
+      </div>
+
     </div>
   </div>
 </div>
@@ -3653,23 +3682,11 @@ function updateNav(){
     btn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span id="nav-user-label">Se connecter</span>';
     btn.onclick=function(){openModal('auth');};
   }
-  // Masquer le lien Admin — toujours masqué ici, affiché uniquement par syncRole
+  // Admin : toujours masqué ici — géré uniquement par syncRoleNow()
   var adminLink=document.getElementById('nav-admin-link');
   if(adminLink) adminLink.setAttribute('hidden','');
-  // Si connecté, vérifier le rôle depuis le serveur
-  if(u){
-    var _t=localStorage.getItem('ygy_token');
-    if(_t){
-      fetch('/api/me',{headers:{'Authorization':'Bearer '+_t}})
-      .then(function(r){return r.ok?r.json():null;})
-      .then(function(d){
-        if(d&&d.user&&d.user.role==='admin'){
-          var al=document.getElementById('nav-admin-link');
-          if(al) al.removeAttribute('hidden');
-        }
-      }).catch(function(){});
-    }
-  }
+  // Re-synchroniser si connecté
+  if(u) syncRoleNow();
 }
 
 // ══════════════════════════════════════════
@@ -3713,21 +3730,10 @@ function renderDash(){
   document.getElementById('d-nm').textContent=u.name||u.prenom||'Utilisateur';
   document.getElementById('d-ph').textContent=u.phone||u.email||'';
 
-  // Lien Admin : masquer par défaut, afficher seulement après vérification serveur
+  // Admin : géré uniquement par syncRoleNow()
   var adminLink=document.getElementById('nav-admin-link');
   if(adminLink) adminLink.setAttribute('hidden','');
-  // Vérifier le rôle depuis MongoDB (source de vérité)
-  var _tok = localStorage.getItem('ygy_token');
-  if(_tok){
-    fetch('/api/me',{headers:{'Authorization':'Bearer '+_tok}})
-    .then(function(r){return r.ok?r.json():null;})
-    .then(function(data){
-      if(data&&data.user&&data.user.role==='admin'){
-        var al=document.getElementById('nav-admin-link');
-        if(al) al.removeAttribute('hidden');
-      }
-    }).catch(function(){});
-  }
+  syncRoleNow();
   // Footer admin btn
   var ftAdminBtn=document.getElementById('ft-admin-btn');
   if(ftAdminBtn) ftAdminBtn.style.display=(u&&u.role==='admin')?'block':'none';
@@ -4127,15 +4133,20 @@ function adminApiGet(path, cb){
 function goAdmin(){
   var u=DB.user();
   if(!u){openModal('auth');return;}
-  if(u.role!=='admin'){toast('🚫 Accès refusé','err');return;}
-  goTo('admin');
-  adminTab('stats');
-  loadAdmin();
+  // Re-vérifier le rôle depuis le serveur avant d'accorder l'accès
+  syncRoleNow(function(isAdmin){
+    if(!isAdmin){toast('🚫 Accès refusé — rôle admin requis','err');return;}
+    goTo('admin');
+    adminTab('stats');
+    loadAdmin();
+  });
 }
 
 function adminTab(name){
   _adminTab = name;
-  ['stats','ads','users','payments'].forEach(function(t){
+  if(name==='messages') loadAdminMessages();
+  if(name==='reports')  loadAdminReports('pending');
+  ['stats','ads','users','payments','messages','reports'].forEach(function(t){
     var pane = document.getElementById('adm-pane-'+t);
     var tab  = document.getElementById('adm-tab-'+t);
     if(pane) pane.style.display = (t===name)?'block':'none';
@@ -4143,7 +4154,77 @@ function adminTab(name){
   });
 }
 
+function loadAdminMessages(){
+  adminApiGet('/api/admin/conversations', function(d){
+    var convs = d.conversations||d||[];
+    var ct = document.getElementById('admin-msg-count');
+    if(ct) ct.textContent = convs.length + ' conversations';
+    var tbody = document.getElementById('admin-messages-body');
+    if(!tbody) return;
+    if(!convs.length){ tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Aucune conversation</td></tr>'; return; }
+    tbody.innerHTML = convs.map(function(c){
+      var date = c.updatedAt ? new Date(c.updatedAt).toLocaleDateString('fr-FR') : '—';
+      var unread = (c.unreadBuyer||0)+(c.unreadSeller||0);
+      return '<tr>'+
+        '<td>'+( c.buyerName||'—')+'</td>'+
+        '<td>'+(c.sellerName||'—')+'</td>'+
+        '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(c.adTitle||'—')+'</td>'+
+        '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(c.lastMessage||'—')+'</td>'+
+        '<td>'+(unread>0?'<span style="background:var(--or);color:#fff;border-radius:50%;padding:1px 6px;font-size:11px">'+unread+'</span>':'0')+'</td>'+
+        '<td>'+date+'</td>'+
+      '</tr>';
+    }).join('');
+  });
+}
+
+function loadAdminReports(status){
+  status = status || 'pending';
+  adminApiGet('/api/admin/reports?status='+status+'&limit=100', function(d){
+    var reports = d.reports||[];
+    var ct = document.getElementById('admin-reports-count');
+    if(ct) ct.textContent = d.total + ' signalement'+(d.total!==1?'s':'');
+    var tbody = document.getElementById('admin-reports-body');
+    if(!tbody) return;
+    if(!reports.length){ tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Aucun signalement</td></tr>'; return; }
+    tbody.innerHTML = reports.map(function(r){
+      var date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('fr-FR') : '—';
+      var adTitle = (r.adId&&r.adId.title)||'Annonce supprimée';
+      var reporter = (r.reporterId&&(r.reporterId.prenom+' '+r.reporterId.nom))||'Anonyme';
+      var statusBadge = r.status==='pending'
+        ? '<span style="background:#FEF3C7;color:#92400E;font-size:11px;padding:2px 8px;border-radius:10px">En attente</span>'
+        : '<span style="background:#D1FAE5;color:#065F46;font-size:11px;padding:2px 8px;border-radius:10px">Traité</span>';
+      var reasons = {arnaque:'🚨 Arnaque',interdit:'🚫 Interdit',doublon:'📋 Doublon',prix:'💰 Prix abusif',photo:'📷 Fausses photos',autre:'❓ Autre'};
+      return '<tr>'+
+        '<td>'+adTitle+'</td>'+
+        '<td>'+(reasons[r.reason]||r.reason)+'</td>'+
+        '<td>'+reporter+'</td>'+
+        '<td>'+date+'</td>'+
+        '<td>'+statusBadge+'</td>'+
+        '<td><button onclick="dismissReport(''+r._id+'')" style="background:var(--brl);border:1px solid var(--br);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer">Traiter</button></td>'+
+      '</tr>';
+    }).join('');
+  });
+}
+
+function dismissReport(id){
+  var token = localStorage.getItem('ygy_token');
+  fetch('/api/admin/reports/'+id, {
+    method:'PATCH',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+    body: JSON.stringify({status:'reviewed'})
+  }).then(function(){ toast('✅ Signalement traité','ok'); loadAdminReports('pending'); })
+  .catch(function(){ toast('❌ Erreur','err'); });
+}
+
 function loadAdmin(){
+  // Vérifier que l'admin est bien authentifié avant de charger
+  if(!_verifiedAdminRole){
+    syncRoleNow(function(isAdmin){
+      if(isAdmin) loadAdmin();
+    });
+    return;
+  }
+  console.log('[ADMIN] Chargement du panel admin...');
   // 1. Stats globales
   adminApiGet('/api/admin/stats', function(d){
     _adminData.stats = d;
@@ -4159,8 +4240,8 @@ function loadAdmin(){
     _adminData.users = d.users||[];
     renderAdminUsers();
   });
-  // 4. Annonces
-  adminApiGet('/api/admin/ads?limit=200', function(d){
+  // 4. Annonces (toutes, actives et inactives)
+  adminApiGet('/api/admin/ads?limit=500', function(d){
     _adminData.ads = d.ads||[];
     renderAdminAds();
   });
@@ -4169,7 +4250,7 @@ function loadAdmin(){
     _adminData.payments = d.payments||[];
     renderAdminPayments(d.revenue||0);
   });
-  // 6. Contacts (depuis paiements de type commission)
+  // 6. Contacts (commissions)
   adminApiGet('/api/admin/payments?type=commission&limit=500', function(d){
     renderAdminContacts(d.payments||[]);
   });
@@ -5725,27 +5806,8 @@ goTo=function(page){
 
 document.addEventListener('DOMContentLoaded',function(){
   DB.load();
-  // Sync rôle depuis MongoDB au chargement
-  (function(){
-    var token = localStorage.getItem('ygy_token');
-    if(token){
-      fetch('/api/me',{headers:{'Authorization':'Bearer '+token}})
-      .then(function(r){return r.ok?r.json():null;})
-      .then(function(data){
-        if(data && data.user){
-          var u = DB.user() || {};
-          u.role = data.user.role; // toujours prendre le rôle depuis MongoDB
-          DB.login(u);
-          // Mettre à jour le lien Admin selon le vrai rôle
-          var adminLink = document.getElementById('nav-admin-link');
-          if(adminLink){
-            if(u.role==='admin') adminLink.removeAttribute('hidden');
-            else adminLink.setAttribute('hidden','');
-          }
-        }
-      }).catch(function(){});
-    }
-  })();
+  // Sync rôle depuis MongoDB au chargement (source de vérité = serveur)
+  syncRoleNow();
 
   // Reset mdp via lien email
   (function(){
@@ -6071,4 +6133,37 @@ document.addEventListener('DOMContentLoaded',function(){
 
     </div>
   </div>
+// ── Rôle vérifié depuis le serveur (source de vérité absolue) ──
+var _verifiedAdminRole = false; // mis à jour par syncRoleNow()
+
+function syncRoleNow(callback){
+  var token = localStorage.getItem('ygy_token');
+  var adminLink = document.getElementById('nav-admin-link');
+  // Masquer par défaut
+  if(adminLink) adminLink.setAttribute('hidden','');
+  if(!token){ _verifiedAdminRole=false; if(callback) callback(false); return; }
+  fetch('/api/me', {headers:{'Authorization':'Bearer '+token}})
+  .then(function(r){ return r.ok ? r.json() : null; })
+  .then(function(data){
+    var isAdmin = !!(data && data.user && data.user.role === 'admin');
+    _verifiedAdminRole = isAdmin;
+    // Synchroniser le user local avec le vrai rôle
+    if(data && data.user){
+      var u = DB.user() || {};
+      u.role  = data.user.role;
+      u.email = data.user.email || u.email;
+      u.phone = data.user.phone || u.phone;
+      DB.login(u);
+    }
+    // Afficher/masquer Admin
+    var al = document.getElementById('nav-admin-link');
+    if(al){ if(isAdmin) al.removeAttribute('hidden'); else al.setAttribute('hidden',''); }
+    if(callback) callback(isAdmin);
+  })
+  .catch(function(){
+    _verifiedAdminRole = false;
+    if(callback) callback(false);
+  });
+}
+
 t
