@@ -1516,20 +1516,6 @@ app.patch('/api/admin/reports/:id', auth, adminOnly, async (req, res) => {
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
-// ★ Conversations admin
-app.get('/api/admin/conversations', auth, adminOnly, async (req, res) => {
-  try {
-    const { limit = 100, skip = 0 } = req.query;
-    const convs = await Conversation.find()
-      .sort({ updatedAt: -1 })
-      .skip(Number(skip))
-      .limit(Number(limit))
-      .select('buyerName sellerName adTitle lastMessage unreadBuyer unreadSeller updatedAt createdAt');
-    const total = await Conversation.countDocuments();
-    res.json({ conversations: convs, total });
-  } catch(err) { res.status(500).json({ error: err.message }); }
-});
-
 // ★ Avis admin
 app.get('/api/admin/reviews', auth, adminOnly, async (req, res) => {
   try {
