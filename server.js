@@ -1567,6 +1567,75 @@ app.patch('/api/admin/users/:id/pro', auth, adminOnly, async (req, res) => {
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
+// ── Route contact ─────────────────────────────────────────
+app.post('/api/contact', async (req, res) => {
+  try {
+    const { name, email, phone, subject, message } = req.body;
+    if (!name || !message) return res.status(400).json({ error: 'Nom et message requis' });
+    if (!email && !phone)  return res.status(400).json({ error: 'Email ou téléphone requis' });
+
+    const contactEmail = process.env.EMAIL_FROM || 'noreply@yougouyougou.net';
+    const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"></head>
+<body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
+  <div style="background:#FF5C00;padding:20px;border-radius:10px 10px 0 0;text-align:center">
+    <h2 style="color:#fff;margin:0">📩 Nouveau message de contact</h2>
+    <p style="color:rgba(255,255,255,.8);margin:4px 0 0;font-size:13px">YouGouYou.net</p>
+  </div>
+  <div style="background:#fff;border:1px solid #eee;border-top:none;padding:24px;border-radius:0 0 10px 10px">
+    <table style="width:100%;border-collapse:collapse">
+      <tr><td style="padding:8px 0;font-weight:700;width:120px;color:#555">Nom</td><td style="padding:8px 0">${name}</td></tr>
+      <tr><td style="padding:8px 0;font-weight:700;color:#555">Email</td><td style="padding:8px 0">${email||'—'}</td></tr>
+      <tr><td style="padding:8px 0;font-weight:700;color:#555">Téléphone</td><td style="padding:8px 0">${phone||'—'}</td></tr>
+      <tr><td style="padding:8px 0;font-weight:700;color:#555">Sujet</td><td style="padding:8px 0">${subject||'—'}</td></tr>
+    </table>
+    <hr style="border:none;border-top:1px solid #eee;margin:16px 0">
+    <div style="font-weight:700;margin-bottom:8px;color:#333">Message :</div>
+    <div style="background:#f9f9f9;padding:14px;border-radius:8px;font-size:14px;line-height:1.7;color:#333">${message.replace(/\n/g,'<br>')}</div>
+    <div style="margin-top:16px;font-size:12px;color:#aaa">Reçu le ${new Date().toLocaleString('fr-FR')} — YouGouYou.net</div>
+  </div>
+</body></html>`;
+
+    const text = `Nouveau message de ${name}\nEmail: ${email||'—'}\nTél: ${phone||'—'}\nSujet: ${subject||'—'}\n\n${message}`;
+
+    // Envoyer à l'adresse support
+    await sendEmail('support.yougouyougou@gmail.com',
+      `[Contact YouGouYou] ${subject||'Nouveau message'} — ${name}`,
+      html, text
+    );
+
+    // Envoyer confirmation à l'expéditeur si email fourni
+    if (email) {
+      const confirmHtml = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"></head>
+<body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
+  <div style="background:#FF5C00;padding:20px;border-radius:10px 10px 0 0;text-align:center">
+    <div style="font-size:28px">✅</div>
+    <h2 style="color:#fff;margin:4px 0 0">Message bien reçu !</h2>
+  </div>
+  <div style="background:#fff;border:1px solid #eee;border-top:none;padding:24px;border-radius:0 0 10px 10px">
+    <p>Bonjour <strong>${name}</strong>,</p>
+    <p style="line-height:1.7">Nous avons bien reçu votre message et nous vous répondrons dans les <strong>24 heures ouvrées</strong>.</p>
+    <div style="background:#FFF3EE;border-radius:8px;padding:12px;margin:16px 0;font-size:13px;color:#555">
+      <strong>Votre message :</strong><br>${message.replace(/\n/g,'<br>')}
+    </div>
+    <p style="font-size:13px;color:#888">— L'équipe YouGouYou 🇬🇳</p>
+  </div>
+</body></html>`;
+      await sendEmail(email, 'Votre message a bien été reçu — YouGouYou', confirmHtml,
+        `Bonjour ${name}, votre message a bien été reçu. Nous vous répondrons sous 24h.`
+      );
+    }
+
+    console.log(`[CONTACT] Message de ${name} (${email||phone}) — sujet: ${subject||'—'}`);
+    res.json({ success: true, message: 'Message envoyé avec succès' });
+  } catch(err) {
+    console.error('[CONTACT] Erreur:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 // ═══════════════════════════════════════════════════════════
 //  HEALTH CHECK + SPA FALLBACK
 // ═══════════════════════════════════════════════════════════
