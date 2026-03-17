@@ -760,13 +760,27 @@ footer{background:transparent;margin-top:0}
   vertical-align:middle;margin-left:6px;
 }
 
-/* Page Pro — même marges que le reste du site */
-#page-pro{background:var(--bg);overflow-x:hidden}
+/* Page Pro — fixe, même gabarit que le bloc principal */
+#page-pro.active{
+  display:block !important;
+  position:fixed;
+  top:104px;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:1100px;
+  height:calc(100vh - 104px);
+  background:var(--bg);
+  z-index:100;
+  overflow-y:auto;
+  overflow-x:hidden;
+}
 .pro-wrap{
   max-width:1100px;
   margin:0 auto;
-  padding:24px 24px 48px;
+  padding:20px 24px 48px;
   background:var(--bg);
+  box-sizing:border-box;
 }
 
 /* Hero Pro */
@@ -786,9 +800,9 @@ footer{background:transparent;margin-top:0}
 .pro-hero-tag{
   display:inline-flex;align-items:center;gap:5px;
   background:rgba(255,92,0,.2);border:1px solid rgba(255,92,0,.4);
-  color:var(--or);font-size:11px;font-weight:700;
+  color:var(--or);font-size:12px;font-weight:700;
   padding:4px 12px;border-radius:20px;margin-bottom:14px;
-  text-transform:uppercase;letter-spacing:.4px;
+  letter-spacing:.2px;
 }
 .pro-hero h1{
   font-size:clamp(20px,3.5vw,30px);font-weight:800;
