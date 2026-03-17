@@ -993,6 +993,10 @@ footer{background:transparent;margin-top:0}
     </button>
   </div>
   <div class="nav-right">
+    <!-- Bouton admin : visible uniquement pour les admins -->
+    <button id="nav-admin-btn" onclick="goAdmin()" title="Panel Admin" style="display:none;background:#1D4ED8;color:#fff;border:none;border-radius:6px;padding:7px 13px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;gap:5px;align-items:center">
+      👑 Admin
+    </button>
     <button class="btn btn-or" onclick="requireLoginThenPost()">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Déposer une annonce
@@ -3274,7 +3278,7 @@ function verifyCode(){
       serverUser.initials=((serverUser.prenom||u.prenom||'U').charAt(0)+((serverUser.nom||u.nom||'').charAt(0)||'')).toUpperCase();
       serverUser.name=serverUser.name||(serverUser.prenom+(serverUser.nom?' '+serverUser.nom:''));
       if(data.token) localStorage.setItem('ygy_token',data.token);
-      DB.addUser(serverUser);DB.login(serverUser);updateNav();closeModal('auth');document.body.style.overflow='';
+      DB.addUser(serverUser);DB.login(serverUser);syncRoleFromServer(function(){updateNav();});closeModal('auth');document.body.style.overflow='';
       toast('🎉 Bienvenue '+u.prenom+' ! Compte créé 🇬🇳','ok'); resetInactivityTimer();
       pendingUser=null;smsCode='';codeFromServer=false;
     })
@@ -3282,7 +3286,7 @@ function verifyCode(){
       resetBtn();
       // Fallback local si serveur inaccessible
       u.initials=(u.prenom.charAt(0)+(u.nom?u.nom.charAt(0):'')).toUpperCase();
-      DB.addUser(u);DB.login(u);updateNav();closeModal('auth');document.body.style.overflow='';
+      DB.addUser(u);DB.login(u);syncRoleFromServer(function(){updateNav();});closeModal('auth');document.body.style.overflow='';
       toast('🎉 Bienvenue '+u.prenom+' ! (mode hors-ligne)','ok');
       pendingUser=null;smsCode='';codeFromServer=false;
     });
@@ -3392,7 +3396,7 @@ function handleGoogleLogin(response){
       avatar: payload.picture||'',
       method: 'google'
     };
-    DB.addUser(u);DB.login(u);updateNav();closeModal('auth');
+    DB.addUser(u);DB.login(u);syncRoleFromServer(function(){updateNav();});closeModal('auth');
     toast('✅ Bienvenue '+u.name.split(' ')[0]+' ! Connecté via Google 🇬🇳','ok');
   }catch(e){
     toast('⚠️ Connexion Google échouée','err');
@@ -3405,7 +3409,7 @@ function fetchGoogleProfile(token){
     .then(function(p){
       var u={name:(p.given_name||'')+' '+(p.family_name||''),email:p.email||'',phone:'',
         initials:((p.given_name||'G').charAt(0)+(p.family_name||'').charAt(0)).toUpperCase(),method:'google'};
-      DB.addUser(u);DB.login(u);updateNav();closeModal('auth');
+      DB.addUser(u);DB.login(u);syncRoleFromServer(function(){updateNav();});closeModal('auth');
       toast('✅ Connecté via Google !','ok');
     }).catch(function(){toast('⚠️ Erreur profil Google','err');});
 }
@@ -4062,22 +4066,14 @@ function updateNav(){
     btn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span id="nav-user-label">Se connecter</span>';
     btn.onclick=function(){openModal('auth');};
   }
-  // Masquer le lien Admin — toujours masqué ici, affiché uniquement par syncRole
-  var adminLink=document.getElementById('nav-admin-link');
-  if(adminLink) adminLink.setAttribute('hidden','');
-  // Si connecté, vérifier le rôle depuis le serveur
-  if(u){
-    var _t=localStorage.getItem('ygy_token');
-    if(_t){
-      fetch('/api/me',{headers:{'Authorization':'Bearer '+_t}})
-      .then(function(r){return r.ok?r.json():null;})
-      .then(function(d){
-        if(d&&d.user&&d.user.role==='admin'){
-          var al=document.getElementById('nav-admin-link');
-          if(al) al.removeAttribute('hidden');
-        }
-      }).catch(function(){});
-    }
+  // Bouton Admin nav principale + lien Admin dashboard
+  var adminNavBtn = document.getElementById('nav-admin-btn');
+  var adminLink   = document.getElementById('nav-admin-link');
+  var isAdmin = (u && u.role==='admin');
+  if(adminNavBtn) adminNavBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+  if(adminLink){
+    if(isAdmin) adminLink.removeAttribute('hidden');
+    else adminLink.setAttribute('hidden','');
   }
 }
 
@@ -4092,13 +4088,15 @@ function syncRoleFromServer(callback){
   .then(function(data){
     if(data&&data.user){
       var u=DB.user()||{};
-      u.role=data.user.role;
-      if(data.user.prenom) u.prenom=data.user.prenom;
-      if(data.user.nom) u.nom=data.user.nom;
-      if(data.user.name) u.name=data.user.name;
-      if(data.user.phone) u.phone=data.user.phone;
-      if(data.user.email) u.email=data.user.email;
-      if(data.user.city) u.city=data.user.city;
+      u.role    = data.user.role;
+      u.isPro   = data.user.isPro   || false;
+      if(data.user.proUntil) u.proUntil = data.user.proUntil;
+      if(data.user.prenom)   u.prenom   = data.user.prenom;
+      if(data.user.nom)      u.nom      = data.user.nom;
+      if(data.user.name)     u.name     = data.user.name;
+      if(data.user.phone)    u.phone    = data.user.phone;
+      if(data.user.email)    u.email    = data.user.email;
+      if(data.user.city)     u.city     = data.user.city;
       DB.login(u);
     }
     if(callback)callback();
@@ -4122,20 +4120,11 @@ function renderDash(){
   document.getElementById('d-nm').textContent=u.name||u.prenom||'Utilisateur';
   document.getElementById('d-ph').textContent=u.phone||u.email||'';
 
-  // Lien Admin : masquer par défaut, afficher seulement après vérification serveur
+  // Lien Admin : afficher si role=admin (déjà synchronisé depuis MongoDB via syncRoleFromServer)
   var adminLink=document.getElementById('nav-admin-link');
-  if(adminLink) adminLink.setAttribute('hidden','');
-  // Vérifier le rôle depuis MongoDB (source de vérité)
-  var _tok = localStorage.getItem('ygy_token');
-  if(_tok){
-    fetch('/api/me',{headers:{'Authorization':'Bearer '+_tok}})
-    .then(function(r){return r.ok?r.json():null;})
-    .then(function(data){
-      if(data&&data.user&&data.user.role==='admin'){
-        var al=document.getElementById('nav-admin-link');
-        if(al) al.removeAttribute('hidden');
-      }
-    }).catch(function(){});
+  if(adminLink){
+    if(u.role==='admin') adminLink.removeAttribute('hidden');
+    else adminLink.setAttribute('hidden','');
   }
   // Footer admin btn
   var ftAdminBtn=document.getElementById('ft-admin-btn');
