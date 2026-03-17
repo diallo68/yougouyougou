@@ -775,6 +775,19 @@ footer{background:transparent;margin-top:0}
   overflow-y:auto;
   overflow-x:hidden;
 }
+/* Page Admin — même gabarit que page-messages */
+#page-admin.active{
+  display:flex !important;
+  position:fixed;
+  top:104px;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:1100px;
+  height:calc(100vh - 104px);
+  z-index:150;
+  overflow:hidden;
+}
 .pro-wrap{
   max-width:1100px;
   margin:0 auto;
@@ -993,8 +1006,11 @@ footer{background:transparent;margin-top:0}
     </button>
   </div>
   <div class="nav-right">
-    <!-- Bouton admin : visible uniquement pour les admins -->
-    <button id="nav-admin-btn" onclick="goAdmin()" title="Panel Admin" style="display:none;background:#1D4ED8;color:#fff;border:none;border-radius:6px;padding:7px 13px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;gap:5px;align-items:center">
+    <!-- Bouton admin : affiché si admin (vérifié via syncRole) -->
+    <button id="nav-admin-btn" onclick="goAdmin()" title="Panel Admin"
+      style="display:none;background:#1D4ED8;color:#fff;border:none;border-radius:6px;
+      padding:7px 14px;font-size:12px;font-weight:800;cursor:pointer;
+      font-family:inherit;align-items:center;gap:5px;margin-right:4px">
       👑 Admin
     </button>
     <button class="btn btn-or" onclick="requireLoginThenPost()">
@@ -1475,7 +1491,7 @@ footer{background:transparent;margin-top:0}
         <a onclick="showDashTab('history')" id="dtab-history">🕐 Historique</a>
         <a onclick="showDashTab('payments')" id="dtab-payments">💳 Paiements</a>
         <a onclick="showDashTab('alerts')" id="dtab-alerts">🔔 Alertes</a>
-        <a id="nav-admin-link" hidden onclick="goAdmin()">👑 Admin</a>
+        <a id="nav-admin-link" hidden onclick="goAdmin()" style="color:#1D4ED8!important;font-weight:800!important">👑 Panel Admin</a>
         <a onclick="showDashTab('pro')" id="dtab-pro" style="color:var(--or);font-weight:700">⭐ Mon Pro</a>
         <a onclick="logout()" style="color:var(--re)!important;margin-top:20px">🚪 Déconnexion</a>
       </nav>
@@ -2061,7 +2077,7 @@ function goTo(page){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   var el=document.getElementById('page-'+page);
   if(el){el.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
-  if(page==='dashboard')loadDash();
+  if(page==='dashboard'){ loadDash(); setTimeout(function(){ var tok=localStorage.getItem('ygy_token'); if(tok){ fetch('/api/me',{headers:{'Authorization':'Bearer '+tok}}).then(function(r){return r.ok?r.json():null;}).then(function(d){ if(d&&d.user){ var u=DB.user()||{}; u.role=d.user.role; u.isPro=d.user.isPro||false; DB.login(u); updateNav(); var al=document.getElementById('nav-admin-link'); if(al){ if(u.role==='admin') al.removeAttribute('hidden'); else al.setAttribute('hidden',''); } } }).catch(function(){}); } }, 300); }
   if(page==='home')renderAds();
   if(page==='seller'&&typeof _curSellerId!=='undefined'&&_curSellerId)loadSellerProfile(_curSellerId);
 }
@@ -4139,6 +4155,9 @@ function renderDash(){
   if(rb) rb.innerHTML=u.role==='admin'
     ? '<span style="background:#EFF6FF;color:#1D4ED8;font-size:11px;font-weight:800;padding:3px 10px;border-radius:50px">👑 Administrateur</span>'
     : '<span style="background:#D1FAE5;color:#065F46;font-size:11px;font-weight:800;padding:3px 10px;border-radius:50px">✅ Membre vérifié</span>';
+  // Bloc accès admin direct dans le profil
+  var adminBox = document.getElementById('dash-admin-box');
+  if(adminBox) adminBox.style.display = (u.role==='admin') ? 'block' : 'none';
   var pp=document.getElementById('p-phone');
   if(pp) pp.textContent=u.phone||'Non renseigné';
   var pe=document.getElementById('p-email');
@@ -4523,12 +4542,27 @@ function adminApiGet(path, cb){
 }
 
 function goAdmin(){
-  var u=DB.user();
-  if(!u){openModal('auth');return;}
-  if(u.role!=='admin'){toast('🚫 Accès refusé','err');return;}
-  goTo('admin');
-  adminTab('stats');
-  loadAdmin();
+  var u = DB.user();
+  if(!u){ openModal('auth'); return; }
+  var tok = localStorage.getItem('ygy_token');
+  if(!tok){ openModal('auth'); return; }
+  // Vérifier le rôle côté serveur (source de vérité)
+  fetch('/api/me',{headers:{'Authorization':'Bearer '+tok}})
+  .then(function(r){ return r.ok ? r.json() : null; })
+  .then(function(data){
+    if(data && data.user && data.user.role==='admin'){
+      // Mettre à jour localement
+      u.role = 'admin';
+      DB.login(u);
+      updateNav();
+      goTo('admin');
+      adminTab('stats');
+      loadAdmin();
+    } else {
+      toast('Accès réservé aux administrateurs','err');
+    }
+  })
+  .catch(function(){ toast('Erreur de connexion','err'); });
 }
 
 function adminTab(name){
@@ -6092,7 +6126,7 @@ goTo=function(page){
 
 document.addEventListener('DOMContentLoaded',function(){
   DB.load();
-  // Sync rôle depuis MongoDB au chargement
+  // Sync rôle + Pro depuis MongoDB au chargement, puis mettre à jour toute la nav
   (function(){
     var token = localStorage.getItem('ygy_token');
     if(token){
@@ -6101,14 +6135,12 @@ document.addEventListener('DOMContentLoaded',function(){
       .then(function(data){
         if(data && data.user){
           var u = DB.user() || {};
-          u.role = data.user.role; // toujours prendre le rôle depuis MongoDB
+          u.role    = data.user.role;
+          u.isPro   = data.user.isPro   || false;
+          u.proUntil= data.user.proUntil || null;
           DB.login(u);
-          // Mettre à jour le lien Admin selon le vrai rôle
-          var adminLink = document.getElementById('nav-admin-link');
-          if(adminLink){
-            if(u.role==='admin') adminLink.removeAttribute('hidden');
-            else adminLink.setAttribute('hidden','');
-          }
+          // Mettre à jour toute la nav (bouton admin + pro)
+          updateNav();
         }
       }).catch(function(){});
     }
