@@ -1810,6 +1810,39 @@ app.patch('/api/me/boutique', auth, async (req, res) => {
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
+
+// ★ Admin — lister toutes les conversations
+app.get('/api/admin/conversations', auth, adminOnly, async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit)||200, 500);
+    const convs = await Conversation.find()
+      .populate('buyerId',  'prenom nom phone')
+      .populate('sellerId', 'prenom nom phone')
+      .populate('adId',     'title')
+      .sort({ updatedAt: -1 })
+      .limit(limit)
+      .lean();
+
+    const result = convs.map(function(conv){
+      return {
+        _id:          conv._id,
+        buyer:        conv.buyerId  || { prenom: conv.buyerName  || '?' },
+        seller:       conv.sellerId || { prenom: conv.sellerName || '?' },
+        adId:         conv.adId     || { title: conv.adTitle || '—' },
+        messageCount: (conv.messages||[]).length,
+        lastMessage:  conv.lastMessage || (conv.messages&&conv.messages.length ? conv.messages[conv.messages.length-1].text : ''),
+        updatedAt:    conv.updatedAt,
+        createdAt:    conv.createdAt,
+      };
+    });
+
+    res.json({ conversations: result, total: result.length });
+  } catch(err) {
+    console.error('[ADMIN CONVS]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Sitemap XML dynamique (SEO)
 app.get('/sitemap.xml', async (req, res) => {
   try {
