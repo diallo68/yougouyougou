@@ -1655,6 +1655,8 @@ footer{background:transparent;margin-top:0}
       <div class="admin-side-title">Gestion</div>
       <div class="admin-nav-item" id="adm-tab-ads" onclick="adminTab('ads')">📋 Annonces</div>
       <div class="admin-nav-item" id="adm-tab-users" onclick="adminTab('users')">👥 Utilisateurs</div>
+      <div class="admin-nav-item" id="adm-tab-pro" onclick="adminTab('pro')">⭐ Abonnements Pro</div>
+      <div class="admin-nav-item" id="adm-tab-messages" onclick="adminTab('messages')">💬 Messages</div>
       <div class="admin-nav-item" id="adm-tab-payments" onclick="adminTab('payments')">💰 Paiements</div>
       <div style="margin-top:auto;padding-top:20px;border-top:1px solid rgba(255,255,255,.1)">
         <div class="admin-nav-item" onclick="goTo('home')" style="margin-top:10px">← Retour au site</div>
@@ -1685,6 +1687,34 @@ footer{background:transparent;margin-top:0}
         </div>
         <table class="admin-table"><thead><tr><th>Nom</th><th>Téléphone</th><th>Email</th><th>Ville</th><th>Rôle</th><th>Pro</th><th>Inscrit le</th><th>Actions</th></tr></thead><tbody id="admin-users-body"></tbody></table>
       </div>
+      <!-- Abonnements Pro -->
+      <div class="admin-pane" id="adm-pane-pro" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div class="admin-title" style="margin-bottom:0">Abonnements Pro <span id="admin-pro-count" style="font-size:14px;color:var(--muted)"></span></div>
+          <div id="admin-pro-revenue" style="font-size:13px;font-weight:700;color:var(--or)"></div>
+        </div>
+        <!-- Stats rapides Pro -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px" id="admin-pro-stats"></div>
+        <!-- Tableau abonnés Pro -->
+        <table class="admin-table">
+          <thead><tr><th>Utilisateur</th><th>Téléphone</th><th>Statut</th><th>Expiration</th><th>Actions</th></tr></thead>
+          <tbody id="admin-pro-body"></tbody>
+        </table>
+      </div>
+
+      <!-- Messages / Conversations -->
+      <div class="admin-pane" id="adm-pane-messages" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div class="admin-title" style="margin-bottom:0">Messages <span id="admin-msg-count" style="font-size:14px;color:var(--muted)"></span></div>
+          <input type="text" id="admin-msg-search" placeholder="Rechercher..." oninput="filterAdminMessages()"
+            style="padding:7px 12px;border:1.5px solid var(--br);border-radius:6px;font-size:12px;font-family:inherit;width:200px">
+        </div>
+        <table class="admin-table">
+          <thead><tr><th>Entre</th><th>Annonce</th><th>Dernier message</th><th>Messages</th><th>Date</th></tr></thead>
+          <tbody id="admin-msg-body"></tbody>
+        </table>
+      </div>
+
       <!-- Paiements -->
       <div class="admin-pane" id="adm-pane-payments">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
@@ -4567,12 +4597,14 @@ function goAdmin(){
 
 function adminTab(name){
   _adminTab = name;
-  ['stats','ads','users','payments'].forEach(function(t){
+  ['stats','ads','users','pro','messages','payments'].forEach(function(t){
     var pane = document.getElementById('adm-pane-'+t);
     var tab  = document.getElementById('adm-tab-'+t);
     if(pane) pane.style.display = (t===name)?'block':'none';
     if(tab)  tab.classList.toggle('active', t===name);
   });
+  if(name==='pro')      renderAdminPro();
+  if(name==='messages') renderAdminMessages();
 }
 
 function loadAdmin(){
@@ -4604,6 +4636,16 @@ function loadAdmin(){
   // 6. Contacts (depuis paiements de type commission)
   adminApiGet('/api/admin/payments?type=commission&limit=500', function(d){
     renderAdminContacts(d.payments||[]);
+  });
+  // 7. Abonnés Pro
+  adminApiGet('/api/admin/users?limit=500', function(d){
+    _adminData.proUsers = (d.users||[]).filter(function(u){ return u.isPro; });
+    if(_adminTab === 'pro') renderAdminPro();
+  });
+  // 8. Messages / Conversations
+  adminApiGet('/api/admin/conversations', function(d){
+    _adminData.conversations = d.conversations||[];
+    if(_adminTab === 'messages') renderAdminMessages();
   });
 }
 
@@ -7064,6 +7106,123 @@ document.addEventListener('DOMContentLoaded', function(){
   var proBtn = document.querySelector('#promo-banner .promo-banner-btn');
   if(proBtn) proBtn.onclick = function(){ goToPro(); };
 });
+
+</script>
+<script>
+// ══════════════════════════════════════════════════════
+//  ADMIN — Abonnements Pro
+// ══════════════════════════════════════════════════════
+function renderAdminPro(){
+  var users = _adminData.proUsers || [];
+  // Stats rapides
+  var statsEl = document.getElementById('admin-pro-stats');
+  var now = new Date();
+  var actifs  = users.filter(function(u){ return u.proUntil && new Date(u.proUntil)>now; });
+  var expires7 = actifs.filter(function(u){ return (new Date(u.proUntil)-now)<7*86400000; });
+  var countEl = document.getElementById('admin-pro-count');
+  if(countEl) countEl.textContent = actifs.length + ' abonné'+(actifs.length>1?'s':'')+' actif'+(actifs.length>1?'s':'');
+  if(statsEl) statsEl.innerHTML =
+    _statCard('⭐', actifs.length,   'Abonnés Pro actifs',  'var(--or)') +
+    _statCard('⚠️', expires7.length, 'Expirent dans 7j',    '#F59E0B') +
+    _statCard('👥', users.length,    'Pro total (tous)',     '#7C3AED') +
+    _statCard('💰', actifs.length*50000, 'Revenu Pro/mois (estimé)', 'var(--gr)');
+
+  // Tableau
+  var tbody = document.getElementById('admin-pro-body');
+  if(!tbody) return;
+  if(!users.length){
+    tbody.innerHTML = '<tr><td colspan="5" style="padding:40px;text-align:center;color:var(--muted)">Aucun abonné Pro.</td></tr>';
+    return;
+  }
+  // Trier : actifs d'abord, puis par expiration
+  var sorted = users.slice().sort(function(a,b){
+    var da = a.proUntil ? new Date(a.proUntil) : new Date(0);
+    var db = b.proUntil ? new Date(b.proUntil) : new Date(0);
+    return db - da;
+  });
+  window._adminUserIds = window._adminUserIds || [];
+  tbody.innerHTML = sorted.map(function(u, idx){
+    var proActive = u.isPro && u.proUntil && new Date(u.proUntil) > now;
+    var expiry = u.proUntil ? new Date(u.proUntil).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}) : '—';
+    var daysLeft = u.proUntil ? Math.ceil((new Date(u.proUntil)-now)/86400000) : 0;
+    var statusBadge = proActive
+      ? '<span style="background:#D1FAE5;color:#065F46;font-size:11px;font-weight:700;padding:3px 9px;border-radius:50px">✅ Actif</span>'
+      : '<span style="background:#FEE2E2;color:#DC2626;font-size:11px;font-weight:700;padding:3px 9px;border-radius:50px">❌ Expiré</span>';
+    var expiryCell = proActive
+      ? expiry + (daysLeft<=7 ? ' <span style="color:#F59E0B;font-weight:700;font-size:10px">('+daysLeft+'j)</span>' : '')
+      : expiry;
+    // Trouver l'index global
+    var globalIdx = (_adminData.users||[]).findIndex(function(x){ return x._id===u._id; });
+    return '<tr style="border-top:1px solid var(--br)">'+
+      '<td style="padding:10px 14px;font-weight:700">'+(u.prenom||u.name||'—')+' '+(u.nom||'')+'</td>'+
+      '<td style="padding:10px 14px;font-size:12px">'+(u.phone||'—')+'</td>'+
+      '<td style="padding:10px 14px">'+statusBadge+'</td>'+
+      '<td style="padding:10px 14px;font-size:12px">'+expiryCell+'</td>'+
+      '<td style="padding:10px 14px;white-space:nowrap">'+
+        '<button onclick="adminTogglePro('+globalIdx+')" style="background:'+(proActive?'#FEF3C7':'var(--orl)')+';\
+color:'+(proActive?'#92400E':'var(--or2)')+';\
+border:1px solid '+(proActive?'#FDE68A':'var(--orm)')+';\
+border-radius:6px;padding:4px 9px;font-size:11px;font-weight:800;cursor:pointer">\
+'+(proActive ? '⬇️ Retirer' : '⭐ Activer')+'</button>'+
+      '</td>'+
+    '</tr>';
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════
+//  ADMIN — Messages / Conversations
+// ══════════════════════════════════════════════════════
+var _allAdminConvs = [];
+
+function renderAdminMessages(){
+  _allAdminConvs = _adminData.conversations || [];
+  var countEl = document.getElementById('admin-msg-count');
+  if(countEl) countEl.textContent = _allAdminConvs.length + ' conversation'+ (_allAdminConvs.length>1?'s':'');
+  _displayAdminMessages(_allAdminConvs);
+}
+
+function filterAdminMessages(){
+  var q = (document.getElementById('admin-msg-search').value||'').toLowerCase().trim();
+  var filtered = q
+    ? _allAdminConvs.filter(function(conv){
+        var buyer  = ((conv.buyer&&(conv.buyer.prenom||conv.buyer.name))||'').toLowerCase();
+        var seller = ((conv.seller&&(conv.seller.prenom||conv.seller.name))||'').toLowerCase();
+        var ad     = ((conv.adId&&conv.adId.title)||'').toLowerCase();
+        return buyer.includes(q) || seller.includes(q) || ad.includes(q);
+      })
+    : _allAdminConvs;
+  _displayAdminMessages(filtered);
+}
+
+function _displayAdminMessages(convs){
+  var tbody = document.getElementById('admin-msg-body');
+  if(!tbody) return;
+  if(!convs.length){
+    tbody.innerHTML = '<tr><td colspan="5" style="padding:40px;text-align:center;color:var(--muted)">Aucune conversation.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = convs.map(function(conv){
+    var buyer  = conv.buyer  ? (conv.buyer.prenom||conv.buyer.name||'?') : '?';
+    var seller = conv.seller ? (conv.seller.prenom||conv.seller.name||'?') : '?';
+    var adTitle= conv.adId   ? (conv.adId.title||'—') : '—';
+    var last   = conv.lastMessage || '—';
+    if(last.length > 50) last = last.substring(0,50)+'...';
+    var d = conv.updatedAt ? new Date(conv.updatedAt).toLocaleDateString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '—';
+    var msgCount = conv.messageCount || 0;
+    return '<tr style="border-top:1px solid var(--br)">'+
+      '<td style="padding:10px 14px;font-size:13px">'+
+        '<div style="font-weight:700">'+buyer+'</div>'+
+        '<div style="font-size:11px;color:var(--muted)">→ '+seller+'</div>'+
+      '</td>'+
+      '<td style="padding:10px 14px;font-size:12px;color:var(--ink2)">'+adTitle+'</td>'+
+      '<td style="padding:10px 14px;font-size:12px;color:var(--muted);font-style:italic">'+last+'</td>'+
+      '<td style="padding:10px 14px;text-align:center">'+
+        '<span style="background:var(--orl);color:var(--or);font-size:11px;font-weight:700;padding:2px 8px;border-radius:50px">'+msgCount+'</span>'+
+      '</td>'+
+      '<td style="padding:10px 14px;font-size:11px;color:var(--muted)">'+d+'</td>'+
+    '</tr>';
+  }).join('');
+}
 
 </script>
 </body>
