@@ -1458,6 +1458,57 @@ app.patch('/api/admin/users/:id/role', auth, adminOnly, async (req, res) => {
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
+// ★ Admin — activer/retirer le Pro d'un utilisateur
+app.patch('/api/admin/users/:id/pro', auth, adminOnly, async (req, res) => {
+  try {
+    const { isPro, months } = req.body;
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
+
+    if (!isPro) {
+      // Retirer le Pro
+      await User.findByIdAndUpdate(req.params.id, { isPro: false, proUntil: null });
+      console.log(`[ADMIN PRO] Retiré → ${req.params.id}`);
+      return res.json({ success: true, isPro: false });
+    }
+
+    // Activer le Pro
+    const validMonths = [1, 3, 12];
+    const m = validMonths.includes(Number(months)) ? Number(months) : 1;
+    const now = new Date();
+    const base = (user.isPro && user.proUntil && user.proUntil > now) ? user.proUntil : now;
+    const proUntil = new Date(base);
+    proUntil.setMonth(proUntil.getMonth() + m);
+
+    await User.findByIdAndUpdate(req.params.id, { isPro: true, proUntil });
+
+    // Email de notification à l'utilisateur
+    if (user.email && user.email.includes('@')) {
+      const expiryStr = proUntil.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+      const html = `<div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto">
+        <div style="background:linear-gradient(135deg,#FF5C00,#FF9500);padding:20px;text-align:center;border-radius:8px 8px 0 0">
+          <h2 style="color:#fff;margin:0">⭐ Votre compte est maintenant Pro !</h2>
+        </div>
+        <div style="padding:20px;background:#fff;border:1px solid #eee;border-radius:0 0 8px 8px">
+          <p>Bonjour <strong>${user.prenom}</strong>,</p>
+          <p>L'équipe YouGouYou vous a offert un abonnement <strong>Pro de ${m} mois</strong>.</p>
+          <p>Votre abonnement est actif jusqu'au <strong>${expiryStr}</strong>.</p>
+          <a href="https://yougouyougou.net" style="display:inline-block;background:#FF5C00;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:700;margin-top:10px">Voir mon compte Pro →</a>
+        </div>
+      </div>`;
+      sendEmail(user.email, '⭐ Votre compte YouGouYou est maintenant Pro !', html,
+        `Bonjour ${user.prenom}, votre abonnement Pro ${m} mois est actif jusqu'au ${expiryStr}.`)
+        .catch(e => console.error('[ADMIN PRO EMAIL]', e.message));
+    }
+
+    console.log(`[ADMIN PRO] Activé → ${req.params.id} (${m} mois, expire: ${proUntil.toISOString()})`);
+    res.json({ success: true, isPro: true, proUntil: proUntil.toISOString(), months: m });
+  } catch(err) {
+    console.error('[ADMIN PRO]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.delete('/api/admin/users/:id', auth, adminOnly, async (req, res) => {
   try {
     await User.findByIdAndDelete(req.params.id);
