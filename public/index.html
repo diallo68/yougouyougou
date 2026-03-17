@@ -1663,7 +1663,7 @@ footer{background:transparent;margin-top:0}
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
           <div class="admin-title" style="margin-bottom:0">Utilisateurs <span id="admin-user-count" style="font-size:14px;color:var(--muted)"></span></div>
         </div>
-        <table class="admin-table"><thead><tr><th>Nom</th><th>Téléphone</th><th>Email</th><th>Ville</th><th>Rôle</th><th>Inscrit le</th><th>Actions</th></tr></thead><tbody id="admin-users-body"></tbody></table>
+        <table class="admin-table"><thead><tr><th>Nom</th><th>Téléphone</th><th>Email</th><th>Ville</th><th>Rôle</th><th>Pro</th><th>Inscrit le</th><th>Actions</th></tr></thead><tbody id="admin-users-body"></tbody></table>
       </div>
       <!-- Paiements -->
       <div class="admin-pane" id="adm-pane-payments">
@@ -4700,6 +4700,12 @@ function renderAdminUsers(){
   window._adminUserIds = users.map(function(u){ return u._id; });
   tbody.innerHTML = users.map(function(u, idx){
     var isAdmin = (u.role==='admin');
+    var now = new Date();
+    var proActive = u.isPro && u.proUntil && new Date(u.proUntil) > now;
+    var proExpiry = u.proUntil ? new Date(u.proUntil).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}) : '';
+    var proBadge = proActive
+      ? '<span style="background:linear-gradient(135deg,#FF5C00,#FF9500);color:#fff;font-size:11px;font-weight:800;padding:3px 9px;border-radius:50px">&#x2B50; PRO — ' + proExpiry + '</span>'
+      : '<span style="background:var(--brl);color:var(--muted);font-size:11px;padding:3px 9px;border-radius:50px">&mdash;</span>';
     var roleBadge = isAdmin
       ? '<span style="background:#EFF6FF;color:#1D4ED8;font-size:11px;font-weight:800;padding:3px 9px;border-radius:50px">👑 Admin</span>'
       : '<span style="background:var(--brl);color:var(--muted);font-size:11px;font-weight:700;padding:3px 9px;border-radius:50px">Utilisateur</span>';
@@ -4709,14 +4715,7 @@ function renderAdminUsers(){
       +'<td style="padding:10px 16px;font-size:13px;font-weight:600">'+(u.phone||'—')+'</td>'
       +'<td style="padding:10px 16px;font-size:12px;color:var(--muted)">'+(u.email||'—')+'</td>'
       +'<td style="padding:10px 16px;font-size:13px">'+(u.city||'—')+'</td>'
-      +'<td style="padding:10px 16px">'+roleBadge+'</td>'
-      +'<td style="padding:10px 16px;font-size:12px;color:var(--muted)">'+d+'</td>'
-      +'<td style="padding:10px 16px;white-space:nowrap">'
-        +(!isAdmin
-          ? '<button onclick="promoteAdmin('+idx+')" style="background:var(--orl);color:var(--or2);border:1px solid var(--orm);border-radius:6px;padding:4px 9px;font-size:11px;font-weight:800;cursor:pointer;margin-right:6px">👑 Promouvoir</button>'
-          : '')
-        +'<button onclick="adminDeleteUser('+idx+')" style="background:#FEE2E2;color:#DC2626;border:1px solid #FECACA;border-radius:6px;padding:4px 9px;font-size:11px;font-weight:700;cursor:pointer">🗑️</button>'
-      +'</td></tr>';
+      +'<td style="padding:10px 16px">'+roleBadge+'</td>'      +'<td style="padding:10px 16px">'+proBadge+'</td>'      +'<td style="padding:10px 16px;font-size:12px;color:var(--muted)">'+d+'</td>'      +'<td style="padding:10px 16px;white-space:nowrap">'        +(!isAdmin ? '<button onclick="promoteAdmin('+idx+')" style="background:var(--orl);color:var(--or2);border:1px solid var(--orm);border-radius:6px;padding:4px 9px;font-size:11px;font-weight:800;cursor:pointer;margin-right:4px">👑 Admin</button>' : '')        +'<button onclick="adminTogglePro('+idx+')" style="background:'+(proActive?'#FEF3C7':'var(--orl)')+';color:'+(proActive?'#92400E':'var(--or2)')+';border:1px solid '+(proActive?'#FDE68A':'var(--orm)')+';border-radius:6px;padding:4px 9px;font-size:11px;font-weight:800;cursor:pointer;margin-right:4px">'+(proActive?'⬇️ Retirer Pro':'⭐ Passer Pro')+'</button>'        +'<button onclick="adminDeleteUser('+idx+')" style="background:#FEE2E2;color:#DC2626;border:1px solid #FECACA;border-radius:6px;padding:4px 9px;font-size:11px;font-weight:700;cursor:pointer">🗑️</button>'      +'</td></tr>';
   }).join('');
 }
 
@@ -4803,6 +4802,43 @@ function promoteAdmin(idx){
       toast('👑 Utilisateur promu administrateur','ok');
       loadAdmin();
     }).catch(function(){ toast('❌ Erreur','err'); });
+}
+
+// ★ Activer / Retirer le Pro d'un utilisateur (Admin uniquement)
+function adminTogglePro(idx){
+  var user = (_adminData.users||[])[idx];
+  if(!user) return;
+  var id = user._id;
+  var isCurrentlyPro = user.isPro && user.proUntil && new Date(user.proUntil) > new Date();
+  var token = localStorage.getItem('ygy_token');
+
+  if(isCurrentlyPro){
+    // Retirer le Pro
+    if(!confirm('Retirer le statut Pro de cet utilisateur ?')) return;
+    fetch('/api/admin/users/'+id+'/pro', {
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body: JSON.stringify({ isPro: false, months: 0 })
+    }).then(function(r){ return r.json(); })
+      .then(function(){ toast('Pro retiré','ok'); loadAdmin(); })
+      .catch(function(){ toast('Erreur','err'); });
+  } else {
+    // Choisir la durée
+    var choix = prompt('Durée abonnement Pro :\n1 = 1 mois\n3 = 3 mois\n12 = 1 an\n\nEntrez 1, 3 ou 12 :');
+    var months = parseInt(choix);
+    if(!months || ![1,3,12].includes(months)){ toast('Durée invalide','err'); return; }
+    fetch('/api/admin/users/'+id+'/pro', {
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body: JSON.stringify({ isPro: true, months: months })
+    }).then(function(r){ return r.json(); })
+      .then(function(d){
+        var expiry = d.proUntil ? new Date(d.proUntil).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}) : '';
+        toast('Pro activé - expire le '+expiry,'ok');
+        loadAdmin();
+      })
+      .catch(function(){ toast('Erreur','err'); });
+  }
 }
 
 document.addEventListener('keydown',function(e){
@@ -6894,7 +6930,7 @@ async function submitProPay(){
     document.getElementById('pro-pay-success').style.display = 'block';
     var expiry = new Date(data.proUntil).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
     var msgEl = document.getElementById('pro-pay-success-msg');
-    if(msgEl) msgEl.textContent = 'Pro actif jusqu\'au '+expiry+'. Badge PRO visible sur vos annonces.';
+    if(msgEl) msgEl.textContent = 'Pro actif jusqu&#39;au '+expiry+'. Badge PRO visible sur vos annonces.';
     toast('Abonnement Pro activé !','ok');
     renderProDash();
 
