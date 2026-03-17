@@ -666,6 +666,7 @@ app.get('/api/me', auth, async (req, res) => {
       prenom: user.prenom, nom: user.nom, phone: user.phone,
       email: user.email, city: user.city, role: user.role,
       verified: user.verified, isPro: user.isPro,
+      proUntil: user.proUntil || null,
       avgRating: user.avgRating, ratingCount: user.ratingCount,
     }});
   } catch(err) { res.status(500).json({ error: err.message }); }
