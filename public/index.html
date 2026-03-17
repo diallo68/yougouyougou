@@ -760,9 +760,14 @@ footer{background:transparent;margin-top:0}
   vertical-align:middle;margin-left:6px;
 }
 
-/* Page Pro */
-#page-pro{background:var(--bg)}
-.pro-wrap{max-width:860px;margin:0 auto;padding:24px 20px 48px}
+/* Page Pro — même marges que le reste du site */
+#page-pro{background:var(--bg);overflow-x:hidden}
+.pro-wrap{
+  max-width:1100px;
+  margin:0 auto;
+  padding:24px 24px 48px;
+  background:var(--bg);
+}
 
 /* Hero Pro */
 .pro-hero{
@@ -770,6 +775,7 @@ footer{background:transparent;margin-top:0}
   border-radius:10px;padding:32px 28px;
   text-align:center;margin-bottom:24px;
   position:relative;overflow:hidden;
+  width:100%;box-sizing:border-box;
 }
 .pro-hero::before{
   content:'';position:absolute;top:-40px;right:-40px;
@@ -795,6 +801,7 @@ footer{background:transparent;margin-top:0}
 .pro-avantages{
   display:grid;grid-template-columns:repeat(3,1fr);
   gap:12px;margin-bottom:24px;
+  width:100%;
 }
 .pro-av{
   background:#fff;border:1px solid var(--br);
@@ -808,6 +815,7 @@ footer{background:transparent;margin-top:0}
 .pro-plans{
   display:grid;grid-template-columns:repeat(3,1fr);
   gap:14px;margin-bottom:24px;
+  width:100%;
 }
 .pro-plan{
   background:#fff;border:2px solid var(--br);
@@ -896,10 +904,15 @@ footer{background:transparent;margin-top:0}
   margin-top:-32px;flex-shrink:0;
 }
 
+@media(max-width:960px){
+  .pro-plans{grid-template-columns:repeat(3,1fr)}
+  .pro-avantages{grid-template-columns:repeat(3,1fr)}
+}
 @media(max-width:700px){
   .pro-avantages,.pro-plans{grid-template-columns:1fr}
   .pro-stats-grid{grid-template-columns:repeat(2,1fr)}
   .pro-status-card{flex-direction:column;align-items:flex-start}
+  .pro-wrap{padding:16px 14px 32px}
 }
 </style>
   <link rel="manifest" href="/manifest.json">
