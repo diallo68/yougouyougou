@@ -205,6 +205,7 @@ const UserSchema = new mongoose.Schema({
   codeExpiry:   { type: Date },
   isPro:        { type: Boolean, default: false },        // compte pro payant
   proUntil:     { type: Date },                           // expiration abonnement pro
+  boutiqueDesc: { type: String, maxlength: 500 },           // description boutique Pro
   avgRating:    { type: Number, default: 0 },             // note moyenne (dénormalisée)
   ratingCount:  { type: Number, default: 0 },             // nb d'avis
   totalViews:   { type: Number, default: 0 },             // vues totales sur ses annonces
@@ -688,7 +689,7 @@ app.patch('/api/me', auth, async (req, res) => {
 app.get('/api/users/:id/public', authOptional, async (req, res) => {
   try {
     const user = await User.findById(req.params.id)
-      .select('prenom nom city isPro proUntil avgRating ratingCount totalViews createdAt');
+      .select('prenom nom city isPro proUntil avgRating ratingCount totalViews boutiqueDesc createdAt');
     if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
 
     const adsCount = await Ad.countDocuments({ seller: user._id, active: true });
@@ -705,6 +706,7 @@ app.get('/api/users/:id/public', authOptional, async (req, res) => {
       name: `${user.prenom} ${user.nom||''}`.trim(),
       city: user.city,
       isPro: user.isPro,
+      boutiqueDesc: user.boutiqueDesc || '',
       memberSince: user.createdAt?.getFullYear() || new Date().getFullYear(),
       rating: { avg: user.avgRating || 0, count: user.ratingCount || 0 },
       adsCount,
@@ -716,15 +718,24 @@ app.get('/api/users/:id/public', authOptional, async (req, res) => {
 // ★ Stats du vendeur connecté
 app.get('/api/my-stats', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('avgRating ratingCount totalViews');
+    const user = await User.findById(req.user.id).select('avgRating ratingCount totalViews isPro proUntil');
     const ads  = await Ad.find({ seller: req.user.id, active: true }).select('views');
     const totalViews    = ads.reduce((acc, a) => acc + (a.views||0), 0);
-    const totalContacts = await Payment.countDocuments({ type: 'commission' });
+    const totalContacts = await Payment.countDocuments({ type: 'commission', buyer: req.user.id });
     const recentAds     = ads.length;
+    // Vérifier expiration Pro
+    const now = new Date();
+    let isPro = user?.isPro || false;
+    if (isPro && user.proUntil && user.proUntil < now) {
+      await User.findByIdAndUpdate(req.user.id, { isPro: false });
+      isPro = false;
+    }
     res.json({
       totalViews, totalContacts, recentAds,
-      avgRating: user?.avgRating || 0,
+      avgRating:   user?.avgRating || 0,
       ratingCount: user?.ratingCount || 0,
+      isPro,
+      proUntil: user?.proUntil || null,
     });
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
@@ -1648,6 +1659,103 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
     features: ['messaging','reviews','alerts','reports','boost','pro'],
   });
+});
+
+
+// ★ Abonnement Pro — souscrire
+app.post('/api/subscribe-pro', auth, async (req, res) => {
+  try {
+    const { planId, months, amount, phone } = req.body;
+
+    const plans = {
+      '1m':  { months: 1,  amount: 50000  },
+      '3m':  { months: 3,  amount: 120000 },
+      '12m': { months: 12, amount: 400000 },
+    };
+    const plan = plans[planId];
+    if (!plan)  return res.status(400).json({ error: 'Plan invalide (1m, 3m ou 12m)' });
+    if (!phone) return res.status(400).json({ error: 'Numéro Orange Money requis' });
+
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
+
+    // Calculer la nouvelle date d'expiration
+    // Si déjà Pro actif → prolonger depuis l'expiration actuelle
+    const now = new Date();
+    const base = (user.isPro && user.proUntil && user.proUntil > now) ? user.proUntil : now;
+    const proUntil = new Date(base);
+    proUntil.setMonth(proUntil.getMonth() + plan.months);
+
+    await User.findByIdAndUpdate(req.user.id, { isPro: true, proUntil });
+
+    // Enregistrer le paiement
+    const ref = genRef();
+    await Payment.create({
+      type: 'boost',
+      buyer: req.user.id,
+      buyerPhone: phone,
+      adTitle: `Abonnement Pro ${plan.months} mois`,
+      amount: plan.amount,
+      boostType: 'pro_' + planId,
+      reference: ref,
+      status: 'success',
+    });
+
+    // Email de confirmation
+    const emailUser = await User.findById(req.user.id).select('email prenom');
+    if (emailUser?.email && emailUser.email.includes('@')) {
+      const expiryStr = proUntil.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+      <body style="font-family:Arial,sans-serif;background:#f5f5f5;padding:20px">
+        <div style="max-width:500px;margin:0 auto;background:#fff;border-radius:10px;overflow:hidden">
+          <div style="background:linear-gradient(135deg,#FF5C00,#FF9500);padding:24px;text-align:center">
+            <div style="font-size:32px;margin-bottom:6px">⭐</div>
+            <div style="font-size:20px;font-weight:900;color:#fff">Bienvenue dans Pro !</div>
+          </div>
+          <div style="padding:24px">
+            <p>Bonjour <strong>${emailUser.prenom}</strong>,</p>
+            <p>Votre abonnement <strong>Pro ${plan.months} mois</strong> est actif.</p>
+            <div style="background:#FFF0E8;border:1px solid #FFCBB0;border-radius:8px;padding:14px;margin:16px 0">
+              <ul style="margin:0;padding-left:16px;font-size:13px;line-height:2">
+                <li>Badge ⭐ PRO sur vos annonces</li>
+                <li>Priorité dans les résultats</li>
+                <li>Jusqu'à 12 annonces actives</li>
+                <li>Statistiques avancées</li>
+              </ul>
+            </div>
+            <p style="font-size:13px;color:#666">Expire le : <strong>${expiryStr}</strong></p>
+            <div style="text-align:center;margin-top:18px">
+              <a href="https://yougouyougou.net" style="background:#FF5C00;color:#fff;padding:11px 24px;border-radius:7px;text-decoration:none;font-weight:700">Gérer mon compte →</a>
+            </div>
+          </div>
+        </div>
+      </body></html>`;
+      sendEmail(emailUser.email, '⭐ Votre abonnement Pro YouGouYou est actif !', html,
+        `Bonjour ${emailUser.prenom}, votre abonnement Pro ${plan.months} mois est actif jusqu'au ${expiryStr}.`)
+        .catch(e => console.error('[PRO EMAIL]', e.message));
+    }
+
+    console.log(`[PRO] ✅ ${req.user.id} → plan=${planId} expires=${proUntil.toISOString()}`);
+    res.json({ success: true, reference: ref, proUntil: proUntil.toISOString(), planId, months: plan.months });
+
+  } catch(err) {
+    console.error('[SUBSCRIBE-PRO]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ★ Boutique Pro — sauvegarder description
+app.patch('/api/me/boutique', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('isPro proUntil');
+    if (!user?.isPro || (user.proUntil && user.proUntil < new Date()))
+      return res.status(403).json({ error: 'Réservé aux membres Pro' });
+    const { boutiqueDesc } = req.body;
+    if (!boutiqueDesc || boutiqueDesc.length > 500)
+      return res.status(400).json({ error: 'Description requise (max 500 caractères)' });
+    await User.findByIdAndUpdate(req.user.id, { boutiqueDesc });
+    res.json({ success: true });
+  } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
 // Sitemap XML dynamique (SEO)
