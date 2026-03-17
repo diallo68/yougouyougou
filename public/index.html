@@ -656,6 +656,251 @@ footer{background:transparent;margin-top:0}
 
 .om-pin{width:52px;height:52px;border:2px solid var(--br);border-radius:10px;text-align:center;font-size:22px;font-family:inherit;outline:none;transition:border-color .2s;background:#fff}
 .om-pin:focus{border-color:var(--or)}
+
+/* ── MENU 3 NIVEAUX ── */
+.cat-sub-grp{position:relative;border-bottom:1px solid var(--brl)}
+.cat-sub-grp:last-child{border-bottom:none}
+.cat-sub-grp-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 16px;font-size:12px;font-weight:600;color:var(--ink);
+  cursor:pointer;transition:background .1s,color .1s;
+}
+.cat-sub-grp-hd:hover{background:var(--orl);color:var(--or)}
+.sub-arr{font-size:9px;color:var(--muted);margin-left:6px;transition:transform .15s}
+.cat-sub-grp:hover>.cat-sub-grp-hd .sub-arr{transform:rotate(90deg);color:var(--or)}
+.cat-items-pnl{
+  visibility:hidden;opacity:0;pointer-events:none;
+  position:absolute;top:0;left:100%;
+  min-width:200px;max-height:320px;overflow-y:auto;
+  background:#fff;border:1px solid var(--br);border-radius:8px;
+  box-shadow:0 8px 24px rgba(0,0,0,.13);
+  padding:4px 0;z-index:100000;
+  transition:opacity .12s,visibility 0s linear .12s;
+}
+.cat-sub-grp:hover>.cat-items-pnl{
+  visibility:visible;opacity:1;pointer-events:auto;
+  transition:opacity .12s,visibility 0s;
+}
+.cat-item{
+  display:block;padding:8px 16px;font-size:12px;
+  color:var(--ink2);cursor:pointer;white-space:nowrap;
+  transition:background .1s;
+}
+.cat-item:hover{background:var(--orl);color:var(--or)}
+/* Derniers items : panel s'ouvre à gauche */
+.ncat:nth-last-child(-n+3)>.cat-dropdown .cat-items-pnl{left:auto;right:100%}
+@media(max-width:600px){
+  .cat-items-pnl{left:0;right:auto;top:100%;max-height:200px}
+}
+
+/* ── BANDEAU PROMO PRO ── */
+.promo-banner{
+  background:linear-gradient(135deg,#1A1A1A 0%,#2d1600 60%,#1A1A1A 100%);
+  margin:16px 24px 0;
+  border-radius:10px;
+  padding:20px 24px;
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  position:relative;overflow:hidden;
+}
+.promo-banner::before{
+  content:'⭐';position:absolute;right:20px;top:50%;
+  transform:translateY(-50%);font-size:56px;opacity:.06;pointer-events:none;
+}
+.promo-banner-icon{
+  font-size:32px;
+  background:rgba(255,92,0,.2);border-radius:10px;
+  width:52px;height:52px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.promo-banner-body{flex:1;min-width:0}
+.promo-banner-title{
+  font-size:15px;font-weight:800;color:#fff;margin-bottom:4px;
+}
+.promo-banner-sub{
+  font-size:12px;color:rgba(255,255,255,.6);line-height:1.5;
+}
+.promo-banner-tags{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.promo-banner-tag{
+  background:rgba(255,255,255,.1);color:rgba(255,255,255,.75);
+  font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;
+  border:1px solid rgba(255,255,255,.15);
+}
+.promo-banner-btn{
+  background:var(--or);color:#fff;border:none;
+  border-radius:7px;padding:11px 22px;
+  font-size:13px;font-weight:800;cursor:pointer;
+  font-family:inherit;white-space:nowrap;flex-shrink:0;
+  transition:background .15s;
+}
+.promo-banner-btn:hover{background:var(--or2)}
+.promo-banner-close{
+  position:absolute;top:8px;right:8px;
+  background:rgba(255,255,255,.1);border:none;border-radius:50%;
+  width:22px;height:22px;cursor:pointer;
+  color:rgba(255,255,255,.5);font-size:13px;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .12s;
+}
+.promo-banner-close:hover{background:rgba(255,255,255,.2);color:#fff}
+@media(max-width:600px){
+  .promo-banner{margin:10px 12px 0;padding:14px 16px;gap:10px}
+  .promo-banner-btn{width:100%;text-align:center}
+}
+
+/* ════════════════════════════════
+   PRO — STYLES
+════════════════════════════════ */
+/* Badge PRO */
+.badge-pro{
+  display:inline-flex;align-items:center;gap:3px;
+  background:linear-gradient(135deg,#FF5C00,#FF9500);
+  color:#fff;font-size:10px;font-weight:800;
+  padding:2px 7px;border-radius:3px;
+  text-transform:uppercase;letter-spacing:.3px;
+  vertical-align:middle;margin-left:6px;
+}
+
+/* Page Pro */
+#page-pro{background:var(--bg)}
+.pro-wrap{max-width:860px;margin:0 auto;padding:24px 20px 48px}
+
+/* Hero Pro */
+.pro-hero{
+  background:linear-gradient(135deg,#1A1A1A,#2d1600);
+  border-radius:10px;padding:32px 28px;
+  text-align:center;margin-bottom:24px;
+  position:relative;overflow:hidden;
+}
+.pro-hero::before{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:180px;height:180px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,92,0,.2),transparent 70%);
+  pointer-events:none;
+}
+.pro-hero-tag{
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(255,92,0,.2);border:1px solid rgba(255,92,0,.4);
+  color:var(--or);font-size:11px;font-weight:700;
+  padding:4px 12px;border-radius:20px;margin-bottom:14px;
+  text-transform:uppercase;letter-spacing:.4px;
+}
+.pro-hero h1{
+  font-size:clamp(20px,3.5vw,30px);font-weight:800;
+  color:#fff;margin-bottom:8px;letter-spacing:-.3px;
+}
+.pro-hero h1 span{color:var(--or)}
+.pro-hero p{font-size:13px;color:rgba(255,255,255,.6);max-width:440px;margin:0 auto;line-height:1.7}
+
+/* Avantages */
+.pro-avantages{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:12px;margin-bottom:24px;
+}
+.pro-av{
+  background:#fff;border:1px solid var(--br);
+  border-radius:8px;padding:16px;text-align:center;
+}
+.pro-av-icon{font-size:28px;margin-bottom:8px;display:block}
+.pro-av-title{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.pro-av-desc{font-size:11px;color:var(--muted);line-height:1.5}
+
+/* Plans */
+.pro-plans{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:14px;margin-bottom:24px;
+}
+.pro-plan{
+  background:#fff;border:2px solid var(--br);
+  border-radius:10px;padding:20px;text-align:center;
+  cursor:pointer;transition:all .18s;position:relative;
+}
+.pro-plan:hover{border-color:var(--or);box-shadow:0 4px 16px rgba(255,92,0,.12);transform:translateY(-2px)}
+.pro-plan.selected{border-color:var(--or);background:var(--orl)}
+.pro-plan.popular{border-color:var(--or)}
+.pro-plan-badge{
+  position:absolute;top:-11px;left:50%;transform:translateX(-50%);
+  background:var(--or);color:#fff;font-size:10px;font-weight:800;
+  padding:2px 12px;border-radius:20px;white-space:nowrap;
+}
+.pro-plan-dur{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+.pro-plan-price{font-size:26px;font-weight:900;color:var(--ink);margin-bottom:2px}
+.pro-plan-price span{font-size:12px;font-weight:400;color:var(--muted)}
+.pro-plan-save{
+  font-size:11px;font-weight:700;color:var(--gr);
+  background:#E6F5EE;padding:2px 8px;border-radius:10px;
+  display:inline-block;margin:5px 0;
+}
+.pro-plan-btn{
+  width:100%;padding:10px;border-radius:7px;
+  background:var(--or);color:#fff;border:none;
+  font-size:13px;font-weight:700;cursor:pointer;
+  font-family:inherit;transition:background .12s;margin-top:14px;
+}
+.pro-plan-btn:hover{background:var(--or2)}
+
+/* Stats Pro dans dashboard */
+.pro-status-card{
+  background:linear-gradient(135deg,#1A1A1A,#2d1600);
+  border-radius:8px;padding:16px 20px;margin-bottom:14px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;flex-wrap:wrap;
+}
+.pro-status-left h3{font-size:14px;font-weight:800;color:#fff;margin-bottom:3px}
+.pro-status-left p{font-size:12px;color:rgba(255,255,255,.55)}
+.pro-expiry{font-size:11px;color:rgba(255,255,255,.4);margin-top:5px}
+.pro-expiry strong{color:var(--or)}
+.pro-renouveler{
+  background:var(--or);color:#fff;border:none;
+  border-radius:6px;padding:8px 16px;
+  font-size:12px;font-weight:700;cursor:pointer;
+  font-family:inherit;white-space:nowrap;flex-shrink:0;
+}
+.pro-stats-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:8px;margin-bottom:14px;
+}
+.pro-stat{background:#fff;border:1px solid var(--br);border-radius:7px;padding:12px;text-align:center}
+.pro-stat-n{font-size:20px;font-weight:800;color:var(--or)}
+.pro-stat-l{font-size:10px;color:var(--muted);font-weight:600;margin-top:2px}
+.pro-cta-card{
+  background:var(--orl);border:2px solid var(--or);
+  border-radius:8px;padding:16px;margin-bottom:14px;
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+}
+.pro-cta-card h3{font-size:13px;font-weight:800;color:var(--ink);margin-bottom:3px}
+.pro-cta-card p{font-size:12px;color:var(--muted)}
+.pro-cta-btn{
+  background:var(--or);color:#fff;border:none;
+  border-radius:6px;padding:9px 18px;font-size:12px;
+  font-weight:700;cursor:pointer;font-family:inherit;
+  white-space:nowrap;margin-left:auto;flex-shrink:0;
+}
+
+/* Boutique vendeur Pro */
+.boutique-banner{
+  width:100%;height:120px;
+  background:linear-gradient(135deg,#1A1A1A,#2d1600);
+  border-radius:8px 8px 0 0;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.boutique-banner::before{
+  content:'🏪';font-size:48px;opacity:.15;
+}
+.boutique-av{
+  width:64px;height:64px;border-radius:50%;
+  background:var(--or);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;font-weight:900;
+  border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.15);
+  margin-top:-32px;flex-shrink:0;
+}
+
+@media(max-width:700px){
+  .pro-avantages,.pro-plans{grid-template-columns:1fr}
+  .pro-stats-grid{grid-template-columns:repeat(2,1fr)}
+  .pro-status-card{flex-direction:column;align-items:flex-start}
+}
 </style>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#FF5C00">
@@ -767,6 +1012,24 @@ footer{background:transparent;margin-top:0}
   </section>
 
   <!-- cats now in nav -->
+
+  <!-- ★ BANDEAU PROMO PRO ★ -->
+  <div id="promo-banner" class="promo-banner">
+    <button class="promo-banner-close" onclick="closeBanner()" title="Fermer">✕</button>
+    <div class="promo-banner-icon">🏪</div>
+    <div class="promo-banner-body">
+      <div class="promo-banner-title">Vous êtes commerçant ? Cette offre est faite pour vous !</div>
+      <div class="promo-banner-sub">Passez à <strong style="color:var(--or)">YouGouYou Pro</strong> à seulement <strong style="color:#fff">50 000 GNF/mois</strong> et boostez vos ventes.</div>
+      <div class="promo-banner-tags">
+        <span class="promo-banner-tag">⭐ Badge PRO visible</span>
+        <span class="promo-banner-tag">🔝 Priorité dans les résultats</span>
+        <span class="promo-banner-tag">📊 Statistiques avancées</span>
+        <span class="promo-banner-tag">📋 Jusqu'à 12 annonces</span>
+      </div>
+    </div>
+    <button class="promo-banner-btn" onclick="openModal('auth')">Découvrir Pro →</button>
+  </div>
+
 
   <!-- ANNONCES -->
   <div class="main-wrap" id="main-two-col">
@@ -1182,6 +1445,7 @@ footer{background:transparent;margin-top:0}
         <a onclick="showDashTab('payments')" id="dtab-payments">💳 Paiements</a>
         <a onclick="showDashTab('alerts')" id="dtab-alerts">🔔 Alertes</a>
         <a id="nav-admin-link" hidden onclick="goAdmin()">👑 Admin</a>
+        <a onclick="showDashTab('pro')" id="dtab-pro" style="color:var(--or);font-weight:700">⭐ Mon Pro</a>
         <a onclick="logout()" style="color:var(--re)!important;margin-top:20px">🚪 Déconnexion</a>
       </nav>
     </div>
@@ -1241,6 +1505,14 @@ footer{background:transparent;margin-top:0}
         <div id="d-pay-list"></div>
       </div>
 
+      <!-- Section Pro -->
+      <div class="dash-section" id="dsec-pro">
+        <div class="dash-section-title">⭐ Mon abonnement Pro</div>
+        <div id="pro-dash-content">
+          <!-- Rempli par renderProDash() -->
+        </div>
+      </div>
+
       <!-- ═══ TAB MESSAGERIE ═══ -->
       <div class="dash-section" id="dsec-messages">
         <div class="msg-layout">
@@ -1291,12 +1563,26 @@ footer{background:transparent;margin-top:0}
 <div id="page-seller" class="page">
   <div class="container" style="display:none">
     <button onclick="history.back()" style="background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:14px;padding:10px 0;font-family:inherit">← Retour</button>
-    <div class="seller-hero" style="border-radius:16px;margin-bottom:16px">
-      <div class="seller-hero-av" id="seller-av">?</div>
-      <div style="font-size:20px;font-weight:900;margin-bottom:4px" id="seller-name">Vendeur</div>
-      <div style="font-size:13px;opacity:.75" id="seller-city">📍 Guinée</div>
-      <div style="font-size:12px;opacity:.6;margin-top:4px" id="seller-since">Membre depuis 2024</div>
-      <div style="margin-top:8px" id="seller-rating"></div>
+    <!-- Boutique Pro ou hero standard -->
+    <div style="background:#fff;border:1px solid var(--br);border-radius:10px;margin-bottom:14px;overflow:hidden">
+      <!-- Bannière (visible si Pro) -->
+      <div id="seller-boutique-banner" class="boutique-banner" style="display:none"></div>
+      <!-- Corps -->
+      <div style="padding:16px 20px">
+        <div style="display:flex;align-items:flex-end;gap:14px;margin-top:0" id="seller-av-wrap">
+          <div class="boutique-av" id="seller-av">?</div>
+          <div style="flex:1;padding-bottom:4px">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span style="font-size:18px;font-weight:900;color:var(--ink)" id="seller-name">Vendeur</span>
+              <span id="seller-pro-badge"></span>
+            </div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px" id="seller-city">📍 Guinée</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:1px" id="seller-since">Membre depuis 2024</div>
+          </div>
+        </div>
+        <!-- Description boutique (Pro) -->
+        <div id="seller-boutique-desc" style="display:none;margin-top:10px;padding:10px 12px;background:var(--brl);border-radius:6px;border-left:3px solid var(--or);font-size:13px;color:var(--ink2);line-height:1.6"></div>
+        <div style="margin-top:10px" id="seller-rating"></div>
       <div style="display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap">
         <button onclick="openConversationWithSeller()" style="background:var(--or);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit">💬 Contacter</button>
         <button onclick="openRateModal(_curSellerId,document.getElementById('seller-name').textContent)" style="background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.4);border-radius:10px;padding:10px 20px;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit">⭐ Laisser un avis</button>
@@ -1600,17 +1886,88 @@ var PREFS=[
 ];
 
 var CATS=[
-  {n:'Véhicules',e:'🚗',c:234,sub:['Voitures','Motos & Scooters','Camions & Utilitaires','Bus & Minibus','Pièces & Accessoires','Engins agricoles','Autres véhicules']},
-  {n:'Immobilier',e:'🏠',c:189,sub:['Appartement','Maison','Terrain','Immeuble','Villa','Bureau & Commerce','Location saisonnière','Colocation','Autres']},
-  {n:'Taxi',e:'🚕',c:78,sub:['Taxi Moto','Taxi Voiture','Taxi communal','Location avec chauffeur','Covoiturage']},
-  {n:'Électronique',e:'📱',c:312,sub:['Téléphones','Ordinateurs portables','Télévisions','Enceintes & Audio','Casques & Écouteurs','Jeux vidéo','Tablettes','Climatiseurs','Accessoires','Autres']},
-  {n:'Ouvriers',e:'🔨',c:156,sub:['Maçon','Plombier','Carreleur','Mécanicien','Menuisier','Électricien','Peintre','Soudeur','Forgeron','Couvreur','Autres']},
-  {n:'Mode',e:'👗',c:278,sub:['Vêtements Homme','Vêtements Femme','Vêtements Enfant','Chaussures Homme','Chaussures Femme','Bijoux & Montres','Sacs','Pagnes & Tissus','Autres']},
-  {n:'Maison',e:'🛋️',c:145,sub:['Armoires','Canapés & Divans','Fauteuils','Chaises','Lits & Matelas','Congélateurs','Fours','Micro-ondes','Aspirateurs','Tables','Autres']},
-  {n:'Tourisme',e:'✈️',c:43,sub:['Conakry','Kindia','Labé','Mamou','Kankan','Faranah','N’Zérékoré','Boké','Siguiri','Guéckédou','Dalaba','Pita','Fria','Kamsar','Autres']},
-  {n:'Loisirs',e:'🎮',c:167,sub:['Livres & BD','Collections','Vélos','Sports & Fitness','Instruments','Films & Séries','Art & Artisanat','Jouets','Autres']},
-  {n:'Cuisine',e:'🍽️',c:89,sub:['Traiteur & Repas','Gâteaux & Pâtisseries','Boissons','Ustensiles','Épices','Fruits & Légumes','Autres']},
-  {n:'Services',e:'🤝',c:120,sub:['Femme de ménage','Garde enfants','Cuisinière','Chauffeur','Gardien','Livraison','Coiffure & Beauté','Couture','Informatique','Autres']}
+  {n:'Véhicules',e:'🚗',c:234,sub:[
+    {n:'Voitures',items:['Berlines','SUV & 4x4','Pick-up','Minivans','Sportives','Citadines','Autres']},
+    {n:'Motos & Scooters',items:['Motos 50cc','Motos 125cc','Motos 250cc+','Scooters','Électriques','Autres']},
+    {n:'Camions & Utilitaires',items:['Camions légers','Camions lourds','Bennes','Fourgonnettes','Autres']},
+    {n:'Bus & Minibus',items:['Bus scolaires','Minibus 15 places','Minibus 30 places','Cars de voyage','Autres']},
+    {n:'Pièces & Accessoires',items:['Moteurs','Pneus & Jantes','Carrosserie','Électronique auto','Autres']},
+    {n:'Engins agricoles',items:['Tracteurs','Motoculteurs','Moissonneuses','Autres']},
+    {n:'Autres véhicules',items:['Bateaux','Vélos électriques','Trottinettes','Autres']}
+  ]},
+  {n:'Immobilier',e:'🏠',c:189,sub:[
+    {n:'Appartements',items:['Studio','F2','F3','F4','F5 et plus','Duplex','Autres']},
+    {n:'Maisons',items:['Villa','Maison simple','Maison R+1','Maison R+2+','Ferme','Autres']},
+    {n:'Terrains',items:['Constructible','Agricole','Commercial','Autres']},
+    {n:'Bureau & Commerce',items:['Bureau','Boutique','Entrepôt','Local commercial','Autres']},
+    {n:'Location',items:['Longue durée','Saisonnière','Colocation','Chambre meublée','Autres']}
+  ]},
+  {n:'Taxi',e:'🚕',c:78,sub:[
+    {n:'Taxi Moto',items:['Jakarta','Clando moto','Courte distance','Autres']},
+    {n:'Taxi Voiture',items:['Taxi ville','Interurbain','Taxi VIP','Autres']},
+    {n:'Location',items:['Avec chauffeur','Sans chauffeur','Covoiturage','Navette aéroport','Autres']}
+  ]},
+  {n:'Électronique',e:'📱',c:312,sub:[
+    {n:'Téléphones',items:['iPhone','Samsung','Tecno','Itel','Infinix','Autres Android','Basiques']},
+    {n:'Ordinateurs',items:['PC Portables','PC Bureau','MacBook','Tablettes','Chromebook','Autres']},
+    {n:'TV & Audio',items:['Télévisions','Home cinéma','Enceintes','Casques','Barres de son','Autres']},
+    {n:'Jeux vidéo',items:['PlayStation','Xbox','Nintendo','Jeux PC','Accessoires gaming','Autres']},
+    {n:'Électroménager',items:['Climatiseurs','Réfrigérateurs','Lave-linge','Cuisinières','Autres']},
+    {n:'Accessoires',items:['Chargeurs','Coques','Câbles','Batteries','Autres']}
+  ]},
+  {n:'Ouvriers',e:'🔨',c:156,sub:[
+    {n:'Construction',items:['Maçon','Carreleur','Couvreur','Coffreur','Ferrailleur','Autres']},
+    {n:'Plomberie & Élec.',items:['Plombier','Électricien','Climatiseur','Soudeur','Autres']},
+    {n:'Menuiserie',items:['Menuisier bois','Menuisier alu','Forgeron','Serrurier','Autres']},
+    {n:'Peinture & Déco',items:['Peintre','Décorateur','Poseur parquet','Tapissier','Autres']},
+    {n:'Mécanique',items:['Mécanicien auto','Mécanicien moto','Tôlier','Autres']}
+  ]},
+  {n:'Mode',e:'👗',c:278,sub:[
+    {n:'Vêtements Homme',items:['Pantalons','Chemises','T-shirts','Vestes','Costumes','Boubous','Djellabas','Shorts','Autres']},
+    {n:'Vêtements Femme',items:['Robes','Jupes','Pantalons femme','Blouses','Tailleurs','Robes soirée','Robes traditionnelles','Autres']},
+    {n:'Vêtements Enfant',items:['0-2 ans','3-6 ans','7-12 ans','Ado garçon','Ado fille','Uniformes','Autres']},
+    {n:'Chaussures Homme',items:['Habillées','Baskets','Sandales','Mocassins','Bottes','Autres']},
+    {n:'Chaussures Femme',items:['Escarpins','Ballerines','Sandales','Baskets','Bottes','Autres']},
+    {n:'Bijoux & Montres',items:['Colliers','Bracelets','Bagues','Boucles oreilles','Montres homme','Montres femme','Autres']},
+    {n:'Sacs',items:['Sacs à main','Sacs à dos','Valises','Portefeuilles','Ceintures','Autres']},
+    {n:'Pagnes & Tissus',items:['Wax','Bazin','Kente','Soie','Tissu traditionnel','Broderies','Autres']}
+  ]},
+  {n:'Maison',e:'🛋️',c:145,sub:[
+    {n:'Meubles',items:['Armoires','Canapés','Fauteuils','Chaises','Lits','Tables','Bureaux','Étagères','Autres']},
+    {n:'Électroménager',items:['Réfrigérateurs','Congélateurs','Cuisinières','Fours','Micro-ondes','Lave-linge','Autres']},
+    {n:'Décoration',items:['Rideaux','Tapis','Tableaux','Luminaires','Coussins','Vases','Miroirs','Autres']},
+    {n:'Literie',items:['Matelas','Oreillers','Draps','Couvertures','Autres']},
+    {n:'Cuisine & Vaisselle',items:['Casseroles','Ustensiles','Vaisselle','Verres','Couverts','Autres']},
+    {n:'Jardin',items:['Mobilier jardin','Outils','Plantes','Barbecue','Autres']}
+  ]},
+  {n:'Tourisme',e:'✈️',c:43,sub:[
+    {n:'Hébergement',items:['Hôtels','Auberges','Chambres hôtes','Résidences','Campements','Autres']},
+    {n:'Excursions',items:['Visite Conakry','Fouta Djallon','Guinée Forestière','Chutes Kinkon','Îles de Los','Autres']},
+    {n:'Services',items:['Guides','Location voiture','Agences voyage','Transport','Autres']}
+  ]},
+  {n:'Loisirs',e:'🎮',c:167,sub:[
+    {n:'Sports',items:['Football','Basket','Musculation','Natation','Arts martiaux','Cyclisme','Autres']},
+    {n:'Culture',items:['Livres','Films & Séries','Musique','Instruments','Jeux de société','Autres']},
+    {n:'Art & Artisanat',items:['Peintures','Sculptures','Bijoux artisanaux','Vannerie','Poterie','Autres']},
+    {n:'Jouets',items:['0-3 ans','4-8 ans','9-12 ans','Éducatifs','Vélos enfant','Autres']},
+    {n:'Collections',items:['Timbres','Monnaies','Cartes','Antiquités','Autres']}
+  ]},
+  {n:'Cuisine',e:'🍽️',c:89,sub:[
+    {n:'Plats & Repas',items:['Riz sauce','Poulet braisé','Attiéké','Sauces','Grillades','Autres']},
+    {n:'Pâtisserie',items:['Gâteaux','Croissants & Pains','Beignets','Donuts','Autres']},
+    {n:'Boissons',items:['Jus naturels','Bissap','Gingembre','Thé & Café','Autres']},
+    {n:'Épicerie',items:['Épices','Fruits & Légumes','Viandes & Poissons','Céréales','Huiles','Autres']},
+    {n:'Ustensiles',items:['Marmites','Mortiers','Couvercles','Passoires','Autres']}
+  ]},
+  {n:'Services',e:'🤝',c:120,sub:[
+    {n:'Aide à domicile',items:['Femme de ménage','Garde enfants','Cuisinière','Repassage','Aide âgées','Autres']},
+    {n:'Transport & Livraison',items:['Livraison express','Déménagement','Transport marchandises','Coursiers','Autres']},
+    {n:'Beauté',items:['Coiffure femme','Coiffure homme','Manucure','Massage','Maquillage','Autres']},
+    {n:'Couture & Mode',items:['Couturière','Tailleur','Broderie','Retouches','Création tenue','Autres']},
+    {n:'Informatique',items:['Réparation téléphone','Réparation PC','Développement web','Graphisme','Autres']},
+    {n:'Événements',items:['Animation fête','DJ','Photographe','Vidéaste','Location salle','Traiteur','Autres']},
+    {n:'Ouvriers',items:['Maçon','Menuisier','Mécanicien','Plombier','Tailleur','Carreleur','Soudeur','Peintre','Autres']}
+  ]}
 ];
 
 var DEMO_ADS=[
@@ -1693,19 +2050,88 @@ function populateCities(){
 }
 
 function renderNavCats(){
-  var el=document.getElementById('nav-cats-bar');if(!el)return;
-  var allItems=CATS;
-  el.innerHTML=allItems.map(function(cat,i){
-    var subs=cat.sub?cat.sub.map(function(s){
-      return '<div class="cat-sub-item" onclick="filterSubCat(event,\''+cat.n+'\',\''+s+'\')">'+s+'</div>';
-    }).join(''):'';
-    var arrow=cat.sub?' <span class="cat-arrow">▾</span>':'';
-    return '<div class="ncat'+(i===0?' active':'')+(cat.sub?' has-sub':'')+'" onclick="filterCat(this,\''+cat.n+'\')">'
-      +'<span class="em">'+cat.e+'</span><span class="cat-label">'+cat.n+'</span>'+arrow
-      +(subs?'<div class="cat-dropdown">'+subs+'</div>':'')
-      +'</div>';
+  var el=document.getElementById('nav-cats-bar');
+  if(!el) return;
+  el.innerHTML = CATS.map(function(cat,i){
+    var dropHtml = '';
+    if(cat.sub && cat.sub.length){
+      if(typeof cat.sub[0]==='object'){
+        // 3 niveaux : sub = [{n, items}]
+        dropHtml = cat.sub.map(function(sub){
+          var itemsHtml = (sub.items||[]).map(function(item){
+            return '<div class="cat-item"'+
+              ' data-cat="'+cat.n.replace(/"/g,'&quot;')+'"'+
+              ' data-sub="'+sub.n.replace(/"/g,'&quot;')+'"'+
+              ' data-item="'+item.replace(/"/g,'&quot;')+'"'+
+              ' onclick="onCatItem(this)">'+item+'</div>';
+          }).join('');
+          return '<div class="cat-sub-grp">'+
+            '<div class="cat-sub-grp-hd"'+
+              ' data-cat="'+cat.n.replace(/"/g,'&quot;')+'"'+
+              ' data-sub="'+sub.n.replace(/"/g,'&quot;')+'"'+
+              ' onclick="onCatSub(event,this)">'+
+              sub.n+'<span class="sub-arr">&#x25B8;</span>'+
+            '</div>'+
+            (itemsHtml?'<div class="cat-items-pnl">'+itemsHtml+'</div>':'')+
+          '</div>';
+        }).join('');
+      } else {
+        // 2 niveaux (strings)
+        dropHtml = cat.sub.map(function(s){
+          return '<div class="cat-sub-item"'+
+            ' data-cat="'+cat.n.replace(/"/g,'&quot;')+'"'+
+            ' data-sub="'+s.replace(/"/g,'&quot;')+'"'+
+            ' onclick="onCatSub(event,this)">'+s+'</div>';
+        }).join('');
+      }
+    }
+    var arrow = cat.sub ? '<span class="cat-arrow">&#x25BE;</span>' : '';
+    return '<div class="ncat'+(i===0?' active':'')+(cat.sub?' has-sub':'')+'"'+
+      ' data-cat="'+cat.n.replace(/"/g,'&quot;')+'"'+
+      ' onclick="onCatClick(this)">'+
+      '<span class="em">'+cat.e+'</span>'+
+      '<span class="cat-label">'+cat.n+'</span>'+arrow+
+      (dropHtml?'<div class="cat-dropdown">'+dropHtml+'</div>':'')+
+    '</div>';
   }).join('');
 }
+/* Gestionnaires via data-attributes */
+function onCatClick(el){ filterCat(el, el.getAttribute('data-cat')); }
+function onCatSub(e,el){ e.stopPropagation(); filterSubCat(e, el.getAttribute('data-cat'), el.getAttribute('data-sub')); }
+function onCatItem(el){
+  var cat=el.getAttribute('data-cat'), sub=el.getAttribute('data-sub'), item=el.getAttribute('data-item');
+  /* Highlight nav */
+  document.querySelectorAll('.ncat').forEach(function(n){
+    n.classList.toggle('active', n.getAttribute('data-cat')===cat);
+  });
+  /* Filtrer annonces par catégorie */
+  var ads=DB.ads().filter(function(a){return a.cat===cat;});
+  var fg=document.getElementById('featured-grid');
+  var rg=document.getElementById('recent-grid');
+  var sb=document.getElementById('sb-ads');
+  if(sb) sb.textContent=ads.length;
+  var empty='<div style="grid-column:1/-1;text-align:center;padding:36px;color:var(--muted)">'+
+    '<div style="font-size:36px;margin-bottom:8px">🔍</div>'+
+    '<div style="font-weight:700;margin-bottom:4px">Aucune annonce pour l&#39;instant</div>'+
+    '<div style="font-size:12px">Soyez le premier dans <strong>'+cat+' › '+sub+' › '+item+'</strong></div>'+
+  '</div>';
+  if(fg){
+    var feat=ads.filter(function(a){return a.feat||a.featured;}).slice(0,4);
+    fg.innerHTML=feat.length?feat.map(function(a){return adCard(a,true);}).join(''):(ads.length?ads.slice(0,4).map(function(a){return adCard(a,false);}).join(''):empty);
+  }
+  if(rg) rg.innerHTML=ads.slice(4,16).map(function(a){return adCard(a,false);}).join('');
+  /* Breadcrumb */
+  var banner=document.getElementById('search-banner');
+  if(banner){
+    banner.style.display='flex';
+    banner.innerHTML='<span style="font-size:13px;font-weight:600">📂 <strong style="color:var(--or2)">'+cat+'</strong> <span style="color:var(--muted)">›</span> <span style="color:var(--or)">'+sub+'</span> <span style="color:var(--muted)">›</span> <strong style="color:var(--or)">'+item+'</strong></span>'+
+      '<button onclick="clearSearch()" style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--muted);font-family:inherit;font-weight:700;margin-left:auto">✕ Tout voir</button>';
+  }
+  toast('🔍 '+cat+' › '+sub+' › '+item);
+  var sec=document.getElementById('ads-section');
+  if(sec) sec.scrollIntoView({behavior:'smooth'});
+}
+
 function filterSubCat(e,catName,subName){
   e.stopPropagation();
   // Mettre en surbrillance la catégorie parente
@@ -5700,6 +6126,7 @@ document.addEventListener('DOMContentLoaded',function(){
   populateCities();
   populateHeroCats();
   renderNavCats();
+  initBanner();
   renderPostCats();
   updateNav();
   // Charger les annonces depuis l'API MongoDB
@@ -6017,7 +6444,7 @@ document.addEventListener('DOMContentLoaded',function(){
 </div></div>
 <div id="static-content-contact" style="display:none">
 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:24px">
-  <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px;background:#f9f9f9;border-radius:12px;text-align:center"><span style="font-size:28px">📧</span><div style="font-weight:700;font-size:13px">Email</div><a href="mailto:support.yougouyougou@gmail.com" style="color:var(--or);font-size:11px;word-break:break-all">support.yougouyougou@gmail.com</a></div>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px;background:#f9f9f9;border-radius:12px;text-align:center"><span style="font-size:28px">📧</span><div style="font-weight:700;font-size:13px">Email</div><a href="/cdn-cgi/l/email-protection#b3c0c6c3c3dcc1c79dcadcc6d4dcc6cadcc6d4dcc6f3d4ded2dadf9dd0dcde" style="color:var(--or);font-size:11px;word-break:break-all"><span class="__cf_email__" data-cfemail="7d0e080d0d120f09530412081a12080412081a12083d1a101c1411531e1210">[email&#160;protected]</span></a></div>
   <div onclick="window.open('https://wa.me/224','_blank')" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px;background:#f9f9f9;border-radius:12px;text-align:center;cursor:pointer"><span style="font-size:28px">💬</span><div style="font-weight:700;font-size:13px">WhatsApp</div><div style="color:var(--or);font-size:12px">Écrire maintenant</div></div>
   <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px;background:#f9f9f9;border-radius:12px;text-align:center"><span style="font-size:28px">📍</span><div style="font-weight:700;font-size:13px">Adresse</div><div style="color:#666;font-size:12px">Conakry, Guinée</div></div>
 </div>
@@ -6051,7 +6478,7 @@ document.addEventListener('DOMContentLoaded',function(){
   <h4 style="font-weight:800;margin:0 0 8px">4. Responsabilité</h4>
   <p style="margin-bottom:14px">YouGouYou est une plateforme de mise en relation. Nous déclinons toute responsabilité quant à l'issue des transactions entre utilisateurs.</p>
   <h4 style="font-weight:800;margin:0 0 8px">5. Contact</h4>
-  <p>support.yougouyougou@gmail.com</p>
+  <p><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b7c4c2c7c7d8c5c399ced8c2d0d8c2ced8c2d0d8c2f7d0dad6dedb99d4d8da">[email&#160;protected]</a></p>
 </div></div>
 <div id="static-content-privacy" style="display:none">
 <div style="font-size:13px;line-height:1.8;color:#444">
@@ -6062,7 +6489,7 @@ document.addEventListener('DOMContentLoaded',function(){
   <h4 style="font-weight:800;margin:0 0 8px">Sécurité</h4>
   <p style="margin-bottom:14px">Mots de passe chiffrés (bcrypt). Communications sécurisées HTTPS. Numéro de téléphone visible uniquement après paiement.</p>
   <h4 style="font-weight:800;margin:0 0 8px">Vos droits</h4>
-  <p>Suppression de compte possible à tout moment. Contact : support.yougouyougou@gmail.com</p>
+  <p>Suppression de compte possible à tout moment. Contact : <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="a1d2d4d1d1ced3d58fd8ced4c6ced4d8ced4c6ced4e1c6ccc0c8cd8fc2cecc">[email&#160;protected]</a></p>
 </div></div>
 <div id="static-content-help" style="display:none">
 <div style="display:flex;flex-direction:column;gap:8px">
@@ -6088,7 +6515,7 @@ document.addEventListener('DOMContentLoaded',function(){
 </div></div>
 </div><!-- /app-wrapper -->
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // Désactivation définitive du search-banner
 (function(){
   var _orig = document.getElementById.bind(document);
@@ -6198,20 +6625,362 @@ document.addEventListener('DOMContentLoaded', function(){
     if(!m||!m.contains(e.changedTouches[0].target)) return;
     if(Math.abs(sx-e.changedTouches[0].clientX)>40) navPhoto(sx>e.changedTouches[0].clientX?1:-1);
   },{passive:true});
-  document.addEventListener('keydown',function(e){
-    var pg=document.getElementById('page-detail');
-    if(pg&&pg.classList.contains('active')){
-      if(e.key==='ArrowLeft') navPhoto(-1);
-      if(e.key==='ArrowRight') navPhoto(1);
-    }
-  });
 })();
 </script>
 <script>
-// ── Repositionnement dropdowns catégories (fix overflow parent) ──
-document.addEventListener('mouseover', function(e){
-  var ncat = e.target.closest('.ncat.has-sub');
-  if(!ncat) return;
-  var dd = ncat.querySelector('.cat-dropdown');
-  if(!dd) return;
-  var rect
+
+// Bandeau promo
+function closeBanner(){
+  var b = document.getElementById('promo-banner');
+  if(b){ b.style.display='none'; sessionStorage.setItem('banner_closed','1'); }
+}
+function initBanner(){
+  var b = document.getElementById('promo-banner');
+  if(!b) return;
+  if(sessionStorage.getItem('banner_closed')) b.style.display='none';
+}
+
+</script>
+
+<!-- ════════════════════════════════
+     PAGE PRO
+════════════════════════════════ -->
+<div id="page-pro" class="page">
+  <div class="pro-wrap">
+
+    <!-- Hero -->
+    <div class="pro-hero">
+      <div class="pro-hero-tag">⭐ YouGouYou Pro</div>
+      <h1>Vendez plus avec <span>Pro</span></h1>
+      <p>Badge professionnel, priorité dans les résultats, statistiques avancées et jusqu'à 12 annonces actives.</p>
+    </div>
+
+    <!-- Avantages -->
+    <div class="pro-avantages">
+      <div class="pro-av">
+        <span class="pro-av-icon">⭐</span>
+        <div class="pro-av-title">Badge PRO visible</div>
+        <div class="pro-av-desc">Badge orange sur toutes vos annonces et votre profil. Inspirez confiance.</div>
+      </div>
+      <div class="pro-av">
+        <span class="pro-av-icon">🔝</span>
+        <div class="pro-av-title">Priorité résultats</div>
+        <div class="pro-av-desc">Vos annonces apparaissent en premier dans les recherches.</div>
+      </div>
+      <div class="pro-av">
+        <span class="pro-av-icon">📋</span>
+        <div class="pro-av-title">Jusqu'à 12 annonces</div>
+        <div class="pro-av-desc">Publiez jusqu'à 12 annonces actives simultanément (5 en gratuit).</div>
+      </div>
+      <div class="pro-av">
+        <span class="pro-av-icon">📊</span>
+        <div class="pro-av-title">Statistiques avancées</div>
+        <div class="pro-av-desc">Vues, contacts, graphiques sur 30 jours pour analyser vos performances.</div>
+      </div>
+      <div class="pro-av">
+        <span class="pro-av-icon">🏪</span>
+        <div class="pro-av-title">Page boutique enrichie</div>
+        <div class="pro-av-desc">Bannière, description et présentation professionnelle de votre boutique.</div>
+      </div>
+      <div class="pro-av">
+        <span class="pro-av-icon">💬</span>
+        <div class="pro-av-title">Messagerie prioritaire</div>
+        <div class="pro-av-desc">Vos messages arrivent en tête de liste chez vos acheteurs.</div>
+      </div>
+    </div>
+
+    <!-- Plans tarifaires -->
+    <h2 style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:16px;text-align:center">Choisissez votre formule</h2>
+    <div class="pro-plans">
+
+      <!-- 1 mois -->
+      <div class="pro-plan" id="plan-1m" onclick="selectPlan('1m',50000,1)">
+        <div class="pro-plan-dur">1 mois</div>
+        <div class="pro-plan-price">50 000 <span>GNF</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px">soit 50 000 GNF/mois</div>
+        <button class="pro-plan-btn">Choisir</button>
+      </div>
+
+      <!-- 3 mois -->
+      <div class="pro-plan popular" id="plan-3m" onclick="selectPlan('3m',120000,3)">
+        <div class="pro-plan-badge">⭐ Populaire</div>
+        <div class="pro-plan-dur">3 mois</div>
+        <div class="pro-plan-price">120 000 <span>GNF</span></div>
+        <div class="pro-plan-save">Économisez 30 000 GNF</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px">soit 40 000 GNF/mois</div>
+        <button class="pro-plan-btn">Choisir</button>
+      </div>
+
+      <!-- 1 an -->
+      <div class="pro-plan" id="plan-12m" onclick="selectPlan('12m',400000,12)">
+        <div class="pro-plan-dur">1 an</div>
+        <div class="pro-plan-price">400 000 <span>GNF</span></div>
+        <div class="pro-plan-save">Économisez 200 000 GNF</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px">soit 33 333 GNF/mois</div>
+        <button class="pro-plan-btn">Choisir</button>
+      </div>
+
+    </div>
+
+    <!-- FAQ -->
+    <div style="background:#fff;border:1px solid var(--br);border-radius:8px;padding:18px">
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:12px">Questions fréquentes</h3>
+      <div style="font-size:13px;color:var(--ink2);display:flex;flex-direction:column;gap:0">
+        <div style="padding:10px 0;border-bottom:1px solid var(--brl)"><strong>Comment payer ?</strong><br><span style="color:var(--muted);font-size:12px">Via Orange Money — entrez votre numéro et code PIN.</span></div>
+        <div style="padding:10px 0;border-bottom:1px solid var(--brl)"><strong>Renouvellement automatique ?</strong><br><span style="color:var(--muted);font-size:12px">Non, vous renouvelez manuellement. Email de rappel 3 jours avant expiration.</span></div>
+        <div style="padding:10px 0"><strong>Puis-je annuler ?</strong><br><span style="color:var(--muted);font-size:12px">Non remboursable, mais actif jusqu'à la date d'expiration.</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     MODAL PAIEMENT PRO
+════════════════════════════════ -->
+<div class="overlay" id="overlay-pro-pay" onclick="maybeClose(event,'pro-pay')">
+  <div class="modal om-modal">
+    <!-- Header Orange -->
+    <div class="om-header">
+      <div class="om-logo">⭐</div>
+      <div class="om-header-title">YouGouYou Pro</div>
+      <div class="om-header-sub" id="pro-pay-label">1 mois — 50 000 GNF</div>
+    </div>
+
+    <!-- Formulaire -->
+    <div id="pro-pay-form" style="padding:18px">
+      <div style="background:var(--orl);border:1px solid var(--orm);border-radius:8px;padding:12px;text-align:center;margin-bottom:14px">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Montant à payer</div>
+        <div id="pro-pay-amount" style="font-size:26px;font-weight:900;color:var(--or)">50 000 GNF</div>
+      </div>
+      <div class="fg">
+        <label>Numéro Orange Money</label>
+        <div class="ph-row">
+          <span class="ph-pfx">🇬🇳 +224</span>
+          <input type="tel" id="pro-om-phone" placeholder="620 00 00 00" maxlength="9" oninput="this.value=this.value.replace(/\D/g,'')">
+        </div>
+      </div>
+      <div class="fg">
+        <label>Code PIN (4 chiffres)</label>
+        <div class="pin-row" style="justify-content:center;gap:10px">
+          <input type="password" class="pin-box om-pin" maxlength="1" id="pro-pin1" oninput="pinNext(this,'pro-pin2')" inputmode="numeric">
+          <input type="password" class="pin-box om-pin" maxlength="1" id="pro-pin2" oninput="pinNext(this,'pro-pin3')" inputmode="numeric">
+          <input type="password" class="pin-box om-pin" maxlength="1" id="pro-pin3" oninput="pinNext(this,'pro-pin4')" inputmode="numeric">
+          <input type="password" class="pin-box om-pin" maxlength="1" id="pro-pin4" inputmode="numeric">
+        </div>
+      </div>
+      <button class="btn btn-or btn-full" onclick="submitProPay()" style="font-size:14px;margin-bottom:8px">🟠 Payer et activer Pro</button>
+      <button onclick="closeModal('pro-pay')" style="width:100%;padding:8px;background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:inherit">Annuler</button>
+    </div>
+
+    <!-- Loading -->
+    <div id="pro-pay-loading" style="display:none;padding:44px 24px;text-align:center">
+      <div style="width:40px;height:40px;border:4px solid var(--br);border-top-color:var(--or);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 14px"></div>
+      <div style="font-size:14px;font-weight:700;color:var(--ink)">Paiement en cours...</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">Validez sur votre téléphone</div>
+    </div>
+
+    <!-- Succès -->
+    <div id="pro-pay-success" style="display:none;padding:36px 24px;text-align:center">
+      <div style="font-size:52px;margin-bottom:10px;animation:tickPop .5s ease">🎉</div>
+      <div style="font-size:18px;font-weight:800;color:var(--gr);margin-bottom:6px">Bienvenue dans Pro !</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:18px" id="pro-pay-success-msg">Votre abonnement est actif.</div>
+      <button class="btn btn-or btn-full" onclick="closeModal('pro-pay');goTo('dashboard');setTimeout(function(){showDashTab('pro');},200)" style="margin-bottom:8px">Voir mon profil Pro</button>
+      <button onclick="closeModal('pro-pay')" style="width:100%;padding:8px;background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:inherit">Continuer</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════
+//  PRO — JavaScript complet
+// ════════════════════════════════════════════════════
+
+var _proSelectedPlan = {id:'1m', amount:50000, months:1};
+
+// ── Sélection d'un plan ──
+function selectPlan(planId, amount, months){
+  _proSelectedPlan = {id:planId, amount:amount, months:months};
+  // Highlight du plan
+  ['1m','3m','12m'].forEach(function(p){
+    var el = document.getElementById('plan-'+p);
+    if(el) el.classList.toggle('selected', p===planId);
+  });
+  // Ouvrir le modal
+  var labels = {'1m':'1 mois','3m':'3 mois','12m':'1 an'};
+  var fmt = amount.toLocaleString('fr-FR')+' GNF';
+  var lbl = document.getElementById('pro-pay-label');
+  var amt = document.getElementById('pro-pay-amount');
+  if(lbl) lbl.textContent = (labels[planId]||planId)+' — '+fmt;
+  if(amt) amt.textContent = fmt;
+  // Reset formulaire
+  document.getElementById('pro-pay-form').style.display = 'block';
+  document.getElementById('pro-pay-loading').style.display = 'none';
+  document.getElementById('pro-pay-success').style.display = 'none';
+  ['pro-pin1','pro-pin2','pro-pin3','pro-pin4'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  var ph = document.getElementById('pro-om-phone'); if(ph) ph.value='';
+  openModal('pro-pay');
+}
+
+// ── Soumettre le paiement Pro ──
+async function submitProPay(){
+  var u = DB.user();
+  if(!u){ toast('Connectez-vous d\'abord','err'); return; }
+  var phone = (document.getElementById('pro-om-phone').value||'').trim();
+  if(!phone || phone.length < 8){ toast('Numéro Orange Money requis','err'); return; }
+  var pin = ['pro-pin1','pro-pin2','pro-pin3','pro-pin4']
+    .map(function(id){ var el=document.getElementById(id); return el?el.value:''; }).join('');
+  if(pin.length < 4){ toast('Code PIN requis (4 chiffres)','err'); return; }
+
+  document.getElementById('pro-pay-form').style.display = 'none';
+  document.getElementById('pro-pay-loading').style.display = 'block';
+
+  try {
+    var tok = localStorage.getItem('ygy_token');
+    var res = await fetch('/api/subscribe-pro', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},
+      body: JSON.stringify({
+        planId: _proSelectedPlan.id,
+        months: _proSelectedPlan.months,
+        amount: _proSelectedPlan.amount,
+        phone: '+224'+phone,
+        pin: pin
+      })
+    });
+    var data = await res.json();
+    if(!res.ok) throw new Error(data.error||'Erreur paiement');
+
+    // Mettre à jour user local
+    var userData = DB.user();
+    if(userData){
+      userData.isPro = true;
+      userData.proUntil = data.proUntil;
+      DB._d.user = userData;
+      DB.save();
+    }
+
+    document.getElementById('pro-pay-loading').style.display = 'none';
+    document.getElementById('pro-pay-success').style.display = 'block';
+    var expiry = new Date(data.proUntil).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+    var msgEl = document.getElementById('pro-pay-success-msg');
+    if(msgEl) msgEl.textContent = 'Pro actif jusqu\'au '+expiry+'. Badge PRO visible sur vos annonces.';
+    toast('Abonnement Pro activé !','ok');
+    renderProDash();
+
+  } catch(err){
+    document.getElementById('pro-pay-loading').style.display = 'none';
+    document.getElementById('pro-pay-form').style.display = 'block';
+    toast(err.message||'Erreur paiement','err');
+  }
+}
+
+// ── Aller à la page Pro ──
+function goToPro(){
+  var u = DB.user();
+  if(!u){ openModal('auth'); return; }
+  goTo('pro');
+}
+
+// ── Rendre le dashboard Pro ──
+function renderProDash(){
+  var container = document.getElementById('pro-dash-content');
+  if(!container) return;
+  var u = DB.user();
+
+  if(u && u.isPro && u.proUntil && new Date(u.proUntil) > new Date()){
+    // Actif
+    var expiry = new Date(u.proUntil).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+    var daysLeft = Math.ceil((new Date(u.proUntil)-new Date())/(1000*60*60*24));
+    container.innerHTML =
+      '<div class="pro-status-card">'+
+        '<div class="pro-status-left">'+
+          '<h3>⭐ Compte Pro actif</h3>'+
+          '<p>Badge PRO, priorité résultats, jusqu\'à 12 annonces.</p>'+
+          '<div class="pro-expiry">Expire le <strong>'+expiry+'</strong>'+
+            (daysLeft<=7?' — <span style="color:var(--or)">Plus que '+daysLeft+' jour(s) !</span>':'')+
+          '</div>'+
+        '</div>'+
+        '<button class="pro-renouveler" onclick="goTo(\'pro\')">Renouveler</button>'+
+      '</div>'+
+      '<div class="pro-stats-grid" id="pro-stats-grid">'+
+        '<div class="pro-stat"><div class="pro-stat-n" id="ps-views">—</div><div class="pro-stat-l">Vues totales</div></div>'+
+        '<div class="pro-stat"><div class="pro-stat-n" id="ps-contacts">—</div><div class="pro-stat-l">Contacts reçus</div></div>'+
+        '<div class="pro-stat"><div class="pro-stat-n" id="ps-ads">—</div><div class="pro-stat-l">Annonces actives</div></div>'+
+        '<div class="pro-stat"><div class="pro-stat-n" id="ps-rating">—</div><div class="pro-stat-l">Note / 5</div></div>'+
+      '</div>';
+    loadProStats();
+  } else {
+    // Non actif
+    container.innerHTML =
+      '<div class="pro-cta-card">'+
+        '<div style="font-size:32px;flex-shrink:0">⭐</div>'+
+        '<div style="flex:1">'+
+          '<h3>Passez à YouGouYou Pro</h3>'+
+          '<p>Badge PRO, priorité résultats, jusqu\'à 12 annonces — dès 50 000 GNF/mois.</p>'+
+        '</div>'+
+        '<button class="pro-cta-btn" onclick="goTo(\'pro\')">Découvrir Pro →</button>'+
+      '</div>';
+  }
+}
+
+// ── Charger les stats Pro ──
+async function loadProStats(){
+  try {
+    var tok = localStorage.getItem('ygy_token');
+    var res = await fetch('/api/my-stats',{headers:{'Authorization':'Bearer '+tok}});
+    var data = await res.json();
+    var set = function(id,val){ var el=document.getElementById(id); if(el) el.textContent=val; };
+    set('ps-views',  (data.totalViews||0).toLocaleString('fr-FR'));
+    set('ps-contacts', data.totalContacts||0);
+    set('ps-ads',    data.recentAds||0);
+    set('ps-rating', data.avgRating ? data.avgRating.toFixed(1) : '—');
+  } catch(e){ console.error('[PRO STATS]', e.message); }
+}
+
+// ── Étendre showDashTab pour Pro ──
+var _origShowDashTab = showDashTab;
+showDashTab = function(tab){
+  _origShowDashTab(tab);
+  if(tab === 'pro') renderProDash();
+};
+
+// ── Afficher boutique enrichie sur la page vendeur ──
+function renderSellerBoutique(seller){
+  var avEl   = document.getElementById('seller-av');
+  var badgeEl= document.getElementById('seller-pro-badge');
+  var bannerEl= document.getElementById('seller-boutique-banner');
+  var descEl = document.getElementById('seller-boutique-desc');
+
+  if(seller.isPro){
+    // Badge Pro
+    if(badgeEl) badgeEl.innerHTML = '<span class="badge-pro">⭐ PRO</span>';
+    // Bannière
+    if(bannerEl){
+      bannerEl.style.display = 'flex';
+      bannerEl.innerHTML = '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.2);font-size:14px;font-weight:700">🏪 Boutique Pro</div>';
+    }
+    // Description boutique
+    if(descEl && seller.boutiqueDesc){
+      descEl.style.display = 'block';
+      descEl.textContent = seller.boutiqueDesc;
+    }
+  } else {
+    if(badgeEl) badgeEl.innerHTML = '';
+    if(bannerEl) bannerEl.style.display = 'none';
+  }
+}
+
+// ── Mise à jour bandeau: bouton Découvrir Pro ──
+// (remplace openModal('auth') par goToPro)
+document.addEventListener('DOMContentLoaded', function(){
+  var proBtn = document.querySelector('#promo-banner .promo-banner-btn');
+  if(proBtn) proBtn.onclick = function(){ goToPro(); };
+});
+
+</script>
+</body>
+</html>
