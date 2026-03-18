@@ -8248,6 +8248,43 @@ function contactBoutiqueWhatsApp(){
 // ════════════════════════════════════════════════════════════════
 
 // Rendre la section boutique dans le dashboard Pro
+
+// ── Éditeur horaires (7 jours) ──
+function buildHoursEditorHTML(){
+  return '<div style="display:flex;flex-direction:column;gap:6px">'
+    + JOURS.map(function(j){
+        return '<div style="display:flex;align-items:center;gap:8px;font-size:12px;flex-wrap:wrap">'
+          + '<span style="width:72px;font-weight:700;flex-shrink:0">'+j.label+'</span>'
+          + '<input type="time" id="bd-h-'+j.key+'-open"  value="08:00"'
+            + ' style="padding:5px 7px;border:1.5px solid var(--br);border-radius:5px;font-size:12px;font-family:inherit">'
+          + '<span style="color:var(--muted);font-size:11px">–</span>'
+          + '<input type="time" id="bd-h-'+j.key+'-close" value="18:00"'
+            + ' style="padding:5px 7px;border:1.5px solid var(--br);border-radius:5px;font-size:12px;font-family:inherit">'
+          + '<label style="display:flex;align-items:center;gap:4px;color:var(--muted);cursor:pointer;font-size:12px">'
+            + '<input type="checkbox" id="bd-h-'+j.key+'-closed" style="accent-color:var(--or)"> Fermé'
+          + '</label>'
+        + '</div>';
+      }).join('')
+    + '</div>';
+}
+
+// ── Ajouter un article au catalogue ──
+async function addBoutiqueItem(item){
+  var tok = localStorage.getItem('ygy_token');
+  if(!tok){ toast('Non connecté','err'); return; }
+  try{
+    var res = await fetch('/api/me/boutique/items',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},
+      body: JSON.stringify(item)
+    });
+    var data = await res.json();
+    if(!res.ok) throw new Error(data.error||'Erreur serveur');
+    toast('✅ Article ajouté au catalogue','ok');
+    loadMyBoutiqueItems();
+  }catch(err){ toast('❌ '+err.message,'err'); throw err; }
+}
+
 function renderBoutiqueDash(){
   var container = document.getElementById('pro-boutique-content');
   if(!container) return;
@@ -8264,7 +8301,14 @@ function renderBoutiqueDash(){
     preFillBoutiqueForm(u);
     // Charger les articles du catalogue
     loadMyBoutiqueItems();
-  }).catch(function(){ container.innerHTML='<p style="color:var(--re)">Erreur de chargement</p>'; });
+  }).catch(function(err){
+    console.error('[BOUTIQUE]', err);
+    container.innerHTML = '<div style="padding:16px;background:#FEF2F2;border-radius:8px;border:1px solid #FECACA">'
+      + '<div style="color:#DC2626;font-weight:700;margin-bottom:6px">❌ Erreur de chargement</div>'
+      + '<div style="color:#7F1D1D;font-size:12px">' + (err.message||'Erreur inconnue') + '</div>'
+      + '<button onclick="renderBoutiqueDash()" style="margin-top:10px;padding:6px 14px;background:var(--or);color:#fff;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-size:12px">🔄 Réessayer</button>'
+      + '</div>';
+  });
 }
 
 function buildBoutiqueDashHTML(u){
