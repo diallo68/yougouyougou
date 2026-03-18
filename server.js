@@ -205,6 +205,7 @@ const UserSchema = new mongoose.Schema({
   codeExpiry:   { type: Date },
   isPro:        { type: Boolean, default: false },        // compte pro payant
   proUntil:     { type: Date },                           // expiration abonnement pro
+  boutiqueName:    { type: String, maxlength: 100 },
   boutiqueDesc:    { type: String, maxlength: 1000 },
   boutiqueSlogan:  { type: String, maxlength: 200 },
   boutiqueBanner:  { type: String },
@@ -219,14 +220,16 @@ const UserSchema = new mongoose.Schema({
   },
   boutiquePinned:  [{ type: mongoose.Schema.Types.ObjectId, ref: 'Ad' }],
   boutiqueItems:   [{
-    _id:      { type: mongoose.Schema.Types.ObjectId, auto: true },
-    name:     { type: String, required: true },
-    price:    { type: Number, default: 0 },
-    desc:     { type: String },
-    photo:    { type: String },
-    category: { type: String },
-    inStock:  { type: Boolean, default: true },
-    createdAt:{ type: Date, default: Date.now },
+    _id:         { type: mongoose.Schema.Types.ObjectId, auto: true },
+    name:        { type: String, required: true },
+    price:       { type: Number, default: 0 },
+    desc:        { type: String },
+    photo:       { type: String },   // base64 ou URL
+    category:    { type: String },   // niveau 1
+    subCategory: { type: String },   // niveau 2
+    subItem:     { type: String },   // niveau 3
+    inStock:     { type: Boolean, default: true },
+    createdAt:   { type: Date, default: Date.now },
   }],
   avgRating:    { type: Number, default: 0 },             // note moyenne (dénormalisée)
   ratingCount:  { type: Number, default: 0 },             // nb d'avis
@@ -782,6 +785,7 @@ app.get('/api/users/:id/public', authOptional, async (req, res) => {
       reviews,
       pinnedAds,
       // Boutique
+      boutiqueName:    user.boutiqueName    || '',
       boutiqueDesc:    user.boutiqueDesc    || '',
       boutiqueSlogan:  user.boutiqueSlogan  || '',
       boutiqueBanner:  user.boutiqueBanner  || '',
@@ -1923,7 +1927,7 @@ app.patch('/api/me/boutique', auth, async (req, res) => {
     if (!isAdmin && !isProActive)
       return res.status(403).json({ error: 'Réservé aux membres Pro' });
 
-    const allowed = ['boutiqueDesc','boutiqueSlogan','boutiqueBanner',
+    const allowed = ['boutiqueName','boutiqueDesc','boutiqueSlogan','boutiqueBanner',
                      'boutiqueSector','boutiqueHours','boutiqueSocial'];
     const update = {};
     allowed.forEach(k => { if (req.body[k] !== undefined) update[k] = req.body[k]; });
@@ -1968,9 +1972,9 @@ app.post('/api/me/boutique/items', auth, async (req, res) => {
     const isAdmin = user?.role === 'admin';
     const isProActive = user?.isPro && user.proUntil && user.proUntil > new Date();
     if (!isAdmin && !isProActive) return res.status(403).json({ error: 'Pro requis' });
-    const { name, price, desc, photo, category, inStock } = req.body;
+    const { name, price, desc, photo, category, subCategory, subItem, inStock } = req.body;
     if (!name?.trim()) return res.status(400).json({ error: 'Nom requis' });
-    const item = { name: name.trim(), price: Number(price)||0, desc, photo, category, inStock: inStock !== false };
+    const item = { name: name.trim(), price: Number(price)||0, desc, photo, category, subCategory: subCategory||'', subItem: subItem||'', inStock: inStock !== false };
     await User.findByIdAndUpdate(req.user.id, { $push: { boutiqueItems: item } });
     res.json({ success: true });
   } catch(err) { res.status(500).json({ error: err.message }); }
