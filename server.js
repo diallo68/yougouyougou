@@ -376,8 +376,32 @@ function authOptional(req, res, next) {
 }
 
 // Middleware admin uniquement
+// Middleware : admin uniquement
 function adminOnly(req, res, next) {
   if (req.user?.role !== 'admin') return res.status(403).json({ error: 'Accès refusé — admin uniquement' });
+  next();
+}
+
+// Middleware : Pro ou Admin
+async function requirePro(req, res, next) {
+  try {
+    const user = await User.findById(req.user.id).select('isPro proUntil role');
+    if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
+    // Admin a tous les droits
+    if (user.role === 'admin') return next();
+    // Vérifier Pro actif
+    if (!user.isPro) return res.status(403).json({ error: 'Réservé aux membres Pro' });
+    if (user.proUntil && user.proUntil < new Date()) {
+      await User.findByIdAndUpdate(req.user.id, { isPro: false });
+      return res.status(403).json({ error: 'Votre abonnement Pro a expiré' });
+    }
+    next();
+  } catch(err) { res.status(500).json({ error: err.message }); }
+}
+
+// Middleware : utilisateur authentifié (user, pro ou admin)
+function requireUser(req, res, next) {
+  if (!req.user) return res.status(401).json({ error: 'Authentification requise' });
   next();
 }
 
@@ -1380,24 +1404,41 @@ app.get('/api/my-payments', auth, async (req, res) => {
 // Stats globales
 app.get('/api/admin/stats', auth, adminOnly, async (req, res) => {
   try {
-    const [totalUsers, totalAds, totalPayments, revenueResult,
-           totalConvs, totalReports] = await Promise.all([
+    const now       = new Date();
+    const today     = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const monthStart= new Date(now.getFullYear(), now.getMonth(), 1);
+    const yearStart = new Date(now.getFullYear(), 0, 1);
+
+    const [totalUsers, totalAds, totalConvs, totalReports,
+           totalPayments, revenueResult,
+           proUsers,
+           payToday, payMonth, payYear] = await Promise.all([
       User.countDocuments(),
       Ad.countDocuments({ active: true }),
-      Payment.countDocuments({ status: 'success' }),
-      Payment.aggregate([{ $group: { _id: null, total: { $sum: '$amount' } } }]),
       Conversation.countDocuments(),
       Report.countDocuments({ status: 'pending' }),
+      Payment.countDocuments(),
+      Payment.aggregate([{ $group: { _id: null, total: { $sum: '$amount' } } }]),
+      User.countDocuments({ isPro: true, proUntil: { $gt: now } }),
+      Payment.aggregate([{ $match: { createdAt:{$gte:today}    }}, { $group:{_id:null,total:{$sum:'$amount'}}}]),
+      Payment.aggregate([{ $match: { createdAt:{$gte:monthStart}}}, { $group:{_id:null,total:{$sum:'$amount'}}}]),
+      Payment.aggregate([{ $match: { createdAt:{$gte:yearStart} }}, { $group:{_id:null,total:{$sum:'$amount'}}}]),
     ]);
+
     res.json({
       totalUsers, totalAds, totalPayments,
-      revenue: revenueResult[0]?.total || 0,
-      totalConvs, pendingReports: totalReports,
+      revenue:       revenueResult[0]?.total || 0,
+      totalConvs,
+      pendingReports: totalReports,
+      proUsers,
+      // Paiements par période
+      revenueToday:  payToday[0]?.total  || 0,
+      revenueMonth:  payMonth[0]?.total  || 0,
+      revenueYear:   payYear[0]?.total   || 0,
     });
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
-// Stats par période
 app.get('/api/admin/stats/period', auth, adminOnly, async (req, res) => {
   try {
     const now = new Date();
@@ -1841,6 +1882,39 @@ app.get('/api/admin/conversations', auth, adminOnly, async (req, res) => {
     console.error('[ADMIN CONVS]', err.message);
     res.status(500).json({ error: err.message });
   }
+});
+
+
+// ★ Pro — outils Pro (statistiques avancées)
+app.get('/api/pro/tools', auth, requirePro, async (req, res) => {
+  try {
+    const ads = await Ad.find({ seller: req.user.id, active: true }).select('views title createdAt');
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now - 30*24*3600*1000);
+    const sevenDaysAgo  = new Date(now - 7*24*3600*1000);
+
+    // Vues par annonce
+    const adStats = ads.map(a => ({
+      id:     a._id,
+      title:  a.title,
+      views:  a.views || 0,
+      days:   Math.floor((now - a.createdAt) / 86400000),
+    })).sort((a,b) => b.views - a.views);
+
+    // Contacts reçus (paiements de type commission sur ses annonces)
+    const adIds = ads.map(a => a._id);
+    const contacts30 = await Payment.countDocuments({
+      type: 'commission',
+      createdAt: { $gte: thirtyDaysAgo },
+    });
+
+    res.json({
+      totalAds:    ads.length,
+      totalViews:  ads.reduce((acc,a) => acc+(a.views||0), 0),
+      contacts30,
+      adStats,
+    });
+  } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
 // Sitemap XML dynamique (SEO)
