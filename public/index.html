@@ -298,11 +298,11 @@ footer{background:transparent;margin-top:0}
 .stat-card{background:#fff;border-radius:6px;padding:14px;border:1px solid var(--br);display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
 .stat-card-val{font-size:22px;font-weight:800;color:var(--or)}
 .stat-card-label{font-size:11px;color:var(--muted);font-weight:500}
-.admin-layout{display:grid;grid-template-columns:190px 1fr;height:100%;min-height:0;overflow:hidden;background:#fff}
-.admin-side{background:#1A1A1A;padding:14px 10px;height:100%;overflow-y:auto;box-sizing:border-box}
+.admin-layout{display:grid;grid-template-columns:190px 1fr;width:100%;height:100%;overflow:hidden}
+.admin-side{background:#1A1A1A;padding:14px 10px;overflow-y:auto;height:100%}
 .admin-nav-item{display:flex;align-items:center;gap:7px;padding:8px 10px;border-radius:5px;font-size:12px;font-weight:400;color:rgba(255,255,255,.45);cursor:pointer;transition:all .12s;margin-bottom:2px}
 .admin-nav-item:hover,.admin-nav-item.active{background:rgba(255,255,255,.08);color:#fff}
-.admin-main{padding:18px 22px;background:var(--bg);overflow-y:auto;min-height:0;box-sizing:border-box}
+.admin-main{padding:18px 22px;overflow-y:auto;background:var(--bg)}
 .admin-title{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:14px}
 .admin-pane{display:none}.admin-pane.active{display:block}
 .admin-table{width:100%;border-collapse:collapse;background:#fff;border-radius:6px;overflow:hidden;border:1px solid var(--br)}
@@ -777,7 +777,8 @@ footer{background:transparent;margin-top:0}
 }
 /* Page Admin — même gabarit que page-messages */
 #page-admin.active{
-  display:block !important;
+  display:flex !important;
+  flex-direction:column;
   position:fixed;
   top:104px;
   left:50%;
@@ -3366,6 +3367,7 @@ function verifyCode(){
         return;
       }
       var serverUser=data.user||u;
+      serverUser._id = serverUser._id||serverUser.id; // normaliser l'id
       serverUser.initials=((serverUser.prenom||u.prenom||'U').charAt(0)+((serverUser.nom||u.nom||'').charAt(0)||'')).toUpperCase();
       serverUser.name=serverUser.name||(serverUser.prenom+(serverUser.nom?' '+serverUser.nom:''));
       if(data.token) localStorage.setItem('ygy_token',data.token);
@@ -4179,6 +4181,9 @@ function syncRoleFromServer(callback){
   .then(function(data){
     if(data&&data.user){
       var u=DB.user()||{};
+      // Stocker TOUS les champs utiles, dont _id pour les appels API
+      if(data.user.id)       u._id      = data.user.id;
+      if(data.user._id)      u._id      = data.user._id;
       u.role    = data.user.role;
       u.isPro   = data.user.isPro   || false;
       if(data.user.proUntil) u.proUntil = data.user.proUntil;
@@ -4663,8 +4668,9 @@ function goAdmin(){
   fetch('/api/admin/stats',{headers:{'Authorization':'Bearer '+tok}})
   .then(function(r){
     if(r.ok){
-      // Confirmer le role admin localement
+      // Confirmer le role admin localement + stocker _id depuis le token
       u.role = 'admin';
+      if(!u._id) u._id = u.id || (tok ? JSON.parse(atob(tok.split('.')[1])).id : null);
       DB.login(u);
       updateNav();
       goTo('admin');
@@ -6260,6 +6266,8 @@ document.addEventListener('DOMContentLoaded',function(){
       .then(function(data){
         if(data && data.user){
           var u = DB.user() || {};
+          if(data.user.id)     u._id    = data.user.id;
+          if(data.user._id)    u._id    = data.user._id;
           u.role    = data.user.role;
           u.isPro   = data.user.isPro   || false;
           u.proUntil= data.user.proUntil || null;
@@ -7064,7 +7072,9 @@ async function activateProAdmin(planId, months){
   toast('⏳ Activation en cours...','ok');
 
   try {
-    var res = await fetch('/api/admin/users/'+u._id+'/pro', {
+    var userId = u._id || u.id;
+  if(!userId){ toast('Erreur: ID utilisateur manquant','err'); return; }
+  var res = await fetch('/api/admin/users/'+userId+'/pro', {
       method:'PATCH',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},
       body: JSON.stringify({ isPro:true, months:months })
@@ -7489,31 +7499,39 @@ function loadDashPayments(){
 var _dashUsers = [];
 
 function loadDashUsersAdmin(){
-  var tok = localStorage.getItem('ygy_token');
   var list = document.getElementById('dash-users-list');
-  if(!tok){
-    if(list) list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--re)">❌ Non connecté</div>';
-    return;
-  }
   if(list) list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted)">⏳ Chargement...</div>';
-  fetch('/api/admin/users?limit=500', {headers:{'Authorization':'Bearer '+tok}})
-  .then(function(r){
-    if(!r.ok){
-      return r.json().then(function(err){
-        throw new Error(err.error || 'Erreur '+r.status);
-      });
+  // Toujours re-synchroniser le rôle avant d'appeler l'API admin
+  syncRoleFromServer(function(){
+    var tok = localStorage.getItem('ygy_token');
+    if(!tok){
+      if(list) list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--re)">❌ Non connecté</div>';
+      return;
     }
-    return r.json();
-  })
-  .then(function(data){
-    _dashUsers = data.users||[];
-    var cnt = document.getElementById('dash-users-count');
-    if(cnt) cnt.textContent = _dashUsers.length + ' utilisateur'+(_dashUsers.length>1?'s':'');
-    filterDashUsers();
-  })
-  .catch(function(err){
-    console.error('loadDashUsersAdmin:', err.message);
-    if(list) list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--re)">❌ '+err.message+'</div>';
+    fetch('/api/admin/users?limit=500', {headers:{'Authorization':'Bearer '+tok}})
+    .then(function(r){
+      if(!r.ok){
+        return r.json().then(function(err){
+          throw new Error(err.error || 'Erreur '+r.status);
+        });
+      }
+      return r.json();
+    })
+    .then(function(data){
+      _dashUsers = data.users||[];
+      var cnt = document.getElementById('dash-users-count');
+      if(cnt) cnt.textContent = _dashUsers.length + ' utilisateur'+(_dashUsers.length>1?'s':'');
+      filterDashUsers();
+    })
+    .catch(function(err){
+      console.error('[USERS]', err.message);
+      if(list) list.innerHTML =
+        '<div style="padding:24px;text-align:center">'+
+          '<div style="color:var(--re);font-weight:700;margin-bottom:8px">❌ '+err.message+'</div>'+
+          '<div style="font-size:12px;color:var(--muted)">Vérifiez que votre compte a bien le rôle admin dans MongoDB.</div>'+
+          '<button onclick="loadDashUsersAdmin()" style="margin-top:10px;padding:7px 14px;background:var(--or);color:#fff;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-size:12px">🔄 Réessayer</button>'+
+        '</div>';
+    });
   });
 }
 
