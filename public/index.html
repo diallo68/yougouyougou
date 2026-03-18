@@ -7976,7 +7976,7 @@ function renderBoutiqueHero(seller){
 
   // Nom
   var nameEl = document.getElementById('seller-name');
-  if(nameEl) nameEl.textContent = (seller.firstName||seller.name||'Vendeur').trim();
+  if(nameEl) nameEl.textContent = (seller.boutiqueName||seller.firstName||seller.name||'Vendeur').trim();
 
   // Slogan
   var sloganEl = document.getElementById('boutique-slogan');
@@ -8268,112 +8268,157 @@ function renderBoutiqueDash(){
 }
 
 function buildBoutiqueDashHTML(u){
-  return '<div style="display:flex;flex-direction:column;gap:14px">'+
+  return '<div style="display:flex;flex-direction:column;gap:0">' +
 
-  // Identité
-  '<div class="boutique-edit-section">'+
-    '<div class="boutique-edit-title">🎨 Identité visuelle</div>'+
-    '<div class="fg"><label>Bannière (URL image)</label>'+
-      '<input type="url" id="bd-banner" placeholder="https://..." style="width:100%;padding:8px 12px;border:1.5px solid var(--br);border-radius:6px;font-size:13px;font-family:inherit"></div>'+
-    '<div class="fg"><label>Slogan <small style="color:var(--muted)">(accroche courte)</small></label>'+
-      '<input type="text" id="bd-slogan" placeholder="Ex: La qualité à votre portée" maxlength="200" style="width:100%;padding:8px 12px;border:1.5px solid var(--br);border-radius:6px;font-size:13px;font-family:inherit"></div>'+
-    '<div class="fg"><label>Secteur d\'activité</label>'+
-      '<select id="bd-sector" style="width:100%;padding:8px 12px;border:1.5px solid var(--br);border-radius:6px;font-size:13px;font-family:inherit;background:#fff">'+
-        '<option value="">-- Choisir --</option>'+
-        ['Mode & Textile','Électronique','Immobilier','Véhicules','Alimentation','Services','Artisanat','Santé & Beauté','Sport & Loisirs','Autre'].map(function(s){
-          return '<option value="'+s+'">'+s+'</option>';}).join('')+
-      '</select></div>'+
-  '</div>'+
+  // ─── 1. NOM DE LA BOUTIQUE ───
+  '<div class="boutique-edit-section">' +
+    '<div class="boutique-edit-title">🏪 Nom de la boutique</div>' +
+    '<div class="fg">' +
+      '<input type="text" id="bd-name" maxlength="100" placeholder="Ex: Mamadou Electronics, Boutique Kadiatou..." ' +
+        'style="width:100%;padding:10px 12px;border:1.5px solid var(--br);border-radius:8px;font-size:14px;font-weight:700;font-family:inherit;box-sizing:border-box">' +
+    '</div>' +
+  '</div>' +
 
-  // Description
-  '<div class="boutique-edit-section">'+
-    '<div class="boutique-edit-title">📝 Description boutique</div>'+
-    '<div class="fg"><textarea id="bd-desc" rows="4" maxlength="1000" placeholder="Décrivez votre activité, vos produits, ce qui vous différencie..." style="width:100%;padding:8px 12px;border:1.5px solid var(--br);border-radius:6px;font-size:13px;font-family:inherit;resize:vertical"></textarea>'+
-    '<div style="text-align:right;font-size:11px;color:var(--muted)" id="bd-desc-count">0 / 1000</div></div>'+
-  '</div>'+
+  // ─── 2. SLOGAN ───
+  '<div class="boutique-edit-section">' +
+    '<div class="boutique-edit-title">💬 Slogan</div>' +
+    '<div class="fg">' +
+      '<input type="text" id="bd-slogan" maxlength="200" placeholder="Ex: La qualité à votre portée en Guinée" ' +
+        'style="width:100%;padding:10px 12px;border:1.5px solid var(--br);border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box">' +
+    '</div>' +
+  '</div>' +
 
-  // Horaires
-  '<div class="boutique-edit-section">'+
-    '<div class="boutique-edit-title">🕐 Horaires d\'ouverture</div>'+
-    '<div id="bd-hours-grid">'+buildHoursEditorHTML()+'</div>'+
-  '</div>'+
+  // ─── 3. SECTEUR D'ACTIVITÉ ───
+  '<div class="boutique-edit-section">' +
+    '<div class="boutique-edit-title">🏷️ Secteur d\'activité</div>' +
+    '<div class="fg">' +
+      '<select id="bd-sector" style="width:100%;padding:10px 12px;border:1.5px solid var(--br);border-radius:8px;font-size:13px;font-family:inherit;background:#fff;box-sizing:border-box">' +
+        '<option value="">-- Choisir votre secteur --</option>' +
+        ['Mode & Textile','Électronique & High-Tech','Alimentation & Épicerie',
+         'Beauté & Bien-être','Ameublement & Décoration','Véhicules & Auto-Moto',
+         'Immobilier & Bâtiment','Santé & Pharmacie','Sport & Loisirs',
+         'Services professionnels','Artisanat & Art','Agriculture & Élevage','Autre'].map(function(s){
+          return '<option value="'+s+'">'+s+'</option>';}).join('') +
+      '</select>' +
+    '</div>' +
+  '</div>' +
 
-  // Réseaux sociaux
-  '<div class="boutique-edit-section">'+
-    '<div class="boutique-edit-title">📱 Réseaux sociaux & Contact</div>'+
-    '<div class="fg"><label>WhatsApp <small style="color:var(--muted)">(+224...)</small></label>'+
-      '<input type="tel" id="bd-wa" placeholder="ex: 224620000000" style="width:100%;padding:8px 12px;border:1.5px solid var(--br);border-radius:6px;font-size:13px;font-family:inherit"></div>'+
-    '<div class="fg"><label>Page Facebook</label>'+
-      '<input type="text" id="bd-fb" placeholder="nom-de-la-page" style="width:100%;padding:8px 12px;border:1.5px solid var(--br);border-radius:6px;font-size:13px;font-family:inherit"></div>'+
-    '<div class="fg"><label>Instagram</label>'+
-      '<input type="text" id="bd-ig" placeholder="@compte" style="width:100%;padding:8px 12px;border:1.5px solid var(--br);border-radius:6px;font-size:13px;font-family:inherit"></div>'+
-    '<div class="fg"><label>TikTok</label>'+
-      '<input type="text" id="bd-tt" placeholder="@compte" style="width:100%;padding:8px 12px;border:1.5px solid var(--br);border-radius:6px;font-size:13px;font-family:inherit"></div>'+
-    '<div class="fg"><label>Site web</label>'+
-      '<input type="url" id="bd-web" placeholder="https://..." style="width:100%;padding:8px 12px;border:1.5px solid var(--br);border-radius:6px;font-size:13px;font-family:inherit"></div>'+
-  '</div>'+
+  // ─── 4. DESCRIPTION ───
+  '<div class="boutique-edit-section">' +
+    '<div class="boutique-edit-title">📝 Description de la boutique</div>' +
+    '<div class="fg">' +
+      '<textarea id="bd-desc" rows="4" maxlength="1000" ' +
+        'placeholder="Décrivez votre activité, vos produits phares, vos avantages, vos conditions de livraison..." ' +
+        'style="width:100%;padding:10px 12px;border:1.5px solid var(--br);border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>' +
+      '<div style="text-align:right;font-size:11px;color:var(--muted);margin-top:3px" id="bd-desc-count">0 / 1000</div>' +
+    '</div>' +
+  '</div>' +
 
-  // Bouton sauvegarder
-  '<button class="btn btn-or btn-full" onclick="saveBoutiqueSettings()" style="font-size:14px">💾 Enregistrer la boutique</button>'+
+  // ─── 5. RÉSEAUX SOCIAUX & CONTACT ───
+  '<div class="boutique-edit-section">' +
+    '<div class="boutique-edit-title">📱 Réseaux sociaux & Contact</div>' +
 
-  // Catalogue articles
-  '<div class="boutique-edit-section" style="margin-top:4px">'+
-    '<div class="boutique-edit-title" style="display:flex;align-items:center;justify-content:space-between">'+
-      '<span>🛍️ Catalogue articles</span>'+
-      '<button onclick="openAddItemModal()" style="background:var(--or);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit">+ Ajouter</button>'+
-    '</div>'+
-    '<div id="my-boutique-items-list"></div>'+
-  '</div>'+
+    // WhatsApp
+    '<div class="fg" style="margin-bottom:10px">' +
+      '<label style="font-size:12px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:6px;margin-bottom:5px">' +
+        '<span style="background:#25D366;color:#fff;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px">W</span>' +
+        'WhatsApp (numéro complet avec indicatif)' +
+      '</label>' +
+      '<div style="display:flex;align-items:center;gap:0;border:1.5px solid var(--br);border-radius:8px;overflow:hidden">' +
+        '<span style="background:var(--brl);padding:10px 12px;font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap;border-right:1px solid var(--br)">🇬🇳 +224</span>' +
+        '<input type="tel" id="bd-wa" placeholder="620 00 00 00" maxlength="15" ' +
+          'style="flex:1;padding:10px 12px;border:none;font-size:13px;font-family:inherit;outline:none">' +
+      '</div>' +
+    '</div>' +
+
+    // Facebook
+    '<div class="fg" style="margin-bottom:10px">' +
+      '<label style="font-size:12px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:6px;margin-bottom:5px">' +
+        '<span style="background:#1877F2;color:#fff;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900">f</span>' +
+        'Page Facebook' +
+      '</label>' +
+      '<div style="display:flex;align-items:center;gap:0;border:1.5px solid var(--br);border-radius:8px;overflow:hidden">' +
+        '<span style="background:var(--brl);padding:10px 12px;font-size:11px;color:var(--muted);border-right:1px solid var(--br);white-space:nowrap">facebook.com/</span>' +
+        '<input type="text" id="bd-fb" placeholder="nom-de-votre-page" ' +
+          'style="flex:1;padding:10px 12px;border:none;font-size:13px;font-family:inherit;outline:none">' +
+      '</div>' +
+    '</div>' +
+
+    // TikTok
+    '<div class="fg">' +
+      '<label style="font-size:12px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:6px;margin-bottom:5px">' +
+        '<span style="background:#000;color:#fff;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px">♪</span>' +
+        'TikTok' +
+      '</label>' +
+      '<div style="display:flex;align-items:center;gap:0;border:1.5px solid var(--br);border-radius:8px;overflow:hidden">' +
+        '<span style="background:var(--brl);padding:10px 12px;font-size:11px;color:var(--muted);border-right:1px solid var(--br);white-space:nowrap">tiktok.com/@</span>' +
+        '<input type="text" id="bd-tt" placeholder="votre_compte" ' +
+          'style="flex:1;padding:10px 12px;border:none;font-size:13px;font-family:inherit;outline:none">' +
+      '</div>' +
+    '</div>' +
+  '</div>' +
+
+  // ─── 6. HORAIRES D'OUVERTURE ───
+  '<div class="boutique-edit-section">' +
+    '<div class="boutique-edit-title">🕐 Horaires d\'ouverture</div>' +
+    buildHoursEditorHTML() +
+  '</div>' +
+
+  // ─── BOUTON ENREGISTRER ───
+  '<div style="padding:0 0 4px">' +
+    '<button class="btn btn-or btn-full" onclick="saveBoutiqueSettings()" ' +
+      'style="font-size:14px;font-weight:800;padding:14px;border-radius:10px">' +
+      '💾 Enregistrer ma boutique' +
+    '</button>' +
+  '</div>' +
+
+  // ─── 7. CATALOGUE ARTICLES ───
+  '<div class="boutique-edit-section" style="margin-top:8px">' +
+    '<div class="boutique-edit-title" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">' +
+      '<span>🛍️ Catalogue articles</span>' +
+      '<button onclick="openAddItemModal()" ' +
+        'style="background:var(--or);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">' +
+        '➕ Ajouter un article' +
+      '</button>' +
+    '</div>' +
+    '<p style="font-size:12px;color:var(--muted);margin-bottom:12px;background:var(--orl);padding:8px 12px;border-radius:6px;border-left:3px solid var(--or)">' +
+      '💡 Le catalogue vous permet d\'afficher vos articles <strong>sans déposer d\'annonce</strong>. Idéal pour présenter votre stock permanent.' +
+    '</p>' +
+    '<div id="my-boutique-items-list">' +
+      '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">⏳ Chargement...</div>' +
+    '</div>' +
+  '</div>' +
 
   '</div>';
 }
 
-// Éditeur horaires
-function buildHoursEditorHTML(){
-  return '<div style="display:flex;flex-direction:column;gap:6px">'+
-    JOURS.map(function(j){
-      return '<div style="display:flex;align-items:center;gap:8px;font-size:12px">'+
-        '<span style="width:70px;font-weight:700">'+j.label+'</span>'+
-        '<input type="time" id="bd-h-'+j.key+'-open" value="08:00" style="padding:4px 6px;border:1px solid var(--br);border-radius:4px;font-size:12px;font-family:inherit">'+
-        '<span style="color:var(--muted)">–</span>'+
-        '<input type="time" id="bd-h-'+j.key+'-close" value="18:00" style="padding:4px 6px;border:1px solid var(--br);border-radius:4px;font-size:12px;font-family:inherit">'+
-        '<label style="display:flex;align-items:center;gap:4px;color:var(--muted)">'+
-          '<input type="checkbox" id="bd-h-'+j.key+'-closed"> Fermé'+
-        '</label>'+
-      '</div>';
-    }).join('')+
-  '</div>';
-}
 
 // Pré-remplir le formulaire depuis les données user
 function preFillBoutiqueForm(u){
   var set = function(id,val){ var el=document.getElementById(id); if(el&&val!==undefined) el.value=val; };
-  set('bd-banner', u.boutiqueBanner||'');
+  set('bd-name',   u.boutiqueName  ||'');
   set('bd-slogan', u.boutiqueSlogan||'');
   set('bd-sector', u.boutiqueSector||'');
-  set('bd-desc', u.boutiqueDesc||'');
+  set('bd-desc',   u.boutiqueDesc  ||'');
   var descEl = document.getElementById('bd-desc');
   var cntEl  = document.getElementById('bd-desc-count');
   if(descEl && cntEl){
     cntEl.textContent = (descEl.value.length)+' / 1000';
-    descEl.addEventListener('input', function(){ cntEl.textContent = descEl.value.length+' / 1000'; });
+    descEl.oninput = function(){ cntEl.textContent = this.value.length+' / 1000'; };
   }
   var soc = u.boutiqueSocial||{};
-  set('bd-wa',  soc.whatsapp||'');
-  set('bd-fb',  soc.facebook||'');
-  set('bd-ig',  soc.instagram||'');
-  set('bd-tt',  soc.tiktok||'');
-  set('bd-web', soc.website||'');
-  // Horaires
+  set('bd-wa', soc.whatsapp||'');
+  set('bd-fb', soc.facebook||'');
+  set('bd-tt', soc.tiktok||'');
   var hours = u.boutiqueHours||{};
   JOURS.forEach(function(j){
     var h = hours[j.key]||{};
     var openEl   = document.getElementById('bd-h-'+j.key+'-open');
     var closeEl  = document.getElementById('bd-h-'+j.key+'-close');
     var closedEl = document.getElementById('bd-h-'+j.key+'-closed');
-    if(openEl&&h.open)   openEl.value   = h.open;
-    if(closeEl&&h.close) closeEl.value  = h.close;
-    if(closedEl)         closedEl.checked = !!h.closed;
+    if(openEl   && h.open)  openEl.value    = h.open;
+    if(closeEl  && h.close) closeEl.value   = h.close;
+    if(closedEl)            closedEl.checked = !!h.closed;
   });
 }
 
@@ -8393,18 +8438,17 @@ async function saveBoutiqueSettings(){
       closed: closedEl? closedEl.checked: false,
     };
   });
+  var g = function(id){ return (document.getElementById(id)||{value:''}).value||''; };
   var payload = {
-    boutiqueDesc:   (document.getElementById('bd-desc')||{}).value||'',
-    boutiqueSlogan: (document.getElementById('bd-slogan')||{}).value||'',
-    boutiqueBanner: (document.getElementById('bd-banner')||{}).value||'',
-    boutiqueSector: (document.getElementById('bd-sector')||{}).value||'',
+    boutiqueName:   g('bd-name'),
+    boutiqueSlogan: g('bd-slogan'),
+    boutiqueSector: g('bd-sector'),
+    boutiqueDesc:   g('bd-desc'),
     boutiqueHours:  hours,
     boutiqueSocial: {
-      whatsapp:  (document.getElementById('bd-wa') ||{}).value||'',
-      facebook:  (document.getElementById('bd-fb') ||{}).value||'',
-      instagram: (document.getElementById('bd-ig') ||{}).value||'',
-      tiktok:    (document.getElementById('bd-tt') ||{}).value||'',
-      website:   (document.getElementById('bd-web')||{}).value||'',
+      whatsapp: g('bd-wa'),
+      facebook: g('bd-fb'),
+      tiktok:   g('bd-tt'),
     },
   };
   var btn = document.querySelector('[onclick="saveBoutiqueSettings()"]');
@@ -8444,50 +8488,53 @@ function renderMyBoutiqueItems(items){
   var list = document.getElementById('my-boutique-items-list');
   if(!list) return;
   if(!items.length){
-    list.innerHTML = '<div style="text-align:center;padding:16px;color:var(--muted);font-size:13px">'+
-      'Aucun article dans votre catalogue.<br><small>Ajoutez des articles indépendamment de vos annonces.</small></div>';
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">'
+      +'<div style="font-size:32px;margin-bottom:8px">&#128717;</div>'
+      +'Aucun article dans votre catalogue.<br>'
+      +'<small>Cliquez sur <strong>+ Ajouter</strong> pour commencer.</small></div>';
     return;
   }
-  list.innerHTML = items.map(function(it){
-    return '<div class="boutique-item-manage-row">'+
-      (it.photo?'<img src="'+it.photo+'" style="width:40px;height:40px;border-radius:6px;object-fit:cover;flex-shrink:0">':'<div style="width:40px;height:40px;background:var(--brl);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px">🛍️</div>')+
-      '<div style="flex:1;min-width:0">'+
-        '<div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(it.name||'—')+'</div>'+
-        '<div style="font-size:12px;color:var(--or);font-weight:700">'+(it.price||0).toLocaleString('fr-FR')+' GNF</div>'+
-        (!it.inStock?'<span style="font-size:10px;background:#FEE2E2;color:#DC2626;padding:1px 5px;border-radius:3px">Épuisé</span>':'')+
-      '</div>'+
-      '<div style="display:flex;gap:4px;flex-shrink:0">'+
-        '<button onclick="toggleItemStock(\''+it._id+'\','+(!it.inStock)+')" style="background:var(--brl);border:1px solid var(--br);border-radius:4px;padding:3px 7px;font-size:10px;cursor:pointer;font-family:inherit">'+(it.inStock?'Épuiser':'Restorer')+'</button>'+
-        '<button onclick="deleteMyItem(\''+it._id+'\')" style="background:#FEE2E2;color:#DC2626;border:1px solid #FECACA;border-radius:4px;padding:3px 7px;font-size:10px;cursor:pointer">🗑️</button>'+
-      '</div>'+
-    '</div>';
-  }).join('');
+  var html = '';
+  items.forEach(function(it){
+    var catPath = [it.category,it.subCategory,it.subItem].filter(Boolean).join(' &rsaquo; ');
+    var photoEl = it.photo
+      ? '<img src="'+it.photo+'" style="width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0">'
+      : '<div style="width:52px;height:52px;background:var(--orl);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">&#128717;</div>';
+    var stk = it.inStock
+      ? '<span style="font-size:10px;background:#D1FAE5;color:#065F46;padding:2px 6px;border-radius:4px;font-weight:700;display:inline-block;margin-top:3px">En stock</span>'
+      : '<span style="font-size:10px;background:#FEE2E2;color:#DC2626;padding:2px 6px;border-radius:4px;font-weight:700;display:inline-block;margin-top:3px">&#201;puis&#233;</span>';
+    var itemId = it._id || '';
+    var newStock = !it.inStock;
+    html += '<div style="display:flex;align-items:center;gap:10px;padding:10px;background:#fff;border:1px solid var(--br);border-radius:8px;margin-bottom:8px">'
+      + photoEl
+      + '<div style="flex:1;min-width:0">'
+        + '<div style="font-weight:800;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(it.name||'&mdash;')+'</div>'
+        + '<div style="font-size:13px;color:var(--or);font-weight:800">'+(it.price||0).toLocaleString('fr-FR')+' GNF</div>'
+        + (catPath ? '<div style="font-size:10px;color:var(--muted);margin-top:2px">&#128194; '+catPath+'</div>' : '')
+        + stk
+      + '</div>'
+      + '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">'
+        + '<button data-itemid="'+itemId+'" data-instock="'+newStock+'" class="btn-toggle-stock"'
+          +' style="background:var(--brl);border:1px solid var(--br);border-radius:5px;padding:4px 8px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">'
+          + (it.inStock ? 'Epuiser' : 'Restorer')
+        + '</button>'
+        + '<button data-itemid="'+itemId+'" class="btn-del-item"'
+          +' style="background:#FEE2E2;color:#DC2626;border:1px solid #FECACA;border-radius:5px;padding:4px 8px;font-size:10px;font-weight:700;cursor:pointer">'
+          + '&#128465;'
+        + '</button>'
+      + '</div>'
+    + '</div>';
+  });
+  list.innerHTML = html;
+  // Attacher les events via dataset (évite les problèmes d'apostrophes dans onclick)
+  list.querySelectorAll('.btn-toggle-stock').forEach(function(btn){
+    btn.onclick = function(){ toggleItemStock(this.dataset.itemid, this.dataset.instock === 'true'); };
+  });
+  list.querySelectorAll('.btn-del-item').forEach(function(btn){
+    btn.onclick = function(){ deleteMyItem(this.dataset.itemid); };
+  });
 }
 
-// Ajouter un article au catalogue
-function openAddItemModal(){
-  var name  = prompt('Nom de l\'article :');
-  if(!name||!name.trim()) return;
-  var price = parseInt(prompt('Prix (GNF) :', '0'))||0;
-  var desc  = prompt('Description (optionnel) :', '')||'';
-  var photo = prompt('URL photo (optionnel) :', '')||'';
-  var cat   = prompt('Catégorie (optionnel) :', '')||'';
-  addBoutiqueItem({name:name.trim(), price:price, desc:desc, photo:photo, category:cat});
-}
-async function addBoutiqueItem(item){
-  var tok = localStorage.getItem('ygy_token');
-  try{
-    var res = await fetch('/api/me/boutique/items',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},
-      body: JSON.stringify(item)
-    });
-    var data = await res.json();
-    if(!res.ok) throw new Error(data.error||'Erreur');
-    toast('✅ Article ajouté au catalogue','ok');
-    loadMyBoutiqueItems();
-  }catch(err){ toast('❌ '+err.message,'err'); }
-}
 async function deleteMyItem(itemId){
   if(!confirm('Supprimer cet article ?')) return;
   var tok = localStorage.getItem('ygy_token');
@@ -8535,6 +8582,208 @@ document.addEventListener('DOMContentLoaded', function(){
     }, 300);
   };
 });
+
+</script>
+<script>
+// ── Modal ajout article catalogue (avec 3 niveaux CATS + photo) ──
+var _itemPhotoB64 = '';
+var _itemCat1 = '', _itemCat2 = '', _itemCat3 = '';
+
+function openAddItemModal(){
+  _itemPhotoB64 = '';
+  _itemCat1 = ''; _itemCat2 = ''; _itemCat3 = '';
+
+  // Créer le modal dynamiquement
+  var existing = document.getElementById('overlay-add-item');
+  if(existing) existing.remove();
+
+  var overlay = document.createElement('div');
+  overlay.id = 'overlay-add-item';
+  overlay.className = 'overlay';
+  overlay.style.cssText = 'display:flex;align-items:center;justify-content:center;z-index:2000';
+  overlay.innerHTML =
+    '<div class="modal" style="max-width:480px;width:95%;max-height:90vh;overflow-y:auto">' +
+      '<div class="modal-head">' +
+        '<div class="modal-title">🛍️ Ajouter un article au catalogue</div>' +
+        '<button class="modal-close" onclick="document.getElementById(\'overlay-add-item\').remove()">✕</button>' +
+      '</div>' +
+      '<div class="modal-body" style="display:flex;flex-direction:column;gap:14px">' +
+
+        // Photo
+        '<div>' +
+          '<label style="font-size:12px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px">📷 Photo de l\'article</label>' +
+          '<div id="item-photo-preview" style="width:100%;height:140px;border:2px dashed var(--br);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:var(--brl);overflow:hidden;position:relative" onclick="document.getElementById(\'item-photo-input\').click()">' +
+            '<div id="item-photo-placeholder" style="text-align:center">' +
+              '<div style="font-size:32px;margin-bottom:6px">📷</div>' +
+              '<div style="font-size:12px;color:var(--muted);font-weight:600">Cliquez pour choisir une photo<br><span style="font-size:11px;font-weight:400">Appareil photo ou galerie</span></div>' +
+            '</div>' +
+          '</div>' +
+          '<input type="file" id="item-photo-input" accept="image/*" capture="environment" style="display:none" onchange="previewItemPhoto(this)">' +
+          '<button onclick="document.getElementById(\'item-photo-input\').click()" style="width:100%;margin-top:6px;padding:8px;background:none;border:1.5px solid var(--br);border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--ink2)">📸 Choisir une photo</button>' +
+        '</div>' +
+
+        // Nom de l'article
+        '<div class="fg">' +
+          '<label>Nom de l\'article <span style="color:var(--re)">*</span></label>' +
+          '<input type="text" id="item-name" maxlength="100" placeholder="Ex: Robe boubou, Téléphone Samsung, Riz parfumé..." ' +
+            'style="width:100%;padding:10px 12px;border:1.5px solid var(--br);border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box">' +
+        '</div>' +
+
+        // Prix
+        '<div class="fg">' +
+          '<label>Prix (GNF) <span style="color:var(--re)">*</span></label>' +
+          '<div style="display:flex;border:1.5px solid var(--br);border-radius:8px;overflow:hidden">' +
+            '<input type="number" id="item-price" min="0" placeholder="0" ' +
+              'style="flex:1;padding:10px 12px;border:none;font-size:14px;font-weight:700;font-family:inherit;outline:none">' +
+            '<span style="background:var(--brl);padding:10px 12px;font-size:12px;font-weight:700;color:var(--muted);border-left:1px solid var(--br)">GNF</span>' +
+          '</div>' +
+        '</div>' +
+
+        // Catégorie niveau 1
+        '<div class="fg">' +
+          '<label>Catégorie <span style="color:var(--re)">*</span></label>' +
+          '<select id="item-cat1" onchange="onItemCat1Change()" ' +
+            'style="width:100%;padding:10px 12px;border:1.5px solid var(--br);border-radius:8px;font-size:13px;font-family:inherit;background:#fff;box-sizing:border-box">' +
+            '<option value="">-- Catégorie principale --</option>' +
+            (typeof CATS !== 'undefined' ? CATS.map(function(cat){
+              return '<option value="'+cat.n+'">'+cat.e+' '+cat.n+'</option>';
+            }).join('') : '') +
+          '</select>' +
+        '</div>' +
+
+        // Catégorie niveau 2
+        '<div class="fg" id="item-cat2-wrap" style="display:none">' +
+          '<label>Sous-catégorie</label>' +
+          '<select id="item-cat2" onchange="onItemCat2Change()" ' +
+            'style="width:100%;padding:10px 12px;border:1.5px solid var(--br);border-radius:8px;font-size:13px;font-family:inherit;background:#fff;box-sizing:border-box">' +
+            '<option value="">-- Sous-catégorie --</option>' +
+          '</select>' +
+        '</div>' +
+
+        // Catégorie niveau 3
+        '<div class="fg" id="item-cat3-wrap" style="display:none">' +
+          '<label>Article / Type</label>' +
+          '<select id="item-cat3" onchange="_itemCat3=this.value" ' +
+            'style="width:100%;padding:10px 12px;border:1.5px solid var(--br);border-radius:8px;font-size:13px;font-family:inherit;background:#fff;box-sizing:border-box">' +
+            '<option value="">-- Type d\'article (optionnel) --</option>' +
+          '</select>' +
+        '</div>' +
+
+        // Stock
+        '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--brl);border-radius:8px">' +
+          '<input type="checkbox" id="item-instock" checked style="width:16px;height:16px;accent-color:var(--or);cursor:pointer">' +
+          '<label for="item-instock" style="font-size:13px;font-weight:600;cursor:pointer">Article disponible en stock</label>' +
+        '</div>' +
+
+        // Bouton ajouter
+        '<button onclick="submitAddItem()" class="btn btn-or btn-full" style="font-size:14px;padding:14px;border-radius:10px;font-weight:800">' +
+          '✅ Ajouter au catalogue' +
+        '</button>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(overlay);
+  overlay.classList.add('open');
+  // Focus sur le nom
+  setTimeout(function(){ var el=document.getElementById('item-name'); if(el) el.focus(); }, 100);
+}
+
+// Preview photo article
+function previewItemPhoto(input){
+  if(!input.files||!input.files[0]) return;
+  var file = input.files[0];
+  var reader = new FileReader();
+  reader.onload = function(e){
+    _itemPhotoB64 = e.target.result;
+    var prev = document.getElementById('item-photo-preview');
+    var placeholder = document.getElementById('item-photo-placeholder');
+    if(prev){
+      if(placeholder) placeholder.style.display = 'none';
+      var img = prev.querySelector('img');
+      if(!img){ img = document.createElement('img'); img.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover'; prev.appendChild(img); }
+      img.src = _itemPhotoB64;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+// Cascade catégories dans le modal article
+function onItemCat1Change(){
+  var sel1 = document.getElementById('item-cat1');
+  _itemCat1 = sel1 ? sel1.value : '';
+  _itemCat2 = ''; _itemCat3 = '';
+  var wrap2 = document.getElementById('item-cat2-wrap');
+  var wrap3 = document.getElementById('item-cat3-wrap');
+  if(wrap3) wrap3.style.display = 'none';
+
+  if(!_itemCat1 || typeof CATS === 'undefined'){ if(wrap2) wrap2.style.display='none'; return; }
+  var cat = CATS.find(function(c){ return c.n === _itemCat1; });
+  if(!cat||!cat.sub||!cat.sub.length){ if(wrap2) wrap2.style.display='none'; return; }
+
+  var sel2 = document.getElementById('item-cat2');
+  sel2.innerHTML = '<option value="">-- Sous-catégorie --</option>';
+  cat.sub.forEach(function(sub){
+    var n = typeof sub==='object' ? sub.n : sub;
+    var opt = document.createElement('option');
+    opt.value = n; opt.textContent = n;
+    sel2.appendChild(opt);
+  });
+  if(wrap2) wrap2.style.display = 'block';
+}
+
+function onItemCat2Change(){
+  var sel2 = document.getElementById('item-cat2');
+  _itemCat2 = sel2 ? sel2.value : '';
+  _itemCat3 = '';
+  var wrap3 = document.getElementById('item-cat3-wrap');
+
+  if(!_itemCat2){ if(wrap3) wrap3.style.display='none'; return; }
+  var cat = CATS.find(function(c){ return c.n === _itemCat1; });
+  if(!cat||!cat.sub){ if(wrap3) wrap3.style.display='none'; return; }
+  var sub = cat.sub.find(function(s){ return (typeof s==='object'?s.n:s) === _itemCat2; });
+  if(!sub||typeof sub!=='object'||!sub.items||!sub.items.length){ if(wrap3) wrap3.style.display='none'; return; }
+
+  var sel3 = document.getElementById('item-cat3');
+  sel3.innerHTML = '<option value="">-- Type (optionnel) --</option>';
+  sub.items.forEach(function(item){
+    var opt = document.createElement('option');
+    opt.value = item; opt.textContent = item;
+    sel3.appendChild(opt);
+  });
+  if(wrap3) wrap3.style.display = 'block';
+}
+
+// Soumettre l'article
+async function submitAddItem(){
+  var name  = (document.getElementById('item-name')||{value:''}).value.trim();
+  var price = parseInt((document.getElementById('item-price')||{value:'0'}).value)||0;
+  var inStk = (document.getElementById('item-instock')||{checked:true}).checked;
+  var cat3El = document.getElementById('item-cat3');
+  if(cat3El) _itemCat3 = cat3El.value;
+
+  if(!name){ toast('⚠️ Le nom de l\'article est obligatoire','err'); return; }
+  if(!_itemCat1){ toast('⚠️ Choisissez une catégorie','err'); return; }
+
+  var btn = document.querySelector('#overlay-add-item .btn-or');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Ajout en cours...'; }
+
+  try{
+    await addBoutiqueItem({
+      name:        name,
+      price:       price,
+      photo:       _itemPhotoB64||'',
+      category:    _itemCat1,
+      subCategory: _itemCat2||'',
+      subItem:     _itemCat3||'',
+      inStock:     inStk,
+    });
+    // Fermer le modal
+    var overlay = document.getElementById('overlay-add-item');
+    if(overlay) overlay.remove();
+  } catch(err){
+    if(btn){ btn.disabled=false; btn.textContent='✅ Ajouter au catalogue'; }
+  }
+}
 
 </script>
 </body>
