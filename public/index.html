@@ -974,6 +974,105 @@ footer{background:transparent;margin-top:0}
   border-left: 3px solid var(--or);
   padding-left: 10px;
 }
+
+/* ══════════════════════════════════════════════
+   BOUTIQUE PRO — CSS COMPLET
+══════════════════════════════════════════════ */
+.boutique-page-wrap{max-width:1100px;margin:0 auto;padding:0 0 40px}
+#page-seller.active{display:block!important;position:fixed;top:104px;left:50%;transform:translateX(-50%);width:100%;max-width:1100px;height:calc(100vh - 104px);z-index:200;overflow-y:auto;overflow-x:hidden;background:var(--bg)}
+
+/* Hero */
+.boutique-hero{position:relative;background:#1A1A1A;color:#fff;border-radius:0 0 12px 12px;overflow:hidden;margin-bottom:0}
+.boutique-banner-img{height:180px;background:linear-gradient(135deg,#FF5C00,#FF9500);background-size:cover;background-position:center}
+.boutique-hero-body{padding:0 20px 20px;position:relative}
+.boutique-back{position:absolute;top:-168px;left:16px;background:rgba(0,0,0,.4);color:#fff;border:none;border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;backdrop-filter:blur(4px)}
+.boutique-identity{display:flex;gap:14px;align-items:flex-end;margin-top:-30px;margin-bottom:14px}
+.boutique-avatar-wrap{position:relative;flex-shrink:0}
+.boutique-av{width:72px;height:72px;border-radius:50%;background:var(--or);color:#fff;font-size:28px;font-weight:900;display:flex;align-items:center;justify-content:center;border:3px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+.boutique-verified{position:absolute;bottom:2px;right:2px;background:#16a34a;color:#fff;width:18px;height:18px;border-radius:50%;font-size:10px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;font-weight:800}
+.boutique-identity-info{flex:1;min-width:0;padding-bottom:4px}
+.boutique-name-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:2px}
+.boutique-name{font-size:20px;font-weight:900;color:#fff}
+.boutique-slogan{font-size:12px;color:rgba(255,255,255,.75);font-style:italic;margin-bottom:4px}
+.boutique-meta-row{font-size:11px;color:rgba(255,255,255,.6);display:flex;gap:8px;flex-wrap:wrap}
+.boutique-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.boutique-btn-wa{background:#25D366;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px}
+.boutique-btn-msg{background:var(--or);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit}
+.boutique-btn-rate{background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.35);border-radius:8px;padding:9px 16px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit}
+.boutique-socials{display:flex;gap:6px;margin-left:4px}
+.boutique-social-link{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;text-decoration:none;border:1.5px solid rgba(255,255,255,.25);cursor:pointer;transition:background .15s}
+.boutique-social-link:hover{background:rgba(255,255,255,.3)}
+
+/* Stats bar */
+.boutique-stats-bar{display:flex;background:#fff;border-bottom:1px solid var(--br);padding:12px 20px;gap:0;margin-bottom:20px}
+.boutique-stat{flex:1;text-align:center;padding:4px 0;border-right:1px solid var(--br)}
+.boutique-stat:last-child{border-right:none}
+.boutique-stat-n{font-size:18px;font-weight:900;color:var(--ink)}
+.boutique-stat-l{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-top:1px}
+
+/* Body 2 colonnes */
+.boutique-body{display:grid;grid-template-columns:240px 1fr;gap:20px;padding:0 16px}
+@media(max-width:700px){.boutique-body{grid-template-columns:1fr}}
+.boutique-aside{display:flex;flex-direction:column;gap:12px}
+.boutique-main{min-width:0}
+
+/* Cards */
+.boutique-card{background:#fff;border:1px solid var(--br);border-radius:10px;padding:14px 16px}
+.boutique-card-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:8px}
+.boutique-desc{font-size:13px;line-height:1.7;color:var(--ink2);margin:0}
+.boutique-stars{font-size:22px;letter-spacing:2px}
+
+/* Horaires */
+.boutique-hours-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--brl);font-size:12px}
+.boutique-hours-row:last-child{border-bottom:none}
+.boutique-hours-day{font-weight:700;color:var(--ink)}
+.boutique-hours-time{color:var(--muted)}
+.boutique-closed{color:var(--re);font-weight:700}
+
+/* Sections titre */
+.boutique-section-title{font-size:14px;font-weight:800;color:var(--ink);margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--or)}
+
+/* Annonces épinglées */
+.boutique-pinned-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:20px}
+.boutique-pinned-card{background:#fff;border:2px solid var(--or);border-radius:10px;overflow:hidden;cursor:pointer;transition:transform .15s;position:relative}
+.boutique-pinned-card:hover{transform:translateY(-2px)}
+.boutique-pinned-card img,.boutique-pinned-card .boutique-pinned-emoji{width:100%;height:90px;object-fit:cover;display:flex;align-items:center;justify-content:center;font-size:32px;background:var(--orl)}
+.boutique-pinned-badge{position:absolute;top:6px;left:6px;background:var(--or);color:#fff;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px}
+.boutique-pinned-info{padding:8px}
+.boutique-pinned-title{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.boutique-pinned-price{font-size:13px;font-weight:800;color:var(--or)}
+
+/* Catalogue items */
+.boutique-items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+.boutique-item-card{background:#fff;border:1px solid var(--br);border-radius:10px;overflow:hidden;transition:box-shadow .15s}
+.boutique-item-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.boutique-item-img{width:100%;height:100px;object-fit:cover;background:var(--brl);display:flex;align-items:center;justify-content:center;font-size:36px}
+.boutique-item-body{padding:8px}
+.boutique-item-name{font-size:12px;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.boutique-item-price{font-size:13px;font-weight:800;color:var(--or)}
+.boutique-item-out{font-size:10px;background:#FEE2E2;color:#DC2626;padding:2px 6px;border-radius:4px;font-weight:700;margin-top:4px;display:inline-block}
+
+/* Avis */
+.boutique-review{background:#fff;border:1px solid var(--br);border-radius:10px;padding:14px;margin-bottom:10px}
+.boutique-review-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.boutique-review-author{font-weight:800;font-size:13px}
+.boutique-review-stars{color:#FBBF24;font-size:14px;letter-spacing:1px}
+.boutique-review-date{font-size:11px;color:var(--muted)}
+.boutique-review-text{font-size:13px;color:var(--ink2);line-height:1.6}
+.boutique-vendor-reply{margin-top:8px;padding:8px 10px;background:var(--orl);border-left:3px solid var(--or);border-radius:0 6px 6px 0;font-size:12px;color:var(--ink2)}
+.boutique-vendor-reply-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--or);margin-bottom:3px}
+.boutique-reply-btn{font-size:11px;color:var(--or);background:none;border:none;cursor:pointer;font-weight:700;font-family:inherit;margin-top:6px;padding:0}
+
+/* Filtre catégorie */
+#boutique-cat-filter:focus{border-color:var(--or);outline:none}
+
+/* Dashboard — section boutique Pro (édition) */
+.boutique-edit-section{background:#fff;border:1px solid var(--br);border-radius:10px;padding:16px;margin-bottom:14px}
+.boutique-edit-title{font-size:13px;font-weight:800;color:var(--ink);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--brl)}
+.boutique-hours-grid{display:grid;grid-template-columns:auto 1fr 1fr;gap:8px;align-items:center;font-size:13px}
+.boutique-items-manage{display:flex;flex-direction:column;gap:8px}
+.boutique-item-manage-row{display:flex;align-items:center;gap:10px;padding:8px;background:var(--brl);border-radius:6px}
+
 </style>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#FF5C00">
@@ -1697,41 +1796,114 @@ footer{background:transparent;margin-top:0}
 
 <!-- ══ PAGE VENDEUR PUBLIC ══ -->
 <div id="page-seller" class="page">
-  <div class="container" style="display:none">
-    <button onclick="history.back()" style="background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:14px;padding:10px 0;font-family:inherit">← Retour</button>
-    <!-- Boutique Pro ou hero standard -->
-    <div style="background:#fff;border:1px solid var(--br);border-radius:10px;margin-bottom:14px;overflow:hidden">
-      <!-- Bannière (visible si Pro) -->
-      <div id="seller-boutique-banner" class="boutique-banner" style="display:none"></div>
-      <!-- Corps -->
-      <div style="padding:16px 20px">
-        <div style="display:flex;align-items:flex-end;gap:14px;margin-top:0" id="seller-av-wrap">
+<div class="boutique-page-wrap">
+
+  <!-- ── HERO : Bannière + identité ── -->
+  <div class="boutique-hero" id="boutique-hero">
+    <div class="boutique-banner-img" id="boutique-banner-img"></div>
+    <div class="boutique-hero-body">
+      <button onclick="goTo('home')" class="boutique-back">← Retour</button>
+      <div class="boutique-identity">
+        <div class="boutique-avatar-wrap">
           <div class="boutique-av" id="seller-av">?</div>
-          <div style="flex:1;padding-bottom:4px">
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-              <span style="font-size:18px;font-weight:900;color:var(--ink)" id="seller-name">Vendeur</span>
-              <span id="seller-pro-badge"></span>
-            </div>
-            <div style="font-size:12px;color:var(--muted);margin-top:2px" id="seller-city">📍 Guinée</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:1px" id="seller-since">Membre depuis 2024</div>
+          <span class="boutique-verified" id="boutique-verified" style="display:none">✓</span>
+        </div>
+        <div class="boutique-identity-info">
+          <div class="boutique-name-row">
+            <span class="boutique-name" id="seller-name">Vendeur</span>
+            <span id="seller-pro-badge"></span>
+          </div>
+          <div class="boutique-slogan" id="boutique-slogan"></div>
+          <div class="boutique-meta-row">
+            <span id="seller-city">📍 Guinée</span>
+            <span id="seller-since">• Membre depuis 2024</span>
+            <span id="boutique-sector"></span>
           </div>
         </div>
-        <!-- Description boutique (Pro) -->
-        <div id="seller-boutique-desc" style="display:none;margin-top:10px;padding:10px 12px;background:var(--brl);border-radius:6px;border-left:3px solid var(--or);font-size:13px;color:var(--ink2);line-height:1.6"></div>
-        <div style="margin-top:10px" id="seller-rating"></div>
-      <div style="display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap">
-        <button onclick="openConversationWithSeller()" style="background:var(--or);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit">💬 Contacter</button>
-        <button onclick="openRateModal(_curSellerId,document.getElementById('seller-name').textContent)" style="background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.4);border-radius:10px;padding:10px 20px;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit">⭐ Laisser un avis</button>
+      </div>
+      <!-- Actions -->
+      <div class="boutique-actions">
+        <button class="boutique-btn-wa" id="boutique-wa-btn" onclick="contactBoutiqueWhatsApp()" style="display:none">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          WhatsApp
+        </button>
+        <button class="boutique-btn-msg" onclick="openConversationWithSeller()">💬 Message</button>
+        <button class="boutique-btn-rate" onclick="openRateModal(_curSellerId,document.getElementById('seller-name').textContent)">⭐ Avis</button>
+        <!-- Réseaux sociaux -->
+        <div class="boutique-socials" id="boutique-socials"></div>
       </div>
     </div>
-    <div class="vendor-stats-grid" id="seller-stats-grid" style="margin-bottom:16px">
-      <div class="vstat"><div class="vstat-n" id="seller-stat-ads">—</div><div class="vstat-l">Annonces</div></div>
-      <div class="vstat"><div class="vstat-n" id="seller-stat-rating">—</div><div class="vstat-l">Note / 5</div></div>
-      <div class="vstat"><div class="vstat-n" id="seller-stat-reviews">—</div><div class="vstat-l">Avis</div></div>
-    </div>
-    <h3 style="font-size:15px;margin-bottom:12px">📋 Annonces de ce vendeur</h3>
-    <div class="ads-grid" id="seller-ads-grid"></div>
   </div>
+
+  <!-- ── STATS ── -->
+  <div class="boutique-stats-bar">
+    <div class="boutique-stat"><div class="boutique-stat-n" id="seller-stat-ads">—</div><div class="boutique-stat-l">Annonces</div></div>
+    <div class="boutique-stat"><div class="boutique-stat-n" id="seller-stat-rating">—</div><div class="boutique-stat-l">Note moy.</div></div>
+    <div class="boutique-stat"><div class="boutique-stat-n" id="seller-stat-reviews">—</div><div class="boutique-stat-l">Avis</div></div>
+    <div class="boutique-stat"><div class="boutique-stat-n" id="seller-stat-views">—</div><div class="boutique-stat-l">Vues</div></div>
+    <div class="boutique-stat" id="boutique-stat-response" style="display:none"><div class="boutique-stat-n">✓</div><div class="boutique-stat-l">Vérifié</div></div>
+  </div>
+
+  <!-- ── BODY : 2 colonnes sur desktop ── -->
+  <div class="boutique-body">
+
+    <!-- Colonne gauche : infos -->
+    <aside class="boutique-aside">
+
+      <!-- Description -->
+      <div class="boutique-card" id="boutique-desc-card" style="display:none">
+        <div class="boutique-card-title">🏪 À propos</div>
+        <p class="boutique-desc" id="seller-boutique-desc"></p>
+      </div>
+
+      <!-- Horaires -->
+      <div class="boutique-card" id="boutique-hours-card" style="display:none">
+        <div class="boutique-card-title">🕐 Horaires</div>
+        <div id="boutique-hours-list"></div>
+      </div>
+
+      <!-- Note / Avis -->
+      <div class="boutique-card">
+        <div class="boutique-card-title" id="seller-rating"></div>
+        <div class="boutique-stars" id="boutique-stars-bar"></div>
+      </div>
+
+    </aside>
+
+    <!-- Colonne droite : annonces + catalogue -->
+    <main class="boutique-main">
+
+      <!-- Annonces épinglées -->
+      <div id="boutique-pinned-section" style="display:none">
+        <div class="boutique-section-title">📌 Annonces à la une</div>
+        <div class="boutique-pinned-grid" id="boutique-pinned-grid"></div>
+      </div>
+
+      <!-- Filtres annonces -->
+      <div class="boutique-section-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <span>📋 Toutes les annonces <span id="seller-ads-count" style="font-size:12px;font-weight:400;color:var(--muted)"></span></span>
+        <select id="boutique-cat-filter" onchange="filterBoutiqueAds()"
+          style="padding:6px 10px;border:1.5px solid var(--br);border-radius:6px;font-size:12px;font-family:inherit;background:#fff">
+          <option value="">Toutes catégories</option>
+        </select>
+      </div>
+      <div class="ads-grid" id="seller-ads-grid" style="margin-bottom:24px"></div>
+
+      <!-- Catalogue articles indépendants -->
+      <div id="boutique-items-section" style="display:none">
+        <div class="boutique-section-title">🛍️ Catalogue articles</div>
+        <div class="boutique-items-grid" id="boutique-items-grid"></div>
+      </div>
+
+      <!-- Avis clients -->
+      <div class="boutique-section-title">💬 Avis clients <span id="seller-reviews-count" style="font-size:12px;font-weight:400;color:var(--muted)"></span></div>
+      <div id="seller-reviews-list">
+        <div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">Aucun avis pour le moment.</div>
+      </div>
+
+    </main>
+  </div><!-- /boutique-body -->
+</div><!-- /boutique-page-wrap -->
 </div>
 
 <!-- ══ PAGE ADMIN ══ -->
@@ -6074,13 +6246,7 @@ function payBoost(){
 
 // ── Profil vendeur public ──
 var _curSellerId=null;
-function viewSellerProfile(){
-  if(!curAd) return;
-  _curSellerId=curAd.seller||curAd.sellerId||curAd.sid||null;
-  if(!_curSellerId){ toast('ℹ️ Profil non disponible','warn'); return; }
-  goTo('seller');
-  loadSellerProfile(_curSellerId);
-}
+// [viewSellerProfile remplacée par boutique_js]
 
 function openConversationWithSeller(){
   var user=DB.user();
@@ -6090,130 +6256,9 @@ function openConversationWithSeller(){
   setTimeout(function(){ showDashTab('messages'); },200);
 }
 
-function loadSellerProfile(sellerId){
-  var token = localStorage.getItem('ygy_token');
-  // Afficher état de chargement
-  var grid = document.getElementById('seller-ads-grid');
-  if(grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted)">⏳ Chargement...</div>';
+// [loadSellerProfile remplacée par boutique_js]
 
-  // Charger profil public
-  fetch('/api/users/'+sellerId+'/public', {headers:{'Authorization':'Bearer '+(token||'')}})
-  .then(function(r){return r.json();})
-  .then(function(data){
-    renderSellerProfile(data);
-  }).catch(function(){
-    renderSellerProfile({
-      firstName: curAd&&curAd.sellerName||'Vendeur',
-      name:      curAd&&curAd.sellerName||'Vendeur',
-      city:      curAd&&curAd.city||'Guinée',
-      rating:    {avg:0,count:0},
-      reviews:   [],
-      adsCount:  0,
-      memberSince: new Date().getFullYear(),
-    });
-  });
-
-  // Charger annonces du vendeur
-  fetch('/api/ads?seller='+sellerId+'&limit=12')
-  .then(function(r){return r.json();})
-  .then(function(data){
-    var ads = data.ads||data||[];
-    if(grid){
-      if(ads.length){
-        grid.innerHTML = ads.map(function(a){return adCard(a,false);}).join('');
-      } else {
-        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted)">'+
-          '<div style="font-size:36px;margin-bottom:10px">📋</div>'+
-          '<div style="font-size:14px;font-weight:600">Aucune annonce active</div>'+
-        '</div>';
-      }
-      // Mettre à jour le compteur
-      var count = document.getElementById('seller-ads-count');
-      if(count) count.textContent = ads.length+' annonce'+(ads.length!==1?'s':'');
-      var statAds = document.getElementById('seller-stat-ads');
-      if(statAds) statAds.textContent = ads.length;
-    }
-  }).catch(function(){
-    if(grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--muted)">Chargement...</div>';
-  });
-}
-
-function renderSellerProfile(seller){
-  var name    = (seller.firstName||seller.name||'Vendeur').trim();
-  var city    = seller.city||'Guinée';
-  var since   = seller.memberSince||new Date().getFullYear();
-  var initial = name.charAt(0).toUpperCase();
-  var avg     = seller.rating ? (seller.rating.avg||0) : 0;
-  var cnt     = seller.rating ? (seller.rating.count||0) : 0;
-
-  // Avatar + nom
-  var el = document.getElementById('seller-av');
-  if(el) el.textContent = initial;
-  el = document.getElementById('seller-name');
-  if(el) el.textContent = name;
-
-  // Meta
-  el = document.getElementById('seller-city');
-  if(el) el.textContent = '📍 '+city;
-  el = document.getElementById('seller-since');
-  if(el) el.textContent = 'Membre depuis '+since;
-
-  // Aside
-  el = document.getElementById('seller-aside-city');
-  if(el) el.textContent = city;
-  el = document.getElementById('seller-aside-since');
-  if(el) el.textContent = 'Membre depuis '+since;
-  el = document.getElementById('seller-aside-verified');
-  if(el && seller.verified) el.style.display = 'flex';
-
-  // Pro badge
-  el = document.getElementById('seller-pro-badge');
-  if(el) el.style.display = seller.isPro ? 'block' : 'none';
-
-  // Étoiles
-  el = document.getElementById('seller-rating');
-  if(el && avg > 0){
-    var stars='';
-    for(var i=1;i<=5;i++) stars+='<span style="color:'+(i<=Math.round(avg)?'#FBBF24':'#E5E7EB')+'">★</span>';
-    el.innerHTML = stars+' <strong>'+avg.toFixed(1)+'</strong> <span style="color:var(--muted);font-weight:400">('+cnt+' avis)</span>';
-  }
-
-  // Stats
-  var statAds = document.getElementById('seller-stat-ads');
-  if(statAds) statAds.textContent = seller.adsCount||0;
-  var statRat = document.getElementById('seller-stat-rating');
-  if(statRat) statRat.textContent = avg>0 ? avg.toFixed(1)+' ★' : '—';
-  var statRev = document.getElementById('seller-stat-reviews');
-  if(statRev) statRev.textContent = cnt;
-  var statViews = document.getElementById('seller-stat-views');
-  if(statViews) statViews.textContent = seller.totalViews||'—';
-  var adsCount = document.getElementById('seller-ads-count');
-  if(adsCount) adsCount.textContent = (seller.adsCount||0)+' annonce'+(seller.adsCount!==1?'s':'');
-
-  // Avis
-  var reviewsList = document.getElementById('seller-reviews-list');
-  var reviewsCount = document.getElementById('seller-reviews-count');
-  if(reviewsList && seller.reviews && seller.reviews.length){
-    if(reviewsCount) reviewsCount.textContent = seller.reviews.length+' avis';
-    reviewsList.innerHTML = seller.reviews.map(function(r){
-      var stars='';
-      for(var i=1;i<=5;i++) stars+='<span style="color:'+(i<=r.rating?'#FBBF24':'#E5E7EB')+'">★</span>';
-      var d = r.createdAt ? new Date(r.createdAt).toLocaleDateString('fr-FR') : '';
-      return '<div class="seller-review">'+
-        '<div class="seller-review-head">'+
-          '<div>'+
-            '<span class="seller-review-author">'+(r.reviewerName||'Anonyme')+'</span>'+
-            '<span class="seller-review-stars" style="margin-left:8px">'+stars+'</span>'+
-          '</div>'+
-          '<div class="seller-review-date">'+d+'</div>'+
-        '</div>'+
-        (r.comment?'<div class="seller-review-text">'+r.comment+'</div>':'')+
-      '</div>';
-    }).join('');
-  } else {
-    if(reviewsCount) reviewsCount.textContent = '0 avis';
-  }
-}
+// [renderSellerProfile remplacée par boutique_js]
 
 // ── PWA Install ──
 var _pwaPrompt=null;
@@ -7835,6 +7880,661 @@ goTo = function(page){
   _origGoToFunc(page);
   if(page === 'pro') setTimeout(adaptProPageForRole, 50);
 };
+
+</script>
+<script>
+// ════════════════════════════════════════════════════════════════
+//  BOUTIQUE PRO — JavaScript complet
+// ════════════════════════════════════════════════════════════════
+
+// ── Variables globales boutique ──
+var _boutiqueData    = null;  // données du vendeur courant
+var _boutiqueAllAds  = [];    // toutes les annonces du vendeur
+
+// ── Ouvrir la boutique depuis une annonce ──
+function viewSellerProfile(){
+  if(!curAd) return;
+  _curSellerId = curAd.seller||curAd.sellerId||curAd.sid||null;
+  if(!_curSellerId){ toast('Profil non disponible','warn'); return; }
+  goTo('seller');
+}
+
+// ── Charger le profil complet ──
+function loadSellerProfile(sellerId){
+  var tok = localStorage.getItem('ygy_token');
+  _curSellerId = sellerId;
+  _boutiqueAllAds = [];
+
+  // Reset UI
+  var grid = document.getElementById('seller-ads-grid');
+  if(grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted)">⏳ Chargement...</div>';
+
+  // Charger profil public
+  fetch('/api/users/'+sellerId+'/public', { headers:{'Authorization':'Bearer '+(tok||'')} })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    _boutiqueData = data;
+    renderBoutiqueHero(data);
+    renderBoutiqueStats(data);
+    renderBoutiqueAside(data);
+    renderBoutiquePinned(data.pinnedAds||[]);
+    renderBoutiqueReviews(data.reviews||[]);
+    if(data.boutiqueItems && data.boutiqueItems.length){
+      renderBoutiqueItems(data.boutiqueItems);
+    }
+  }).catch(function(){
+    renderBoutiqueHero({ firstName:curAd&&curAd.sellerName||'Vendeur', city:curAd&&curAd.city||'Guinée' });
+  });
+
+  // Charger les annonces du vendeur
+  fetch('/api/ads?seller='+sellerId+'&limit=50')
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    _boutiqueAllAds = data.ads||data||[];
+    populateBoutiqueCatFilter(_boutiqueAllAds);
+    renderBoutiqueAds(_boutiqueAllAds);
+    var cnt = document.getElementById('seller-ads-count');
+    if(cnt) cnt.textContent = '('+_boutiqueAllAds.length+')';
+    var statAds = document.getElementById('seller-stat-ads');
+    if(statAds) statAds.textContent = _boutiqueAllAds.length;
+  }).catch(function(){
+    if(grid) grid.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted)">Aucune annonce</div>';
+  });
+}
+
+// ── Hero : bannière + identité ──
+function renderBoutiqueHero(seller){
+  var initial = (seller.firstName||seller.name||'V').charAt(0).toUpperCase();
+  var isProActive = seller.isPro;
+
+  // Bannière
+  var bannerEl = document.getElementById('boutique-banner-img');
+  if(bannerEl){
+    if(seller.boutiqueBanner){
+      bannerEl.style.backgroundImage = 'url('+seller.boutiqueBanner+')';
+      bannerEl.style.backgroundSize  = 'cover';
+    } else if(isProActive){
+      bannerEl.style.background = 'linear-gradient(135deg,#FF5C00 0%,#FF9500 50%,#FFB900 100%)';
+    } else {
+      bannerEl.style.background = 'linear-gradient(135deg,#1A1A1A,#333)';
+    }
+  }
+
+  // Avatar
+  var av = document.getElementById('seller-av');
+  if(av) av.textContent = initial;
+
+  // Badge vérifié
+  var verified = document.getElementById('boutique-verified');
+  if(verified) verified.style.display = seller.verified ? 'flex' : 'none';
+
+  // Badge Pro
+  var badge = document.getElementById('seller-pro-badge');
+  if(badge) badge.innerHTML = isProActive
+    ? '<span style="background:linear-gradient(135deg,#FF5C00,#FF9500);color:#fff;font-size:11px;font-weight:800;padding:3px 8px;border-radius:12px">⭐ PRO</span>'
+    : '';
+
+  // Nom
+  var nameEl = document.getElementById('seller-name');
+  if(nameEl) nameEl.textContent = (seller.firstName||seller.name||'Vendeur').trim();
+
+  // Slogan
+  var sloganEl = document.getElementById('boutique-slogan');
+  if(sloganEl){
+    sloganEl.textContent = seller.boutiqueSlogan||'';
+    sloganEl.style.display = seller.boutiqueSlogan ? 'block' : 'none';
+  }
+
+  // Méta
+  var cityEl   = document.getElementById('seller-city');
+  var sinceEl  = document.getElementById('seller-since');
+  var sectorEl = document.getElementById('boutique-sector');
+  if(cityEl)   cityEl.textContent   = '📍 '+(seller.city||'Guinée');
+  if(sinceEl)  sinceEl.textContent  = '• Membre depuis '+(seller.memberSince||new Date().getFullYear());
+  if(sectorEl){
+    sectorEl.textContent = seller.boutiqueSector ? ('• '+seller.boutiqueSector) : '';
+  }
+
+  // Bouton WhatsApp
+  var waBtn = document.getElementById('boutique-wa-btn');
+  if(waBtn){
+    var wa = seller.boutiqueSocial && seller.boutiqueSocial.whatsapp;
+    if(wa){
+      waBtn.style.display = 'flex';
+      waBtn.onclick = function(){
+        var num = wa.replace(/\D/g,'');
+        var msg = encodeURIComponent('Bonjour, j\'ai vu votre boutique sur YouGouYou. Je suis intéressé(e).');
+        window.open('https://wa.me/'+num+'?text='+msg,'_blank');
+      };
+    } else {
+      waBtn.style.display = 'none';
+    }
+  }
+
+  // Réseaux sociaux
+  renderBoutiqueSocials(seller.boutiqueSocial||{});
+}
+
+// ── Réseaux sociaux ──
+function renderBoutiqueSocials(social){
+  var container = document.getElementById('boutique-socials');
+  if(!container) return;
+  var links = [
+    { key:'facebook',  icon:'f', label:'Facebook',  url:'https://facebook.com/' },
+    { key:'instagram', icon:'📷', label:'Instagram', url:'https://instagram.com/' },
+    { key:'tiktok',    icon:'♪',  label:'TikTok',    url:'https://tiktok.com/@' },
+    { key:'website',   icon:'🌐', label:'Site web',  url:'' },
+  ];
+  container.innerHTML = links.filter(function(l){ return social[l.key]; }).map(function(l){
+    var href = l.url ? (l.url + social[l.key]) : social[l.key];
+    return '<a href="'+href+'" target="_blank" class="boutique-social-link" title="'+l.label+'">'+l.icon+'</a>';
+  }).join('');
+}
+
+// ── Stats bar ──
+function renderBoutiqueStats(seller){
+  var set = function(id,val){ var el=document.getElementById(id); if(el) el.textContent=val; };
+  var avg = seller.rating ? seller.rating.avg : 0;
+  var cnt = seller.rating ? seller.rating.count : 0;
+  set('seller-stat-ads',     seller.adsCount||0);
+  set('seller-stat-rating',  avg>0 ? avg.toFixed(1)+' ★' : '—');
+  set('seller-stat-reviews', cnt||0);
+  set('seller-stat-views',   (seller.totalViews||0).toLocaleString('fr-FR'));
+}
+
+// ── Aside : description + horaires ──
+function renderBoutiqueAside(seller){
+  // Description
+  var descCard = document.getElementById('boutique-desc-card');
+  var descEl   = document.getElementById('seller-boutique-desc');
+  if(descEl && seller.boutiqueDesc){
+    descEl.textContent = seller.boutiqueDesc;
+    if(descCard) descCard.style.display = 'block';
+  }
+
+  // Note détaillée
+  var ratingEl = document.getElementById('seller-rating');
+  var starsEl  = document.getElementById('boutique-stars-bar');
+  var avg = seller.rating ? seller.rating.avg : 0;
+  var cnt = seller.rating ? seller.rating.count : 0;
+  if(ratingEl){
+    if(avg > 0){
+      ratingEl.innerHTML = '⭐ <strong>'+avg.toFixed(1)+'</strong> <span style="font-weight:400;color:var(--muted)">('+cnt+' avis)</span>';
+    } else {
+      ratingEl.innerHTML = '<span style="color:var(--muted);font-size:12px">Pas encore d\'avis</span>';
+    }
+  }
+  if(starsEl && avg > 0){
+    var stars = '';
+    for(var i=1;i<=5;i++) stars += '<span style="color:'+(i<=Math.round(avg)?'#FBBF24':'#E5E7EB')+'">★</span>';
+    starsEl.innerHTML = stars;
+  }
+
+  // Horaires
+  renderBoutiqueHours(seller.boutiqueHours||{});
+}
+
+// ── Horaires ──
+var JOURS = [
+  {key:'lun',label:'Lundi'},   {key:'mar',label:'Mardi'},
+  {key:'mer',label:'Mercredi'},{key:'jeu',label:'Jeudi'},
+  {key:'ven',label:'Vendredi'},{key:'sam',label:'Samedi'},
+  {key:'dim',label:'Dimanche'}
+];
+function renderBoutiqueHours(hours){
+  var card = document.getElementById('boutique-hours-card');
+  var list = document.getElementById('boutique-hours-list');
+  if(!list || !card) return;
+  var hasHours = Object.keys(hours).length > 0;
+  card.style.display = hasHours ? 'block' : 'none';
+  if(!hasHours) return;
+  list.innerHTML = JOURS.map(function(j){
+    var h = hours[j.key];
+    if(!h) return '';
+    var timeStr = h.closed ? '<span class="boutique-closed">Fermé</span>'
+      : '<span class="boutique-hours-time">'+(h.open||'—')+' – '+(h.close||'—')+'</span>';
+    return '<div class="boutique-hours-row"><span class="boutique-hours-day">'+j.label+'</span>'+timeStr+'</div>';
+  }).join('');
+}
+
+// ── Annonces épinglées ──
+function renderBoutiquePinned(pinnedAds){
+  var section = document.getElementById('boutique-pinned-section');
+  var grid    = document.getElementById('boutique-pinned-grid');
+  if(!section || !grid) return;
+  if(!pinnedAds || !pinnedAds.length){ section.style.display='none'; return; }
+  section.style.display = 'block';
+  grid.innerHTML = pinnedAds.map(function(a){
+    var img = (a.photos&&a.photos[0])
+      ? '<img src="'+a.photos[0]+'" style="width:100%;height:90px;object-fit:cover">'
+      : '<div class="boutique-pinned-emoji">'+( a.emoji||'📦')+'</div>';
+    return '<div class="boutique-pinned-card" onclick="viewAd(\''+(a._id||a.id)+'\')">'+
+      '<div class="boutique-pinned-badge">📌 Vedette</div>'+img+
+      '<div class="boutique-pinned-info">'+
+        '<div class="boutique-pinned-title">'+(a.title||'—')+'</div>'+
+        '<div class="boutique-pinned-price">'+(a.price||0).toLocaleString('fr-FR')+' GNF</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+// ── Remplir filtre catégorie ──
+function populateBoutiqueCatFilter(ads){
+  var sel = document.getElementById('boutique-cat-filter');
+  if(!sel) return;
+  var cats = {};
+  ads.forEach(function(a){ var c=a.category||a.cat; if(c) cats[c]=1; });
+  var opts = '<option value="">Toutes catégories</option>';
+  Object.keys(cats).sort().forEach(function(c){ opts += '<option value="'+c+'">'+c+'</option>'; });
+  sel.innerHTML = opts;
+}
+
+// ── Filtrer annonces par catégorie ──
+function filterBoutiqueAds(){
+  var sel = document.getElementById('boutique-cat-filter');
+  var cat = sel ? sel.value : '';
+  var filtered = cat ? _boutiqueAllAds.filter(function(a){ return (a.category||a.cat)===cat; }) : _boutiqueAllAds;
+  renderBoutiqueAds(filtered);
+}
+
+// ── Rendre les annonces ──
+function renderBoutiqueAds(ads){
+  var grid = document.getElementById('seller-ads-grid');
+  if(!grid) return;
+  if(!ads.length){
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted)">Aucune annonce dans cette catégorie.</div>';
+    return;
+  }
+  grid.innerHTML = ads.map(function(a){ return adCard(a, false); }).join('');
+}
+
+// ── Catalogue articles indépendants ──
+function renderBoutiqueItems(items){
+  var section = document.getElementById('boutique-items-section');
+  var grid    = document.getElementById('boutique-items-grid');
+  if(!section||!grid) return;
+  var activeItems = items.filter(function(it){ return it; });
+  if(!activeItems.length){ section.style.display='none'; return; }
+  section.style.display = 'block';
+  grid.innerHTML = activeItems.map(function(it){
+    var img = it.photo
+      ? '<img src="'+it.photo+'" class="boutique-item-img">'
+      : '<div class="boutique-item-img">🛍️</div>';
+    return '<div class="boutique-item-card">'+img+
+      '<div class="boutique-item-body">'+
+        '<div class="boutique-item-name">'+(it.name||'—')+'</div>'+
+        '<div class="boutique-item-price">'+(it.price||0).toLocaleString('fr-FR')+' GNF</div>'+
+        (!it.inStock?'<span class="boutique-item-out">Épuisé</span>':'')+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+// ── Avis clients avec réponse vendeur ──
+function renderBoutiqueReviews(reviews){
+  var list = document.getElementById('seller-reviews-list');
+  var cnt  = document.getElementById('seller-reviews-count');
+  if(!list) return;
+  if(cnt) cnt.textContent = '('+reviews.length+')';
+  if(!reviews.length){
+    list.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">'+
+      '<div style="font-size:32px;margin-bottom:8px">💬</div>Aucun avis pour le moment.</div>';
+    return;
+  }
+  var u = DB.user();
+  var isOwner = u && (String(u._id||u.id) === String(_curSellerId));
+  list.innerHTML = reviews.map(function(r){
+    var stars = '';
+    for(var i=1;i<=5;i++) stars += '<span style="color:'+(i<=r.rating?'#FBBF24':'#D1D5DB')+'">★</span>';
+    var d = r.createdAt ? new Date(r.createdAt).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}) : '';
+    var replyHtml = '';
+    if(r.vendorReply){
+      replyHtml = '<div class="boutique-vendor-reply">'+
+        '<div class="boutique-vendor-reply-label">Réponse du vendeur</div>'+
+        r.vendorReply+
+      '</div>';
+    } else if(isOwner){
+      replyHtml = '<button class="boutique-reply-btn" onclick="openReplyModal(\''+r._id+'\')">↩️ Répondre</button>';
+    }
+    return '<div class="boutique-review">'+
+      '<div class="boutique-review-head">'+
+        '<div>'+
+          '<div class="boutique-review-author">'+(r.reviewerName||'Anonyme')+'</div>'+
+          '<span class="boutique-review-stars">'+stars+'</span>'+
+        '</div>'+
+        '<div class="boutique-review-date">'+d+'</div>'+
+      '</div>'+
+      (r.comment?'<div class="boutique-review-text">'+r.comment+'</div>':'')+
+      replyHtml+
+    '</div>';
+  }).join('');
+}
+
+// ── Répondre à un avis ──
+var _replyingToReviewId = '';
+function openReplyModal(reviewId){
+  _replyingToReviewId = reviewId;
+  var text = prompt('Votre réponse à cet avis :');
+  if(!text||!text.trim()) return;
+  submitVendorReply(reviewId, text.trim());
+}
+function submitVendorReply(reviewId, reply){
+  var tok = localStorage.getItem('ygy_token');
+  fetch('/api/reviews/'+reviewId+'/reply',{
+    method:'PATCH',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},
+    body: JSON.stringify({reply:reply})
+  }).then(function(r){return r.json();})
+  .then(function(data){
+    if(data.error){ toast('❌ '+data.error,'err'); return; }
+    toast('✅ Réponse publiée','ok');
+    loadSellerProfile(_curSellerId);
+  }).catch(function(){ toast('Erreur réseau','err'); });
+}
+
+// ── Contact WhatsApp boutique ──
+function contactBoutiqueWhatsApp(){
+  if(!_boutiqueData) return;
+  var wa = (_boutiqueData.boutiqueSocial||{}).whatsapp;
+  if(!wa){ toast('Numéro non disponible','warn'); return; }
+  var num = wa.replace(/\D/g,'');
+  var name = _boutiqueData.firstName||'le vendeur';
+  var msg = encodeURIComponent('Bonjour '+name+', j\'ai vu votre boutique sur YouGouYou. Je suis intéressé(e).');
+  window.open('https://wa.me/'+num+'?text='+msg,'_blank');
+}
+
+// ════════════════════════════════════════════════════════════════
+//  DASHBOARD PRO — Section Boutique (édition)
+// ════════════════════════════════════════════════════════════════
+
+// Rendre la section boutique dans le dashboard Pro
+function renderBoutiqueDash(){
+  var container = document.getElementById('pro-boutique-content');
+  if(!container) return;
+  var tok = localStorage.getItem('ygy_token');
+  if(!tok){ container.innerHTML='<p style="color:var(--muted)">Connectez-vous</p>'; return; }
+
+  // Charger les données boutique de l'utilisateur
+  fetch('/api/me',{headers:{'Authorization':'Bearer '+tok}})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var u = data.user||{};
+    container.innerHTML = buildBoutiqueDashHTML(u);
+    // Pré-remplir les champs
+    preFillBoutiqueForm(u);
+    // Charger les articles du catalogue
+    loadMyBoutiqueItems();
+  }).catch(function(){ container.innerHTML='<p style="color:var(--re)">Erreur de chargement</p>'; });
+}
+
+function buildBoutiqueDashHTML(u){
+  return '<div style="display:flex;flex-direction:column;gap:14px">'+
+
+  // Identité
+  '<div class="boutique-edit-section">'+
+    '<div class="boutique-edit-title">🎨 Identité visuelle</div>'+
+    '<div class="fg"><label>Bannière (URL image)</label>'+
+      '<input type="url" id="bd-banner" placeholder="https://..." style="width:100%;padding:8px 12px;border:1.5px solid var(--br);border-radius:6px;font-size:13px;font-family:inherit"></div>'+
+    '<div class="fg"><label>Slogan <small style="color:var(--muted)">(accroche courte)</small></label>'+
+      '<input type="text" id="bd-slogan" placeholder="Ex: La qualité à votre portée" maxlength="200" style="width:100%;padding:8px 12px;border:1.5px solid var(--br);border-radius:6px;font-size:13px;font-family:inherit"></div>'+
+    '<div class="fg"><label>Secteur d\'activité</label>'+
+      '<select id="bd-sector" style="width:100%;padding:8px 12px;border:1.5px solid var(--br);border-radius:6px;font-size:13px;font-family:inherit;background:#fff">'+
+        '<option value="">-- Choisir --</option>'+
+        ['Mode & Textile','Électronique','Immobilier','Véhicules','Alimentation','Services','Artisanat','Santé & Beauté','Sport & Loisirs','Autre'].map(function(s){
+          return '<option value="'+s+'">'+s+'</option>';}).join('')+
+      '</select></div>'+
+  '</div>'+
+
+  // Description
+  '<div class="boutique-edit-section">'+
+    '<div class="boutique-edit-title">📝 Description boutique</div>'+
+    '<div class="fg"><textarea id="bd-desc" rows="4" maxlength="1000" placeholder="Décrivez votre activité, vos produits, ce qui vous différencie..." style="width:100%;padding:8px 12px;border:1.5px solid var(--br);border-radius:6px;font-size:13px;font-family:inherit;resize:vertical"></textarea>'+
+    '<div style="text-align:right;font-size:11px;color:var(--muted)" id="bd-desc-count">0 / 1000</div></div>'+
+  '</div>'+
+
+  // Horaires
+  '<div class="boutique-edit-section">'+
+    '<div class="boutique-edit-title">🕐 Horaires d\'ouverture</div>'+
+    '<div id="bd-hours-grid">'+buildHoursEditorHTML()+'</div>'+
+  '</div>'+
+
+  // Réseaux sociaux
+  '<div class="boutique-edit-section">'+
+    '<div class="boutique-edit-title">📱 Réseaux sociaux & Contact</div>'+
+    '<div class="fg"><label>WhatsApp <small style="color:var(--muted)">(+224...)</small></label>'+
+      '<input type="tel" id="bd-wa" placeholder="ex: 224620000000" style="width:100%;padding:8px 12px;border:1.5px solid var(--br);border-radius:6px;font-size:13px;font-family:inherit"></div>'+
+    '<div class="fg"><label>Page Facebook</label>'+
+      '<input type="text" id="bd-fb" placeholder="nom-de-la-page" style="width:100%;padding:8px 12px;border:1.5px solid var(--br);border-radius:6px;font-size:13px;font-family:inherit"></div>'+
+    '<div class="fg"><label>Instagram</label>'+
+      '<input type="text" id="bd-ig" placeholder="@compte" style="width:100%;padding:8px 12px;border:1.5px solid var(--br);border-radius:6px;font-size:13px;font-family:inherit"></div>'+
+    '<div class="fg"><label>TikTok</label>'+
+      '<input type="text" id="bd-tt" placeholder="@compte" style="width:100%;padding:8px 12px;border:1.5px solid var(--br);border-radius:6px;font-size:13px;font-family:inherit"></div>'+
+    '<div class="fg"><label>Site web</label>'+
+      '<input type="url" id="bd-web" placeholder="https://..." style="width:100%;padding:8px 12px;border:1.5px solid var(--br);border-radius:6px;font-size:13px;font-family:inherit"></div>'+
+  '</div>'+
+
+  // Bouton sauvegarder
+  '<button class="btn btn-or btn-full" onclick="saveBoutiqueSettings()" style="font-size:14px">💾 Enregistrer la boutique</button>'+
+
+  // Catalogue articles
+  '<div class="boutique-edit-section" style="margin-top:4px">'+
+    '<div class="boutique-edit-title" style="display:flex;align-items:center;justify-content:space-between">'+
+      '<span>🛍️ Catalogue articles</span>'+
+      '<button onclick="openAddItemModal()" style="background:var(--or);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit">+ Ajouter</button>'+
+    '</div>'+
+    '<div id="my-boutique-items-list"></div>'+
+  '</div>'+
+
+  '</div>';
+}
+
+// Éditeur horaires
+function buildHoursEditorHTML(){
+  return '<div style="display:flex;flex-direction:column;gap:6px">'+
+    JOURS.map(function(j){
+      return '<div style="display:flex;align-items:center;gap:8px;font-size:12px">'+
+        '<span style="width:70px;font-weight:700">'+j.label+'</span>'+
+        '<input type="time" id="bd-h-'+j.key+'-open" value="08:00" style="padding:4px 6px;border:1px solid var(--br);border-radius:4px;font-size:12px;font-family:inherit">'+
+        '<span style="color:var(--muted)">–</span>'+
+        '<input type="time" id="bd-h-'+j.key+'-close" value="18:00" style="padding:4px 6px;border:1px solid var(--br);border-radius:4px;font-size:12px;font-family:inherit">'+
+        '<label style="display:flex;align-items:center;gap:4px;color:var(--muted)">'+
+          '<input type="checkbox" id="bd-h-'+j.key+'-closed"> Fermé'+
+        '</label>'+
+      '</div>';
+    }).join('')+
+  '</div>';
+}
+
+// Pré-remplir le formulaire depuis les données user
+function preFillBoutiqueForm(u){
+  var set = function(id,val){ var el=document.getElementById(id); if(el&&val!==undefined) el.value=val; };
+  set('bd-banner', u.boutiqueBanner||'');
+  set('bd-slogan', u.boutiqueSlogan||'');
+  set('bd-sector', u.boutiqueSector||'');
+  set('bd-desc', u.boutiqueDesc||'');
+  var descEl = document.getElementById('bd-desc');
+  var cntEl  = document.getElementById('bd-desc-count');
+  if(descEl && cntEl){
+    cntEl.textContent = (descEl.value.length)+' / 1000';
+    descEl.addEventListener('input', function(){ cntEl.textContent = descEl.value.length+' / 1000'; });
+  }
+  var soc = u.boutiqueSocial||{};
+  set('bd-wa',  soc.whatsapp||'');
+  set('bd-fb',  soc.facebook||'');
+  set('bd-ig',  soc.instagram||'');
+  set('bd-tt',  soc.tiktok||'');
+  set('bd-web', soc.website||'');
+  // Horaires
+  var hours = u.boutiqueHours||{};
+  JOURS.forEach(function(j){
+    var h = hours[j.key]||{};
+    var openEl   = document.getElementById('bd-h-'+j.key+'-open');
+    var closeEl  = document.getElementById('bd-h-'+j.key+'-close');
+    var closedEl = document.getElementById('bd-h-'+j.key+'-closed');
+    if(openEl&&h.open)   openEl.value   = h.open;
+    if(closeEl&&h.close) closeEl.value  = h.close;
+    if(closedEl)         closedEl.checked = !!h.closed;
+  });
+}
+
+// Sauvegarder les paramètres boutique
+async function saveBoutiqueSettings(){
+  var tok = localStorage.getItem('ygy_token');
+  if(!tok){ toast('Non connecté','err'); return; }
+  // Collecter les horaires
+  var hours = {};
+  JOURS.forEach(function(j){
+    var openEl   = document.getElementById('bd-h-'+j.key+'-open');
+    var closeEl  = document.getElementById('bd-h-'+j.key+'-close');
+    var closedEl = document.getElementById('bd-h-'+j.key+'-closed');
+    hours[j.key] = {
+      open:   openEl  ? openEl.value   : '08:00',
+      close:  closeEl ? closeEl.value  : '18:00',
+      closed: closedEl? closedEl.checked: false,
+    };
+  });
+  var payload = {
+    boutiqueDesc:   (document.getElementById('bd-desc')||{}).value||'',
+    boutiqueSlogan: (document.getElementById('bd-slogan')||{}).value||'',
+    boutiqueBanner: (document.getElementById('bd-banner')||{}).value||'',
+    boutiqueSector: (document.getElementById('bd-sector')||{}).value||'',
+    boutiqueHours:  hours,
+    boutiqueSocial: {
+      whatsapp:  (document.getElementById('bd-wa') ||{}).value||'',
+      facebook:  (document.getElementById('bd-fb') ||{}).value||'',
+      instagram: (document.getElementById('bd-ig') ||{}).value||'',
+      tiktok:    (document.getElementById('bd-tt') ||{}).value||'',
+      website:   (document.getElementById('bd-web')||{}).value||'',
+    },
+  };
+  var btn = document.querySelector('[onclick="saveBoutiqueSettings()"]');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Enregistrement...'; }
+  try{
+    var res = await fetch('/api/me/boutique',{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},
+      body: JSON.stringify(payload)
+    });
+    var data = await res.json();
+    if(!res.ok) throw new Error(data.error||'Erreur');
+    toast('✅ Boutique mise à jour !','ok');
+  }catch(err){
+    toast('❌ '+err.message,'err');
+  }finally{
+    if(btn){ btn.disabled=false; btn.textContent='💾 Enregistrer la boutique'; }
+  }
+}
+
+// ── Catalogue articles ──
+function loadMyBoutiqueItems(){
+  var tok = localStorage.getItem('ygy_token');
+  var list = document.getElementById('my-boutique-items-list');
+  if(!list) return;
+  list.innerHTML = '<div style="padding:10px;color:var(--muted);font-size:12px">⏳ Chargement...</div>';
+  fetch('/api/me/boutique/items',{headers:{'Authorization':'Bearer '+tok}})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    renderMyBoutiqueItems(d.items||[]);
+  }).catch(function(){
+    list.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:10px">Aucun article</div>';
+  });
+}
+
+function renderMyBoutiqueItems(items){
+  var list = document.getElementById('my-boutique-items-list');
+  if(!list) return;
+  if(!items.length){
+    list.innerHTML = '<div style="text-align:center;padding:16px;color:var(--muted);font-size:13px">'+
+      'Aucun article dans votre catalogue.<br><small>Ajoutez des articles indépendamment de vos annonces.</small></div>';
+    return;
+  }
+  list.innerHTML = items.map(function(it){
+    return '<div class="boutique-item-manage-row">'+
+      (it.photo?'<img src="'+it.photo+'" style="width:40px;height:40px;border-radius:6px;object-fit:cover;flex-shrink:0">':'<div style="width:40px;height:40px;background:var(--brl);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px">🛍️</div>')+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(it.name||'—')+'</div>'+
+        '<div style="font-size:12px;color:var(--or);font-weight:700">'+(it.price||0).toLocaleString('fr-FR')+' GNF</div>'+
+        (!it.inStock?'<span style="font-size:10px;background:#FEE2E2;color:#DC2626;padding:1px 5px;border-radius:3px">Épuisé</span>':'')+
+      '</div>'+
+      '<div style="display:flex;gap:4px;flex-shrink:0">'+
+        '<button onclick="toggleItemStock(\''+it._id+'\','+(!it.inStock)+')" style="background:var(--brl);border:1px solid var(--br);border-radius:4px;padding:3px 7px;font-size:10px;cursor:pointer;font-family:inherit">'+(it.inStock?'Épuiser':'Restorer')+'</button>'+
+        '<button onclick="deleteMyItem(\''+it._id+'\')" style="background:#FEE2E2;color:#DC2626;border:1px solid #FECACA;border-radius:4px;padding:3px 7px;font-size:10px;cursor:pointer">🗑️</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+// Ajouter un article au catalogue
+function openAddItemModal(){
+  var name  = prompt('Nom de l\'article :');
+  if(!name||!name.trim()) return;
+  var price = parseInt(prompt('Prix (GNF) :', '0'))||0;
+  var desc  = prompt('Description (optionnel) :', '')||'';
+  var photo = prompt('URL photo (optionnel) :', '')||'';
+  var cat   = prompt('Catégorie (optionnel) :', '')||'';
+  addBoutiqueItem({name:name.trim(), price:price, desc:desc, photo:photo, category:cat});
+}
+async function addBoutiqueItem(item){
+  var tok = localStorage.getItem('ygy_token');
+  try{
+    var res = await fetch('/api/me/boutique/items',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},
+      body: JSON.stringify(item)
+    });
+    var data = await res.json();
+    if(!res.ok) throw new Error(data.error||'Erreur');
+    toast('✅ Article ajouté au catalogue','ok');
+    loadMyBoutiqueItems();
+  }catch(err){ toast('❌ '+err.message,'err'); }
+}
+async function deleteMyItem(itemId){
+  if(!confirm('Supprimer cet article ?')) return;
+  var tok = localStorage.getItem('ygy_token');
+  try{
+    await fetch('/api/me/boutique/items/'+itemId,{method:'DELETE',headers:{'Authorization':'Bearer '+tok}});
+    toast('Article supprimé','ok'); loadMyBoutiqueItems();
+  }catch(err){ toast('Erreur','err'); }
+}
+async function toggleItemStock(itemId, inStock){
+  var tok = localStorage.getItem('ygy_token');
+  try{
+    await fetch('/api/me/boutique/items/'+itemId,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},
+      body:JSON.stringify({inStock:inStock})
+    });
+    loadMyBoutiqueItems();
+  }catch(err){ toast('Erreur','err'); }
+}
+
+// ── Intégrer dans renderProDash ──
+// Appel automatique quand l'onglet boutique du dashboard est visible
+document.addEventListener('DOMContentLoaded', function(){
+  // Surcharger renderProDash pour inclure la section boutique
+  var _origRenderProDash = typeof renderProDash === 'function' ? renderProDash : function(){};
+  renderProDash = function(){
+    _origRenderProDash();
+    // Attendre que le DOM soit prêt pour le contenu Pro
+    setTimeout(function(){
+      var proContent = document.getElementById('pro-dash-content');
+      if(!proContent) return;
+      var u = DB.user();
+      var isProOrAdmin = u && (u.role==='admin' || (u.isPro && u.proUntil && new Date(u.proUntil)>new Date()));
+      if(isProOrAdmin && !document.getElementById('pro-boutique-content')){
+        var boutiqueSection = document.createElement('div');
+        boutiqueSection.id = 'pro-boutique-section';
+        boutiqueSection.innerHTML =
+          '<div style="margin-top:20px;border-top:2px solid var(--or);padding-top:16px">'+
+            '<div style="font-size:15px;font-weight:800;margin-bottom:14px">🏪 Ma Boutique Pro</div>'+
+            '<div id="pro-boutique-content"><div style="padding:20px;text-align:center;color:var(--muted)">⏳ Chargement...</div></div>'+
+          '</div>';
+        proContent.appendChild(boutiqueSection);
+        renderBoutiqueDash();
+      }
+    }, 300);
+  };
+});
 
 </script>
 </body>
