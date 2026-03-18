@@ -205,7 +205,29 @@ const UserSchema = new mongoose.Schema({
   codeExpiry:   { type: Date },
   isPro:        { type: Boolean, default: false },        // compte pro payant
   proUntil:     { type: Date },                           // expiration abonnement pro
-  boutiqueDesc: { type: String, maxlength: 500 },           // description boutique Pro
+  boutiqueDesc:    { type: String, maxlength: 1000 },
+  boutiqueSlogan:  { type: String, maxlength: 200 },
+  boutiqueBanner:  { type: String },
+  boutiqueSector:  { type: String },
+  boutiqueHours:   { type: mongoose.Schema.Types.Mixed, default: {} },
+  boutiqueSocial:  {
+    whatsapp:  { type: String },
+    facebook:  { type: String },
+    instagram: { type: String },
+    tiktok:    { type: String },
+    website:   { type: String },
+  },
+  boutiquePinned:  [{ type: mongoose.Schema.Types.ObjectId, ref: 'Ad' }],
+  boutiqueItems:   [{
+    _id:      { type: mongoose.Schema.Types.ObjectId, auto: true },
+    name:     { type: String, required: true },
+    price:    { type: Number, default: 0 },
+    desc:     { type: String },
+    photo:    { type: String },
+    category: { type: String },
+    inStock:  { type: Boolean, default: true },
+    createdAt:{ type: Date, default: Date.now },
+  }],
   avgRating:    { type: Number, default: 0 },             // note moyenne (dénormalisée)
   ratingCount:  { type: Number, default: 0 },             // nb d'avis
   totalViews:   { type: Number, default: 0 },             // vues totales sur ses annonces
@@ -727,28 +749,46 @@ app.patch('/api/me', auth, async (req, res) => {
 app.get('/api/users/:id/public', authOptional, async (req, res) => {
   try {
     const user = await User.findById(req.params.id)
-      .select('prenom nom city isPro proUntil avgRating ratingCount totalViews boutiqueDesc createdAt');
+      .select('prenom nom city isPro proUntil avgRating ratingCount totalViews createdAt verified ' +
+              'boutiqueDesc boutiqueSlogan boutiqueBanner boutiqueSector boutiqueHours boutiqueSocial boutiquePinned boutiqueItems');
     if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
 
+    const isProActive = user.isPro && user.proUntil && user.proUntil > new Date();
     const adsCount = await Ad.countDocuments({ seller: user._id, active: true });
 
-    // Récents avis (sans données privées)
+    // Annonces épinglées (jusqu'à 3)
+    let pinnedAds = [];
+    if (isProActive && user.boutiquePinned?.length) {
+      pinnedAds = await Ad.find({ _id: { $in: user.boutiquePinned }, active: true })
+        .select('title price city photos emoji category subCategory views createdAt').limit(3);
+    }
+
+    // Avis clients
     const reviews = await Review.find({ sellerId: user._id })
-      .sort({ createdAt: -1 })
-      .limit(10)
-      .select('reviewerName rating comment createdAt');
+      .sort({ createdAt: -1 }).limit(10)
+      .select('reviewerName rating comment createdAt vendorReply');
 
     res.json({
       _id: user._id,
       firstName: user.prenom,
       name: `${user.prenom} ${user.nom||''}`.trim(),
       city: user.city,
-      isPro: user.isPro,
-      boutiqueDesc: user.boutiqueDesc || '',
+      isPro: isProActive,
+      verified: user.verified || false,
       memberSince: user.createdAt?.getFullYear() || new Date().getFullYear(),
+      totalViews: user.totalViews || 0,
       rating: { avg: user.avgRating || 0, count: user.ratingCount || 0 },
       adsCount,
       reviews,
+      pinnedAds,
+      // Boutique
+      boutiqueDesc:    user.boutiqueDesc    || '',
+      boutiqueSlogan:  user.boutiqueSlogan  || '',
+      boutiqueBanner:  user.boutiqueBanner  || '',
+      boutiqueSector:  user.boutiqueSector  || '',
+      boutiqueHours:   user.boutiqueHours   || {},
+      boutiqueSocial:  user.boutiqueSocial  || {},
+      boutiqueItems:   isProActive ? (user.boutiqueItems || []) : [],
     });
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
@@ -1163,6 +1203,24 @@ app.post('/api/reviews', auth, async (req, res) => {
 });
 
 // Résumé des avis d'un vendeur
+
+// Répondre à un avis (vendeur uniquement)
+app.patch('/api/reviews/:id/reply', auth, async (req, res) => {
+  try {
+    const { reply } = req.body;
+    if (!reply?.trim()) return res.status(400).json({ error: 'Réponse requise' });
+    const review = await Review.findById(req.params.id);
+    if (!review) return res.status(404).json({ error: 'Avis introuvable' });
+    // Seul le vendeur concerné peut répondre
+    if (String(review.sellerId) !== req.user.id)
+      return res.status(403).json({ error: 'Non autorisé' });
+    await Review.findByIdAndUpdate(req.params.id, {
+      vendorReply: reply.trim(),
+      vendorReplyAt: new Date(),
+    });
+    res.json({ success: true });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
 app.get('/api/reviews/:sellerId/summary', async (req, res) => {
   try {
     const result = await Review.aggregate([
@@ -1859,13 +1917,87 @@ app.post('/api/subscribe-pro', auth, async (req, res) => {
 // ★ Boutique Pro — sauvegarder description
 app.patch('/api/me/boutique', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('isPro proUntil');
-    if (!user?.isPro || (user.proUntil && user.proUntil < new Date()))
+    const user = await User.findById(req.user.id).select('isPro proUntil role');
+    const isAdmin = user?.role === 'admin';
+    const isProActive = user?.isPro && user.proUntil && user.proUntil > new Date();
+    if (!isAdmin && !isProActive)
       return res.status(403).json({ error: 'Réservé aux membres Pro' });
-    const { boutiqueDesc } = req.body;
-    if (!boutiqueDesc || boutiqueDesc.length > 500)
-      return res.status(400).json({ error: 'Description requise (max 500 caractères)' });
-    await User.findByIdAndUpdate(req.user.id, { boutiqueDesc });
+
+    const allowed = ['boutiqueDesc','boutiqueSlogan','boutiqueBanner',
+                     'boutiqueSector','boutiqueHours','boutiqueSocial'];
+    const update = {};
+    allowed.forEach(k => { if (req.body[k] !== undefined) update[k] = req.body[k]; });
+
+    const updated = await User.findByIdAndUpdate(req.user.id, update, { new: true })
+      .select(allowed.join(' '));
+    res.json({ success: true, boutique: updated });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// Épingler / désépingler une annonce dans la boutique
+app.patch('/api/me/boutique/pin/:adId', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('isPro proUntil role boutiquePinned');
+    const isAdmin = user?.role === 'admin';
+    const isProActive = user?.isPro && user.proUntil && user.proUntil > new Date();
+    if (!isAdmin && !isProActive) return res.status(403).json({ error: 'Pro requis' });
+
+    const adId = req.params.adId;
+    const pinned = (user.boutiquePinned || []).map(String);
+    const idx = pinned.indexOf(adId);
+    if (idx >= 0) pinned.splice(idx, 1);          // désépingler
+    else if (pinned.length < 3) pinned.push(adId); // épingler (max 3)
+    else return res.status(400).json({ error: 'Maximum 3 annonces épinglées' });
+
+    await User.findByIdAndUpdate(req.user.id, { boutiquePinned: pinned });
+    res.json({ success: true, pinned });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── Catalogue boutique : CRUD articles indépendants ──
+app.get('/api/me/boutique/items', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('boutiqueItems');
+    res.json({ items: user?.boutiqueItems || [] });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/me/boutique/items', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('isPro proUntil role boutiqueItems');
+    const isAdmin = user?.role === 'admin';
+    const isProActive = user?.isPro && user.proUntil && user.proUntil > new Date();
+    if (!isAdmin && !isProActive) return res.status(403).json({ error: 'Pro requis' });
+    const { name, price, desc, photo, category, inStock } = req.body;
+    if (!name?.trim()) return res.status(400).json({ error: 'Nom requis' });
+    const item = { name: name.trim(), price: Number(price)||0, desc, photo, category, inStock: inStock !== false };
+    await User.findByIdAndUpdate(req.user.id, { $push: { boutiqueItems: item } });
+    res.json({ success: true });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+app.patch('/api/me/boutique/items/:itemId', auth, async (req, res) => {
+  try {
+    const { name, price, desc, photo, category, inStock } = req.body;
+    const update = {};
+    if (name !== undefined)     update['boutiqueItems.$.name']     = name;
+    if (price !== undefined)    update['boutiqueItems.$.price']    = Number(price)||0;
+    if (desc !== undefined)     update['boutiqueItems.$.desc']     = desc;
+    if (photo !== undefined)    update['boutiqueItems.$.photo']    = photo;
+    if (category !== undefined) update['boutiqueItems.$.category'] = category;
+    if (inStock !== undefined)  update['boutiqueItems.$.inStock']  = inStock;
+    await User.findOneAndUpdate(
+      { _id: req.user.id, 'boutiqueItems._id': req.params.itemId },
+      { $set: update }
+    );
+    res.json({ success: true });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+app.delete('/api/me/boutique/items/:itemId', auth, async (req, res) => {
+  try {
+    await User.findByIdAndUpdate(req.user.id,
+      { $pull: { boutiqueItems: { _id: req.params.itemId } } });
     res.json({ success: true });
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
