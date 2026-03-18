@@ -222,6 +222,8 @@ const AdSchema = new mongoose.Schema({
   description:  { type: String },
   price:        { type: Number, required: true },
   category:     { type: String, index: true },
+  subCategory:  { type: String, index: true },   // niveau 2
+  subItem:      { type: String },                // niveau 3
   city:         { type: String, index: true },
   quartier:     { type: String },
   etat:         { type: String },
@@ -870,13 +872,15 @@ app.get('/api/ads/:id', authOptional, async (req, res) => {
 // Publier une annonce
 app.post('/api/ads', auth, async (req, res) => {
   try {
-    const { title, description, price, category, city, quartier, etat,
+    const { title, description, price, category, subCategory, subItem,
+            city, quartier, etat,
             phone, photos, seller: sellerName, nego, subFields, tags } = req.body;
     if (!title || !price) return res.status(400).json({ error: 'Titre et prix obligatoires' });
 
     const ad = await Ad.create({
       title, description, price: Number(price),
-      category, city, quartier, etat,
+      category, subCategory: subCategory||'', subItem: subItem||'',
+      city, quartier, etat,
       sellerName: sellerName || req.user.prenom || '',
       sellerPhone: phone || '',
       seller: req.user.id,
@@ -905,8 +909,8 @@ app.patch('/api/ads/:id', auth, async (req, res) => {
     if (String(ad.seller) !== req.user.id && req.user.role !== 'admin')
       return res.status(403).json({ error: 'Non autorisé' });
 
-    const allowed = ['title','description','price','category','city','quartier',
-                     'etat','photos','nego','subFields','tags'];
+    const allowed = ['title','description','price','category','subCategory','subItem',
+                     'city','quartier','etat','photos','nego','subFields','tags'];
     allowed.forEach(k => { if (req.body[k] !== undefined) ad[k] = req.body[k]; });
     if (req.body.phone) ad.sellerPhone = req.body.phone;
     await ad.save();
