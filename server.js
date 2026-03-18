@@ -1483,8 +1483,12 @@ app.get('/api/admin/users', auth, adminOnly, async (req, res) => {
       { prenom: new RegExp(search, 'i') }, { nom: new RegExp(search, 'i') },
       { phone: new RegExp(search, 'i') },  { city: new RegExp(search, 'i') },
     ];
-    const users = await User.find(filter).select('-password -smsCode')
-      .sort({ createdAt: -1 }).skip(Number(skip)).limit(Number(limit));
+    const users = await User.find(filter)
+      .select('-password -verifyCode -codeExpiry -smsCode')
+      .sort({ createdAt: -1 })
+      .skip(Number(skip))
+      .limit(Number(limit))
+      .lean();
     const total = await User.countDocuments(filter);
     res.json({ users, total });
   } catch(err) { res.status(500).json({ error: err.message }); }
