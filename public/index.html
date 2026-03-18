@@ -298,11 +298,11 @@ footer{background:transparent;margin-top:0}
 .stat-card{background:#fff;border-radius:6px;padding:14px;border:1px solid var(--br);display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
 .stat-card-val{font-size:22px;font-weight:800;color:var(--or)}
 .stat-card-label{font-size:11px;color:var(--muted);font-weight:500}
-.admin-layout{display:grid;grid-template-columns:190px 1fr;min-height:calc(100vh - 62px)}
-.admin-side{background:#1A1A1A;padding:14px 10px;position:sticky;top:62px;height:calc(100vh - 62px)}
+.admin-layout{display:grid;grid-template-columns:190px 1fr;height:100%;overflow:hidden;background:#fff}
+.admin-side{background:#1A1A1A;padding:14px 10px;height:100%;overflow-y:auto;box-sizing:border-box}
 .admin-nav-item{display:flex;align-items:center;gap:7px;padding:8px 10px;border-radius:5px;font-size:12px;font-weight:400;color:rgba(255,255,255,.45);cursor:pointer;transition:all .12s;margin-bottom:2px}
 .admin-nav-item:hover,.admin-nav-item.active{background:rgba(255,255,255,.08);color:#fff}
-.admin-main{padding:18px 22px;background:var(--bg);overflow:auto}
+.admin-main{padding:18px 22px;background:var(--bg);overflow-y:auto;height:100%;box-sizing:border-box;max-height:100%}
 .admin-title{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:14px}
 .admin-pane{display:none}.admin-pane.active{display:block}
 .admin-table{width:100%;border-collapse:collapse;background:#fff;border-radius:6px;overflow:hidden;border:1px solid var(--br)}
@@ -771,13 +771,13 @@ footer{background:transparent;margin-top:0}
   max-width:1100px;
   height:calc(100vh - 104px);
   background:var(--bg);
-  z-index:100;
+  z-index:200;
   overflow-y:auto;
   overflow-x:hidden;
 }
 /* Page Admin — même gabarit que page-messages */
 #page-admin.active{
-  display:flex !important;
+  display:block !important;
   position:fixed;
   top:104px;
   left:50%;
@@ -785,8 +785,9 @@ footer{background:transparent;margin-top:0}
   width:100%;
   max-width:1100px;
   height:calc(100vh - 104px);
-  z-index:150;
+  z-index:200;
   overflow:hidden;
+  background:#fff;
 }
 .pro-wrap{
   max-width:1100px;
@@ -1084,7 +1085,7 @@ footer{background:transparent;margin-top:0}
         <span class="promo-banner-tag">📋 Jusqu'à 12 annonces</span>
       </div>
     </div>
-    <button class="promo-banner-btn" onclick="openModal('auth')">Découvrir Pro →</button>
+    <button class="promo-banner-btn" onclick="goToPro()">Découvrir Pro →</button>
   </div>
 
 
