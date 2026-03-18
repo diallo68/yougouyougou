@@ -376,19 +376,28 @@ function authOptional(req, res, next) {
 }
 
 // Middleware admin uniquement
-// Middleware : admin uniquement
-function adminOnly(req, res, next) {
-  if (req.user?.role !== 'admin') return res.status(403).json({ error: 'Accès refusé — admin uniquement' });
-  next();
+// Middleware : admin uniquement (vérifie MongoDB, pas le JWT)
+async function adminOnly(req, res, next) {
+  try {
+    const user = await User.findById(req.user.id).select('role');
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: 'Accès refusé — admin uniquement' });
+    }
+    // Mettre à jour req.user.role avec la vraie valeur MongoDB
+    req.user.role = user.role;
+    next();
+  } catch(err) {
+    return res.status(500).json({ error: err.message });
+  }
 }
 
-// Middleware : Pro ou Admin
+// Middleware : Pro ou Admin (vérifie toujours MongoDB)
 async function requirePro(req, res, next) {
   try {
     const user = await User.findById(req.user.id).select('isPro proUntil role');
     if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
-    // Admin a tous les droits
-    if (user.role === 'admin') return next();
+    // Admin a tous les droits (rôle vérifié depuis MongoDB)
+    if (user.role === 'admin') { req.user.role = 'admin'; return next(); }
     // Vérifier Pro actif
     if (!user.isPro) return res.status(403).json({ error: 'Réservé aux membres Pro' });
     if (user.proUntil && user.proUntil < new Date()) {
@@ -688,8 +697,10 @@ app.get('/api/me', auth, async (req, res) => {
     res.json({ user: {
       id: user._id, name: `${user.prenom} ${user.nom||''}`.trim(),
       prenom: user.prenom, nom: user.nom, phone: user.phone,
-      email: user.email, city: user.city, role: user.role,
-      verified: user.verified, isPro: user.isPro,
+      email: user.email, city: user.city,
+      role: user.role,        // toujours depuis MongoDB (source de vérité)
+      verified: user.verified,
+      isPro: user.isPro && user.proUntil && user.proUntil > new Date() ? true : false,
       proUntil: user.proUntil || null,
       avgRating: user.avgRating, ratingCount: user.ratingCount,
     }});
