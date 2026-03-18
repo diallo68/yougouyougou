@@ -4649,12 +4649,14 @@ function goAdmin(){
   if(!u){ openModal('auth'); return; }
   var tok = localStorage.getItem('ygy_token');
   if(!tok){ openModal('auth'); return; }
-  // Vérifier le rôle côté serveur (source de vérité)
-  fetch('/api/me',{headers:{'Authorization':'Bearer '+tok}})
-  .then(function(r){ return r.ok ? r.json() : null; })
-  .then(function(data){
-    if(data && data.user && data.user.role==='admin'){
-      // Mettre à jour localement
+
+  // Vérifier le rôle directement via /api/admin/stats
+  // Si la requête réussit (200) → l'utilisateur est admin
+  // Si 403 → pas admin
+  fetch('/api/admin/stats',{headers:{'Authorization':'Bearer '+tok}})
+  .then(function(r){
+    if(r.ok){
+      // Confirmer le role admin localement
       u.role = 'admin';
       DB.login(u);
       updateNav();
@@ -6262,13 +6264,23 @@ document.addEventListener('DOMContentLoaded',function(){
           u.role    = data.user.role;
           u.isPro   = data.user.isPro   || false;
           u.proUntil= data.user.proUntil || null;
+          if(data.user.prenom) u.prenom = data.user.prenom;
+          if(data.user.nom)    u.nom    = data.user.nom;
+          if(data.user.name)   u.name   = data.user.name;
+          if(data.user.phone)  u.phone  = data.user.phone;
+          if(data.user.email)  u.email  = data.user.email;
+          if(data.user.city)   u.city   = data.user.city;
           DB.login(u);
-          // Mettre à jour toute la nav (bouton admin + pro)
           updateNav();
+          // Si hash #admin et role admin → ouvrir panel directement
+          if(window.location.hash==='#admin' && u.role==='admin'){
+            goTo('admin'); adminTab('stats'); loadAdmin();
+          }
         }
       }).catch(function(){});
     }
   })();
+
 
   // Reset mdp via lien email
   (function(){
