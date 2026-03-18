@@ -298,11 +298,11 @@ footer{background:transparent;margin-top:0}
 .stat-card{background:#fff;border-radius:6px;padding:14px;border:1px solid var(--br);display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
 .stat-card-val{font-size:22px;font-weight:800;color:var(--or)}
 .stat-card-label{font-size:11px;color:var(--muted);font-weight:500}
-.admin-layout{display:grid;grid-template-columns:190px 1fr;height:100%;overflow:hidden;background:#fff}
+.admin-layout{display:grid;grid-template-columns:190px 1fr;height:100%;min-height:0;overflow:hidden;background:#fff}
 .admin-side{background:#1A1A1A;padding:14px 10px;height:100%;overflow-y:auto;box-sizing:border-box}
 .admin-nav-item{display:flex;align-items:center;gap:7px;padding:8px 10px;border-radius:5px;font-size:12px;font-weight:400;color:rgba(255,255,255,.45);cursor:pointer;transition:all .12s;margin-bottom:2px}
 .admin-nav-item:hover,.admin-nav-item.active{background:rgba(255,255,255,.08);color:#fff}
-.admin-main{padding:18px 22px;background:var(--bg);overflow-y:auto;height:100%;box-sizing:border-box;max-height:100%}
+.admin-main{padding:18px 22px;background:var(--bg);overflow-y:auto;min-height:0;box-sizing:border-box}
 .admin-title{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:14px}
 .admin-pane{display:none}.admin-pane.active{display:block}
 .admin-table{width:100%;border-collapse:collapse;background:#fff;border-radius:6px;overflow:hidden;border:1px solid var(--br)}
@@ -6917,7 +6917,7 @@ function initBanner(){
         <div class="pro-plan-dur">1 mois</div>
         <div class="pro-plan-price">50 000 <span>GNF</span></div>
         <div style="font-size:11px;color:var(--muted);margin-bottom:12px">soit 50 000 GNF/mois</div>
-        <button class="pro-plan-btn">Choisir</button>
+        <button class="pro-plan-btn pro-plan-btn-1m">Choisir</button>
       </div>
 
       <!-- 3 mois -->
@@ -6927,7 +6927,7 @@ function initBanner(){
         <div class="pro-plan-price">120 000 <span>GNF</span></div>
         <div class="pro-plan-save">Économisez 30 000 GNF</div>
         <div style="font-size:11px;color:var(--muted);margin-bottom:12px">soit 40 000 GNF/mois</div>
-        <button class="pro-plan-btn">Choisir</button>
+        <button class="pro-plan-btn pro-plan-btn-3m">Choisir</button>
       </div>
 
       <!-- 1 an -->
@@ -6936,7 +6936,7 @@ function initBanner(){
         <div class="pro-plan-price">400 000 <span>GNF</span></div>
         <div class="pro-plan-save">Économisez 200 000 GNF</div>
         <div style="font-size:11px;color:var(--muted);margin-bottom:12px">soit 33 333 GNF/mois</div>
-        <button class="pro-plan-btn">Choisir</button>
+        <button class="pro-plan-btn pro-plan-btn-12m">Choisir</button>
       </div>
 
     </div>
@@ -7026,7 +7026,15 @@ function selectPlan(planId, amount, months){
     var el = document.getElementById('plan-'+p);
     if(el) el.classList.toggle('selected', p===planId);
   });
-  // Ouvrir le modal
+
+  // ★ ADMIN : activation directe sans paiement
+  var u = DB.user();
+  if(u && u.role==='admin'){
+    activateProAdmin(planId, months);
+    return;
+  }
+
+  // USER/PRO : ouvrir le modal paiement Orange Money
   var labels = {'1m':'1 mois','3m':'3 mois','12m':'1 an'};
   var fmt = amount.toLocaleString('fr-FR')+' GNF';
   var lbl = document.getElementById('pro-pay-label');
@@ -7042,6 +7050,49 @@ function selectPlan(planId, amount, months){
   });
   var ph = document.getElementById('pro-om-phone'); if(ph) ph.value='';
   openModal('pro-pay');
+}
+
+// ★ Activation Pro directe pour Admin (sans paiement)
+async function activateProAdmin(planId, months){
+  var tok = localStorage.getItem('ygy_token');
+  var u   = DB.user();
+  if(!u || !tok) return;
+
+  // Feedback visuel
+  var plans = document.querySelectorAll('.pro-plan');
+  plans.forEach(function(p){ p.style.opacity='0.5'; p.style.pointerEvents='none'; });
+  toast('⏳ Activation en cours...','ok');
+
+  try {
+    var res = await fetch('/api/admin/users/'+u._id+'/pro', {
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},
+      body: JSON.stringify({ isPro:true, months:months })
+    });
+    var data = await res.json();
+    if(!res.ok) throw new Error(data.error||'Erreur activation');
+
+    // Mettre à jour localement
+    u.isPro    = true;
+    u.proUntil = data.proUntil;
+    DB.login(u);
+
+    var expiry = data.proUntil
+      ? new Date(data.proUntil).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})
+      : '';
+
+    toast('Pro activé, expire le '+expiry,'ok');
+
+    // Retourner au dashboard onglet Pro
+    setTimeout(function(){
+      goTo('dashboard');
+      setTimeout(function(){ showDashTab('pro'); }, 200);
+    }, 1000);
+
+  } catch(err){
+    toast('❌ '+err.message,'err');
+    plans.forEach(function(p){ p.style.opacity=''; p.style.pointerEvents=''; });
+  }
 }
 
 // ── Soumettre le paiement Pro ──
@@ -7438,14 +7489,32 @@ function loadDashPayments(){
 var _dashUsers = [];
 
 function loadDashUsersAdmin(){
-  var tok = localStorage.getItem('ygy_token'); if(!tok) return;
+  var tok = localStorage.getItem('ygy_token');
+  var list = document.getElementById('dash-users-list');
+  if(!tok){
+    if(list) list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--re)">❌ Non connecté</div>';
+    return;
+  }
+  if(list) list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted)">⏳ Chargement...</div>';
   fetch('/api/admin/users?limit=500', {headers:{'Authorization':'Bearer '+tok}})
-  .then(function(r){ return r.ok ? r.json() : null; })
+  .then(function(r){
+    if(!r.ok){
+      return r.json().then(function(err){
+        throw new Error(err.error || 'Erreur '+r.status);
+      });
+    }
+    return r.json();
+  })
   .then(function(data){
-    if(!data) return;
     _dashUsers = data.users||[];
+    var cnt = document.getElementById('dash-users-count');
+    if(cnt) cnt.textContent = _dashUsers.length + ' utilisateur'+(_dashUsers.length>1?'s':'');
     filterDashUsers();
-  }).catch(function(){ console.error('loadDashUsersAdmin error'); });
+  })
+  .catch(function(err){
+    console.error('loadDashUsersAdmin:', err.message);
+    if(list) list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--re)">❌ '+err.message+'</div>';
+  });
 }
 
 function filterDashUsers(){
@@ -7552,6 +7621,40 @@ function dashToggleAdmin(userId, currentRole){
     loadDashUsersAdmin();
   }).catch(function(){ toast('Erreur','err'); });
 }
+
+</script>
+<script>
+
+// Adapter les boutons de plans selon le rôle
+function adaptProPageForRole(){
+  var u = DB.user();
+  var isAdmin = u && u.role==='admin';
+  var btns = document.querySelectorAll('.pro-plan-btn');
+  btns.forEach(function(btn){
+    if(isAdmin){
+      btn.textContent = '⚡ Activer gratuitement';
+      btn.style.background = '#1D4ED8';
+    } else {
+      btn.textContent = 'Choisir';
+      btn.style.background = '';
+    }
+  });
+  // Afficher un badge "Admin" si connecté comme admin
+  var hero = document.querySelector('.pro-hero-tag');
+  if(hero && isAdmin){
+    hero.innerHTML = '👑 Admin — Activation gratuite';
+    hero.style.background = 'rgba(29,78,216,.2)';
+    hero.style.borderColor = 'rgba(29,78,216,.4)';
+    hero.style.color = '#1D4ED8';
+  }
+}
+// Appeler quand on arrive sur la page Pro
+var _origGoTo = typeof _origGoTo !== 'undefined' ? _origGoTo : null;
+var _origGoToFunc = goTo;
+goTo = function(page){
+  _origGoToFunc(page);
+  if(page === 'pro') setTimeout(adaptProPageForRole, 50);
+};
 
 </script>
 </body>
