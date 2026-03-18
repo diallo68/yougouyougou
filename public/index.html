@@ -4205,15 +4205,27 @@ function loadDash(){
 
 // ── Adapter la nav dashboard selon le rôle ──
 function adaptDashNav(isAdmin, isPro, isUser){
+  // Pro : visible pour Pro ET Admin
   document.querySelectorAll('.dash-nav-pro-only').forEach(function(el){
-    el.style.display = isPro ? 'flex' : 'none';
+    el.style.display = (isPro || isAdmin) ? 'flex' : 'none';
   });
+  // Admin uniquement
   document.querySelectorAll('.dash-nav-admin-only').forEach(function(el){
     el.style.display = isAdmin ? 'flex' : 'none';
   });
+  // User seulement : Historique et Alertes (cachés pour admin)
   document.querySelectorAll('.dash-nav-user-only').forEach(function(el){
-    el.style.display = (isUser || isPro) ? 'flex' : 'none';
+    el.style.display = isAdmin ? 'none' : 'flex';
   });
+  // Label annonces selon rôle
+  var adsLabel = document.getElementById('dash-ads-label');
+  if(adsLabel) adsLabel.textContent = isAdmin ? 'Les annonces' : 'Mes annonces';
+  // Lien Panel Admin dans sidebar
+  var adminLink = document.getElementById('nav-admin-link');
+  if(adminLink){
+    if(isAdmin) adminLink.removeAttribute('hidden');
+    else adminLink.setAttribute('hidden','');
+  }
 }
 function renderDash(){
   var u=DB.user(); if(!u) return;
@@ -4228,16 +4240,10 @@ function renderDash(){
   var isAdmin = (u.role==='admin');
   var isPro   = !isAdmin && !!(u.isPro && u.proUntil && new Date(u.proUntil)>new Date());
 
-  // ── Adapter la nav selon le rôle ──
-  // Onglet Pro : visible si Pro OU Admin
-  var dtabPro = document.getElementById('dtab-pro');
-  if(dtabPro) dtabPro.style.display = (isPro||isAdmin) ? 'flex' : 'none';
-  // Onglet Utilisateurs : admin uniquement
-  var dtabUsers = document.getElementById('dtab-users-admin');
-  if(dtabUsers) dtabUsers.style.display = isAdmin ? 'flex' : 'none';
-  // Lien Panel Admin
-  var adminLink = document.getElementById('nav-admin-link');
-  if(adminLink){ if(isAdmin) adminLink.removeAttribute('hidden'); else adminLink.setAttribute('hidden',''); }
+  // ── Adapter toute la nav selon le rôle ──
+  var isUser = !isAdmin && !isPro;
+  adaptDashNav(isAdmin, isPro, isUser);
+  // Bouton Admin nav principale
   var adminNavBtn = document.getElementById('nav-admin-btn');
   if(adminNavBtn) adminNavBtn.style.display = isAdmin ? 'inline-flex' : 'none';
   // Footer admin btn
@@ -5195,11 +5201,14 @@ function showDashTab(tab){
   var navEl = document.getElementById('dtab-'+tab);
   if(sec)   sec.classList.add('active');
   if(navEl) navEl.classList.add('active');
-  // Actions selon onglet
-  if(tab==='pro')         { renderProDash(); }
-  if(tab==='ads')         { loadDashAds(); }
-  if(tab==='payments')    { loadDashPayments(); }
-  if(tab==='users-admin') { loadDashUsersAdmin(); }
+  // ── Actions selon onglet (version complète et unique) ──
+  if(tab==='messages')    { if(typeof loadConversations==='function') loadConversations(); }
+  if(tab==='alerts')      { if(typeof loadAlerts==='function') loadAlerts(); }
+  if(tab==='profil')      { if(typeof loadVendorStats==='function') loadVendorStats(); }
+  if(tab==='pro')         { if(typeof renderProDash==='function') renderProDash(); if(typeof loadProStats==='function') loadProStats(); }
+  if(tab==='ads')         { if(typeof loadDashAds==='function') loadDashAds(); }
+  if(tab==='payments')    { if(typeof loadDashPayments==='function') loadDashPayments(); }
+  if(tab==='users-admin') { if(typeof loadDashUsersAdmin==='function') loadDashUsersAdmin(); }
 }
 
 function toggleFav(id){
@@ -6177,18 +6186,7 @@ function loadVendorStats(){
   });
 }
 
-// ── showDashTab étendu ──
-var _origShowDashTab = showDashTab;
-showDashTab = function(tab){
-  _origShowDashTab(tab);
-  if(tab==='messages')     loadConversations();
-  if(tab==='alerts')       loadAlerts();
-  if(tab==='profil')       loadVendorStats();
-  if(tab==='pro')          { if(typeof renderProDash==='function') renderProDash(); if(typeof loadProStats==='function') loadProStats(); }
-  if(tab==='ads')          loadDashAds();
-  if(tab==='payments')     loadDashPayments();
-  if(tab==='users-admin')  loadDashUsersAdmin();
-};
+// [showDashTab V10 intégré dans la version principale]
 
 // ── Open modal message enrichi (depuis btn "Envoyer un message") ──
 // Remplacer envoyerMessage est déjà fait plus haut
@@ -7162,12 +7160,7 @@ async function loadProStats(){
   } catch(e){ console.error('[PRO STATS]', e.message); }
 }
 
-// ── Étendre showDashTab pour Pro ──
-var _origShowDashTab = showDashTab;
-showDashTab = function(tab){
-  _origShowDashTab(tab);
-  if(tab === 'pro') renderProDash();
-};
+// [showDashTab Pro intégré dans la version principale]
 
 // ── Afficher boutique enrichie sur la page vendeur ──
 function renderSellerBoutique(seller){
