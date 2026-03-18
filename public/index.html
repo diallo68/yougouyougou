@@ -953,6 +953,27 @@ footer{background:transparent;margin-top:0}
 .pay-period-card-val{font-size:18px;font-weight:900;color:var(--or)}
 .pay-period-card-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:3px}
 @media(max-width:600px){.pay-period-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* ── Sélecteurs POST 3 niveaux ── */
+#post-subcat-sel:focus, #post-item-sel:focus {
+  border-color: var(--or);
+  box-shadow: 0 0 0 3px rgba(255,92,0,.1);
+}
+#post-subcat-sel, #post-item-sel {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236F6F6F' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 32px;
+  cursor: pointer;
+  transition: border-color .15s;
+}
+#post-subcat-wrap, #post-item-wrap {
+  animation: fadeUp .2s ease;
+}
+#post-cat-breadcrumb {
+  border-left: 3px solid var(--or);
+  padding-left: 10px;
+}
 </style>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#FF5C00">
@@ -1401,10 +1422,32 @@ footer{background:transparent;margin-top:0}
       </div>
     </div>
 
-    <!-- Catégorie -->
+    <!-- Catégorie → Sous-catégorie → Article (dynamique) -->
     <div class="post-section">
       <div class="post-section-title">📂 Catégorie *</div>
+      <!-- Niveau 1 : Catégorie principale -->
       <div class="cat-grid" id="post-cats"></div>
+
+      <!-- Niveau 2 : Sous-catégorie (apparaît après choix niveau 1) -->
+      <div id="post-subcat-wrap" style="display:none;margin-top:12px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:6px">Sous-catégorie</div>
+        <select id="post-subcat-sel" onchange="onPostSubChange()"
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--br);border-radius:6px;font-size:13px;font-family:inherit;color:var(--ink);background:#fff;outline:none;-webkit-appearance:none">
+          <option value="">-- Choisir une sous-catégorie --</option>
+        </select>
+      </div>
+
+      <!-- Niveau 3 : Article (apparaît après choix niveau 2) -->
+      <div id="post-item-wrap" style="display:none;margin-top:8px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:6px">Article <span style="font-weight:400">(optionnel)</span></div>
+        <select id="post-item-sel" onchange="onPostItemChange()"
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--br);border-radius:6px;font-size:13px;font-family:inherit;color:var(--ink);background:#fff;outline:none;-webkit-appearance:none">
+          <option value="">-- Choisir un article --</option>
+        </select>
+      </div>
+
+      <!-- Breadcrumb sélection -->
+      <div id="post-cat-breadcrumb" style="display:none;margin-top:8px;padding:8px 12px;background:var(--orl);border-radius:6px;font-size:12px;font-weight:600;color:var(--or)"></div>
     </div>
 
     <!-- Infos -->
@@ -2868,10 +2911,28 @@ function editMyAd(){
     var pp=document.getElementById('pp'); if(pp) pp.value=curAd.p||curAd.price||'';
     var pd=document.getElementById('pd'); if(pd) pd.value=curAd.desc||curAd.description||'';
     var pc=document.getElementById('pc'); if(pc) pc.value=curAd.city||'';
-    selCat=curAd.cat||curAd.category||'';
+    // Pré-remplir catégorie niveau 1
+    selCat = curAd.cat||curAd.category||'';
     document.querySelectorAll('.cat-opt').forEach(function(el){
-      el.classList.toggle('sel', el.textContent.includes(selCat));
+      el.classList.toggle('sel', el.textContent.trim() === selCat);
     });
+    // Pré-remplir niveau 2 si disponible
+    if(selCat){
+      _renderPostSubCat(selCat);
+      selSubCat = curAd.subCategory||'';
+      if(selSubCat){
+        var sub = document.getElementById('post-subcat-sel');
+        if(sub){ sub.value = selSubCat; }
+        // Pré-remplir niveau 3
+        _renderPostItem(selCat, selSubCat);
+        selSubItem = curAd.subItem||'';
+        if(selSubItem){
+          var item = document.getElementById('post-item-sel');
+          if(item) item.value = selSubItem;
+        }
+      }
+      _updatePostBreadcrumb();
+    }
     // Changer le titre du bouton
     var btn=document.getElementById('submit-ad-btn');
     if(btn) btn.textContent="✏️ Mettre à jour l'annonce";
@@ -2909,7 +2970,105 @@ function addFav(){if(curAd){DB.addFav(curAd.id);toast('❤️ Ajouté aux favori
 //  POST AD
 // ══════════════════════════════════════════
 var selCat='';
-function pickCat(el,name){document.querySelectorAll('.cat-opt').forEach(function(c){c.classList.remove('sel');});el.classList.add('sel');selCat=name;}
+var selSubCat=''; // sous-catégorie niveau 2
+var selSubItem=''; // article niveau 3
+function pickCat(el, name){
+  // Réinitialiser les niveaux inférieurs
+  selCat = name; selSubCat = ''; selSubItem = '';
+  document.querySelectorAll('.cat-opt').forEach(function(c){ c.classList.remove('sel'); });
+  el.classList.add('sel');
+  _updatePostBreadcrumb();
+  _renderPostSubCat(name);
+}
+
+// Niveau 2 : remplir le select sous-catégorie depuis CATS
+function _renderPostSubCat(catName){
+  var wrap = document.getElementById('post-subcat-wrap');
+  var sel  = document.getElementById('post-subcat-sel');
+  var itemWrap = document.getElementById('post-item-wrap');
+  if(!wrap || !sel) return;
+
+  var cat = CATS.find(function(c){ return c.n === catName; });
+  if(!cat || !cat.sub || !cat.sub.length){
+    wrap.style.display = 'none';
+    if(itemWrap) itemWrap.style.display = 'none';
+    return;
+  }
+
+  // Remplir les options niveau 2
+  sel.innerHTML = '<option value="">-- Choisir une sous-catégorie --</option>';
+  cat.sub.forEach(function(sub){
+    var name2 = typeof sub === 'object' ? sub.n : sub;
+    var opt = document.createElement('option');
+    opt.value = name2;
+    opt.textContent = name2;
+    sel.appendChild(opt);
+  });
+  wrap.style.display = 'block';
+  if(itemWrap) itemWrap.style.display = 'none';
+  sel.value = '';
+}
+
+// Événement : changement niveau 2 → afficher niveau 3
+function onPostSubChange(){
+  var sel  = document.getElementById('post-subcat-sel');
+  selSubCat = sel ? sel.value : '';
+  selSubItem = '';
+  _updatePostBreadcrumb();
+  _renderPostItem(selCat, selSubCat);
+}
+
+// Niveau 3 : remplir le select articles depuis CATS
+function _renderPostItem(catName, subName){
+  var wrap = document.getElementById('post-item-wrap');
+  var sel  = document.getElementById('post-item-sel');
+  if(!wrap || !sel) return;
+
+  var cat = CATS.find(function(c){ return c.n === catName; });
+  if(!cat || !cat.sub) { wrap.style.display='none'; return; }
+
+  var sub = cat.sub.find(function(s){ return (typeof s==='object' ? s.n : s) === subName; });
+  if(!sub || typeof sub !== 'object' || !sub.items || !sub.items.length){
+    wrap.style.display = 'none'; return;
+  }
+
+  sel.innerHTML = '<option value="">-- Choisir un article (optionnel) --</option>';
+  sub.items.forEach(function(item){
+    var opt = document.createElement('option');
+    opt.value = item; opt.textContent = item;
+    sel.appendChild(opt);
+  });
+  wrap.style.display = 'block';
+  sel.value = '';
+}
+
+// Événement : changement niveau 3
+function onPostItemChange(){
+  var sel = document.getElementById('post-item-sel');
+  selSubItem = sel ? sel.value : '';
+  _updatePostBreadcrumb();
+}
+
+// Breadcrumb dans le formulaire
+function _updatePostBreadcrumb(){
+  var bc = document.getElementById('post-cat-breadcrumb');
+  if(!bc) return;
+  if(!selCat){ bc.style.display='none'; return; }
+  var parts = ['📂 '+selCat];
+  if(selSubCat) parts.push(selSubCat);
+  if(selSubItem) parts.push(selSubItem);
+  bc.textContent = parts.join(' › ');
+  bc.style.display = 'block';
+}
+
+// Réinitialiser le formulaire post (appelé après soumission)
+function resetPostForm(){
+  selCat=''; selSubCat=''; selSubItem='';
+  document.querySelectorAll('.cat-opt').forEach(function(c){ c.classList.remove('sel'); });
+  var w1=document.getElementById('post-subcat-wrap'); if(w1) w1.style.display='none';
+  var w2=document.getElementById('post-item-wrap');   if(w2) w2.style.display='none';
+  var bc=document.getElementById('post-cat-breadcrumb'); if(bc) bc.style.display='none';
+}
 var selectedPhotos = []; // stockage base64 des photos
 
 function handlePhotos(input){
@@ -2987,7 +3146,10 @@ function submitAd(){
   var adData={
     title:title, price:parseInt(price)||0,
     city:city, quartier:quartier,
-    category:selCat, description:desc,
+    category:selCat,
+    subCategory: selSubCat||'',
+    subItem: selSubItem||'',
+    description:desc,
     phone:phone?'+224'+phone:'',
     etat:etat, seller:user.name||user.prenom||'',
     sellerId:user._id||user.id||'',
@@ -3020,7 +3182,7 @@ function submitAd(){
       toast('🎉 Annonce publiée avec succès !','ok');
       // Réinitialiser le formulaire
       ['pt','pp','pd','ptel','pq','pn','pem'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
-      selCat=''; selectedPhotos=[]; window._editingAdId=null;
+      selCat=''; selSubCat=''; selSubItem=''; selectedPhotos=[]; window._editingAdId=null; resetPostForm();
       var submitBtn=document.getElementById('submit-ad-btn');if(submitBtn)submitBtn.textContent='🚀 Publier mon annonce gratuitement';
       var pp=document.getElementById('photo-previews');if(pp)pp.innerHTML='';
       var pz=document.getElementById('upload-zone-el');if(pz){var pzp=pz.querySelector('p');if(pzp)pzp.textContent='Cliquez pour ajouter des photos';}
