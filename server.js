@@ -798,6 +798,38 @@ app.get('/api/users/:id/public', authOptional, async (req, res) => {
 });
 
 // ★ Stats du vendeur connecté
+
+// ★ Liste des boutiques Pro publiques
+app.get('/api/boutiques', async (req, res) => {
+  try {
+    const now = new Date();
+    const { sector, search, limit = 50 } = req.query;
+    const filter = {
+      isPro: true,
+      proUntil: { $gt: now },
+    };
+    if (sector) filter.boutiqueSector = sector;
+    if (search) filter.$or = [
+      { boutiqueName:  new RegExp(search, 'i') },
+      { boutiqueDesc:  new RegExp(search, 'i') },
+      { boutiqueSector:new RegExp(search, 'i') },
+    ];
+
+    const users = await User.find(filter)
+      .select('prenom nom city boutiqueName boutiqueSlogan boutiqueBanner boutiqueSector boutiqueSocial boutiqueDesc avgRating ratingCount totalViews createdAt')
+      .sort({ totalViews: -1 })
+      .limit(Number(limit))
+      .lean();
+
+    // Ajouter le nombre d'annonces pour chaque boutique
+    const boutiques = await Promise.all(users.map(async (u) => {
+      const adsCount = await Ad.countDocuments({ seller: u._id, active: true });
+      return { ...u, adsCount };
+    }));
+
+    res.json({ boutiques, total: boutiques.length });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
 app.get('/api/my-stats', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('avgRating ratingCount totalViews isPro proUntil');
