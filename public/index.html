@@ -2461,11 +2461,11 @@ function scrollToAds(){document.getElementById('ads-section').scrollIntoView({be
 //  POPULATE
 // ══════════════════════════════════════════
 function populateCities(){
-  var ids=['hero-city-sel','pc'];
+  var ids=['hero-city-sel','pc','ep-city'];
   ids.forEach(function(id){
     var el=document.getElementById(id);if(!el)return;
-    var o='<option value="">Toutes les villes</option>';
-    ALL_CITIES.forEach(function(c){o+='<option>'+c+'</option>';});
+    var o='<option value="">Choisir une ville...</option>';
+    ALL_CITIES.forEach(function(city){o+='<option value="'+city+'">'+city+'</option>';});
     el.innerHTML=o;
   });
 }
@@ -3978,46 +3978,115 @@ function doLogin(){
   });
 }
 function openEditProfile(){
-  var u=DB.user();if(!u)return;
-  var prenom=u.prenom||(u.name||'').split(' ')[0]||'';
-  var nom=u.nom||(u.name||'').split(' ').slice(1).join(' ')||'';
-  var phone=(u.phone||'').replace('+224','').replace(/\s/g,'');
-  document.getElementById('ep-prenom').value=prenom;
-  document.getElementById('ep-nom').value=nom;
-  document.getElementById('ep-phone').value=phone;
-  document.getElementById('ep-city').value=u.city||'';
-  document.getElementById('ep-pw').value='';
+  // Lire les données utilisateur depuis l'API pour avoir les infos à jour
+  var tok = localStorage.getItem('ygy_token');
+  var u = DB.user();
+  if(!u){ toast('Connectez-vous','err'); return; }
+
+  // Peupler les villes immédiatement
+  var cityEl = document.getElementById('ep-city');
+  if(cityEl && cityEl.options.length <= 1 && typeof ALL_CITIES !== 'undefined'){
+    var opts = '<option value="">Choisir une ville...</option>';
+    ALL_CITIES.forEach(function(v){
+      opts += '<option value="'+v+'">'+v+'</option>';
+    });
+    cityEl.innerHTML = opts;
+  }
+
+  // Remplir depuis DB.user() (données locales)
+  function fillForm(data){
+    var prenom = data.prenom||(data.name||'').split(' ')[0]||'';
+    var nom    = data.nom||(data.name||'').split(' ').slice(1).join(' ')||'';
+    var phone  = (data.phone||'').replace('+224','').replace(/\s/g,'');
+    var set = function(id,val){ var el=document.getElementById(id); if(el) el.value=val; };
+    set('ep-prenom', prenom);
+    set('ep-nom',    nom);
+    set('ep-phone',  phone);
+    set('ep-city',   data.city||'');
+    set('ep-pw',     '');
+    // Sélectionner la ville dans le select
+    var cEl = document.getElementById('ep-city');
+    if(cEl && data.city) cEl.value = data.city;
+  }
+
+  // Remplir d'abord avec les données locales
+  fillForm(u);
+  // Ouvrir le modal immédiatement (sans attendre l'API)
   openModal('editprofile');
+
+  // Puis enrichir avec les données serveur si disponible
+  if(tok){
+    fetch('/api/me',{headers:{'Authorization':'Bearer '+tok}})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d){
+      if(d && d.user){
+        // Mettre à jour DB
+        var lu = DB.user()||{};
+        if(d.user.prenom) lu.prenom = d.user.prenom;
+        if(d.user.nom)    lu.nom    = d.user.nom;
+        if(d.user.city)   lu.city   = d.user.city;
+        if(d.user.phone)  lu.phone  = d.user.phone;
+        DB.login(lu);
+        // Re-remplir avec données fraîches (si le modal est encore ouvert)
+        var ov = document.getElementById('overlay-editprofile');
+        if(ov && ov.classList.contains('open')) fillForm(lu);
+      }
+    }).catch(function(){});
+  }
 }
 
-function saveProfile(){
-  var u=DB.user();if(!u)return;
-  var prenom=document.getElementById('ep-prenom').value.trim();
-  var nom=document.getElementById('ep-nom').value.trim();
-  var phone=document.getElementById('ep-phone').value.trim();
-  var city=document.getElementById('ep-city').value;
-  var pw=document.getElementById('ep-pw').value.trim();
-  if(!prenom){toast('⚠️ Le prénom est obligatoire','err');return;}
-  // Mettre à jour l'utilisateur
-  u.prenom=prenom;
-  u.nom=nom;
-  u.name=prenom+(nom?' '+nom:'');
-  u.initials=(prenom.charAt(0)+(nom.charAt(0)||'')).toUpperCase();
-  if(phone) u.phone='+224'+phone.replace(/\s/g,'');
-  if(city) u.city=city;
-  if(pw&&pw.length>=6) u.password=pw;
-  else if(pw&&pw.length<6){toast('⚠️ Mot de passe trop court (6 min)','err');return;}
-  // Sauvegarder dans la session et la liste des users
-  DB.login(u);
-  var users=DB._d.users||[];
-  var idx=users.findIndex(function(x){return x.email===u.email||x.phone===u.phone;});
-  if(idx>=0) users[idx]=u; else users.push(u);
-  DB._d.users=users;
-  DB.save();
-  closeModal('editprofile');
-  loadDash();
-  updateNav();
-  toast('✅ Profil mis à jour !','ok');
+async function saveProfile(){
+  var u = DB.user(); if(!u) return;
+  var prenom = document.getElementById('ep-prenom').value.trim();
+  var nom    = document.getElementById('ep-nom').value.trim();
+  var phone  = document.getElementById('ep-phone').value.trim();
+  var city   = document.getElementById('ep-city').value;
+  var pw     = document.getElementById('ep-pw').value.trim();
+
+  if(!prenom){ toast('⚠️ Le prénom est obligatoire','err'); return; }
+  if(pw && pw.length < 6){ toast('⚠️ Mot de passe trop court (6 min)','err'); return; }
+
+  var btn = document.querySelector('#overlay-editprofile .btn-or');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Enregistrement...'; }
+
+  var tok = localStorage.getItem('ygy_token');
+  var payload = { prenom:prenom, nom:nom };
+  if(city)  payload.city  = city;
+  // Le mot de passe est géré séparément
+  // Pas besoin d'envoyer le phone car il est lié au compte
+
+  try {
+    // 1. Sauvegarder sur le serveur
+    if(tok){
+      var res = await fetch('/api/me', {
+        method:'PATCH',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},
+        body: JSON.stringify(payload)
+      });
+      var data = await res.json();
+      if(!res.ok) throw new Error(data.error||'Erreur serveur');
+    }
+
+    // 2. Mettre à jour localement
+    u.prenom = prenom;
+    u.nom    = nom;
+    u.name   = prenom+(nom?' '+nom:'');
+    u.initials = (prenom.charAt(0)+(nom.charAt(0)||'')).toUpperCase();
+    if(city) u.city = city;
+    DB.login(u);
+    DB.save();
+
+    closeModal('editprofile');
+    updateNav();
+    toast('✅ Profil mis à jour !','ok');
+    // renderDash en léger délai pour ne pas interférer avec la fermeture du modal
+    setTimeout(function(){ renderDash(); }, 150);
+
+  } catch(err){
+    toast('❌ '+err.message,'err');
+  } finally {
+    if(btn){ btn.disabled=false; btn.textContent='💾 Enregistrer'; }
+  }
 }
 
 function logout(){DB.logout();localStorage.removeItem('ygy_token');updateNav();goTo('home');toast('👋 Déconnecté');}
