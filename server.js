@@ -28,7 +28,9 @@ async function sendSMS(phone, message) {
   params.append('username', username);
   params.append('to',       phone);
   params.append('message',  message);
-  if (isLive && process.env.AT_SENDER) params.append('from', process.env.AT_SENDER);
+  // AT_SENDER désactivé — shortcode automatique AT (fonctionne sans approbation)
+  // Pour réactiver un Sender ID custom : l'enregistrer d'abord sur AT Dashboard
+  // if (isLive && process.env.AT_SENDER) params.append('from', process.env.AT_SENDER);
 
   const body = params.toString();
 
@@ -55,9 +57,12 @@ async function sendSMS(phone, message) {
           const statusCode = recipient?.statusCode;
           const status = recipient?.status;
           const ok = statusCode === 100 || statusCode === 101;
-          // Log complet pour débug
-          console.log(`[SMS] ${phone} → statusCode=${statusCode} status="${status}" ok=${ok}`);
-          console.log(`[SMS] Réponse AT complète:`, JSON.stringify(json));
+          if(ok){
+            console.log(`[SMS] ✅ Envoyé → ${phone} | statusCode=${statusCode}`);
+          } else {
+            const msg = json?.SMSMessageData?.Message || status || 'Erreur inconnue';
+            console.error(`[SMS] ❌ Échec → ${phone} | code=${statusCode} | "${msg}"`);
+          }
           resolve(ok);
         } catch(e) {
           console.error('[SMS] Parse erreur:', e.message);
