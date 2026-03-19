@@ -468,6 +468,7 @@ async function recalcSellerRating(sellerId) {
 app.post('/api/auth/send-code', async (req, res) => {
   try {
     const { phone, email, method = 'sms', prenom = 'Utilisateur' } = req.body;
+    console.log(`[SEND-CODE] Reçu: method=${method} phone="${phone}" email="${email}" prenom="${prenom}"`);
     if (method === 'sms'   && !phone) return res.status(400).json({ error: 'Numéro requis pour SMS' });
     if (method === 'email' && !email) return res.status(400).json({ error: 'Email requis' });
 
@@ -503,14 +504,18 @@ app.post('/api/auth/send-code', async (req, res) => {
         tempUser.email = email.toLowerCase();
         tempUser.phone = 'em_' + Date.now(); // phone unique temporaire
       }
+      console.log(`[SEND-CODE] Création tempUser: phone="${tempUser.phone}" email="${tempUser.email||''}"`);
       await User.create(tempUser);
+      console.log(`[SEND-CODE] TempUser créé ✅`);
     }
 
     // Envoyer le code
     let emailSent = false;
     let smsSent   = false;
     if (method === 'sms') {
+      console.log(`[SEND-CODE] Envoi SMS → ${phone} code=${code}`);
       smsSent = await sendSMS(phone, `Votre code YouGouYou : ${code}. Valable 15 min.`);
+      console.log(`[SEND-CODE] SMS résultat: smsSent=${smsSent}`);
       if (!smsSent) console.warn(`[SMS] Échec → ${phone} code=${code}`);
     } else {
       try {
