@@ -505,8 +505,28 @@ app.post('/api/auth/send-code', async (req, res) => {
         tempUser.phone = 'em_' + Date.now(); // phone unique temporaire
       }
       console.log(`[SEND-CODE] Création tempUser: phone="${tempUser.phone}" email="${tempUser.email||''}"`);
-      await User.create(tempUser);
-      console.log(`[SEND-CODE] TempUser créé ✅`);
+      try {
+        await User.create(tempUser);
+        console.log(`[SEND-CODE] TempUser créé ✅`);
+      } catch(createErr) {
+        // E11000 = phone déjà en base (doublon) → récupérer l'existant et mettre à jour le code
+        if (createErr.code === 11000) {
+          console.warn(`[SEND-CODE] Doublon détecté — mise à jour code sur user existant`);
+          const dup = method === 'sms'
+            ? await User.findOne({ phone })
+            : await User.findOne({ email: email.toLowerCase() });
+          if (dup) {
+            dup.verifyCode = code;
+            dup.codeExpiry = expiry;
+            await dup.save();
+            console.log(`[SEND-CODE] Code mis à jour sur user existant ✅`);
+          } else {
+            throw createErr; // vraie erreur inconnue
+          }
+        } else {
+          throw createErr;
+        }
+      }
     }
 
     // Envoyer le code
@@ -538,8 +558,9 @@ app.post('/api/auth/send-code', async (req, res) => {
         : (emailSent ? `Email envoyé à ${email}` : `Erreur envoi email`)
     });
   } catch(err) {
-    console.error('[SEND-CODE] Erreur:', err.message);
-    res.status(500).json({ error: err.message });
+    console.error('[SEND-CODE] Erreur FATALE:', err.code, err.message);
+    // Renvoyer une erreur claire au front au lieu de planter silencieusement
+    res.status(500).json({ error: 'Erreur serveur: ' + err.message });
   }
 });
 
