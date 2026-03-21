@@ -4649,8 +4649,9 @@ function sendPageMsg(){
   }).then(function(r){return r.json();})
   .then(function(){
     if(inp) inp.value='';
-    // Recharger les messages
-    openPageConv(_pageConvId, {buyerId:'', sellerName:'', adTitle:''});
+    // Recharger les messages en gardant les infos de la conv courante
+    var convInfo = (_pageConvs||[]).find(function(c){return (c._id||c.id)===_pageConvId;})||{_id:_pageConvId};
+    openPageConv(_pageConvId, convInfo);
   }).catch(function(){ toast('❌ Erreur envoi','err'); });
 }
 function updateNav(){
@@ -6294,56 +6295,81 @@ function sendMsgInThread(){
 // Modal message rapide depuis page detail
 async function envoyerMessage(){
   var user = DB.user();
-  if(!user){ toast('🔒 Connectez-vous pour envoyer un message','err'); setTimeout(function(){ openModal('auth'); },400); return; }
+  if(!user){
+    toast('🔒 Connectez-vous pour envoyer un message','err');
+    setTimeout(function(){ openModal('auth'); }, 400);
+    return;
+  }
   if(!curAd){ toast('Annonce non disponible','err'); return; }
 
-  var adId = curAd._id || curAd.id;
-  if(!adId){ toast('Identifiant annonce manquant','err'); return; }
+  var adId    = curAd._id || curAd.id;
+  var titre   = curAd.t   || curAd.title || 'Annonce';
+  var vendeur = curAd.sellerName || curAd.seller_name || 'Vendeur';
+
+  if(!adId){ toast('ID annonce manquant','err'); return; }
 
   // Empêcher d'écrire à soi-même
   var sellerId = curAd.seller || curAd.sellerId || curAd.sid;
   if(sellerId && String(sellerId) === String(user._id || user.id)){
-    toast('Vous ne pouvez pas vous envoyer un message','warn'); return;
+    toast('Vous ne pouvez pas vous envoyer un message','warn');
+    return;
   }
 
   var tok = localStorage.getItem('ygy_token');
-  var titre = curAd.t || curAd.title || 'votre annonce';
-  var msgDefaut = 'Bonjour, je suis intéressé(e) par votre annonce : ' + titre + '. Est-elle toujours disponible ?';
+  var msgDefaut = 'Bonjour, je suis intéressé(e) par : ' + titre + '. Est-elle toujours disponible ?';
 
-  // Bouton feedback
   var btn = document.querySelector('.btn-msg');
-  if(btn){ btn.disabled = true; btn.textContent = '⏳ Ouverture...'; }
+  if(btn){ btn.disabled = true; btn.textContent = '⏳...'; }
 
   try {
+    // Créer ou retrouver la conversation
     var res = await fetch('/api/conversations', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
-      body: JSON.stringify({ adId: adId, message: msgDefaut })
+      headers: {'Content-Type':'application/json','Authorization':'Bearer '+tok},
+      body: JSON.stringify({adId: adId, message: msgDefaut})
     });
     var data = await res.json();
 
-    if(!res.ok){ toast('❌ ' + (data.error || 'Erreur'), 'err'); return; }
+    if(!res.ok){
+      toast('❌ ' + (data.error || 'Erreur'), 'err');
+      return;
+    }
 
     var convId = data.conversationId;
-    toast('💬 Conversation ouverte !', 'ok');
 
-    // Aller dans la messagerie et ouvrir directement ce thread
-    navGoMessages();
-    // Ouvrir le thread après que navGoMessages ait chargé les conversations
-    setTimeout(function(){
-      if(convId && typeof openPageConvById === 'function'){
-        openPageConvById(convId);
-      } else if(convId && typeof openPageConv === 'function'){
-        openPageConv(convId, {_id: convId, adTitle: titre});
-      }
-    }, 1200);
+    // Aller sur la page messages
+    goTo('messages');
+
+    // Préparer les données de la conversation pour l'affichage immédiat
+    var convData = {
+      _id:        convId,
+      adTitle:    titre,
+      sellerName: vendeur,
+      buyerId:    String(user._id || user.id),
+    };
+
+    // Ouvrir le thread immédiatement SANS attendre le fetch des conversations
+    openPageConv(convId, convData);
+
+    // Charger aussi la liste en arrière-plan pour la colonne gauche
+    if(tok){
+      fetch('/api/conversations',{headers:{'Authorization':'Bearer '+tok}})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var convs = d.conversations||d||[];
+        _pageConvs = convs;
+        renderPageConvList(convs);
+        updateMsgBadge(convs);
+      }).catch(function(){});
+    }
 
   } catch(err) {
-    toast('❌ Erreur réseau', 'err');
+    toast('❌ Erreur réseau — vérifiez votre connexion', 'err');
   } finally {
     if(btn){ btn.disabled = false; btn.textContent = '💬 Envoyer un message'; }
   }
 }
+
 
 function sendQuickMessage(){
   var user=DB.user();
