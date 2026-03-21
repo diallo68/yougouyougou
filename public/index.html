@@ -469,23 +469,22 @@ footer{background:transparent;margin-top:0}
 .pmsg-conv.active{background:#FFF5EE;border-left-color:var(--or)}
 .pmsg-conv-thumb{width:52px;height:52px;border-radius:8px;flex-shrink:0;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:var(--or);overflow:hidden;border:1px solid #eee}
 .pmsg-conv-thumb img{width:100%;height:100%;object-fit:cover;border-radius:7px}
-.pmsg-conv-body{flex:1;min-width:0}
-.pmsg-conv-top{display:flex;align-items:baseline;justify-content:space-between;gap:6px;margin-bottom:3px}
-.pmsg-conv-title{font-size:13px;font-weight:700;color:#1A1A2E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pmsg-conv-time{font-size:11px;color:#aaa;white-space:nowrap;flex-shrink:0}
-.pmsg-conv-name{font-size:12px;color:#888;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pmsg-conv-info{flex:1;min-width:0}
+.pmsg-conv-title{font-size:13px;font-weight:700;color:#1A1A2E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
 .pmsg-conv-preview{font-size:12px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pmsg-conv-preview.bold{font-weight:700;color:#333}
-.pmsg-conv-dot{width:10px;height:10px;border-radius:50%;background:var(--or);position:absolute;right:14px;top:50%;transform:translateY(-50%)}
+.pmsg-conv-who{font-size:12px;color:#888;margin-bottom:2px}
+.pmsg-conv-meta{display:flex;align-items:center;gap:4px;margin-top:2px}
+.pmsg-conv-date{font-size:11px;color:#bbb}
+.pmsg-conv-unread{background:var(--or);color:#fff;border-radius:50%;min-width:18px;height:18px;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;padding:0 3px;position:absolute;right:10px;top:50%;transform:translateY(-50%)}
 .pmsg-center{display:flex;flex-direction:column;overflow:hidden;background:#f6f6f6;min-height:0}
 .pmsg-thread-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#ccc;padding:40px;background:#f6f6f6;text-align:center}
 .pmsg-thread-head{display:flex;align-items:center;gap:12px;padding:0 20px;height:56px;border-bottom:1px solid #eee;background:#fff;flex-shrink:0}
 .pmsg-thread-av{width:40px;height:40px;border-radius:50%;background:var(--or);color:#fff;font-weight:800;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .pmsg-thread-name{font-size:14px;font-weight:800;color:#1A1A2E}
-.pmsg-thread-sub{font-size:12px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pmsg-thread-ad{font-size:12px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pmsg-bubbles{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:2px}
 .pmsg-date-sep{text-align:center;font-size:11px;color:#bbb;margin:12px 0;font-weight:600}
-.pmsg-security-bar{background:#FFFBEA;border:1px solid #FDE68A;border-radius:10px;padding:10px 14px;font-size:12px;color:#92400E;display:flex;gap:8px;margin-bottom:12px;line-height:1.5;flex-shrink:0}
+.pmsg-security{background:#FFFBEA;border:1px solid #FDE68A;border-radius:10px;padding:10px 14px;font-size:12px;color:#92400E;display:flex;gap:8px;margin-bottom:12px;line-height:1.5;flex-shrink:0}
 .pmsg-bubble-wrap{display:flex;flex-direction:column;margin-bottom:4px}
 .pmsg-bubble-wrap.mine{align-items:flex-end}.pmsg-bubble-wrap.theirs{align-items:flex-start}
 .pmsg-bubble{max-width:65%;padding:10px 14px;font-size:14px;line-height:1.55;word-break:break-word}
@@ -497,20 +496,16 @@ footer{background:transparent;margin-top:0}
 .pmsg-input:focus{border-color:var(--or);background:#fff}
 .pmsg-send{background:var(--or);color:#fff;border:none;border-radius:50%;width:44px;height:44px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .15s}
 .pmsg-send:hover{opacity:.85}
-.pmsg-right-panel{display:flex;flex-direction:column;border-left:1px solid var(--br);background:#fff;overflow-y:auto;min-height:0}
-.pmsg-panel-img{width:100%;height:180px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:52px;cursor:pointer;flex-shrink:0;overflow:hidden}
-.pmsg-panel-img img{width:100%;height:100%;object-fit:cover}
-.pmsg-panel-body{padding:14px 16px;border-bottom:1px solid #f0f0f0;cursor:pointer}
-.pmsg-panel-title{font-size:14px;font-weight:700;color:#1A1A2E;margin-bottom:6px;line-height:1.4}
-.pmsg-panel-price{font-size:22px;font-weight:900;color:#1A1A2E}
-.pmsg-panel-vendor{padding:14px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:10px}
-.pmsg-panel-av{width:40px;height:40px;border-radius:50%;background:var(--or);color:#fff;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.pmsg-panel-vname{font-size:13px;font-weight:700;color:#1A1A2E}
-.pmsg-panel-vsince{font-size:11px;color:#aaa}
-.pmsg-panel-action{padding:14px 16px;border-bottom:1px solid #f0f0f0}
-.pmsg-panel-btn{width:100%;padding:10px;border:1.5px solid var(--br);border-radius:8px;background:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
-.pmsg-panel-btn:hover{background:#f5f5f5}
-.pmsg-panel-tip{padding:14px 16px;font-size:12px;color:#aaa;line-height:1.6}
+.pmsg-right-panel{display:flex;flex-direction:column;border-left:1px solid var(--br);background:#fff;overflow-y:auto;min-height:0;padding:16px}
+.pmsg-vendor-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.pmsg-vendor-av{width:52px;height:52px;border-radius:50%;background:var(--or);color:#fff;font-size:20px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pmsg-vendor-name{font-size:16px;font-weight:800;color:var(--ink)}
+.pmsg-vendor-meta{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px;margin-top:3px}
+.pmsg-ad-card{border:1px solid var(--br);border-radius:10px;overflow:hidden;margin-bottom:14px;cursor:pointer}
+.pmsg-ad-img{width:100%;height:140px;object-fit:cover;background:var(--brl);display:flex;align-items:center;justify-content:center;font-size:40px}
+.pmsg-ad-info{padding:10px 12px}
+.pmsg-ad-title{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.pmsg-ad-price{font-size:18px;font-weight:800;color:var(--ink)}
 @media(max-width:900px){.pmsg-wrap{grid-template-columns:280px 1fr}.pmsg-right-panel{display:none!important}}
 @media(max-width:640px){.pmsg-wrap{grid-template-columns:1fr}}
 
@@ -4371,334 +4366,1962 @@ function navGoFavs(){
   goTo('favs');
 }
 
-
-// ══════════════════════════════════════════════════════════
-//  MESSAGERIE STYLE LEBONCOIN — v2
-// ══════════════════════════════════════════════════════════
-
-var _convId   = null;   // ID de la conv active
-var _convList = [];     // liste complète chargée
-
-// ── Compatibilité ancien code ──
-var _pageConvId  = null;
-var _pageConvs   = [];
-
-// ── Aller sur la page messages ──
 function navGoMessages(){
-  if(!DB.user()){ openModal('auth'); return; }
-  goTo('messages');
-  _chargeConvs();
-}
-
-// ── Charger les conversations depuis l'API ──
-function _chargeConvs(callback){
-  var tok  = localStorage.getItem('ygy_token');
+  if(!DB.user()){openModal('auth');return;}
+  // Charger les conversations dans la page dédiée
+  var token = localStorage.getItem('ygy_token');
   var list = document.getElementById('page-msg-list');
-  if(list && !callback) list.innerHTML =
-    '<div style="padding:30px;text-align:center;color:var(--muted)">⏳ Chargement...</div>';
-  if(!tok){ if(callback) callback([]); return; }
-  fetch('/api/conversations',{headers:{'Authorization':'Bearer '+tok}})
-  .then(function(r){return r.json();})
-  .then(function(d){
-    _convList  = d.conversations||d||[];
-    _pageConvs = _convList;  // compatibilité
-    _afficherListe(_convList);
-    _majBadge(_convList);
-    var nbr = document.getElementById('pmsg-nbr');
-    if(nbr) nbr.textContent = _convList.length ? _convList.length+' conv.' : '';
-    if(callback) callback(_convList);
-  })
-  .catch(function(){
-    if(list) list.innerHTML =
-      '<div style="padding:30px;text-align:center;color:var(--muted)">❌ Erreur réseau</div>';
-    if(callback) callback([]);
-  });
+  if(list) list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">⏳ Chargement...</div>';
+  goTo('messages');
+  if(token){
+    fetch('/api/conversations',{headers:{'Authorization':'Bearer '+token}})
+    .then(function(r){return r.json();})
+    .then(function(data){
+      var convs = data.conversations||data||[];
+      _pageConvs = convs;
+      renderPageConvList(convs);
+      updateMsgBadge(convs);
+    }).catch(function(){
+      if(list) list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">❌ Erreur de chargement</div>';
+    });
+  }
 }
 
-// ── Afficher la liste ──
-function _afficherListe(convs){
+function renderPageConvList(convs){
   var list = document.getElementById('page-msg-list');
   if(!list) return;
   var user = DB.user();
   if(!convs||!convs.length){
-    list.innerHTML =
-      '<div style="padding:48px 20px;text-align:center;color:var(--muted)">'+
-        '<div style="font-size:44px;margin-bottom:12px">💬</div>'+
-        '<div style="font-weight:700;font-size:14px;margin-bottom:6px">Aucun message</div>'+
-        '<div style="font-size:13px">Contactez un vendeur pour démarrer</div>'+
-      '</div>';
+    list.innerHTML = '<div style="padding:32px 16px;text-align:center;color:var(--muted)">'+
+      '<div style="font-size:36px;margin-bottom:8px">💬</div>'+
+      '<div style="font-size:13px;font-weight:600">Aucune conversation</div>'+
+    '</div>';
     return;
   }
-  var html = '';
-  convs.forEach(function(conv){
-    var cid     = conv._id||conv.id||'';
-    var isBuyer = String(conv.buyerId)===(user&&String(user._id||user.id));
-    var nom     = isBuyer ? (conv.sellerName||'Vendeur') : (conv.buyerName||'Acheteur');
-    var titre   = conv.adTitle||'Annonce';
-    var preview = conv.lastMessage||'Nouvelle conversation';
-    var unread  = conv.unreadCount||0;
-    var photo   = conv.adPhoto||'';
-    var actif   = _convId===cid;
-    // Temps relatif
-    var tstr='';
-    if(conv.updatedAt){
-      var sec=Math.floor((new Date()-new Date(conv.updatedAt))/1000);
-      if(sec<60)       tstr="À l'instant";
-      else if(sec<3600) tstr=Math.floor(sec/60)+'min';
-      else if(sec<86400) tstr=Math.floor(sec/3600)+'h';
-      else if(sec<604800) tstr=Math.floor(sec/86400)+'j';
-      else tstr=new Date(conv.updatedAt).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
-    }
-    var thumb = photo
-      ? '<img src="'+photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:7px" loading="lazy">'
-      : '<span style="font-size:20px;font-weight:800;color:var(--or)">'+nom.charAt(0).toUpperCase()+'</span>';
-    html +=
-      '<div class="pmsg-conv'+(actif?' active':'')+'" data-cid="'+cid+'">'+
-        '<div class="pmsg-conv-thumb">'+thumb+'</div>'+
-        '<div class="pmsg-conv-body">'+
-          '<div class="pmsg-conv-top">'+
-            '<span class="pmsg-conv-title">'+titre+'</span>'+
-            '<span class="pmsg-conv-time">'+tstr+'</span>'+
-          '</div>'+
-          '<div class="pmsg-conv-name">'+nom+'</div>'+
-          '<div class="pmsg-conv-preview'+(unread?' bold':'')+'">'+
-            (unread?'<strong>':'')+preview.substring(0,55)+(unread?'</strong>':'')+
-          '</div>'+
+  list.innerHTML = convs.map(function(conv){
+    var isUnread = (conv.unreadCount||0) > 0;
+    var isBuyer  = String(conv.buyerId)===(user&&String(user._id));
+    var name     = isBuyer ? (conv.sellerName||'Vendeur') : (conv.buyerName||'Acheteur');
+    var last     = conv.lastMessage||'Nouvelle conversation';
+    var time     = conv.updatedAt ? timeAgo(conv.updatedAt) : '';
+    var cid      = conv._id||conv.id||'';
+    var adTitle  = conv.adTitle||'';
+    return '<div class="pmsg-conv" onclick="openPageConvById(\''+cid+'\')">'+
+      '<div class="pmsg-conv-thumb">'+name.charAt(0).toUpperCase()+'</div>'+
+      '<div class="pmsg-conv-info">'+
+        '<div class="pmsg-conv-title">'+(adTitle||name)+'</div>'+
+        '<div class="pmsg-conv-preview">'+last.substring(0,45)+'</div>'+
+        '<div class="pmsg-conv-meta">'+
+          '<span class="pmsg-conv-who">'+name+'</span>'+
+          '<span class="pmsg-conv-date">· '+time+'</span>'+
         '</div>'+
-        (unread?'<div class="pmsg-conv-dot"></div>':'')+
-      '</div>';
-  });
-  list.innerHTML = html;
-  // Event delegation (évite apostrophes dans onclick)
-  list.querySelectorAll('.pmsg-conv').forEach(function(el){
-    el.addEventListener('click', function(){ _ouvrirConv(this.dataset.cid); });
-  });
+      '</div>'+
+      (isUnread?'<div class="pmsg-conv-unread">'+conv.unreadCount+'</div>':'')+
+    '</div>';
+  }).join('');
 }
 
-// ── Filtres et recherche ──
-function pmsgFilter(type, btn){
-  document.querySelectorAll('.pmsg-filter').forEach(function(b){ b.classList.remove('active'); });
-  btn.classList.add('active');
-  var filtered = type==='unread'
-    ? _convList.filter(function(c){ return (c.unreadCount||0)>0; })
-    : _convList;
-  _afficherListe(filtered);
-}
-function pmsgSearch(q){
-  q = (q||'').toLowerCase();
-  var filtered = _convList.filter(function(conv){
-    return (conv.adTitle||'').toLowerCase().includes(q)
-        || (conv.sellerName||conv.buyerName||'').toLowerCase().includes(q)
-        || (conv.lastMessage||'').toLowerCase().includes(q);
-  });
-  _afficherListe(filtered);
-}
-
-// Compatibilité
-function filterConvs(type, btn){ pmsgFilter(type, btn); }
-function renderPageConvList(convs){ _convList=convs; _pageConvs=convs; _afficherListe(convs); }
-function openPageConvById(cid){ _ouvrirConv(cid); }
-
-// ── Ouvrir une conversation ──
-function _ouvrirConv(cid){
-  _convId     = cid;
-  _pageConvId = cid;
-  var conv    = _convList.find(function(c){ return (c._id||c.id)===cid; })||{_id:cid};
+var _pageConvId = null;
+var _pageConvs  = [];
+function openPageConvById(cid){
+  var conv = _pageConvs.find(function(c){return (c._id||c.id)===cid;})||{_id:cid};
   // Marquer actif
+  document.querySelectorAll('.pmsg-conv').forEach(function(i){i.classList.remove('active');});
   document.querySelectorAll('.pmsg-conv').forEach(function(el){
-    el.classList.toggle('active', el.dataset.cid===cid);
+    if(el.getAttribute('onclick')&&el.getAttribute('onclick').includes(cid)) el.classList.add('active');
   });
-  _afficherThread(conv);
-  _afficherPanel(conv);
-  // Marquer comme lu
-  var tok = localStorage.getItem('ygy_token');
-  if(tok) fetch('/api/conversations/'+cid+'/read',{
-    method:'PATCH', headers:{'Authorization':'Bearer '+tok}
-  }).catch(function(){});
+  openPageConv(cid, conv);
 }
-
-// ── Afficher le thread (col centre) ──
-function _afficherThread(conv){
-  var center = document.getElementById('pmsg-center');
-  if(!center) return;
-  var user   = DB.user();
-  var cid    = conv._id||conv.id||'';
-  var isBuyer= !conv.buyerId || String(conv.buyerId)===(user&&String(user._id||user.id));
-  var nom    = isBuyer ? (conv.sellerName||'Vendeur') : (conv.buyerName||'Acheteur');
-  var titre  = conv.adTitle||'';
-
-  center.innerHTML =
+function filterConvs(type, btn){
+  document.querySelectorAll('.pmsg-filter').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  var convs = _pageConvs;
+  if(type==='unread') convs = convs.filter(function(c){return (c.unreadCount||0)>0;});
+  renderPageConvList(convs);
+}
+function openPageConv(convId, convData){
+  _pageConvId = convId;
+  // actif géré par openPageConvById
+  var thread = document.getElementById('page-msg-thread');
+  if(!thread) return;
+  var user = DB.user();
+  var conv = convData || {};
+  var otherName = String(conv.buyerId)===(user&&String(user._id)) ? (conv.sellerName||'Vendeur') : (conv.buyerName||'Acheteur');
+  var adTitle = conv.adTitle||'';
+  thread.className = '';
+  thread.innerHTML =
     '<div class="pmsg-thread-head">'+
-      '<div class="pmsg-thread-av">'+nom.charAt(0).toUpperCase()+'</div>'+
-      '<div style="flex:1;min-width:0">'+
-        '<div class="pmsg-thread-name">'+nom+'</div>'+
-        (titre?'<div class="pmsg-thread-sub">📦 '+titre+'</div>':'')+
+      '<div class="pmsg-thread-av">'+(otherName||'?').charAt(0).toUpperCase()+'</div>'+
+      '<div class="pmsg-thread-info">'+
+        '<div class="pmsg-thread-name">'+otherName+'</div>'+
+        (adTitle?'<div class="pmsg-thread-ad">📦 '+adTitle+'</div>':'')+
       '</div>'+
     '</div>'+
-    '<div class="pmsg-bubbles" id="pmsg-bubbles">'+
-      '<div style="text-align:center;padding:24px;color:var(--muted);font-size:12px">⏳ Chargement...</div>'+
+    '<div class="pmsg-seller-card">'+
+      '<div class="pmsg-seller-card-title">À propos de ce vendeur</div>'+
+      '<div class="pmsg-seller-since">'+
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'+
+        'Membre YouGouYou'+
+      '</div>'+
+    '</div>'+
+    '<div class="pmsg-bubbles" id="page-msg-bubbles">'+
+      '<div class="pmsg-security">'+
+        '<strong>Soyez prudent lorsque votre interlocuteur vous demande ou vous envoie un numéro de téléphone / e-mail</strong>'+
+        'Ici nous garantissons la sécurité de vos échanges, c\'est pourquoi nous vous conseillons de rester sur la messagerie pour discuter et passer par le paiement sécurisé pour vos transactions.<br>'+
+        '<a href="#">→ En savoir plus</a>'+
+      '</div>'+
+      '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">⏳ Chargement...</div>'+
     '</div>'+
     '<div class="pmsg-input-wrap">'+
-      '<input class="pmsg-input" id="pmsg-inp" type="text" placeholder="Votre message..." '+
-        'onkeydown="if(event.key===\'Enter\') _envoyerMsg()">'+
-      '<button class="pmsg-send" onclick="_envoyerMsg()" title="Envoyer">'+
-        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">'+
-          '<line x1="22" y1="2" x2="11" y2="13"/>'+
-          '<polygon points="22 2 15 22 11 13 2 9 22 2"/>'+
-        '</svg>'+
+      '<input class="pmsg-input" type="text" id="page-msg-input" placeholder="Écrivez votre message..." '+
+        'onkeydown="if(event.key===\'Enter\')sendPageMsg()">'+
+      '<button class="pmsg-send" onclick="sendPageMsg()">'+
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>'+
       '</button>'+
     '</div>';
-
-  _chargerMessages(cid);
-  setTimeout(function(){
-    var inp = document.getElementById('pmsg-inp');
-    if(inp) inp.focus();
-  }, 100);
+  // Remplir la colonne droite avec les infos vendeur
+  var panel = document.getElementById('page-msg-panel');
+  if(panel){
+    panel.innerHTML =
+      '<div class="pmsg-vendor-head">'+
+        '<div class="pmsg-vendor-av">'+(otherName||'?').charAt(0).toUpperCase()+'</div>'+
+        '<div>'+
+          '<div class="pmsg-vendor-name">'+otherName+'</div>'+
+          '<div class="pmsg-vendor-meta">'+
+            '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+
+            'Membre YouGouYou'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      (adTitle?
+        '<div class="pmsg-ad-card">'+
+          '<div class="pmsg-ad-img">📦</div>'+
+          '<div class="pmsg-ad-info">'+
+            '<div class="pmsg-ad-title">'+adTitle+'</div>'+
+          '</div>'+
+        '</div>':'')+
+      '<div style="font-size:12px;color:var(--muted);line-height:1.7;background:#f9f9f9;border-radius:8px;padding:10px 12px;margin-top:8px">'+
+        '<strong style="color:var(--ink);display:block;margin-bottom:4px">🛡️ Paiement sécurisé</strong>'+
+        'Utilisez le paiement Orange Money intégré pour vos transactions. Ne payez jamais en dehors de la plateforme.'+
+      '</div>';
+  }
+  // Charger les messages
+  var token = localStorage.getItem('ygy_token');
+  if(token){
+    fetch('/api/conversations/'+convId,{headers:{'Authorization':'Bearer '+token}})
+    .then(function(r){return r.json();})
+    .then(function(data){
+      var msgs = data.messages||[];
+      var container = document.getElementById('page-msg-bubbles');
+      if(!container) return;
+      if(!msgs.length){
+        container.innerHTML = '<div class="msg-security">🛡️ <strong>Conseils sécurité</strong> — Vérifiez l\'article avant paiement. Échangez en lieu public.</div>'+
+          '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Démarrez la conversation 👋</div>';
+        return;
+      }
+      var html = '<div class="pmsg-security">'+
+        '<strong>Soyez prudent lorsque votre interlocuteur vous demande un numéro de téléphone / e-mail</strong>'+
+        'Restez sur la messagerie YouGouYou pour vos échanges. Passez par le paiement sécurisé pour vos transactions.'+
+      '</div>';
+      msgs.forEach(function(m){
+        var isMine = String(m.senderId)===(user&&String(user._id));
+        var t = m.createdAt?new Date(m.createdAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
+        html += '<div class="pmsg-bubble-wrap '+(isMine?'mine':'theirs')+'">'+
+          '<div class="pmsg-bubble '+(isMine?'mine':'theirs')+'">'+m.text+'</div>'+
+          '<div class="pmsg-bubble-time">'+t+(isMine?' · ✓✓':'')+'</div>'+
+        '</div>';
+      });
+      container.innerHTML = html;
+      container.scrollTop = container.scrollHeight;
+    }).catch(function(){});
+    // Marquer comme lu
+    fetch('/api/conversations/'+convId+'/read',{method:'PATCH',headers:{'Authorization':'Bearer '+token}}).catch(function(){});
+  }
 }
 
-// ── Charger les messages ──
-function _chargerMessages(cid){
-  var tok  = localStorage.getItem('ygy_token');
-  var user = DB.user();
-  if(!tok) return;
-  fetch('/api/conversations/'+cid,{headers:{'Authorization':'Bearer '+tok}})
-  .then(function(r){ return r.json(); })
-  .then(function(d){ _afficherBulles(d.messages||[], user); })
-  .catch(function(){
-    var bx = document.getElementById('pmsg-bubbles');
-    if(bx) bx.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">Erreur de chargement</div>';
+function sendPageMsg(){
+  if(!_pageConvId) return;
+  var inp = document.getElementById('page-msg-input');
+  var text = (inp&&inp.value.trim())||'';
+  if(!text) return;
+  var token = localStorage.getItem('ygy_token');
+  fetch('/api/conversations/'+_pageConvId,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+    body:JSON.stringify({text:text})
+  }).then(function(r){return r.json();})
+  .then(function(){
+    if(inp) inp.value='';
+    // Recharger les messages en gardant les infos de la conv courante
+    var convInfo = (_pageConvs||[]).find(function(c){return (c._id||c.id)===_pageConvId;})||{_id:_pageConvId};
+    openPageConv(_pageConvId, convInfo);
+  }).catch(function(){ toast('❌ Erreur envoi','err'); });
+}
+function updateNav(){
+  var btn=document.getElementById('nav-auth-btn');if(!btn)return;
+  var u=DB.user();
+  var favsBtn=document.getElementById('nav-favs-btn');
+  var msgsBtn=document.getElementById('nav-msgs-btn');
+  if(u){
+    var firstName = (u.name||u.prenom||'Moi').split(' ')[0];
+    btn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>'+firstName+'</span>';
+    btn.onclick=function(){loadDash();goTo('dashboard');};
+  } else {
+    btn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span id="nav-user-label">Se connecter</span>';
+    btn.onclick=function(){openModal('auth');};
+  }
+  // Bouton Admin nav principale + lien Admin dashboard
+  var adminNavBtn = document.getElementById('nav-admin-btn');
+  var adminLink   = document.getElementById('nav-admin-link');
+  var isAdmin = (u && u.role==='admin');
+  if(adminNavBtn) adminNavBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+  if(adminLink){
+    if(isAdmin) adminLink.removeAttribute('hidden');
+    else adminLink.setAttribute('hidden','');
+  }
+}
+
+// ══════════════════════════════════════════
+//  SYNC ROLE DEPUIS MONGODB
+// ══════════════════════════════════════════
+function syncRoleFromServer(callback){
+  var token=localStorage.getItem('ygy_token');
+  if(!token){if(callback)callback();return;}
+  fetch('/api/me',{headers:{'Authorization':'Bearer '+token}})
+  .then(function(r){return r.ok?r.json():Promise.reject();})
+  .then(function(data){
+    if(data&&data.user){
+      var u=DB.user()||{};
+      // Stocker TOUS les champs utiles, dont _id pour les appels API
+      if(data.user.id)       u._id      = data.user.id;
+      if(data.user._id)      u._id      = data.user._id;
+      u.role    = data.user.role;
+      u.isPro   = data.user.isPro   || false;
+      if(data.user.proUntil) u.proUntil = data.user.proUntil;
+      if(data.user.prenom)   u.prenom   = data.user.prenom;
+      if(data.user.nom)      u.nom      = data.user.nom;
+      if(data.user.name)     u.name     = data.user.name;
+      if(data.user.phone)    u.phone    = data.user.phone;
+      if(data.user.email)    u.email    = data.user.email;
+      if(data.user.city)     u.city     = data.user.city;
+      if(data.user.dob)  u.dob = data.user.dob;
+      if(data.user.pob)  u.pob = data.user.pob;
+      DB.login(u);
+    }
+    if(callback)callback();
+  })
+  .catch(function(){if(callback)callback();});
+}
+
+// ══════════════════════════════════════════
+//  DASHBOARD
+// ══════════════════════════════════════════
+function loadDash(){
+  var u=DB.user();if(!u){openModal('auth');return;}
+  syncRoleFromServer(function(){renderDash();});
+}
+
+// ── Adapter la nav dashboard selon le rôle ──
+function adaptDashNav(isAdmin, isPro, isUser){
+  // Pro : visible pour Pro ET Admin
+  document.querySelectorAll('.dash-nav-pro-only').forEach(function(el){
+    el.style.display = (isPro || isAdmin) ? 'flex' : 'none';
+  });
+  // Admin uniquement
+  document.querySelectorAll('.dash-nav-admin-only').forEach(function(el){
+    el.style.display = isAdmin ? 'flex' : 'none';
+  });
+  // User seulement : Historique et Alertes (cachés pour admin)
+  document.querySelectorAll('.dash-nav-user-only').forEach(function(el){
+    el.style.display = isAdmin ? 'none' : 'flex';
+  });
+  // Label annonces selon rôle
+  var adsLabel = document.getElementById('dash-ads-label');
+  if(adsLabel) adsLabel.textContent = isAdmin ? 'Les annonces' : 'Mes annonces';
+  // Lien Panel Admin dans sidebar
+  var adminLink = document.getElementById('nav-admin-link');
+  if(adminLink){
+    if(isAdmin) adminLink.removeAttribute('hidden');
+    else adminLink.setAttribute('hidden','');
+  }
+}
+function renderDash(){
+  var u=DB.user(); if(!u) return;
+
+  // ── Infos sidebar ──
+  var initials=(u.prenom||u.name||'U').charAt(0).toUpperCase()+((u.nom||'').charAt(0)||'').toUpperCase();
+  document.getElementById('d-av').textContent=initials||'U';
+  document.getElementById('d-nm').textContent=u.name||u.prenom||'Utilisateur';
+  document.getElementById('d-ph').textContent=u.phone||u.email||'';
+
+  // ── Rôle effectif ──
+  var isAdmin = (u.role==='admin');
+  var isPro   = !isAdmin && !!(u.isPro && u.proUntil && new Date(u.proUntil)>new Date());
+
+  // ── Adapter toute la nav selon le rôle ──
+  var isUser = !isAdmin && !isPro;
+  adaptDashNav(isAdmin, isPro, isUser);
+  // Bouton Admin nav principale
+  var adminNavBtn = document.getElementById('nav-admin-btn');
+  if(adminNavBtn) adminNavBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+  // Footer admin btn
+  var ftAdminBtn=document.getElementById('ft-admin-btn');
+  if(ftAdminBtn) ftAdminBtn.style.display=isAdmin?'block':'none';
+  // Bloc accès admin dans profil
+  var adminBox=document.getElementById('dash-admin-box');
+  if(adminBox) adminBox.style.display=isAdmin?'block':'none';
+  // Grille stats paiements (admin seulement)
+  var payGrid=document.getElementById('dash-pay-period-stats');
+  if(payGrid) payGrid.style.display=isAdmin?'grid':'none';
+
+  // Onglet Profil — infos personnelles
+  var av=document.getElementById('p-avatar');
+  if(av) av.textContent=initials||'U';
+  var pn=document.getElementById('p-name');
+  if(pn) pn.textContent=u.name||u.prenom||'—';
+  var rb=document.getElementById('p-role-badge');
+  if(rb) rb.innerHTML=u.role==='admin'
+    ? '<span style="background:#EFF6FF;color:#1D4ED8;font-size:11px;font-weight:800;padding:3px 10px;border-radius:50px">👑 Administrateur</span>'
+    : '<span style="background:#D1FAE5;color:#065F46;font-size:11px;font-weight:800;padding:3px 10px;border-radius:50px">✅ Membre vérifié</span>';
+  // Bloc accès admin direct dans le profil
+  var adminBox = document.getElementById('dash-admin-box');
+  if(adminBox) adminBox.style.display = (u.role==='admin') ? 'block' : 'none';
+  var pp=document.getElementById('p-phone');
+  if(pp) pp.textContent=u.phone||'Non renseigné';
+  var pe=document.getElementById('p-email');
+  if(pe) pe.textContent=u.email||'Non renseigné';
+  var pc=document.getElementById('p-city');
+  if(pc) pc.textContent=u.city||'Non renseignée';
+  var pv=document.getElementById('p-verif');
+  if(pv) pv.textContent=(u.method==='email'?'📧 Email':'📱 SMS')+' — Vérifié';
+  var pdob=document.getElementById('p-dob');
+  if(pdob) pdob.textContent=u.dob ? new Date(u.dob).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}) : 'Non renseignée';
+  var ppob=document.getElementById('p-pob');
+  if(ppob) ppob.textContent=u.pob||'Non renseigné';
+
+  // Mes annonces : charger depuis l'API
+  var myAds = [];
+
+  // Stats
+  var pays=DB.payments();
+  var favIds=DB.favs();
+  var pca=document.getElementById('p-count-ads'); if(pca) pca.textContent=myAds.length;
+  var pcp=document.getElementById('p-count-pay'); if(pcp) pcp.textContent=pays.length;
+  var pcf=document.getElementById('p-count-favs'); if(pcf) pcf.textContent=favIds.length;
+
+  // Historique de navigation (annonces consultées)
+  var hist=DB._d.history||[];
+  var ph=document.getElementById('p-history');
+  if(ph){
+    if(!hist.length){
+      ph.innerHTML='<div style="text-align:center;padding:32px;color:var(--muted)">'+
+        '<div style="font-size:48px;margin-bottom:12px">🔍</div>'+
+        '<p style="font-weight:700">Aucune annonce consultée récemment</p>'+
+        '<p style="font-size:13px;margin-top:6px">Les annonces que vous visitez apparaîtront ici</p>'+
+        '</div>';
+    } else {
+      ph.innerHTML=hist.slice(0,10).map(function(a){
+        return '<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--brl)">'+
+          '<span style="font-size:28px">'+a.e+'</span>'+
+          '<div style="flex:1"><div style="font-weight:700;font-size:14px">'+a.t+'</div>'+
+          '<div style="font-size:12px;color:var(--muted)">📍 '+a.city+' · '+a.date+'</div></div>'+
+          '<div style="font-weight:800;color:var(--or);font-size:14px">'+a.p.toLocaleString('fr-FR')+' GNF</div>'+
+          '</div>';
+      }).join('');
+    }
+  }
+
+  // Onglet Mes annonces : charger depuis API
+  var full=document.getElementById('d-ads-full');
+  if(full){
+    full.innerHTML='<div style="padding:40px;text-align:center;color:var(--muted)">⏳ Chargement...</div>';
+    var tok3=localStorage.getItem('ygy_token');
+    if(tok3){
+      fetch('/api/my-ads',{headers:{'Authorization':'Bearer '+tok3}})
+      .then(function(r){return r.json();})
+      .then(function(apiMyAds){
+        window._myAdsList = Array.isArray(apiMyAds) ? apiMyAds : (apiMyAds.ads||[]);
+        var pca2=document.getElementById('p-count-ads');
+        if(pca2) pca2.textContent=window._myAdsList.length;
+        full.innerHTML = window._myAdsList.length
+          ? window._myAdsList.map(function(a,i){ return dashRow(a,i); }).join('')
+          : '<div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:48px;text-align:center;color:var(--muted);box-shadow:var(--sh)">'+
+            '<div style="font-size:52px;margin-bottom:14px">📋</div>'+
+            '<p style="font-weight:800;font-size:16px;margin-bottom:8px">Aucune annonce publiée</p>'+
+            '<a onclick="goTo(\'post\')" style="color:var(--or);font-weight:800;cursor:pointer;font-size:14px">➕ Déposer ma première annonce →</a>'+
+            '</div>';
+      }).catch(function(){
+        full.innerHTML='<div style="padding:40px;text-align:center;color:var(--muted)">❌ Erreur de chargement</div>';
+      });
+    }
+  }
+
+  // Onglet Paiements
+  var pl=document.getElementById('d-pay-list');
+  if(pl){
+    if(!pays.length){
+      pl.innerHTML='<div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:48px;text-align:center;color:var(--muted);box-shadow:var(--sh)"><div style="font-size:52px;margin-bottom:14px">🟠</div><p style="font-weight:800;font-size:16px;margin-bottom:6px">Aucun paiement</p><p style="font-size:14px">Vos transactions Orange Money apparaîtront ici</p></div>';
+    } else {
+      pl.innerHTML=pays.map(function(p){
+        return '<div class="dash-ad-row"><div style="font-size:30px">🟠</div><div style="flex:1"><div style="font-weight:800;font-size:14px">'+p.item+'</div><div style="font-size:12px;color:var(--muted)">📅 '+p.date+' · 🔑 '+p.ref+'</div></div><div style="text-align:right"><div style="font-weight:800;font-size:16px;color:var(--or)">'+parseInt(p.amount).toLocaleString('fr-FR')+' GNF</div><span class="badge badge-g">✅ Payé</span></div></div>';
+      }).join('');
+    }
+  }
+
+  // Onglet Favoris
+  var favAds=DB.ads().filter(function(a){return favIds.includes(a.id);});
+  var df=document.getElementById('d-favs');
+  if(df) df.innerHTML=favAds.length
+    ? favAds.map(function(a){return adCard(a,false);}).join('')
+    : '<div style="grid-column:1/-1;background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:48px;text-align:center;color:var(--muted);box-shadow:var(--sh)"><div style="font-size:52px;margin-bottom:14px">❤️</div><p>Aucun favori</p></div>';
+}
+function dashRow(a, idx){
+  var adId = a._id||a.id||'';
+  var thumb = (a.photos&&a.photos[0])
+    ? '<img src="'+a.photos[0]+'" style="width:44px;height:44px;object-fit:cover;border-radius:8px;flex-shrink:0">'
+    : '<div style="font-size:30px;width:44px;height:44px;display:flex;align-items:center;justify-content:center">'+( a.emoji||a.e||'📦')+'</div>';
+  var title = a.title||a.t||'Sans titre';
+  var price = (a.price||a.p||0).toLocaleString('fr-FR');
+  var city  = a.city||'';
+  var views = a.views||0;
+  var d     = a.createdAt ? new Date(a.createdAt).toLocaleDateString('fr-FR') : (a.date||'');
+  return '<div class="dash-ad-row" style="cursor:pointer" onclick="viewAd(\''+adId+'\')">'
+    +thumb
+    +'<div style="flex:1;min-width:0">'
+      +'<div style="font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+title+'</div>'
+      +'<div style="font-size:12px;color:var(--muted);margin-top:2px">📍 '+city+' · 👁️ '+views+' vues · '+d+'</div>'
+    +'</div>'
+    +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">'
+      +'<div style="font-weight:800;font-size:15px;color:var(--or)">'+price+' GNF</div>'
+      +'<div style="display:flex;gap:6px">'
+        +'<button onclick="event.stopPropagation();dashEditAd('+idx+')" style="background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer">✏️ Modifier</button>'
+        +'<button onclick="event.stopPropagation();dashDeleteAd('+idx+')" style="background:#FEE2E2;color:#DC2626;border:1px solid #FECACA;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer">🗑️ Supprimer</button>'
+      +'</div>'
+    +'</div>'
+    +'</div>';
+}
+
+function dashEditAd(idx){
+  var ads = window._myAdsList||[];
+  var ad = ads[idx];
+  if(!ad) return;
+  curAd = {
+    _id: ad._id, id: ad._id,
+    t: ad.title||'', p: ad.price||0,
+    desc: ad.description||'', city: ad.city||'',
+    cat: ad.category||'', e: ad.emoji||'📦',
+    photos: ad.photos||[], seller: ad.sellerName||''
+  };
+  editMyAd();
+}
+
+function dashDeleteAd(idx){
+  var ads = window._myAdsList||[];
+  var ad = ads[idx];
+  if(!ad) return;
+  if(!confirm('Supprimer "' + (ad.title||'cette annonce') + '" ?')) return;
+  var token = localStorage.getItem('ygy_token');
+  fetch('/api/ads/'+ad._id, {
+    method:'DELETE',
+    headers:{'Authorization':'Bearer '+token}
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(data.error){ toast('❌ '+data.error,'err'); return; }
+    toast('🗑️ Annonce supprimée','ok');
+    window._myAdsList = (window._myAdsList||[]).filter(function(a){ return a._id !== ad._id; });
+    fetchAdsFromAPI(function(){renderAds();});
+    renderDash();
+  })
+  .catch(function(){ toast('❌ Erreur réseau','err'); });
+}
+function showTab(tab){
+  ['profil','ads','payments','favs'].forEach(function(t){
+    var el=document.getElementById('tab-'+t);
+    if(el) el.style.display=(t===tab?'block':'none');
+  });
+  document.querySelectorAll('.dash-nav a').forEach(function(a,i){
+    a.classList.toggle('active',i===(['profil','ads','payments','favs'].indexOf(tab)));
   });
 }
 
-// ── Afficher les bulles ──
-function _afficherBulles(msgs, user){
-  var bx = document.getElementById('pmsg-bubbles');
-  if(!bx) return;
-  if(!msgs.length){
-    bx.innerHTML =
-      '<div class="pmsg-security-bar"><span>🛡️</span>'+
-        '<span>Échangez en toute sécurité. Ne partagez pas vos coordonnées avant d\'avoir vu le produit en personne.</span>'+
-      '</div>'+
-      '<div style="text-align:center;padding:32px;color:var(--muted)">'+
-        '<div style="font-size:32px;margin-bottom:10px">👋</div>'+
-        '<div style="font-size:13px">Démarrez la conversation !</div>'+
-      '</div>';
+// ══════════════════════════════════════════
+//  ORANGE MONEY
+// ══════════════════════════════════════════
+function openOM(){
+  document.getElementById('om-form').style.display='block';
+  document.getElementById('om-processing').style.display='none';
+  document.getElementById('om-success').style.display='none';
+  var ph=document.getElementById('om-phone');if(ph)ph.value='';
+  ['p1','p2','p3','p4'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+  openModal('om');
+}
+function movPin(el,nid){if(el.value.length>=1){var n=document.getElementById(nid);if(n)n.focus();}}
+function processPayment(){
+  var phone=(document.getElementById('om-phone')||{value:''}).value.trim();
+  var pin=['p1','p2','p3','p4'].map(function(id){return(document.getElementById(id)||{value:''}).value;}).join('');
+  if(!phone||phone.length<8){toast('⚠️ Numéro Orange invalide','err');return;}
+  if(pin.length<4){toast('⚠️ Code PIN incomplet','err');return;}
+  document.getElementById('om-form').style.display='none';
+  document.getElementById('om-processing').style.display='block';
+  setTimeout(function(){
+    var ref='OM'+Date.now().toString(36).toUpperCase().slice(-9);
+    var amt=curAd?curAd.p:0;var item=curAd?curAd.t:'Article';
+    DB.addPayment({ref:ref,amount:amt,item:item,date:new Date().toLocaleDateString('fr-FR'),phone:'+224 '+phone});
+    document.getElementById('om-ok-val').textContent=amt.toLocaleString('fr-FR')+' GNF';
+    document.getElementById('om-ref').textContent='Référence : '+ref;
+    document.getElementById('om-ok-phone').textContent='SMS de confirmation envoyé au +224 '+phone;
+    document.getElementById('om-processing').style.display='none';
+    document.getElementById('om-success').style.display='block';
+    if(DB.user())loadDash();
+  },3000);
+}
+
+// ══════════════════════════════════════════
+//  MODALS
+// ══════════════════════════════════════════
+function openModal(id){var el=document.getElementById('overlay-'+id);if(el){el.classList.add('open');}if(id==='auth')renderAuthForm('login');}
+function closeModal(id){
+  var el=document.getElementById('overlay-'+id);
+  if(el){
+    el.classList.remove('open');
+    el.style.visibility='hidden';
+    el.style.opacity='0';
+    el.style.pointerEvents='none';
+    el.style.display='';
+    setTimeout(function(){
+      el.style.visibility='';
+      el.style.opacity='';
+      el.style.pointerEvents='';
+      el.style.display='';
+    },250);
+  }
+  document.body.style.overflow='';
+}
+function maybeClose(e,id){if(e.target===e.currentTarget)closeModal(id);}
+
+// ══════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════
+var tt;
+function toast(msg,type,dur){
+  var el=document.getElementById('toast-el');
+  el.textContent=msg;el.className='toast show'+(type?' '+type:'');
+  clearTimeout(tt);tt=setTimeout(function(){el.className='toast';},3600);
+}
+
+// ══════════════════════════════════════════
+//  CONTACT VENDEUR — avec vérification connexion
+// ══════════════════════════════════════════
+function contactVendeur(){
+  var user = DB.user();
+  if(!user){
+    // Pas connecté → alerte + ouvre modal auth
+    toast('🔒 Connectez-vous pour contacter le vendeur','err');
+    setTimeout(function(){ openModal('auth'); }, 600);
     return;
   }
-  var html = '<div class="pmsg-security-bar"><span>🛡️</span><span>Échangez en toute sécurité sur YouGouYou.</span></div>';
-  var lastDate = '';
-  msgs.forEach(function(m){
-    var mine = String(m.senderId)===(user&&String(user._id||user.id));
-    var d    = m.createdAt ? new Date(m.createdAt) : null;
-    var date = d ? d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'}) : '';
-    if(date && date!==lastDate){
-      html += '<div class="pmsg-date-sep">— '+date+' —</div>';
-      lastDate = date;
-    }
-    var t = d ? d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) : '';
-    html +=
-      '<div class="pmsg-bubble-wrap '+(mine?'mine':'theirs')+'">'+
-        '<div class="pmsg-bubble '+(mine?'mine':'theirs')+'">'+m.text+'</div>'+
-        '<div class="pmsg-bubble-time">'+t+(mine?' · ✓✓':'')+'</div>'+
-      '</div>';
-  });
-  bx.innerHTML = html;
-  bx.scrollTop = bx.scrollHeight;
+  // Connecté → ouvrir le modal de commission
+  openCommission();
 }
 
-// ── Envoyer un message ──
-async function _envoyerMsg(){
-  if(!_convId){ toast('Sélectionnez une conversation','warn'); return; }
-  var inp  = document.getElementById('pmsg-inp');
-  var text = inp ? inp.value.trim() : '';
-  if(!text) return;
-  var tok  = localStorage.getItem('ygy_token');
-  if(inp) inp.value='';
-  try{
-    var r = await fetch('/api/conversations/'+_convId,{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},
-      body: JSON.stringify({text:text})
-    });
-    var d = await r.json();
-    if(!r.ok){ toast('❌ '+(d.error||'Erreur'),'err'); if(inp) inp.value=text; return; }
-    // Recharger messages + update prévisualisation
-    _chargerMessages(_convId);
-    var conv = _convList.find(function(c){ return (c._id||c.id)===_convId; });
-    if(conv){ conv.lastMessage=text; conv.updatedAt=new Date().toISOString(); }
-    _afficherListe(_convList);
-    // Re-marquer actif
-    document.querySelectorAll('.pmsg-conv').forEach(function(el){
-      el.classList.toggle('active', el.dataset.cid===_convId);
-    });
-  }catch(e){
-    toast('❌ Erreur réseau','err');
-    if(inp) inp.value=text;
+
+function openCommission(){
+  if(!curAd){return;}
+  var price = curAd.p || curAd.price || 0;
+  var title = curAd.t || curAd.title || 'Annonce';
+  var photo = (curAd.photos&&curAd.photos[0]) || (curAd.ph&&curAd.ph[0]) || '';
+  var fee   = Math.max(1000, Math.round(price * 0.05));
+
+  // Remplir le résumé annonce
+  var thumb = document.getElementById('com-ad-thumb');
+  if(thumb){
+    if(photo) thumb.innerHTML = '<img src="'+photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:8px">';
+    else thumb.textContent = '📦';
   }
-  if(inp){ inp.focus(); }
+  var t = document.getElementById('com-ad-title');
+  if(t) t.textContent = title;
+  var p = document.getElementById('com-ad-price');
+  if(p) p.textContent = price.toLocaleString('fr-FR')+' GNF';
+
+  // Frais
+  var elFee = document.getElementById('com-fee');
+  if(elFee) elFee.textContent = fee.toLocaleString('fr-FR')+' GNF';
+  var elTotal = document.getElementById('com-total');
+  if(elTotal) elTotal.textContent = fee.toLocaleString('fr-FR')+' GNF';
+
+  window._commFee = fee;
+
+  // Reset formulaire
+  var formEl = document.getElementById('com-form');
+  var succEl = document.getElementById('com-success');
+  if(formEl) formEl.style.display = '';
+  if(succEl) succEl.style.display = 'none';
+  var phoneEl = document.getElementById('com-phone');
+  if(phoneEl) phoneEl.value = '';
+  ['cp1','cp2','cp3','cp4'].forEach(function(id){
+    var e = document.getElementById(id); if(e) e.value = '';
+  });
+  var btn = document.getElementById('com-pay-btn');
+  if(btn){ btn.disabled=false; btn.textContent='🟠 Payer et voir le numéro'; }
+  openModal('commission');
 }
-
-// Compatibilité sendPageMsg
-function sendPageMsg(){ _envoyerMsg(); }
-
-// ── Panel droit : infos annonce ──
-function _afficherPanel(conv){
-  var panel = document.getElementById('page-msg-panel');
-  if(!panel) return;
-  var user   = DB.user();
-  var cid    = conv._id||conv.id||'';
-  var isBuyer= !conv.buyerId||String(conv.buyerId)===(user&&String(user._id||user.id));
-  var nom    = isBuyer ? (conv.sellerName||'Vendeur') : (conv.buyerName||'Acheteur');
-  var titre  = conv.adTitle||'Annonce';
-  var photo  = conv.adPhoto||'';
-  var adId   = conv.adId||'';
-  var prix   = conv.adPrice ? Number(conv.adPrice).toLocaleString('fr-FR')+' GNF' : '';
-  panel.innerHTML =
-    '<div class="pmsg-panel-img" onclick="viewAd(\''+adId+'\')">'+
-      (photo?'<img src="'+photo+'" alt="'+titre+'">':'<span>📦</span>')+
-    '</div>'+
-    '<div class="pmsg-panel-body" onclick="viewAd(\''+adId+'\')">'+
-      '<div class="pmsg-panel-title">'+titre+'</div>'+
-      (prix?'<div class="pmsg-panel-price">'+prix+'</div>':'')+
-    '</div>'+
-    '<div class="pmsg-panel-vendor">'+
-      '<div class="pmsg-panel-av">'+nom.charAt(0).toUpperCase()+'</div>'+
-      '<div><div class="pmsg-panel-vname">'+nom+'</div>'+
-      '<div class="pmsg-panel-vsince">Membre YouGouYou</div></div>'+
-    '</div>'+
-    '<div class="pmsg-panel-action">'+
-      '<button class="pmsg-panel-btn" onclick="viewAd(\''+adId+'\')">🔍 Voir l\'annonce</button>'+
-    '</div>'+
-    '<div class="pmsg-panel-tip">'+
-      '🛡️ <strong>Conseils sécurité</strong><br>'+
-      'Vérifiez l\'article avant tout paiement. N\'envoyez jamais d\'argent à l\'avance.'+
-    '</div>';
-}
-
-// ── Badge non lus ──
-function _majBadge(convs){
-  var n=(convs||[]).reduce(function(a,c){return a+(c.unreadCount||0);},0);
-  ['msg-badge','nav-msg-badge'].forEach(function(id){
-    var b=document.getElementById(id);
-    if(!b) return;
-    if(n>0){b.textContent=n;b.style.display='flex';}else b.style.display='none';
+function payCommission(){
+  var phone = (document.getElementById('com-phone')||{}).value || '';
+  if(!phone || phone.length < 8){ toast('📱 Entrez votre numéro Orange Money','err'); return; }
+  var pin = ['cp1','cp2','cp3','cp4'].map(function(id){
+    return (document.getElementById(id)||{}).value||'';
+  }).join('');
+  if(pin.length < 4){ toast('🔑 Entrez votre code PIN (4 chiffres)','err'); return; }
+  var fee = window._commFee || Math.max(1000, Math.round((curAd&&(curAd.p||curAd.price)||0)*0.05));
+  var btn = document.querySelector('#overlay-commission .btn-or');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Traitement...'; }
+  var token = localStorage.getItem('ygy_token');
+  fetch('/api/payment/commission', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},
+    body: JSON.stringify({
+      adId: curAd&&(curAd._id||curAd.id),
+      adTitle: curAd&&(curAd.t||curAd.title||''),
+      amount: fee,
+      phone: '224'+phone,
+      pin: pin
+    })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if(btn){ btn.disabled=false; btn.textContent='🟠 Payer et voir le numéro'; }
+    if(data.error){ toast('❌ '+data.error,'err'); return; }
+    // Afficher le numéro révélé
+    var formEl = document.getElementById('com-form');
+    var sc = document.getElementById('com-success');
+    if(formEl) formEl.style.display='none';
+    if(sc){
+      sc.style.display='block';
+      var ph = document.getElementById('com-revealed-phone');
+      var revPhone = data.sellerPhone || ('+224'+phone);
+      if(ph) ph.textContent = revPhone;
+      window._revealedPhone = revPhone;
+      var refEl = document.getElementById('com-ref-display');
+      if(refEl) refEl.textContent = data.reference || '—';
+    }
+    // Sauvegarder paiement local
+    DB._d.payments = DB._d.payments || [];
+    DB._d.payments.push({
+      ref: 'COM-'+Date.now(),
+      item: curAd&&(curAd.t||curAd.title||'Annonce'),
+      amount: fee,
+      date: new Date().toLocaleDateString('fr-FR'),
+      type: 'commission'
+    });
+    DB.save();
+  })
+  .catch(function(){
+    if(btn){ btn.disabled=false; btn.textContent='🟠 Payer et voir le numéro'; }
+    // Mode démo : afficher le numéro quand même
+    var mb = document.querySelector('#overlay-commission .m-body');
+    var sc = document.getElementById('com-success');
+    if(mb) mb.style.display='none';
+    if(sc){
+      sc.style.display='block';
+      var ph = document.getElementById('com-revealed-phone');
+      if(ph) ph.textContent = '+224 6XX XX XX XX (mode démo)';
+    }
+    DB._d.payments = DB._d.payments||[];
+    DB._d.payments.push({ ref:'COM-'+Date.now(), item:curAd&&(curAd.t||''), amount:fee, date:new Date().toLocaleDateString('fr-FR'), type:'commission' });
+    DB.save();
+    toast('✅ Commission enregistrée (mode démo)','ok');
   });
 }
-function updateMsgBadge(convs){ _majBadge(convs); }
+function copyPhone(){
+  var num = window._revealedPhone || document.getElementById('com-revealed-phone').textContent || '';
+  navigator.clipboard.writeText(num).then(function(){toast('📋 Numéro copié !','ok');}).catch(function(){toast('📋 '+num,'ok');});
+}
+function openWhatsapp(){
+  var num = (window._revealedPhone||'').replace(/[^0-9]/g,'');
+  if(num) window.open('https://wa.me/'+num,'_blank');
+}
 
-// ── Polling 30s ──
+function showAppQR(platform){
+  var zone=document.getElementById('app-qr-zone');
+  var label=document.getElementById('app-qr-label');
+  if(zone)zone.style.display='block';
+  if(label)label.textContent=platform==='android'?'▶️ Google Play Store — yougouyougou':'🍎 Apple App Store — yougouyougou';
+  toast('📲 App '+(platform==='android'?'Android':'iOS')+' — bientôt disponible !');
+  zone.scrollIntoView({behavior:'smooth'});
+}
+
+// ══════════════════════════════════════════
+//  ADMIN — VOIR UTILISATEURS
+// ══════════════════════════════════════════
+// ─── ADMIN ───────────────────────────────────────────────────────────────────
+var _adminData = { stats:{}, period:{}, users:[], ads:[], payments:[] };
+var _adminTab = 'stats';
+
+function adminApiGet(path, cb){
+  var token = localStorage.getItem('ygy_token');
+  fetch(path, { headers:{'Authorization':'Bearer '+token} })
+    .then(function(r){ return r.json(); })
+    .then(cb)
+    .catch(function(e){ console.error(path, e); cb({}); });
+}
+
+function goAdmin(){
+  var u = DB.user();
+  if(!u){ openModal('auth'); return; }
+  var tok = localStorage.getItem('ygy_token');
+  if(!tok){ openModal('auth'); return; }
+
+  // Vérifier le rôle directement via /api/admin/stats
+  // Si la requête réussit (200) → l'utilisateur est admin
+  // Si 403 → pas admin
+  fetch('/api/admin/stats',{headers:{'Authorization':'Bearer '+tok}})
+  .then(function(r){
+    if(r.ok){
+      // Confirmer le role admin localement + stocker _id depuis le token
+      u.role = 'admin';
+      if(!u._id) u._id = u.id || (tok ? JSON.parse(atob(tok.split('.')[1])).id : null);
+      DB.login(u);
+      updateNav();
+      goTo('admin');
+      adminTab('stats');
+      loadAdmin();
+    } else {
+      toast('Accès réservé aux administrateurs','err');
+    }
+  })
+  .catch(function(){ toast('Erreur de connexion','err'); });
+}
+
+function adminTab(name){
+  _adminTab = name;
+  ['stats','ads','users','pro','messages','payments'].forEach(function(t){
+    var pane = document.getElementById('adm-pane-'+t);
+    var tab  = document.getElementById('adm-tab-'+t);
+    if(pane) pane.style.display = (t===name)?'block':'none';
+    if(tab)  tab.classList.toggle('active', t===name);
+  });
+  if(name==='pro')      renderAdminPro();
+  if(name==='messages') renderAdminMessages();
+}
+
+function loadAdmin(){
+  // 1. Stats globales
+  adminApiGet('/api/admin/stats', function(d){
+    _adminData.stats = d;
+    renderAdminStats();
+  });
+  // 2. Stats par période
+  adminApiGet('/api/admin/stats/period', function(d){
+    _adminData.period = d;
+    renderAdminPeriod();
+  });
+  // 3. Utilisateurs
+  adminApiGet('/api/admin/users?limit=200', function(d){
+    _adminData.users = d.users||[];
+    renderAdminUsers();
+  });
+  // 4. Annonces
+  adminApiGet('/api/admin/ads?limit=200', function(d){
+    _adminData.ads = d.ads||[];
+    renderAdminAds();
+  });
+  // 5. Paiements
+  adminApiGet('/api/admin/payments?limit=200', function(d){
+    _adminData.payments = d.payments||[];
+    renderAdminPayments(d.revenue||0);
+  });
+  // 6. Contacts (depuis paiements de type commission)
+  adminApiGet('/api/admin/payments?type=commission&limit=500', function(d){
+    renderAdminContacts(d.payments||[]);
+  });
+  // 7. Abonnés Pro
+  adminApiGet('/api/admin/users?limit=500', function(d){
+    _adminData.proUsers = (d.users||[]).filter(function(u){ return u.isPro; });
+    if(_adminTab === 'pro') renderAdminPro();
+  });
+  // 8. Messages / Conversations
+  adminApiGet('/api/admin/conversations', function(d){
+    _adminData.conversations = d.conversations||[];
+    if(_adminTab === 'messages') renderAdminMessages();
+  });
+}
+
+function _statCard(e, n, l, c, sub){
+  return '<div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:22px;box-shadow:var(--sh)">'
+    +'<div style="font-size:28px;margin-bottom:8px">'+e+'</div>'
+    +'<div style="font-family:Instrument Serif,serif;font-size:28px;color:'+c+';font-style:italic;margin-bottom:2px">'+n+'</div>'
+    +'<div style="font-size:12px;color:var(--muted);font-weight:700">'+l+'</div>'
+    +(sub?'<div style="font-size:11px;color:var(--muted);margin-top:4px">'+sub+'</div>':'')
+    +'</div>';
+}
+
+function renderAdminStats(){
+  var d = _adminData.stats;
+  var el = document.getElementById('admin-stats');
+  if(!el) return;
+  el.innerHTML = [
+    _statCard('👥', (d.totalUsers||0), 'Utilisateurs inscrits', 'var(--or)'),
+    _statCard('📋', (d.totalAds||0), 'Annonces publiées', 'var(--gr)'),
+    _statCard('📞', (d.totalPayments||0), 'Contacts vendeurs', '#7C3AED'),
+    _statCard('💰', (d.revenue||0).toLocaleString('fr-FR')+' GNF', 'Total encaissé', '#2563EB'),
+  ].join('');
+}
+
+function renderAdminPeriod(){
+  var d = _adminData.period||{};
+  var el = document.getElementById('admin-period-stats');
+  if(!el) return;
+  var labels = {day:"Aujourd'hui", week:'Cette semaine', month:'Ce mois'};
+  var colors  = {day:'#EF4444', week:'#F59E0B', month:'#10B981'};
+  el.innerHTML = ['day','week','month'].map(function(k){
+    var p = d[k]||{};
+    return '<div style="background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:20px;box-shadow:var(--sh)">'
+      +'<div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:'+colors[k]+';margin-bottom:12px">'+labels[k]+'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+      +'<div><div style="font-size:22px;font-weight:800">'+(p.ads||0)+'</div><div style="font-size:11px;color:var(--muted)">Annonces</div></div>'
+      +'<div><div style="font-size:22px;font-weight:800">'+(p.users||0)+'</div><div style="font-size:11px;color:var(--muted)">Inscriptions</div></div>'
+      +'<div><div style="font-size:18px;font-weight:800;color:#7C3AED">'+(p.payments||0)+'</div><div style="font-size:11px;color:var(--muted)">Contacts</div></div>'
+      +'<div><div style="font-size:14px;font-weight:800;color:#2563EB">'+(p.revenue||0).toLocaleString('fr-FR')+'</div><div style="font-size:11px;color:var(--muted)">GNF encaissés</div></div>'
+      +'</div></div>';
+  }).join('');
+}
+
+function renderAdminContacts(payments){
+  var el = document.getElementById('admin-contacts-chart');
+  if(!el) return;
+  if(!payments.length){ el.innerHTML='<div style="text-align:center;padding:30px;color:var(--muted)">Aucun contact enregistré pour le moment.</div>'; return; }
+  // Grouper par jour (30 derniers jours)
+  var counts = {};
+  var now = Date.now();
+  payments.forEach(function(p){
+    var d = new Date(p.createdAt||p.date);
+    var key = d.toLocaleDateString('fr-FR');
+    counts[key] = (counts[key]||0)+1;
+  });
+  var max = Math.max.apply(null, Object.values(counts))||1;
+  el.innerHTML = '<div style="display:flex;align-items:flex-end;gap:4px;height:80px;padding-bottom:4px">'
+    + Object.entries(counts).slice(-14).map(function(e){
+        var h = Math.max(6, Math.round((e[1]/max)*72));
+        return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px" title="'+e[0]+': '+e[1]+' contacts">'
+          +'<div style="font-size:10px;color:var(--muted)">'+e[1]+'</div>'
+          +'<div style="width:100%;background:#7C3AED;border-radius:3px 3px 0 0;height:'+h+'px"></div>'
+          +'</div>';
+      }).join('')
+    + '</div>'
+    + '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:6px">'
+    + Object.keys(counts).slice(-14).map(function(k){ return '<div>'+k.slice(0,5)+'</div>'; }).join('')
+    + '</div>';
+}
+
+function renderAdminAds(){
+  window._adminAdIds = [];
+  var ads = _adminData.ads;
+  var ct = document.getElementById('admin-ads-count');
+  if(ct) ct.textContent = ads.length+' annonce'+(ads.length>1?'s':'');
+  var tbody = document.getElementById('admin-ads-body');
+  if(!tbody) return;
+  if(!ads.length){
+    tbody.innerHTML = '<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--muted)">Aucune annonce.</td></tr>';
+    return;
+  }
+  window._adminAdIds = ads.map(function(a){ return a._id; });
+  tbody.innerHTML = ads.map(function(a, idx){
+    var thumb = (a.photos&&a.photos[0])
+      ? '<img src="'+a.photos[0]+'" style="width:36px;height:36px;object-fit:cover;border-radius:6px;flex-shrink:0">'
+      : '<div style="width:36px;height:36px;background:var(--brl);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px">'+(a.emoji||'📦')+'</div>';
+    var d = a.createdAt ? new Date(a.createdAt).toLocaleDateString('fr-FR') : '—';
+    return '<tr style="border-top:1px solid var(--br)">'
+      +'<td style="padding:10px 16px"><div style="display:flex;align-items:center;gap:10px">'+thumb
+        +'<div><div style="font-weight:700;font-size:13px;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(a.title||'—')+'</div>'
+        +'<div style="font-size:11px;color:var(--muted)">'+(a.views||0)+' vues</div></div></div></td>'
+      +'<td style="padding:10px 16px;font-weight:800;color:var(--or);white-space:nowrap">'+(a.price||0).toLocaleString('fr-FR')+' GNF</td>'
+      +'<td style="padding:10px 16px;font-size:13px">'+(a.category||'—')+'</td>'
+      +'<td style="padding:10px 16px;font-size:13px">'+(a.sellerName||'—')+'</td>'
+      +'<td style="padding:10px 16px;font-size:13px">'+(a.city||'—')+'</td>'
+      +'<td style="padding:10px 16px;font-size:12px;color:var(--muted)">'+d+'</td>'
+      +'<td style="padding:10px 16px;white-space:nowrap">'
+        +(a.featured
+          ? '<span style="background:#D1FAE5;color:#065F46;font-size:11px;font-weight:700;padding:3px 8px;border-radius:50px;margin-right:6px">⭐ Vedette</span>'
+          : '<button onclick="adminFeatureAd('+idx+')" style="background:var(--brl);color:var(--ink);border:1px solid var(--br);border-radius:6px;padding:4px 8px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">⭐ Vedette</button>')
+        +'<button onclick="adminDeleteAd('+idx+')" style="background:#FEE2E2;color:#DC2626;border:1px solid #FECACA;border-radius:6px;padding:4px 8px;font-size:11px;font-weight:700;cursor:pointer">🗑️ Supprimer</button>'
+      +'</td></tr>';
+  }).join('');
+}
+
+function renderAdminUsers(){
+  window._adminUserIds = [];
+  var users = _adminData.users;
+  var uc = document.getElementById('admin-user-count');
+  if(uc) uc.textContent = users.length+' utilisateur'+(users.length>1?'s':'');
+  var tbody = document.getElementById('admin-users-body');
+  if(!tbody) return;
+  if(!users.length){
+    tbody.innerHTML = '<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--muted)">Aucun utilisateur.</td></tr>';
+    return;
+  }
+  window._adminUserIds = users.map(function(u){ return u._id; });
+  tbody.innerHTML = users.map(function(u, idx){
+    var isAdmin = (u.role==='admin');
+    var now = new Date();
+    var proActive = u.isPro && u.proUntil && new Date(u.proUntil) > now;
+    var proExpiry = u.proUntil ? new Date(u.proUntil).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}) : '';
+    var proBadge = proActive
+      ? '<span style="background:linear-gradient(135deg,#FF5C00,#FF9500);color:#fff;font-size:11px;font-weight:800;padding:3px 9px;border-radius:50px">&#x2B50; PRO — ' + proExpiry + '</span>'
+      : '<span style="background:var(--brl);color:var(--muted);font-size:11px;padding:3px 9px;border-radius:50px">&mdash;</span>';
+    var roleBadge = isAdmin
+      ? '<span style="background:#EFF6FF;color:#1D4ED8;font-size:11px;font-weight:800;padding:3px 9px;border-radius:50px">👑 Admin</span>'
+      : '<span style="background:var(--brl);color:var(--muted);font-size:11px;font-weight:700;padding:3px 9px;border-radius:50px">Utilisateur</span>';
+    var d = u.createdAt ? new Date(u.createdAt).toLocaleDateString('fr-FR') : '—';
+    return '<tr style="border-top:1px solid var(--br)">'
+      +'<td style="padding:10px 16px"><div style="font-weight:800;font-size:14px">'+(u.prenom||u.name||'—')+' '+(u.nom||'')+'</div></td>'
+      +'<td style="padding:10px 16px;font-size:13px;font-weight:600">'+(u.phone||'—')+'</td>'
+      +'<td style="padding:10px 16px;font-size:12px;color:var(--muted)">'+(u.email||'—')+'</td>'
+      +'<td style="padding:10px 16px;font-size:13px">'+(u.city||'—')+'</td>'
+      +'<td style="padding:10px 16px">'+roleBadge+'</td>'      +'<td style="padding:10px 16px">'+proBadge+'</td>'      +'<td style="padding:10px 16px;font-size:12px;color:var(--muted)">'+d+'</td>'      +'<td style="padding:10px 16px;white-space:nowrap">'        +(!isAdmin ? '<button onclick="promoteAdmin('+idx+')" style="background:var(--orl);color:var(--or2);border:1px solid var(--orm);border-radius:6px;padding:4px 9px;font-size:11px;font-weight:800;cursor:pointer;margin-right:4px">👑 Admin</button>' : '')        +'<button onclick="adminTogglePro('+idx+')" style="background:'+(proActive?'#FEF3C7':'var(--orl)')+';color:'+(proActive?'#92400E':'var(--or2)')+';border:1px solid '+(proActive?'#FDE68A':'var(--orm)')+';border-radius:6px;padding:4px 9px;font-size:11px;font-weight:800;cursor:pointer;margin-right:4px">'+(proActive?'⬇️ Retirer Pro':'⭐ Passer Pro')+'</button>'        +'<button onclick="adminDeleteUser('+idx+')" style="background:#FEE2E2;color:#DC2626;border:1px solid #FECACA;border-radius:6px;padding:4px 9px;font-size:11px;font-weight:700;cursor:pointer">🗑️</button>'      +'</td></tr>';
+  }).join('');
+}
+
+function renderAdminPayments(totalRevenue){
+  var pays = _adminData.payments;
+  var el = document.getElementById('admin-pay-total');
+  if(el) el.textContent = 'Total : '+(totalRevenue||0).toLocaleString('fr-FR')+' GNF';
+  var tbody = document.getElementById('admin-payments-body');
+  if(!tbody) return;
+  if(!pays.length){
+    tbody.innerHTML = '<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--muted)">Aucun paiement enregistré.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = pays.map(function(p){
+    var buyer = p.buyer ? (p.buyer.prenom||'')+' '+(p.buyer.nom||'') : (p.phone||'—');
+    var item  = p.ad ? (p.ad.title||p.item||'—') : (p.item||'—');
+    var d = p.createdAt ? new Date(p.createdAt).toLocaleDateString('fr-FR') : (p.date||'—');
+    var statusBadge = p.status==='success'
+      ? '<span style="background:#D1FAE5;color:#065F46;font-size:11px;font-weight:700;padding:3px 8px;border-radius:50px">✅ Succès</span>'
+      : '<span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;padding:3px 8px;border-radius:50px">⏳ En attente</span>';
+    var typeBadge = (p.type==='commission')
+      ? '<span style="background:#EDE9FE;color:#5B21B6;font-size:11px;font-weight:700;padding:3px 8px;border-radius:50px">📞 Contact</span>'
+      : '<span style="background:#FFF3E0;color:#E65100;font-size:11px;font-weight:700;padding:3px 8px;border-radius:50px">🟠 OM</span>';
+    return '<tr style="border-top:1px solid var(--br)">'
+      +'<td style="padding:10px 16px;font-size:11px;font-family:monospace;color:var(--muted)">'+(p.ref||p._id||'—').toString().slice(-8)+'</td>'
+      +'<td style="padding:10px 16px;font-size:13px;font-weight:600">'+buyer.trim()+'</td>'
+      +'<td style="padding:10px 16px;font-size:13px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+item+'</td>'
+      +'<td style="padding:10px 16px;font-weight:800;color:var(--or);white-space:nowrap">'+(p.amount||0).toLocaleString('fr-FR')+' GNF</td>'
+      +'<td style="padding:10px 16px">'+typeBadge+'</td>'
+      +'<td style="padding:10px 16px;font-size:12px;color:var(--muted)">'+d+'</td>'
+      +'<td style="padding:10px 16px">'+statusBadge+'</td>'
+      +'</tr>';
+  }).join('');
+}
+
+function adminDeleteAd(idx){
+  var id = (window._adminAdIds||[])[idx];
+  if(!confirm('Supprimer définitivement cette annonce ?')) return;
+  var token = localStorage.getItem('ygy_token');
+  fetch('/api/admin/ads/'+id, { method:'DELETE', headers:{'Authorization':'Bearer '+token} })
+    .then(function(r){ return r.json(); })
+    .then(function(){
+      toast('🗑️ Annonce supprimée','ok');
+      _adminData.ads = _adminData.ads.filter(function(a){ return String(a._id)!==String(id); });
+      renderAdminAds();
+      fetchAdsFromAPI(function(){ renderAds(); });
+    })
+    .catch(function(){ toast('❌ Erreur','err'); });
+}
+
+function adminFeatureAd(idx){
+  var id = (window._adminAdIds||[])[idx];
+  var token = localStorage.getItem('ygy_token');
+  fetch('/api/admin/ads/'+id+'/feature', {
+    method:'PATCH',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+    body: JSON.stringify({ featured: true })
+  }).then(function(){ toast('⭐ Annonce mise en vedette','ok'); loadAdmin(); });
+}
+
+function adminDeleteUser(idx){
+  var id = (window._adminUserIds||[])[idx];
+  if(!confirm('Supprimer cet utilisateur et toutes ses annonces ?')) return;
+  var token = localStorage.getItem('ygy_token');
+  fetch('/api/admin/users/'+id, { method:'DELETE', headers:{'Authorization':'Bearer '+token} })
+    .then(function(r){ return r.json(); })
+    .then(function(){
+      toast('🗑️ Utilisateur supprimé','ok');
+      _adminData.users = _adminData.users.filter(function(u){ return String(u._id)!==String(id); });
+      renderAdminUsers();
+    })
+    .catch(function(){ toast('❌ Erreur','err'); });
+}
+
+function promoteAdmin(idx){
+  var id = (window._adminUserIds||[])[idx];
+  var token = localStorage.getItem('ygy_token');
+  fetch('/api/admin/users/'+id+'/role', {
+    method:'PATCH',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+    body: JSON.stringify({ role:'admin' })
+  }).then(function(r){ return r.json(); })
+    .then(function(d){
+      toast('👑 Utilisateur promu administrateur','ok');
+      loadAdmin();
+    }).catch(function(){ toast('❌ Erreur','err'); });
+}
+
+// ★ Activer / Retirer le Pro d'un utilisateur (Admin uniquement)
+function adminTogglePro(idx){
+  var user = (_adminData.users||[])[idx];
+  if(!user) return;
+  var id = user._id;
+  var isCurrentlyPro = user.isPro && user.proUntil && new Date(user.proUntil) > new Date();
+  var token = localStorage.getItem('ygy_token');
+
+  if(isCurrentlyPro){
+    // Retirer le Pro
+    if(!confirm('Retirer le statut Pro de cet utilisateur ?')) return;
+    fetch('/api/admin/users/'+id+'/pro', {
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body: JSON.stringify({ isPro: false, months: 0 })
+    }).then(function(r){ return r.json(); })
+      .then(function(){ toast('Pro retiré','ok'); loadAdmin(); })
+      .catch(function(){ toast('Erreur','err'); });
+  } else {
+    // Choisir la durée
+    var choix = prompt('Durée abonnement Pro :\n1 = 1 mois\n3 = 3 mois\n12 = 1 an\n\nEntrez 1, 3 ou 12 :');
+    var months = parseInt(choix);
+    if(!months || ![1,3,12].includes(months)){ toast('Durée invalide','err'); return; }
+    fetch('/api/admin/users/'+id+'/pro', {
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body: JSON.stringify({ isPro: true, months: months })
+    }).then(function(r){ return r.json(); })
+      .then(function(d){
+        var expiry = d.proUntil ? new Date(d.proUntil).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}) : '';
+        toast('Pro activé - expire le '+expiry,'ok');
+        loadAdmin();
+      })
+      .catch(function(){ toast('Erreur','err'); });
+  }
+}
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){document.querySelectorAll('.overlay.open').forEach(function(o){o.classList.remove('open');});document.body.style.overflow='';}
+});
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+
+// ═══════════════════════════════════════
+//  VARIABLES V8 (filtres avancés)
+// ═══════════════════════════════════════
+var _currentView = 'grid';
+var _currentCat = '';
+var _currentEtat = '';
+var _currentSubCat = '';
+var _adsOffset = 0;
+var _adsPerPage = 24;
+var _allFilteredAds = [];
+
+
+// ═══════════════════════════════════════
+//  FONCTIONS V8 (pages détail/filtres)
+// ═══════════════════════════════════════
+
+function applyFilters(){
+  var ads = DB.ads();
+  var cat = _currentCat;
+  var city = (document.getElementById('f-city')||{}).value || '';
+  var pmin = parseInt((document.getElementById('f-pmin')||{}).value) || 0;
+  var pmax = parseInt((document.getElementById('f-pmax')||{}).value) || Infinity;
+  var etat = _currentEtat;
+  var sort = (document.getElementById('f-sort')||{}).value || 'recent';
+  var query = ((document.getElementById('search-input')||{}).value || '').toLowerCase().trim();
+
+  var filtered = ads.filter(function(a){
+    if(cat && (a.cat||a.category||'') !== cat) return false;
+    if(_currentSubCat && (a.subcat||a.subcategory||'') !== _currentSubCat) return false;
+    if(city && (a.city||'') !== city) return false;
+    if((a.p||a.price||0) < pmin) return false;
+    if((a.p||a.price||0) > pmax) return false;
+    if(etat && (a.etat||a.condition||'') !== etat) return false;
+    if(query){
+      var txt = ((a.t||a.title||'')+' '+(a.cat||'')+' '+(a.city||'')+' '+(a.desc||'')).toLowerCase();
+      if(!txt.includes(query)) return false;
+    }
+    return true;
+  });
+
+  // Tri
+  if(sort === 'price-asc') filtered.sort(function(a,b){ return (a.p||0)-(b.p||0); });
+  else if(sort === 'price-desc') filtered.sort(function(a,b){ return (b.p||0)-(a.p||0); });
+  else if(sort === 'views') filtered.sort(function(a,b){ return (b.views||0)-(a.views||0); });
+
+  _allFilteredAds = filtered;
+  _adsOffset = 0;
+  renderFilteredAds(true);
+}
+
+function filterByCat(cat){
+  _currentCat = cat;
+  // Mettre à jour catbar
+  document.querySelectorAll('.catbar-item').forEach(function(el){
+    el.classList.toggle('active', el.dataset.cat === cat);
+  });
+  // Mettre à jour filtres sidebar
+  document.querySelectorAll('.filter-chip').forEach(function(el){
+    el.classList.toggle('active', el.dataset.cat === cat);
+  });
+  applyFilters();
+}
+
+function filterBySubCat(e, cat, sub){
+  e.stopPropagation();
+  _currentCat = cat;
+  _currentSubCat = sub;
+  // Mettre à jour catbar
+  document.querySelectorAll('.catbar-item').forEach(function(el){
+    el.classList.toggle('active', el.dataset.cat === cat);
+  });
+  // Mettre à jour sidebar
+  document.querySelectorAll('.filter-chip').forEach(function(el){
+    el.classList.toggle('active', el.dataset.cat === cat);
+  });
+  // Breadcrumb
+  var sb = document.getElementById('search-banner');
+  if(sb){
+    sb.style.display = 'flex';
+    sb.innerHTML = '<span class="sb-text">📂 <strong style="color:var(--or)">'+cat+'</strong> › '+sub+'</span>'+
+      '<button class="sb-clear" onclick="resetFilters()">✕ Effacer</button>';
+  }
+  applyFilters();
+  goTo('home');
+}
+
+function goToCat(){
+  if(curAd) filterByCat(curAd.cat||curAd.category||'');
+  goTo('home');
+}
+
+function loadMore(){
+  renderFilteredAds(false);
+}
+
+function openLocationPicker(){
+  toast('📍 Sélection de zone — bientôt disponible !');
+}
+
+function renderFilteredAds(reset){
+  var grid = document.getElementById('ads-grid');
+  var countEl = document.getElementById('sb-ads');
+  if(!grid) return;
+
+  var total = _allFilteredAds.length;
+  if(countEl) countEl.textContent = total.toLocaleString('fr-FR');
+
+  var slice = _allFilteredAds.slice(0, _adsOffset + _adsPerPage);
+  _adsOffset = slice.length;
+
+  if(reset) grid.innerHTML = '';
+
+  if(!total){
+    grid.innerHTML = '<div class="ads-empty"><div class="ads-empty-icon">🔍</div><div class="ads-empty-title">Aucune annonce trouvée</div><p style="font-size:13px">Essayez d&#39;autres filtres ou mots-cl&#233;s</p></div>';
+    document.getElementById('load-more-wrap').style.display='none';
+    return;
+  }
+
+  if(reset){
+    grid.innerHTML = slice.map(function(a){ return adCard(a, a.feat||a.featured); }).join('');
+  } else {
+    grid.insertAdjacentHTML('beforeend', slice.map(function(a){ return adCard(a, a.feat||a.featured); }).join(''));
+  }
+
+  var lmw = document.getElementById('load-more-wrap');
+  if(lmw) lmw.style.display = (_adsOffset < total) ? 'block' : 'none';
+}
+
+function renderSimilarAds(cat){
+  var grid = document.getElementById('similar-grid');
+  if(!grid) return;
+  var adId = curAd ? String(curAd._id||curAd.id) : '';
+  var similar = DB.ads().filter(function(a){
+    return (a.cat||a.category||'')=== cat && String(a._id||a.id) !== adId;
+  }).slice(0,6);
+  if(!similar.length){
+    grid.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:10px">Aucune annonce similaire</div>';
+    return;
+  }
+  grid.innerHTML = similar.map(function(a){ return adCard(a, false); }).join('');
+}
+
+function resetFilters(){
+  _currentCat = '';
+  _currentEtat = '';
+  _currentSubCat = '';
+  _adsOffset = 0;
+  var pmin = document.getElementById('f-pmin');
+  var pmax = document.getElementById('f-pmax');
+  var fcity = document.getElementById('f-city');
+  var fsort = document.getElementById('f-sort');
+  if(pmin) pmin.value = '';
+  if(pmax) pmax.value = '';
+  if(fcity) fcity.value = '';
+  if(fsort) fsort.value = 'recent';
+  document.querySelectorAll('.filter-chip').forEach(function(el){ el.classList.remove('active'); });
+  document.querySelectorAll('.catbar-item').forEach(function(el){ el.classList.remove('active'); });
+  document.querySelectorAll('.etat-btn').forEach(function(el){ el.classList.remove('active'); });
+  var sb = document.getElementById('search-banner');
+  if(sb) sb.style.display = 'none';
+  var si = document.getElementById('search-input');
+  if(si) si.value = '';
+  renderAds();
+}
+
+function setEtatFilter(el, val){
+  _currentEtat = val;
+  document.querySelectorAll('.etat-btn').forEach(function(b){ b.classList.remove('active'); });
+  el.classList.add('active');
+  applyFilters();
+}
+
+function setView(v){
+  _currentView = v;
+  var grid = document.getElementById('ads-grid');
+  if(!grid) return;
+  if(v === 'list'){
+    grid.classList.add('list-view');
+    document.getElementById('vbtn-grid').classList.remove('active');
+    document.getElementById('vbtn-list').classList.add('active');
+  } else {
+    grid.classList.remove('list-view');
+    document.getElementById('vbtn-grid').classList.add('active');
+    document.getElementById('vbtn-list').classList.remove('active');
+  }
+}
+
+function shareAd(){
+  if(curAd){
+    var url = window.location.href.split('?')[0] + '?ad='+(curAd._id||curAd.id);
+    navigator.clipboard.writeText(url).then(function(){
+      toast('🔗 Lien copié !', 'ok');
+    }).catch(function(){
+      toast('🔗 '+url);
+    });
+  }
+}
+
+function showDashTab(tab){
+  document.querySelectorAll('.dash-section').forEach(function(s){ s.classList.remove('active'); });
+  document.querySelectorAll('.dash-nav a').forEach(function(a){ a.classList.remove('active'); });
+  var sec   = document.getElementById('dsec-'+tab);
+  var navEl = document.getElementById('dtab-'+tab);
+  if(sec)   sec.classList.add('active');
+  if(navEl) navEl.classList.add('active');
+  // ── Actions selon onglet (version complète et unique) ──
+  if(tab==='messages')    { if(typeof loadConversations==='function') loadConversations(); }
+  if(tab==='alerts')      { if(typeof loadAlerts==='function') loadAlerts(); }
+  if(tab==='profil')      { if(typeof loadVendorStats==='function') loadVendorStats(); }
+  if(tab==='pro')         { if(typeof renderProDash==='function') renderProDash(); if(typeof loadProStats==='function') loadProStats(); }
+  if(tab==='ads')         { if(typeof loadDashAds==='function') loadDashAds(); }
+  if(tab==='payments')    { if(typeof loadDashPayments==='function') loadDashPayments(); }
+  if(tab==='users-admin') { if(typeof loadDashUsersAdmin==='function') loadDashUsersAdmin(); }
+}
+
+function toggleFav(id){
+  var favIds = DB.favs();
+  var isFav = favIds.includes(id);
+  if(isFav){
+    DB._d.favs = favIds.filter(function(f){ return f !== id; });
+    toast('💔 Retiré des favoris');
+  } else {
+    DB.addFav(id);
+    toast('❤️ Ajouté aux favoris !', 'ok');
+  }
+  DB.save();
+  // Rafraîchir le bouton dans la grille
+  document.querySelectorAll('.ad-card-fav').forEach(function(btn){
+    var card = btn.closest('.ad-card');
+    if(card && card.onclick){
+      var onclick = card.getAttribute('onclick')||card.onclick.toString();
+      if(onclick.includes(id)){
+        var newFav = DB.favs().includes(id);
+        btn.textContent = newFav ? '❤️' : '🤍';
+        btn.classList.toggle('active', newFav);
+      }
+    }
+  });
+}
+
+function toggleMobileFilters(){
+  var fp = document.getElementById('filters-panel');
+  if(fp) fp.classList.toggle('mobile-open');
+}
+
+
+// ══════════════════════════════════════════
+//  HERO SEARCH
+// ══════════════════════════════════════════
+function heroSearch(){
+  var q = (document.getElementById('hero-search')||{}).value||'';
+  var cat = (document.getElementById('hero-cat-sel')||{}).value||'';
+  var city = (document.getElementById('hero-city-sel')||{}).value||'';
+  var pmin = parseInt((document.getElementById('hero-pmin')||{}).value)||0;
+  var pmax = parseInt((document.getElementById('hero-pmax')||{}).value)||Infinity;
+  // Remplir la barre de recherche principale
+  var mainSearch = document.getElementById('search-input');
+  if(mainSearch && q) mainSearch.value = q;
+  // Filtrer
+  var ads = DB.ads();
+  var results = ads.filter(function(a){
+    var matchQ = !q || ((a.t||a.title||'')+' '+(a.cat||'')+' '+(a.city||'')+' '+(a.desc||'')).toLowerCase().includes(q.toLowerCase());
+    var matchCat = !cat || (a.cat||a.category||'')===cat;
+    var matchCity = !city || (a.city||'')===city;
+    var matchP = (a.p||a.price||0)>=pmin && (a.p||a.price||0)<=pmax;
+    return matchQ && matchCat && matchCity && matchP;
+  });
+  var fg = document.getElementById('featured-grid');
+  var rg = document.getElementById('recent-grid');
+  var sbEl = document.getElementById('sb-ads');
+  if(sbEl) sbEl.textContent = results.length.toLocaleString('fr-FR');
+  // Banner
+  var banner = document.getElementById('search-banner');
+  if(!banner){
+    banner = document.createElement('div');
+    banner.id='search-banner';
+    banner.style.cssText='background:var(--brl);border:1.5px solid var(--or);border-radius:14px;padding:12px 18px;margin-bottom:16px;display:none;';
+    var adsSection = document.getElementById('ads-section');
+    if(adsSection) adsSection.insertBefore(banner, adsSection.firstChild);
+  }
+  banner.style.display='none';
+  var label = q ? ('"'+q+'"') : (cat||'Toutes catégories');
+  if(city) label += ' à '+city;
+  banner.innerHTML = '<span style="font-size:14px;font-weight:700">🔍 '+label+' — <strong style="color:var(--or)">'+results.length+'</strong> annonce'+(results.length>1?'s':'')+'</span>'+
+    '<button onclick="clearSearch()" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--muted);font-family:inherit;font-weight:700">✕ Effacer</button>';
+  if(fg) fg.innerHTML = results.length>0
+    ? results.slice(0,4).map(function(a){return adCard(a,false);}).join('')
+    : '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:14px">Aucun résultat — <a style="color:var(--or);cursor:pointer;font-weight:700" onclick="clearSearch()">Voir toutes les annonces</a></div>';
+  if(rg) rg.innerHTML = results.slice(4,16).map(function(a){return adCard(a,false);}).join('');
+  scrollToAds();
+}
+
+function heroTag(tag){
+  var inp = document.getElementById('hero-search');
+  if(inp) inp.value = tag;
+  heroSearch();
+}
+
+function populateHeroCats(){
+  var sel = document.getElementById('hero-cat-sel');
+  var quick = document.getElementById('hero-cat-quick');
+  if(!sel) return;
+  var opts = '<option value="">Toutes catégories</option>';
+  CATS.forEach(function(cat){
+    opts += '<option value="'+cat.n+'">'+cat.e+' '+cat.n+'</option>';
+  });
+  sel.innerHTML = opts;
+  if(quick) quick.innerHTML = opts;
+}
+
+// ════════════════════════════════════════════════════════
+//  AMÉLIORATIONS V10 — 47 fonctionnalités
+// ════════════════════════════════════════════════════════
+
+// ── Global loader ──
+function showLoader(){ var l=document.getElementById('global-loader'); if(l)l.classList.add('show'); }
+function hideLoader(){ var l=document.getElementById('global-loader'); if(l)l.classList.remove('show'); }
+
+// ── Toast enrichi (pile de toasts) ──
+var _toasts=[];
+function toast(msg,type,dur){
+  dur=dur||3000;
+  var stack=document.getElementById('toast-stack');
+  if(!stack){
+    var el=document.getElementById('toast');
+    if(el){el.textContent=msg;el.className='toast show '+(type||'');setTimeout(function(){el.className='toast';},dur);}
+    return;
+  }
+  var t=document.createElement('div');
+  t.className='toast-item '+(type||'');
+  t.textContent=msg;
+  stack.appendChild(t);
+  setTimeout(function(){
+    t.style.animation='toastOut .3s ease forwards';
+    setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},300);
+  },dur);
+}
+
+// ── Annonces déjà vues — marquage visuel ──
+function markSeenAds(){
+  var history=(DB._d&&DB._d.history)||[];
+  document.querySelectorAll('.ad-card').forEach(function(card){
+    var id=card.getAttribute('data-id');
+    if(id && history.indexOf(id)!==-1) card.classList.add('seen');
+  });
+}
+
+// ── adCard enrichi — badge urgent, vu, nego ──
+var _origAdCard = adCard;
+adCard = function(a, feat){
+  var html = _origAdCard(a, feat);
+  return html; // on garde l'original et on patch via markSeenAds + DOM
+};
+
+// ── Tri et filtres enrichis ──
+function applySortFilter(){
+  var sort=(document.getElementById('sort-select')||{}).value||'date_desc';
+  var etat=(document.getElementById('etat-select')||{}).value||'';
+  var ads=DB.ads().slice();
+  // filtre état
+  if(etat) ads=ads.filter(function(a){ return (a.cond||a.condition||a.etat||'')===etat; });
+  // tri
+  ads.sort(function(a,b){
+    if(sort==='price_asc') return (a.p||a.price||0)-(b.p||b.price||0);
+    if(sort==='price_desc') return (b.p||b.price||0)-(a.p||a.price||0);
+    if(sort==='views_desc') return (b.views||0)-(a.views||0);
+    // date_desc default
+    return new Date(b.createdAt||0)-new Date(a.createdAt||0);
+  });
+  var cnt=document.getElementById('results-count');
+  if(cnt) cnt.textContent=ads.length+' annonce'+(ads.length!==1?'s':'');
+  var featured=ads.filter(function(a){return a.feat||a.featured;});
+  var recent=ads.filter(function(a){return !a.feat&&!a.featured;});
+  var fg=document.getElementById('featured-grid');
+  var rg=document.getElementById('recent-grid');
+  if(fg) fg.innerHTML=featured.slice(0,_adsPerPage).map(function(a){return adCard(a,true);}).join('');
+  if(rg) rg.innerHTML=recent.slice(0,_adsPerPage*2).map(function(a){return adCard(a,false);}).join('');
+  setTimeout(markSeenAds,50);
+}
+
+// ── Scroll infini ──
+var _adsPage=1;
+var _loadingMore=false;
+var _allAds=[];
+
+function initInfiniteScroll(){
+  var sentinel=document.getElementById('load-sentinel');
+  if(!sentinel) return;
+  var obs=new IntersectionObserver(function(entries){
+    if(entries[0].isIntersecting && !_loadingMore){ loadMoreAds(); }
+  },{threshold:0.1});
+  obs.observe(sentinel);
+}
+
+function loadMoreAds(){
+  var rg=document.getElementById('recent-grid');
+  if(!rg) return;
+  _loadingMore=true;
+  var spinner=document.getElementById('load-spinner');
+  if(spinner) spinner.classList.add('active');
+  setTimeout(function(){
+    var allRecent=DB.ads().filter(function(a){return !a.feat&&!a.featured;});
+    var start=_adsPage*_adsPerPage;
+    var chunk=allRecent.slice(start,start+_adsPerPage);
+    if(chunk.length>0){
+      chunk.forEach(function(a){ rg.innerHTML+=adCard(a,false); });
+      _adsPage++;
+      setTimeout(markSeenAds,50);
+    } else {
+      var end=document.getElementById('end-results');
+      if(end) end.style.display='block';
+    }
+    if(spinner) spinner.classList.remove('active');
+    _loadingMore=false;
+  },400);
+}
+
+// ── Date relative ──
+function timeAgo(dateStr){
+  if(!dateStr) return '';
+  var d=new Date(dateStr), now=new Date();
+  var diff=Math.floor((now-d)/1000);
+  if(diff<60) return 'Instantane';
+  if(diff<3600) return Math.floor(diff/60)+' min';
+  if(diff<86400) return Math.floor(diff/3600)+'h';
+  if(diff<604800) return Math.floor(diff/86400)+' j';
+  if(diff<2592000) return Math.floor(diff/604800)+' sem';
+  return Math.floor(diff/2592000)+' mois';
+}
+
+// ── Partage enrichi ──
+function toggleShareMenu(){
+  var m=document.getElementById('share-menu');
+  if(m) m.style.display=m.style.display==='none'?'block':'none';
+}
+function shareOnWhatsApp(){
+  if(!curAd) return;
+  var title=curAd.t||curAd.title||'Annonce';
+  var price=(curAd.p||curAd.price||0).toLocaleString('fr-FR')+' GNF';
+  var url=window.location.href;
+  var txt=encodeURIComponent('🇬🇳 '+title+' — '+price+' | Voir sur YouGouYou: '+url);
+  window.open('https://wa.me/?text='+txt,'_blank');
+}
+function shareOnTelegram(){
+  if(!curAd) return;
+  var title=curAd.t||curAd.title||'Annonce';
+  var url=window.location.href;
+  window.open('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent('🇬🇳 '+title+' sur YouGouYou'),'_blank');
+}
+function shareOnFacebook(){
+  var url=window.location.href;
+  window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(url),'_blank');
+}
+function copyAdLink(){
+  var url=window.location.href;
+  navigator.clipboard.writeText(url).then(function(){ toast('🔗 Lien copié !','ok'); });
+}
+
+// ── Contact WhatsApp vendeur ──
+function contactOnWhatsApp(){
+  if(!curAd) return;
+  var user=DB.user();
+  if(!user){ toast('🔒 Connectez-vous','err'); openModal('auth'); return; }
+  var title=curAd.t||curAd.title||'votre annonce';
+  var txt=encodeURIComponent('Bonjour, je suis intéressé(e) par votre annonce sur YouGouYou : '+title);
+  // Si le numéro est disponible (après paiement commission)
+  var phone=curAd.sellerPhone||curAd.sp||'';
+  if(phone){ window.open('https://wa.me/'+phone.replace(/\D/g,'')+'?text='+txt,'_blank'); }
+  else { openCommission(); }
+}
+
+// ── Signalement ──
+var _reportReason='';
+function openReportModal(){
+  _reportReason='';
+  document.querySelectorAll('.report-opt').forEach(function(b){b.classList.remove('sel');});
+  var d=document.getElementById('report-details');
+  if(d) d.value='';
+  openModal('report');
+}
+function selectReport(btn,reason){
+  _reportReason=reason;
+  document.querySelectorAll('.report-opt').forEach(function(b){b.classList.remove('sel');});
+  btn.classList.add('sel');
+}
+function submitReport(){
+  if(!_reportReason){ toast('Choisissez un motif','warn'); return; }
+  var details=(document.getElementById('report-details')||{}).value||'';
+  var user=DB.user(); var token=localStorage.getItem('ygy_token');
+  fetch('/api/reports',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},
+    body:JSON.stringify({adId:curAd&&(curAd._id||curAd.id),reason:_reportReason,details:details})
+  }).then(function(r){return r.json();}).then(function(){
+    toast('✅ Signalement envoyé, merci !','ok');
+    closeModal('report');
+  }).catch(function(){
+    toast('✅ Signalement enregistré (mode démo)','ok');
+    closeModal('report');
+  });
+}
+
+// ── Notation vendeurs ──
+var _currentRating=0;
+var _rateForSellerId='';
+function openRateModal(sellerId,sellerName){
+  _currentRating=0; _rateForSellerId=sellerId||'';
+  document.querySelectorAll('.rate-star-big').forEach(function(s){s.classList.remove('on');});
+  var lbl=document.getElementById('rate-label');
+  if(lbl) lbl.textContent='Sélectionnez une note';
+  var sn=document.getElementById('rate-seller-name');
+  if(sn) sn.textContent='Comment s est passee la transaction avec '+( sellerName||'ce vendeur')+' ?';
+  var rc=document.getElementById('rate-comment');
+  if(rc) rc.value='';
+  openModal('rate');
+}
+function setRating(n){
+  _currentRating=n;
+  var labels=['','😞 Mauvaise expérience','😐 Passable','🙂 Correcte','😊 Bonne','🤩 Excellente !'];
+  document.querySelectorAll('.rate-star-big').forEach(function(s,i){
+    s.classList.toggle('on',i<n);
+  });
+  var lbl=document.getElementById('rate-label');
+  if(lbl) lbl.textContent=labels[n]||'';
+}
+function submitRating(){
+  if(!_currentRating){ toast('⭐ Choisissez une note','warn'); return; }
+  var comment=(document.getElementById('rate-comment')||{}).value||'';
+  var token=localStorage.getItem('ygy_token');
+  fetch('/api/reviews',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},
+    body:JSON.stringify({sellerId:_rateForSellerId,adId:curAd&&(curAd._id||curAd.id),rating:_currentRating,comment:comment})
+  }).then(function(r){return r.json();}).then(function(data){
+    if(data.error){ toast('❌ '+data.error,'err'); return; }
+    toast('⭐ Avis publié ! Merci','ok');
+    closeModal('rate');
+  }).catch(function(){
+    toast('⭐ Avis enregistré (mode démo)','ok');
+    closeModal('rate');
+  });
+}
+
+// ── Alertes de recherche ──
+function showAlertModal(){
+  // Pré-remplir depuis la recherche courante
+  var q=(document.getElementById('search-input')||{}).value||'';
+  var ainput=document.getElementById('alert-query');
+  if(ainput) ainput.value=q;
+  // Peupler les selects
+  var acat=document.getElementById('alert-cat');
+  var acity=document.getElementById('alert-city');
+  if(acat && acat.options.length<=1){
+    CATS.forEach(function(cat){ var o=document.createElement('option'); o.value=cat.n; o.textContent=cat.e+' '+cat.n; acat.appendChild(o); });
+  }
+  if(acity && acity.options.length<=1){
+    CITIES.forEach(function(city){ var o=document.createElement('option'); o.value=city; o.textContent=city; acity.appendChild(o); });
+  }
+  openModal('alert');
+}
+function saveAlert(){
+  var user=DB.user();
+  if(!user){ toast('🔒 Connectez-vous','err'); openModal('auth'); return; }
+  var q=(document.getElementById('alert-query')||{}).value||'';
+  var cat=(document.getElementById('alert-cat')||{}).value||'';
+  var city=(document.getElementById('alert-city')||{}).value||'';
+  var pmin=parseInt((document.getElementById('alert-pmin')||{}).value)||0;
+  var pmax=parseInt((document.getElementById('alert-pmax')||{}).value)||0;
+  if(!q&&!cat){ toast('Entrez au moins un critere','warn'); return; }
+  var token=localStorage.getItem('ygy_token');
+  fetch('/api/alerts',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},
+    body:JSON.stringify({query:q,category:cat,city:city,priceMin:pmin,priceMax:pmax})
+  }).then(function(r){return r.json();}).then(function(data){
+    if(data.error){ toast('❌ '+data.error,'err'); return; }
+    toast('🔔 Alerte créée ! Vous serez notifié par email','ok');
+    closeModal('alert');
+    loadAlerts();
+  }).catch(function(){
+    // Mode démo — sauvegarder localement
+    DB._d.alerts=DB._d.alerts||[];
+    DB._d.alerts.push({_id:'local_'+Date.now(),query:q,category:cat,city:city,priceMin:pmin,priceMax:pmax,createdAt:new Date().toISOString()});
+    DB.save();
+    toast('🔔 Alerte créée (mode démo)','ok');
+    closeModal('alert');
+    loadAlerts();
+  });
+}
+function loadAlerts(){
+  var list=document.getElementById('alerts-list');
+  if(!list) return;
+  var token=localStorage.getItem('ygy_token');
+  fetch('/api/alerts',{ headers:{'Authorization':'Bearer '+(token||'')} })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var alerts=(data.alerts||data||[]);
+    renderAlerts(alerts);
+  }).catch(function(){
+    var localAlerts=DB._d.alerts||[];
+    renderAlerts(localAlerts);
+  });
+}
+function renderAlerts(alerts){
+  var list=document.getElementById('alerts-list');
+  if(!list) return;
+  if(!alerts.length){
+    list.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:30px"><div style="font-size:32px;margin-bottom:8px">🔔</div>Aucune alerte créée<br><small>Cliquez sur "Créer une alerte" pour commencer</small></div>';
+    return;
+  }
+  list.innerHTML=alerts.map(function(a){
+    var parts=[];
+    if(a.query) parts.push('"'+a.query+'"');
+    if(a.category) parts.push(a.category);
+    if(a.city) parts.push(a.city);
+    if(a.priceMax) parts.push('max '+a.priceMax.toLocaleString('fr-FR')+' GNF');
+    return '<div class="alert-item">'
+      +'<div style="font-size:24px">🔔</div>'
+      +'<div class="alert-info">'
+      +'<div class="alert-query">'+parts.join(' · ')+'</div>'
+      +'<div class="alert-meta">Notification par email · Créée le '+(a.createdAt?new Date(a.createdAt).toLocaleDateString('fr-FR'):'—')+'</div>'
+      +'</div>'
+      +'<button class="alert-del" onclick="deleteAlert(\''+(a._id||a.id||'')+'\')">🗑️</button>'
+      +'</div>';
+  }).join('');
+}
+function deleteAlert(id){
+  if(!confirm('Supprimer cette alerte ?')) return;
+  var token=localStorage.getItem('ygy_token');
+  fetch('/api/alerts/'+id,{method:'DELETE',headers:{'Authorization':'Bearer '+(token||'')}})
+  .then(function(){toast('🗑️ Alerte supprimée','ok');loadAlerts();})
+  .catch(function(){
+    DB._d.alerts=(DB._d.alerts||[]).filter(function(a){return (a._id||a.id)!==id;});
+    DB.save(); toast('🗑️ Alerte supprimée','ok'); loadAlerts();
+  });
+}
+
+// ── Messagerie interne ──
+var _currentConvId=null;
+var _convPollTimer=null;
+
+function loadConversations(){
+  var list=document.getElementById('page-msg-list');
+  if(!list) return;
+  var token=localStorage.getItem('ygy_token');
+  if(!token){ list.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">Connectez-vous pour voir vos messages</div>'; return; }
+  fetch('/api/conversations',{headers:{'Authorization':'Bearer '+token}})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var convs=data.conversations||data||[];
+    renderConversationList(convs);
+    updateMsgBadge(convs);
+  }).catch(function(){
+    list.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px"><div style="font-size:28px;margin-bottom:8px">💬</div>Messagerie disponible<br>après connexion au serveur</div>';
+  });
+}
+
+function renderConversationList(convs){
+  window._cachedConvs=convs;
+  var list=document.getElementById('page-msg-list');
+  if(!list) return;
+  if(!convs.length){
+    list.innerHTML='<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px"><div style="font-size:28px;margin-bottom:8px">💬</div>Aucune conversation<br><small>Contactez un vendeur pour commencer</small></div>';
+    return;
+  }
+  var user=DB.user();
+  list.innerHTML=convs.map(function(conv){
+    var isUnread=(conv.unreadCount||0)>0;
+    var name=conv.buyerId===(user&&user._id)?conv.sellerName:conv.buyerName;
+    var last=conv.lastMessage||'Nouvelle conversation';
+    var time=conv.updatedAt?timeAgo(conv.updatedAt):'';
+    var active=_currentConvId===conv._id?'active':'';
+    var cid=conv._id||conv.id||'';
+    return '<div class="msg-list-item '+active+'" onclick="openConvById(\''+cid+'\')">'
+      +'<div class="msg-av">'+(name||'?').charAt(0).toUpperCase()+'</div>'
+      +'<div class="msg-info">'
+        +'<div class="msg-name">'+(name||'Utilisateur')+'</div>'
+        +'<div class="msg-preview">'+last.substring(0,40)+'</div>'
+        +(isUnread?'<span class="msg-badge">'+conv.unreadCount+'</span>':'')
+      +'</div>'
+      +'<div class="msg-time">'+time+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function openConvById(convId){ 
+  var convs=window._cachedConvs||[];
+  var conv=convs.find(function(c){return c._id===convId;})||{_id:convId,adTitle:'Conversation'};
+  openConversation(convId,conv);
+}
+function openConversation(convId, conv){
+  _currentConvId=convId;
+  document.querySelectorAll('.msg-list-item').forEach(function(i){i.classList.remove('active');});
+  var items=document.querySelectorAll('.msg-list-item');
+  items.forEach(function(item){ if(item.onclick && item.onclick.toString().includes(convId)) item.classList.add('active'); });
+  var thread=document.getElementById('page-msg-thread');
+  if(!thread) return;
+  var user=DB.user();
+  var otherName=conv.buyerId===(user&&user._id)?conv.sellerName:conv.buyerName;
+  var adTitle=(conv.adTitle||'');
+  thread.innerHTML=
+    '<div class="msg-thread-head">'+
+      '<div class="msg-av" style="width:38px;height:38px;font-size:15px;flex-shrink:0">'+(otherName||'?').charAt(0).toUpperCase()+'</div>'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="font-size:14px;font-weight:700;color:var(--ink)">'+otherName+'</div>'+
+        (adTitle?'<div style="font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">📦 '+adTitle+'</div>':'')+
+      '</div>'+
+    '</div>'+
+    '<div class="msg-bubbles" id="msg-bubbles-'+convId+'">'+
+      '<div class="msg-security">'+
+        '🛡️ <strong>Conseils sécurité</strong> — Vérifiez l\'article avant paiement. Échangez en lieu public. N\'envoyez jamais d\'argent à l\'avance.'+
+      '</div>'+
+      '<div style="text-align:center;padding:16px;color:var(--muted);font-size:12px">⏳ Chargement...</div>'+
+    '</div>'+
+    '<div class="msg-input-row">'+
+      '<input type="text" id="msg-input-text" placeholder="Votre message..." '+
+        'onkeydown="if(event.key===\'Enter\')sendMsgInThread()" '+
+        'onfocus="this.style.borderColor=\'var(--or)\'" onblur="this.style.borderColor=\'var(--br)\'">'+
+      '<button class="msg-send-btn" onclick="sendMsgInThread()">'+
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>'+
+      '</button>'+
+    '</div>';
+  loadMessages(convId);
+  // Marquer comme lu
+  var token=localStorage.getItem('ygy_token');
+  if(token) fetch('/api/conversations/'+convId+'/read',{method:'PATCH',headers:{'Authorization':'Bearer '+token}}).catch(function(){});
+}
+
+function loadMessages(convId){
+  var token=localStorage.getItem('ygy_token');
+  if(!token) return;
+  fetch('/api/conversations/'+convId,{headers:{'Authorization':'Bearer '+token}})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var msgs=data.messages||[];
+    renderMessages(convId,msgs);
+  }).catch(function(){ console.log('Messagerie: connexion serveur requise'); });
+}
+
+function renderMessages(convId,msgs){
+  var container=document.getElementById('msg-bubbles-'+convId);
+  if(!container) return;
+  var user=DB.user();
+  if(!msgs.length){
+    container.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Démarrez la conversation 👋</div>';
+    return;
+  }
+  container.innerHTML=msgs.map(function(m){
+    var isMine=String(m.senderId)===(user&&String(user._id));
+    var t=m.createdAt?new Date(m.createdAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
+    return '<div style="display:flex;flex-direction:column;align-items:'+(isMine?'flex-end':'flex-start')+';margin-bottom:4px">'+
+      '<div class="msg-bubble '+(isMine?'mine':'theirs')+'">'+
+        '<div>'+m.text+'</div>'+
+        '<div style="font-size:10px;opacity:.65;margin-top:4px;text-align:'+(isMine?'right':'left')+'">'+
+          t+(isMine?' &nbsp;'+(m.read?'✓✓':'✓'):'')+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  container.scrollTop=container.scrollHeight;
+}
+
+function sendMsgInThread(){
+  if(!_currentConvId){ toast('Selectionnez une conversation','warn'); return; }
+  var input=document.getElementById('msg-input-text');
+  var text=(input&&input.value.trim())||'';
+  if(!text) return;
+  var token=localStorage.getItem('ygy_token');
+  fetch('/api/conversations/'+_currentConvId,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},
+    body:JSON.stringify({text:text})
+  }).then(function(r){return r.json();})
+  .then(function(data){
+    if(input) input.value='';
+    loadMessages(_currentConvId);
+  }).catch(function(){
+    // Mode démo
+    if(input) input.value='';
+    toast('✅ Message envoyé','ok');
+  });
+}
+
+// Modal message rapide depuis page detail
+async function envoyerMessage(){
+  var user = DB.user();
+  if(!user){
+    toast('🔒 Connectez-vous pour envoyer un message','err');
+    setTimeout(function(){ openModal('auth'); }, 400);
+    return;
+  }
+  if(!curAd){ toast('Annonce non disponible','err'); return; }
+
+  var adId    = curAd._id || curAd.id;
+  var titre   = curAd.t   || curAd.title || 'Annonce';
+  var vendeur = curAd.sellerName || curAd.seller_name || 'Vendeur';
+
+  if(!adId){ toast('ID annonce manquant','err'); return; }
+
+  // Empêcher d'écrire à soi-même
+  var sellerId = curAd.seller || curAd.sellerId || curAd.sid;
+  if(sellerId && String(sellerId) === String(user._id || user.id)){
+    toast('Vous ne pouvez pas vous envoyer un message','warn');
+    return;
+  }
+
+  var tok = localStorage.getItem('ygy_token');
+  var msgDefaut = 'Bonjour, je suis intéressé(e) par : ' + titre + '. Est-elle toujours disponible ?';
+
+  var btn = document.querySelector('.btn-msg');
+  if(btn){ btn.disabled = true; btn.textContent = '⏳...'; }
+
+  try {
+    // Créer ou retrouver la conversation
+    var res = await fetch('/api/conversations', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Authorization':'Bearer '+tok},
+      body: JSON.stringify({adId: adId, message: msgDefaut})
+    });
+    var data = await res.json();
+
+    if(!res.ok){
+      toast('❌ ' + (data.error || 'Erreur'), 'err');
+      return;
+    }
+
+    var convId = data.conversationId;
+
+    // Aller sur la page messages
+    goTo('messages');
+
+    // Préparer les données de la conversation pour l'affichage immédiat
+    var convData = {
+      _id:        convId,
+      adTitle:    titre,
+      sellerName: vendeur,
+      buyerId:    String(user._id || user.id),
+    };
+
+    // Ouvrir le thread immédiatement SANS attendre le fetch des conversations
+    openPageConv(convId, convData);
+
+    // Charger aussi la liste en arrière-plan pour la colonne gauche
+    if(tok){
+      fetch('/api/conversations',{headers:{'Authorization':'Bearer '+tok}})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var convs = d.conversations||d||[];
+        _pageConvs = convs;
+        renderPageConvList(convs);
+        updateMsgBadge(convs);
+      }).catch(function(){});
+    }
+
+  } catch(err) {
+    toast('❌ Erreur réseau — vérifiez votre connexion', 'err');
+  } finally {
+    if(btn){ btn.disabled = false; btn.textContent = '💬 Envoyer un message'; }
+  }
+}
+
+
+function sendQuickMessage(){
+  var user=DB.user();
+  if(!user){ toast('🔒 Connectez-vous','err'); return; }
+  var text=(document.getElementById('quick-msg-text')||{}).value||'';
+  if(!text.trim()){ toast('⚠️ Entrez un message','warn'); return; }
+  var token=localStorage.getItem('ygy_token');
+  fetch('/api/conversations',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},
+    body:JSON.stringify({adId:curAd&&(curAd._id||curAd.id),message:text})
+  }).then(function(r){return r.json();})
+  .then(function(data){
+    if(data.error){ toast('❌ '+data.error,'err'); return; }
+    closeModal('message');
+    toast('✅ Message envoyé ! Consultez votre messagerie','ok',4000);
+  }).catch(function(){
+    closeModal('message');
+    toast('✅ Message envoyé (mode démo)','ok');
+  });
+}
+
+function updateMsgBadge(convs){
+  var total=(convs||[]).reduce(function(acc,c){return acc+(c.unreadCount||0);},0);
+  // Badge dans le dashboard
+  var badge=document.getElementById('msg-badge');
+  if(badge){ if(total>0){badge.textContent=total;badge.style.display='flex';}else badge.style.display='none'; }
+  // Badge dans la nav top
+  var navBadge=document.getElementById('nav-msg-badge');
+  if(navBadge){ if(total>0){navBadge.textContent=total;navBadge.style.display='flex';}else navBadge.style.display='none'; }
+}
+
+// Polling messages non lus
 function startMsgPolling(){
-  setInterval(function(){
-    var tok=localStorage.getItem('ygy_token');
-    if(!tok) return;
-    fetch('/api/conversations/unread',{headers:{'Authorization':'Bearer '+tok}})
+  if(_convPollTimer) clearInterval(_convPollTimer);
+  _convPollTimer=setInterval(function(){
+    var token=localStorage.getItem('ygy_token');
+    if(!token) return;
+    fetch('/api/conversations/unread',{headers:{'Authorization':'Bearer '+token}})
     .then(function(r){return r.json();})
-    .then(function(d){ _majBadge([{unreadCount:d.count||0}]); })
-    .catch(function(){});
+    .then(function(data){
+      var badge=document.getElementById('msg-badge');
+      if(!badge) return;
+      var cnt=data.count||0;
+      if(cnt>0){ badge.textContent=cnt; badge.style.display='flex'; }
+      else badge.style.display='none';
+    }).catch(function(){});
   },30000);
 }
-
-
 
 // ── Contre-offre ──
 function makeOffer(){
@@ -5311,25 +6934,21 @@ document.addEventListener('DOMContentLoaded',function(){
 <!-- ══ PAGE MESSAGES ══ -->
 <div id="page-messages" class="page">
   <div class="pmsg-wrap">
-
-    <!-- ══ COL 1 : LISTE ══ -->
+    <!-- COL 1 : liste -->
     <div class="pmsg-left">
       <div class="pmsg-left-head">
         <button class="pmsg-back" onclick="goTo('home')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-          Retour
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg> Retour
         </button>
         <span style="font-size:15px;font-weight:800;flex:1">Messages</span>
-        <span id="pmsg-nbr" style="font-size:11px;color:var(--muted)"></span>
       </div>
       <div class="pmsg-search-wrap">
-        <input class="pmsg-search" id="pmsg-q" type="text"
-          placeholder="🔍 Rechercher une conversation..."
-          oninput="pmsgSearch(this.value)">
+        <input class="pmsg-search" id="pmsg-q" type="text" placeholder="🔍 Rechercher..."
+          oninput="filterPageConvsBySearch(this.value)">
       </div>
       <div class="pmsg-filters">
-        <button class="pmsg-filter active" onclick="pmsgFilter('all',this)">Tous</button>
-        <button class="pmsg-filter" onclick="pmsgFilter('unread',this)">Non lus</button>
+        <button class="pmsg-filter active" onclick="filterConvs('all',this)">Tous</button>
+        <button class="pmsg-filter" onclick="filterConvs('unread',this)">Non lus</button>
       </div>
       <div id="page-msg-list" class="pmsg-list">
         <div style="padding:40px 20px;text-align:center;color:var(--muted)">
@@ -5338,24 +6957,21 @@ document.addEventListener('DOMContentLoaded',function(){
         </div>
       </div>
     </div>
-
-    <!-- ══ COL 2 : THREAD ══ -->
+    <!-- COL 2 : thread -->
     <div class="pmsg-center" id="pmsg-center">
-      <div class="pmsg-thread-empty" id="page-msg-thread">
-        <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <div id="page-msg-thread" class="pmsg-thread-empty">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         <div style="font-size:16px;font-weight:800;color:#999;margin-top:14px">Sélectionnez une conversation</div>
-        <div style="font-size:13px;margin-top:6px">Vos échanges avec les vendeurs apparaissent ici</div>
+        <div style="font-size:13px;margin-top:6px">Vos échanges apparaissent ici</div>
       </div>
     </div>
-
-    <!-- ══ COL 3 : INFOS ANNONCE ══ -->
+    <!-- COL 3 : infos vendeur -->
     <div class="pmsg-right-panel" id="page-msg-panel">
-      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#ddd;text-align:center;padding:30px">
-        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-        <div style="margin-top:12px;font-size:13px;color:#ccc">Infos de l'annonce</div>
+      <div style="padding:40px 16px;text-align:center;color:var(--muted)">
+        <div style="font-size:36px;margin-bottom:8px">ℹ️</div>
+        <div style="font-size:13px">Sélectionnez une conversation</div>
       </div>
     </div>
-
   </div>
 </div>
 
@@ -7510,55 +9126,16 @@ function viewBoutiqueById(userId){
 }
 
 
-async function envoyerMessage(){
-  var user = DB.user();
-  if(!user){
-    toast('🔒 Connectez-vous pour envoyer un message','err');
-    setTimeout(function(){ openModal('auth'); }, 400);
-    return;
-  }
-  if(!curAd){ toast('Annonce non disponible','err'); return; }
-  var adId    = curAd._id||curAd.id;
-  var titre   = curAd.t||curAd.title||'Annonce';
-  var vendeur = curAd.sellerName||'Vendeur';
-  var prix    = curAd.p||curAd.price||0;
-  if(!adId){ toast('ID annonce manquant','err'); return; }
-  var sellerId = curAd.seller||curAd.sellerId||curAd.sid;
-  if(sellerId && String(sellerId)===String(user._id||user.id)){
-    toast('Vous ne pouvez pas vous envoyer un message','warn'); return;
-  }
-  var tok = localStorage.getItem('ygy_token');
-  var btn = document.querySelector('.btn-msg');
-  if(btn){ btn.disabled=true; btn.textContent='⏳...'; }
-  try{
-    var res = await fetch('/api/conversations',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},
-      body:JSON.stringify({
-        adId:adId,
-        message:'Bonjour, je suis intéressé(e) par : '+titre+'. Est-elle toujours disponible ?'
-      })
-    });
-    var data = await res.json();
-    if(!res.ok){ toast('❌ '+(data.error||'Erreur'),'err'); return; }
-    var cid = data.conversationId;
-    // Aller sur la messagerie et ouvrir le thread
-    goTo('messages');
-    _chargeConvs(function(){
-      // Enrichir avec les données de l'annonce si pas dans la liste
-      if(!_convList.find(function(cv){ return (cv._id||cv.id)===cid; })){
-        _convList.unshift({_id:cid,adTitle:titre,adPrice:prix,sellerName:vendeur,adPhoto:''});
-        _afficherListe(_convList);
-      }
-      _ouvrirConv(cid);
-    });
-  }catch(e){
-    toast('❌ Erreur réseau','err');
-  }finally{
-    if(btn){ btn.disabled=false; btn.textContent='💬 Envoyer un message'; }
-  }
+function filterPageConvsBySearch(q){
+  q=(q||'').toLowerCase().trim();
+  var filtered=(_pageConvs||[]).filter(function(conv){
+    return !q
+      ||(conv.adTitle||'').toLowerCase().includes(q)
+      ||(conv.sellerName||conv.buyerName||'').toLowerCase().includes(q)
+      ||(conv.lastMessage||'').toLowerCase().includes(q);
+  });
+  renderPageConvList(filtered);
 }
-
 </script>
 </body>
 </html>
