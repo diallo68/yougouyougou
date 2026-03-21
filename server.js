@@ -203,6 +203,8 @@ const UserSchema = new mongoose.Schema({
   email:        { type: String, trim: true, lowercase: true },
   password:     { type: String, required: true },
   city:         { type: String },
+  dob:          { type: String },   // date de naissance (YYYY-MM-DD)
+  pob:          { type: String },   // lieu de naissance
   role:         { type: String, enum: ['user','admin'], default: 'user' },
   verified:     { type: Boolean, default: false },
   verifyMethod: { type: String, enum: ['sms','email'], default: 'sms' },
@@ -768,12 +770,14 @@ app.get('/api/me', auth, async (req, res) => {
 // Modifier son profil
 app.patch('/api/me', auth, async (req, res) => {
   try {
-    const { prenom, nom, city, email } = req.body;
+    const { prenom, nom, city, email, dob, pob } = req.body;
     const update = {};
     if (prenom) update.prenom = prenom;
     if (nom !== undefined) update.nom = nom;
     if (city)  update.city  = city;
     if (email) update.email = email.toLowerCase();
+    if (dob)   update.dob   = dob;
+    if (pob)   update.pob   = pob;
     const user = await User.findByIdAndUpdate(req.user.id, update, { new: true }).select('-password');
     res.json({ success: true, user });
   } catch(err) { res.status(500).json({ error: err.message }); }
