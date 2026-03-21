@@ -3985,62 +3985,61 @@ function doLogin(){
 }
 function openEditProfile(){
   var tok = localStorage.getItem('ygy_token');
+  var u   = DB.user();
 
-  function doOpen(u){
-    // Peupler les villes
-    var cityEl = document.getElementById('ep-city');
-    if(cityEl && cityEl.options.length <= 1 && typeof ALL_CITIES !== 'undefined'){
-      var opts = '<option value="">Choisir une ville...</option>';
-      ALL_CITIES.forEach(function(v){ opts += '<option value="'+v+'">'+v+'</option>'; });
-      cityEl.innerHTML = opts;
-    }
-    // Remplir les champs
-    var set = function(id,val){ var el=document.getElementById(id); if(el) el.value=val||''; };
-    var prenom = u.prenom||(u.name||'').split(' ')[0]||'';
-    var nom    = u.nom||(u.name||'').split(' ').slice(1).join(' ')||'';
-    var phone  = (u.phone||'').replace('+224','').replace(/\s/g,'');
-    set('ep-prenom',   prenom);
-    set('ep-nom',      nom);
-    set('ep-phone',    phone);
-    set('ep-city',     u.city||'');
-    set('ep-dob',      u.dob||'');
-    set('ep-pob',      u.pob||'');
-    set('ep-pw',       '');
-    openModal('editprofile');
-  }
-
-  var u = DB.user();
-  if(u){
-    doOpen(u);
-    // Enrichir depuis serveur en arrière-plan
-    if(tok){
-      fetch('/api/me',{headers:{'Authorization':'Bearer '+tok}})
-      .then(function(r){ return r.ok?r.json():null; })
-      .then(function(d){
-        if(!d||!d.user) return;
-        var lu = DB.user()||{};
-        ['prenom','nom','city','phone','dob','pob'].forEach(function(k){
-          if(d.user[k]) lu[k]=d.user[k];
-        });
-        DB.login(lu);
-        var ov=document.getElementById('overlay-editprofile');
-        if(ov&&ov.classList.contains('open')) doOpen(lu);
-      }).catch(function(){});
-    }
-  } else if(tok){
-    // DB.user() null mais token présent → charger depuis API
+  // Si pas connecté localement → essayer le token
+  if(!u && tok){
+    // Afficher le modal vide et le remplir quand /api/me répond
+    // Ouvrir IMMÉDIATEMENT le modal avec les champs vides
+    _openProfileModal({});
     fetch('/api/me',{headers:{'Authorization':'Bearer '+tok}})
-    .then(function(r){ return r.ok?r.json():null; })
+    .then(function(r){return r.ok?r.json():null;})
     .then(function(d){
-      if(!d||!d.user){ toast('Connectez-vous','err'); return; }
-      var u2 = d.user;
-      u2._id = u2._id||u2.id;
-      DB.login(u2);
-      doOpen(u2);
-    }).catch(function(){ toast('Erreur de connexion','err'); });
-  } else {
-    toast('Connectez-vous pour modifier votre profil','err');
+      if(d&&d.user){
+        var usr=d.user; usr._id=usr._id||usr.id;
+        DB.login(usr);
+        _fillProfileModal(usr);
+      }
+    }).catch(function(){});
+    return;
   }
+
+  if(!u){ toast('Veuillez vous connecter','err'); return; }
+  _openProfileModal(u);
+}
+
+function _openProfileModal(u){
+  // Peupler villes
+  var cityEl=document.getElementById('ep-city');
+  if(cityEl&&cityEl.options.length<=1&&typeof ALL_CITIES!=='undefined'){
+    var opts='<option value="">Choisir une ville...</option>';
+    ALL_CITIES.forEach(function(v){opts+='<option value="'+v+'">'+v+'</option>';});
+    cityEl.innerHTML=opts;
+  }
+  _fillProfileModal(u);
+  // Ouvrir directement sans passer par openModal pour éviter tout conflit
+  var el=document.getElementById('overlay-editprofile');
+  if(el){
+    el.style.display='flex';
+    el.style.opacity='1';
+    el.style.visibility='visible';
+    el.style.pointerEvents='all';
+    el.classList.add('open');
+  }
+}
+
+function _fillProfileModal(u){
+  var set=function(id,val){var el=document.getElementById(id);if(el)el.value=val||'';};
+  set('ep-prenom', u.prenom||(u.name||'').split(' ')[0]||'');
+  set('ep-nom',    u.nom||(u.name||'').split(' ').slice(1).join(' ')||'');
+  set('ep-phone',  (u.phone||'').replace('+224','').replace(/\s/g,''));
+  set('ep-city',   u.city||'');
+  set('ep-dob',    u.dob||'');
+  set('ep-pob',    u.pob||'');
+  set('ep-pw',     '');
+  // Sélectionner la ville correctement
+  var cEl=document.getElementById('ep-city');
+  if(cEl&&u.city) cEl.value=u.city;
 }
 
 
@@ -4973,11 +4972,16 @@ function closeModal(id){
   var el=document.getElementById('overlay-'+id);
   if(el){
     el.classList.remove('open');
-    // Forcer le masquage immédiat sans attendre la transition
     el.style.visibility='hidden';
     el.style.opacity='0';
     el.style.pointerEvents='none';
-    setTimeout(function(){el.style.visibility='';el.style.opacity='';el.style.pointerEvents='';},250);
+    el.style.display='';
+    setTimeout(function(){
+      el.style.visibility='';
+      el.style.opacity='';
+      el.style.pointerEvents='';
+      el.style.display='';
+    },250);
   }
   document.body.style.overflow='';
 }
