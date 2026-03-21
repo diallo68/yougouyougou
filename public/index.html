@@ -6247,7 +6247,17 @@ async function envoyerMessage(){
     var data = await res.json();
 
     if(!res.ok){
-      toast('❌ ' + (data.error || 'Erreur'), 'err');
+      var errMsg = data.error || 'Erreur';
+      // Si token expiré → déconnecter et demander reconnexion
+      if(res.status === 401){
+        toast('🔒 Session expirée — reconnectez-vous', 'err');
+        localStorage.removeItem('ygy_token');
+        DB.logout();
+        updateNav();
+        setTimeout(function(){ openModal('auth'); }, 600);
+        return;
+      }
+      toast('❌ ' + errMsg, 'err');
       return;
     }
 
@@ -6619,6 +6629,24 @@ goTo=function(page){
 
 document.addEventListener('DOMContentLoaded',function(){
   DB.load();
+  // Auto-refresh du token si présent (silencieux)
+  (function(){
+    var tok = localStorage.getItem('ygy_token');
+    if(tok){
+      fetch('/api/auth/refresh',{
+        method:'POST',
+        headers:{'Authorization':'Bearer '+tok}
+      })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(d){
+        if(d && d.token){
+          localStorage.setItem('ygy_token', d.token);
+          console.log('[AUTH] Token renouvelé automatiquement');
+        }
+      }).catch(function(){});
+    }
+  })();
+
   // Sync rôle + Pro depuis MongoDB au chargement, puis mettre à jour toute la nav
   (function(){
     var token = localStorage.getItem('ygy_token');
