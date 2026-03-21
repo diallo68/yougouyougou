@@ -6292,16 +6292,57 @@ function sendMsgInThread(){
 }
 
 // Modal message rapide depuis page detail
-function envoyerMessage(){
-  var user=DB.user();
-  if(!user){ toast('🔒 Connectez-vous','err'); openModal('auth'); return; }
-  if(!curAd) return;
-  var prev=document.getElementById('msg-ad-preview');
-  if(prev) prev.innerHTML='📦 <strong>'+(curAd.t||curAd.title||'Annonce')+'</strong><br>'+
-    '<span style="color:var(--or);font-weight:700">'+(curAd.p||curAd.price||0).toLocaleString('fr-FR')+' GNF</span>';
-  var txt=document.getElementById('quick-msg-text');
-  if(txt) txt.value='Bonjour, votre annonce m interesse. Est-elle toujours disponible ?';
-  openModal('message');
+async function envoyerMessage(){
+  var user = DB.user();
+  if(!user){ toast('🔒 Connectez-vous pour envoyer un message','err'); setTimeout(function(){ openModal('auth'); },400); return; }
+  if(!curAd){ toast('Annonce non disponible','err'); return; }
+
+  var adId = curAd._id || curAd.id;
+  if(!adId){ toast('Identifiant annonce manquant','err'); return; }
+
+  // Empêcher d'écrire à soi-même
+  var sellerId = curAd.seller || curAd.sellerId || curAd.sid;
+  if(sellerId && String(sellerId) === String(user._id || user.id)){
+    toast('Vous ne pouvez pas vous envoyer un message','warn'); return;
+  }
+
+  var tok = localStorage.getItem('ygy_token');
+  var titre = curAd.t || curAd.title || 'votre annonce';
+  var msgDefaut = 'Bonjour, je suis intéressé(e) par votre annonce : ' + titre + '. Est-elle toujours disponible ?';
+
+  // Bouton feedback
+  var btn = document.querySelector('.btn-msg');
+  if(btn){ btn.disabled = true; btn.textContent = '⏳ Ouverture...'; }
+
+  try {
+    var res = await fetch('/api/conversations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
+      body: JSON.stringify({ adId: adId, message: msgDefaut })
+    });
+    var data = await res.json();
+
+    if(!res.ok){ toast('❌ ' + (data.error || 'Erreur'), 'err'); return; }
+
+    var convId = data.conversationId;
+    toast('💬 Conversation ouverte !', 'ok');
+
+    // Aller dans la messagerie et ouvrir directement ce thread
+    navGoMessages();
+    // Ouvrir le thread après que navGoMessages ait chargé les conversations
+    setTimeout(function(){
+      if(convId && typeof openPageConvById === 'function'){
+        openPageConvById(convId);
+      } else if(convId && typeof openPageConv === 'function'){
+        openPageConv(convId, {_id: convId, adTitle: titre});
+      }
+    }, 1200);
+
+  } catch(err) {
+    toast('❌ Erreur réseau', 'err');
+  } finally {
+    if(btn){ btn.disabled = false; btn.textContent = '💬 Envoyer un message'; }
+  }
 }
 
 function sendQuickMessage(){
