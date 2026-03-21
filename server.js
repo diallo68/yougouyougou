@@ -591,7 +591,7 @@ app.post('/api/register', async (req, res) => {
 
     // Compte déjà vérifié → connexion directe
     if (pending.verified) {
-      const token = jwt.sign({ id: pending._id, role: pending.role }, JWT_SECRET, { expiresIn: '30d' });
+      const token = jwt.sign({ id: pending._id, role: pending.role }, JWT_SECRET, { expiresIn: '90d' });
       return res.json({
         success: true, token,
         user: { id: pending._id, name: `${pending.prenom} ${pending.nom||''}`.trim(),
@@ -615,7 +615,7 @@ app.post('/api/register', async (req, res) => {
     if (phone) pending.phone = phone;
     await pending.save();
 
-    const token = jwt.sign({ id: pending._id, role: pending.role }, JWT_SECRET, { expiresIn: '30d' });
+    const token = jwt.sign({ id: pending._id, role: pending.role }, JWT_SECRET, { expiresIn: '90d' });
     console.log(`[REGISTER] ✅ Compte créé: ${pending._id} email=${pending.email}`);
     res.json({
       success: true, token,
@@ -628,6 +628,22 @@ app.post('/api/register', async (req, res) => {
     console.error('[REGISTER] Erreur:', err.message);
     res.status(500).json({ error: err.message });
   }
+});
+
+
+// ── Renouvellement de token ──
+app.post('/api/auth/refresh', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password -verifyCode -codeExpiry');
+    if (!user) return res.status(401).json({ error: 'Utilisateur introuvable' });
+    const newToken = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '90d' });
+    res.json({ token: newToken, user: {
+      id: user._id, role: user.role,
+      prenom: user.prenom, nom: user.nom||'',
+      phone: user.phone||'', email: user.email||'',
+      city: user.city||'', isPro: user.isPro||false,
+    }});
+  } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
 // Connexion
@@ -647,7 +663,7 @@ app.post('/api/login', async (req, res) => {
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(400).json({ error: 'Mot de passe incorrect' });
 
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '30d' });
+    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '90d' });
     res.json({
       success: true, token,
       user: { id: user._id, name: `${user.prenom} ${user.nom||''}`.trim(),
