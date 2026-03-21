@@ -2328,7 +2328,9 @@ var DB={
   payments:function(){return this._d.payments||[];},
   addPayment:function(p){this._d.payments.unshift(p);this.save();},
   favs:function(){return this._d.favs||[];},
-  addFav:function(id){if(!this._d.favs)this._d.favs=[];if(!this._d.favs.includes(id)){this._d.favs.push(id);this.save();}}
+  addFav:function(id){if(!this._d.favs)this._d.favs=[];if(!this._d.favs.includes(id)){this._d.favs.push(id);this.save();}},
+  removeFav:function(id){this._d.favs=(this._d.favs||[]).filter(function(f){return String(f)!==String(id);});this.save();},
+  setFavs:function(ids){this._d.favs=ids||[];this.save();}
 };
 
 // ══════════════════════════════════════════
@@ -2577,7 +2579,7 @@ function adCard(a,feat){
   return '<div class="lbc-card" data-id="'+adId+'" onclick="viewAd(\''+adId+'\')">'
     +'<div class="lbc-img" style="background:'+(a.bg||'#EBEBEB')+'">'
     +imgHTML+badges
-    +'<button class="lbc-fav" onclick="event.stopPropagation();favAd(\''+adId+'\')">'
+    +'<button class="lbc-fav" data-adid="'+adId+'" onclick="event.stopPropagation();favAd(\''+adId+'\')" title="Ajouter aux favoris">'
     +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">'
     +'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>'
     +'</svg>'
@@ -3109,8 +3111,33 @@ function switchPhotoIdx(idx, el){
   });
   if(el){el.classList.add('active');el.style.border='2px solid var(--or)';}
 }
-function favAd(id){DB.addFav(id);toast('❤️ Ajouté aux favoris !','ok');}
-function addFav(){if(curAd){DB.addFav(curAd.id);toast('❤️ Ajouté aux favoris !','ok');}}
+function favAd(id){
+  var user = DB.user();
+  if(!user){ toast('🔒 Connectez-vous pour ajouter aux favoris','err'); setTimeout(function(){ openModal('auth'); },400); return; }
+  var tok = localStorage.getItem('ygy_token');
+  if(!tok){ toast('🔒 Reconnectez-vous','err'); return; }
+  var isFav = DB.favs().includes(String(id));
+  fetch('/api/me/favorites/'+id, {
+    method:'POST',
+    headers:{'Authorization':'Bearer '+tok}
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(data.error){ toast('❌ '+data.error,'err'); return; }
+    DB.setFavs(data.favorites || []);
+    var added = data.action === 'added';
+    toast(added ? '❤️ Ajouté aux favoris !' : '💔 Retiré des favoris', added ? 'ok' : '');
+    // Mettre à jour l'icône sur toutes les cartes
+    document.querySelectorAll('.lbc-fav[data-adid="'+id+'"],.ad-card-fav[data-adid="'+id+'"]').forEach(function(btn){
+      btn.style.color = added ? '#CC1C0C' : '';
+      btn.title = added ? 'Retirer des favoris' : 'Ajouter aux favoris';
+    });
+  })
+  .catch(function(){ toast('❌ Erreur réseau','err'); });
+}
+function addFav(){
+  if(curAd){ favAd(curAd._id || curAd.id); }
+}
 
 // ══════════════════════════════════════════
 //  POST AD
@@ -3415,6 +3442,10 @@ function renderAuthForm(tab){
       '<div id="pw-match-msg" style="margin-top:-10px;margin-bottom:12px;font-size:13px;font-weight:700;display:none"></div>'+
       // Ville
       '<div class="fg"><label>📍 Préfecture / Ville *</label><select id="rct">'+opts+'</select></div>'+
+      // Date de naissance
+      '<div class="fg"><label>📅 Date de naissance * <span style="font-size:11px;color:var(--muted);font-weight:400">(vous devez avoir au moins 18 ans)</span></label>'+
+        '<input type="date" id="rdob" max="'+new Date(new Date().setFullYear(new Date().getFullYear()-18)).toISOString().split('T')[0]+'" style="width:100%;padding:10px 12px;border:1.5px solid var(--br);border-radius:8px;font-size:13px;font-family:inherit;outline:none;transition:border-color .2s" onfocus="this.style.borderColor=\'var(--or)\'" onblur="this.style.borderColor=\'var(--br)\'">'+
+      '</div>'+
       // Bouton envoyer
       '<button class="btn btn-or btn-full" style="border-radius:12px" id="btn-sendcode" onclick="sendVerifCode()">📱 Recevoir le code SMS →</button>'+
       '<p style="text-align:center;font-size:13px;color:var(--muted);margin-top:14px">Déjà un compte ? <a style="color:var(--or);cursor:pointer;font-weight:700" onclick="authTab(\'login\')">Se connecter</a></p>';
@@ -3514,6 +3545,7 @@ function sendVerifCode(){
   var pw=(document.getElementById('rpw')||{value:''}).value.trim();
   var pw2=(document.getElementById('rpw2')||{value:''}).value.trim();
   var city=(document.getElementById('rct')||{value:''}).value;
+  var dob=(document.getElementById('rdob')||{value:''}).value.trim();
 
   var ok=true;
   if(!fn){markField(document.getElementById('rfn'),false);ok=false;}
@@ -3522,6 +3554,24 @@ function sendVerifCode(){
   if(!pw||pw.length<8){markField(document.getElementById('rpw'),false);ok=false;}
   if(!pw2||pw!==pw2){markField(document.getElementById('rpw2'),false);ok=false;}
   if(!city){markField(document.getElementById('rct'),false);ok=false;}
+
+  // Validation date de naissance + age minimum 18 ans
+  if(!dob){
+    markField(document.getElementById('rdob'),false);
+    ok=false;
+  } else {
+    var birth = new Date(dob);
+    var today = new Date();
+    var age = today.getFullYear() - birth.getFullYear();
+    var m = today.getMonth() - birth.getMonth();
+    if(m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+    if(age < 18){
+      markField(document.getElementById('rdob'),false);
+      toast('⚠️ Vous devez avoir au moins 18 ans pour vous inscrire','err');
+      ok=false;
+    }
+  }
+
   if(!ok){toast('⚠️ Remplissez les champs en rouge','err');return;}
 
   pendingUser={
@@ -3531,6 +3581,7 @@ function sendVerifCode(){
     email: regMode==='email' ? em : '',
     password:pw,
     city: city,
+    dob: dob,
     method: regMode==='email'?'email':'sms',
     initials:(fn.charAt(0)+((document.getElementById('rln')||{value:''}).value.trim().charAt(0)||'')).toUpperCase()
   };
@@ -3662,6 +3713,7 @@ function verifyCode(){
         email: pendingUser.email||'',
         password: pendingUser.password,
         city: pendingUser.city||'',
+        dob: pendingUser.dob||'',
         code: entered,
         method: pendingUser.method||'sms'
       })
@@ -4348,22 +4400,30 @@ function navGoSearches(){
 
 function navGoFavs(){
   if(!DB.user()){openModal('auth');return;}
-  // Charger les favoris dans la page dédiée
-  var favIds = DB.favs();
-  var favAds = DB.ads().filter(function(a){ return favIds.includes(a.id||a._id) || favIds.includes(String(a.id||a._id)); });
   var grid = document.getElementById('page-favs-grid');
-  if(grid){
-    if(!favAds.length){
+  if(grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)"><div style="font-size:28px;margin-bottom:8px">⏳</div><div>Chargement...</div></div>';
+  goTo('favs');
+  var tok = localStorage.getItem('ygy_token');
+  if(!tok) return;
+  fetch('/api/me/favorites',{headers:{'Authorization':'Bearer '+tok}})
+  .then(function(r){return r.ok?r.json():Promise.reject();})
+  .then(function(data){
+    DB.setFavs(data.favorites||[]);
+    var ads = data.ads||[];
+    if(!grid) return;
+    if(!ads.length){
       grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted)">'+
         '<div style="font-size:48px;margin-bottom:12px">❤️</div>'+
         '<div style="font-size:15px;font-weight:700;margin-bottom:6px">Aucun favori</div>'+
         '<div style="font-size:13px">Cliquez sur 🤍 sur une annonce pour l\'ajouter</div>'+
       '</div>';
     } else {
-      grid.innerHTML = favAds.map(function(a){ return adCard(a,false); }).join('');
+      grid.innerHTML = ads.map(function(a){ return adCard(a,false); }).join('');
     }
-  }
-  goTo('favs');
+  })
+  .catch(function(){
+    if(grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">❌ Impossible de charger les favoris</div>';
+  });
 }
 
 function navGoMessages(){
@@ -4605,10 +4665,9 @@ function syncRoleFromServer(callback){
   .then(function(data){
     if(data&&data.user){
       var u=DB.user()||{};
-      // Stocker TOUS les champs utiles, dont _id pour les appels API
       if(data.user.id)       u._id      = data.user.id;
       if(data.user._id)      u._id      = data.user._id;
-      u.role    = data.user.role;
+      u.role    = data.user.role;   // toujours depuis MongoDB — source de vérité
       u.isPro   = data.user.isPro   || false;
       if(data.user.proUntil) u.proUntil = data.user.proUntil;
       if(data.user.prenom)   u.prenom   = data.user.prenom;
@@ -4617,9 +4676,14 @@ function syncRoleFromServer(callback){
       if(data.user.phone)    u.phone    = data.user.phone;
       if(data.user.email)    u.email    = data.user.email;
       if(data.user.city)     u.city     = data.user.city;
-      if(data.user.dob)  u.dob = data.user.dob;
-      if(data.user.pob)  u.pob = data.user.pob;
+      if(data.user.dob)      u.dob      = data.user.dob;
+      if(data.user.pob)      u.pob      = data.user.pob;
       DB.login(u);
+      // Charger les favoris depuis MongoDB en arrière-plan
+      fetch('/api/me/favorites',{headers:{'Authorization':'Bearer '+token}})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(fd){ if(fd&&fd.favorites) DB.setFavs(fd.favorites); })
+      .catch(function(){});
     }
     if(callback)callback();
   })
@@ -4781,12 +4845,28 @@ function renderDash(){
     }
   }
 
-  // Onglet Favoris
-  var favAds=DB.ads().filter(function(a){return favIds.includes(a.id);});
+  // Onglet Favoris — charger depuis l'API
   var df=document.getElementById('d-favs');
-  if(df) df.innerHTML=favAds.length
-    ? favAds.map(function(a){return adCard(a,false);}).join('')
-    : '<div style="grid-column:1/-1;background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:48px;text-align:center;color:var(--muted);box-shadow:var(--sh)"><div style="font-size:52px;margin-bottom:14px">❤️</div><p>Aucun favori</p></div>';
+  if(df){
+    df.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted)">⏳ Chargement...</div>';
+    var tokFav=localStorage.getItem('ygy_token');
+    if(tokFav){
+      fetch('/api/me/favorites',{headers:{'Authorization':'Bearer '+tokFav}})
+      .then(function(r){return r.ok?r.json():Promise.reject();})
+      .then(function(data){
+        DB.setFavs(data.favorites||[]);
+        var pcf=document.getElementById('p-count-favs');
+        if(pcf) pcf.textContent=(data.favorites||[]).length;
+        var favAds=data.ads||[];
+        df.innerHTML=favAds.length
+          ? favAds.map(function(a){return adCard(a,false);}).join('')
+          : '<div style="grid-column:1/-1;background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:48px;text-align:center;color:var(--muted);box-shadow:var(--sh)"><div style="font-size:52px;margin-bottom:14px">❤️</div><p>Aucun favori</p></div>';
+      })
+      .catch(function(){ df.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted)">❌ Impossible de charger les favoris</div>'; });
+    } else {
+      df.innerHTML='<div style="grid-column:1/-1;background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:48px;text-align:center;color:var(--muted);box-shadow:var(--sh)"><div style="font-size:52px;margin-bottom:14px">❤️</div><p>Aucun favori</p></div>';
+    }
+  }
 }
 function dashRow(a, idx){
   var adId = a._id||a.id||'';
@@ -4929,12 +5009,11 @@ function toast(msg,type,dur){
 function contactVendeur(){
   var user = DB.user();
   if(!user){
-    // Pas connecté → alerte + ouvre modal auth
     toast('🔒 Connectez-vous pour contacter le vendeur','err');
     setTimeout(function(){ openModal('auth'); }, 600);
     return;
   }
-  // Connecté → ouvrir le modal de commission
+  // Connecté → ouvrir le modal de commission (paiement pour voir le numéro)
   openCommission();
 }
 
@@ -5085,23 +5164,31 @@ function goAdmin(){
   var tok = localStorage.getItem('ygy_token');
   if(!tok){ openModal('auth'); return; }
 
-  // Vérifier le rôle directement via /api/admin/stats
-  // Si la requête réussit (200) → l'utilisateur est admin
-  // Si 403 → pas admin
-  fetch('/api/admin/stats',{headers:{'Authorization':'Bearer '+tok}})
-  .then(function(r){
-    if(r.ok){
-      // Confirmer le role admin localement + stocker _id depuis le token
-      u.role = 'admin';
-      if(!u._id) u._id = u.id || (tok ? JSON.parse(atob(tok.split('.')[1])).id : null);
-      DB.login(u);
-      updateNav();
-      goTo('admin');
-      adminTab('stats');
-      loadAdmin();
-    } else {
+  // Vérifier le rôle directement via /api/me (source de vérité MongoDB)
+  // Si role==='admin' → accès autorisé. Sinon → refus.
+  fetch('/api/me',{headers:{'Authorization':'Bearer '+tok}})
+  .then(function(r){return r.ok?r.json():Promise.reject('http_'+r.status);})
+  .then(function(data){
+    if(!data||!data.user) throw new Error('no_user');
+    if(data.user.role !== 'admin'){
       toast('Accès réservé aux administrateurs','err');
+      // S'assurer que le bouton Admin est bien masqué
+      var btn = document.getElementById('nav-admin-btn');
+      if(btn) btn.style.display = 'none';
+      var lnk = document.getElementById('nav-admin-link');
+      if(lnk) lnk.setAttribute('hidden','');
+      return;
     }
+    // Rôle confirmé depuis MongoDB → mettre à jour localement
+    var uu = DB.user()||{};
+    uu.role = 'admin';
+    if(data.user.id)  uu._id = data.user.id;
+    if(data.user._id) uu._id = data.user._id;
+    DB.login(uu);
+    updateNav();
+    goTo('admin');
+    adminTab('stats');
+    loadAdmin();
   })
   .catch(function(){ toast('Erreur de connexion','err'); });
 }
@@ -5641,28 +5728,28 @@ function showDashTab(tab){
 }
 
 function toggleFav(id){
-  var favIds = DB.favs();
-  var isFav = favIds.includes(id);
-  if(isFav){
-    DB._d.favs = favIds.filter(function(f){ return f !== id; });
-    toast('💔 Retiré des favoris');
-  } else {
-    DB.addFav(id);
-    toast('❤️ Ajouté aux favoris !', 'ok');
-  }
-  DB.save();
-  // Rafraîchir le bouton dans la grille
-  document.querySelectorAll('.ad-card-fav').forEach(function(btn){
-    var card = btn.closest('.ad-card');
-    if(card && card.onclick){
-      var onclick = card.getAttribute('onclick')||card.onclick.toString();
-      if(onclick.includes(id)){
-        var newFav = DB.favs().includes(id);
-        btn.textContent = newFav ? '❤️' : '🤍';
-        btn.classList.toggle('active', newFav);
-      }
-    }
-  });
+  var user = DB.user();
+  if(!user){ toast('🔒 Connectez-vous pour ajouter aux favoris','err'); setTimeout(function(){ openModal('auth'); },400); return; }
+  var tok = localStorage.getItem('ygy_token');
+  if(!tok){ toast('🔒 Reconnectez-vous','err'); return; }
+  var sid = String(id);
+  fetch('/api/me/favorites/'+sid, {
+    method:'POST',
+    headers:{'Authorization':'Bearer '+tok}
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(data.error){ toast('❌ '+data.error,'err'); return; }
+    DB.setFavs(data.favorites || []);
+    var added = data.action === 'added';
+    toast(added ? '❤️ Ajouté aux favoris !' : '💔 Retiré des favoris', added ? 'ok' : '');
+    // Mettre à jour visuellement tous les boutons favoris de cette annonce
+    document.querySelectorAll('.lbc-fav[data-adid="'+sid+'"],.ad-card-fav[data-adid="'+sid+'"]').forEach(function(btn){
+      btn.style.color = added ? '#CC1C0C' : '';
+      btn.title = added ? 'Retirer des favoris' : 'Ajouter aux favoris';
+    });
+  })
+  .catch(function(){ toast('❌ Erreur réseau','err'); });
 }
 
 function toggleMobileFilters(){
@@ -6221,68 +6308,119 @@ async function envoyerMessage(){
   var adId    = curAd._id || curAd.id;
   var titre   = curAd.t   || curAd.title || 'Annonce';
   var vendeur = curAd.sellerName || curAd.seller_name || 'Vendeur';
+  var sellerId = curAd.seller || curAd.sellerId || curAd.sid;
 
   if(!adId){ toast('ID annonce manquant','err'); return; }
 
   // Empêcher d'écrire à soi-même
-  var sellerId = curAd.seller || curAd.sellerId || curAd.sid;
   if(sellerId && String(sellerId) === String(user._id || user.id)){
     toast('Vous ne pouvez pas vous envoyer un message','warn');
     return;
   }
 
-  var tok = localStorage.getItem('ygy_token');
-  var msgDefaut = 'Bonjour, je suis intéressé(e) par : ' + titre + '. Est-elle toujours disponible ?';
+  // Ouvrir le modal de saisie de message
+  var overlay = document.getElementById('overlay-send-msg');
+  if(!overlay){
+    // Créer le modal dynamiquement s'il n'existe pas encore
+    overlay = document.createElement('div');
+    overlay.id = 'overlay-send-msg';
+    overlay.className = 'overlay';
+    overlay.innerHTML =
+      '<div class="modal" style="max-width:420px">' +
+        '<div class="modal-head">' +
+          '<span class="modal-title">💬 Envoyer un message</span>' +
+          '<button class="modal-close" onclick="closeModal(\'send-msg\')">✕</button>' +
+        '</div>' +
+        '<div class="modal-body">' +
+          '<div id="send-msg-to" style="font-size:13px;color:var(--muted);margin-bottom:12px"></div>' +
+          '<textarea id="send-msg-text" rows="4" placeholder="Bonjour, je suis intéressé(e) par votre annonce. Est-elle toujours disponible ?" ' +
+            'style="width:100%;border:1.5px solid var(--br);border-radius:8px;padding:10px 12px;font-size:13px;font-family:inherit;resize:vertical;outline:none;transition:border-color .2s" ' +
+            'onfocus="this.style.borderColor=\'var(--or)\'" onblur="this.style.borderColor=\'var(--br)\'"></textarea>' +
+          '<div style="font-size:11px;color:var(--muted);margin-top:6px">Votre message sera envoyé à <strong id="send-msg-seller"></strong></div>' +
+        '</div>' +
+        '<div style="padding:0 20px 18px;display:flex;gap:10px">' +
+          '<button class="btn btn-ghost" style="flex:1" onclick="closeModal(\'send-msg\')">Annuler</button>' +
+          '<button class="btn btn-or" style="flex:1" id="send-msg-btn" onclick="submitEnvoyerMessage()">📤 Envoyer</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+  }
 
-  var btn = document.querySelector('.btn-msg');
-  if(btn){ btn.disabled = true; btn.textContent = '⏳...'; }
+  // Pré-remplir
+  var toEl = document.getElementById('send-msg-to');
+  var sellerEl = document.getElementById('send-msg-seller');
+  var textEl = document.getElementById('send-msg-text');
+  if(toEl) toEl.textContent = 'Annonce : ' + titre;
+  if(sellerEl) sellerEl.textContent = vendeur;
+  if(textEl){
+    textEl.value = '';
+    textEl.style.borderColor = 'var(--br)';
+  }
+  var sendBtn = document.getElementById('send-msg-btn');
+  if(sendBtn){ sendBtn.disabled = false; sendBtn.textContent = '📤 Envoyer'; }
+
+  openModal('send-msg');
+  setTimeout(function(){ if(textEl) textEl.focus(); }, 200);
+}
+
+async function submitEnvoyerMessage(){
+  var tok = localStorage.getItem('ygy_token');
+  var textEl = document.getElementById('send-msg-text');
+  var msgText = textEl ? textEl.value.trim() : '';
+
+  if(!msgText){
+    if(textEl){ textEl.style.borderColor='#DC2626'; textEl.focus(); }
+    toast('⚠️ Entrez votre message','err');
+    return;
+  }
+  if(!curAd){ toast('Annonce non disponible','err'); return; }
+
+  var adId  = curAd._id || curAd.id;
+  var titre = curAd.t || curAd.title || 'Annonce';
+  var vendeur = curAd.sellerName || 'Vendeur';
+
+  var sendBtn = document.getElementById('send-msg-btn');
+  if(sendBtn){ sendBtn.disabled = true; sendBtn.textContent = '⏳...'; }
 
   try {
-    // Créer ou retrouver la conversation
     var res = await fetch('/api/conversations', {
       method: 'POST',
       headers: {'Content-Type':'application/json','Authorization':'Bearer '+tok},
-      body: JSON.stringify({adId: adId, message: msgDefaut})
+      body: JSON.stringify({adId: adId, message: msgText})
     });
     var data = await res.json();
 
     if(!res.ok){
-      var errMsg = data.error || 'Erreur';
-      // Si token expiré → déconnecter et demander reconnexion
       if(res.status === 401){
         toast('🔒 Session expirée — reconnectez-vous', 'err');
         localStorage.removeItem('ygy_token');
-        DB.logout();
-        updateNav();
+        DB.logout(); updateNav();
+        closeModal('send-msg');
         setTimeout(function(){ openModal('auth'); }, 600);
         return;
       }
-      toast('❌ ' + errMsg, 'err');
+      toast('❌ ' + (data.error || 'Erreur'), 'err');
       return;
     }
 
     var convId = data.conversationId;
+    closeModal('send-msg');
+    toast('✅ Message envoyé !', 'ok');
 
-    // Aller sur la page messages
+    // Aller sur la page messages et ouvrir la conversation
     goTo('messages');
-
-    // Préparer les données de la conversation pour l'affichage immédiat
     var convData = {
-      _id:        convId,
-      adTitle:    titre,
-      sellerName: vendeur,
-      buyerId:    String(user._id || user.id),
+      _id: convId, adTitle: titre, sellerName: vendeur,
+      buyerId: String((DB.user()||{})._id || (DB.user()||{}).id || '')
     };
-
-    // Ouvrir le thread immédiatement SANS attendre le fetch des conversations
     openPageConv(convId, convData);
 
-    // Charger aussi la liste en arrière-plan pour la colonne gauche
+    // Recharger la liste des conversations en arrière-plan
     if(tok){
       fetch('/api/conversations',{headers:{'Authorization':'Bearer '+tok}})
       .then(function(r){return r.json();})
       .then(function(d){
-        var convs = d.conversations||d||[];
+        var convs = d.conversations||[];
         _pageConvs = convs;
         renderPageConvList(convs);
         updateMsgBadge(convs);
@@ -6292,7 +6430,7 @@ async function envoyerMessage(){
   } catch(err) {
     toast('❌ Erreur réseau — vérifiez votre connexion', 'err');
   } finally {
-    if(btn){ btn.disabled = false; btn.textContent = '💬 Envoyer un message'; }
+    if(sendBtn){ sendBtn.disabled = false; sendBtn.textContent = '📤 Envoyer'; }
   }
 }
 
