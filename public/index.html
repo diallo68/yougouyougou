@@ -36,6 +36,9 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 .page{display:none}.page.active{display:block}
+/* Pages spéciales qui nécessitent display:flex plutôt que block */
+#page-messages.active{display:flex !important}
+#page-favs.active{display:block !important}
 #app-wrapper{background:#fff;max-width:1280px;margin:0 auto;min-height:100vh;box-shadow:0 2px 12px rgba(0,0,0,.08)}
 
 /* ── DÉSACTIVÉS ── */
@@ -452,7 +455,7 @@ footer{background:transparent;margin-top:0}
   z-index:200;
   overflow:hidden;
 }
-.pmsg-wrap{display:grid;grid-template-columns:320px 1fr 300px;flex:1;min-height:0;overflow:hidden;border-top:1px solid var(--br)}
+.pmsg-wrap{display:grid;grid-template-columns:320px 1fr 300px;flex:1;height:100%;min-height:0;overflow:hidden;border-top:1px solid var(--br)}
 .pmsg-left{display:flex;flex-direction:column;border-right:1px solid var(--br);background:#fff;overflow:hidden;min-height:0}
 .pmsg-left-head{display:flex;align-items:center;gap:8px;padding:0 16px;height:56px;border-bottom:1px solid var(--br);background:#fff;flex-shrink:0}
 .pmsg-back{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:13px;font-family:inherit;padding:0}
@@ -2336,17 +2339,75 @@ var DB={
 // ══════════════════════════════════════════
 //  ROUTING
 // ══════════════════════════════════════════
-function goTo(page){
+function goTo(page, opts){
+  opts = opts || {};
   // Fermer tous les overlays ouverts et libérer le scroll
   document.querySelectorAll('.overlay.open').forEach(function(o){o.classList.remove('open');});
   document.body.style.overflow='';
   // Changer de page
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   var el=document.getElementById('page-'+page);
-  if(el){el.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+  if(el){
+    el.classList.add('active');
+    // Ne pas scroller pour les pages en position:fixed (messages)
+    if(page!=='messages') window.scrollTo({top:0,behavior:'smooth'});
+  }
   if(page==='dashboard'){ loadDash(); setTimeout(function(){ var tok=localStorage.getItem('ygy_token'); if(tok){ fetch('/api/me',{headers:{'Authorization':'Bearer '+tok}}).then(function(r){return r.ok?r.json():null;}).then(function(d){ if(d&&d.user){ var u=DB.user()||{}; u.role=d.user.role; u.isPro=d.user.isPro||false; DB.login(u); updateNav(); var al=document.getElementById('nav-admin-link'); if(al){ if(u.role==='admin') al.removeAttribute('hidden'); else al.setAttribute('hidden',''); } } }).catch(function(){}); } }, 300); }
-  if(page==='home')renderAds();
-  if(page==='seller'&&typeof _curSellerId!=='undefined'&&_curSellerId)loadSellerProfile(_curSellerId);
+  if(page==='home') renderAds();
+  if(page==='seller'&&typeof _curSellerId!=='undefined'&&_curSellerId) loadSellerProfile(_curSellerId);
+  // ── Page Messages ──────────────────────────────────────────────
+  if(page==='messages'){
+    startMsgPolling();
+    // opts.skipConvLoad=true quand appelé depuis submitEnvoyerMessage
+    // (qui ouvre directement la conv — on ne recharge pas la liste pour ne pas écraser)
+    if(opts.skipConvLoad) return;
+    var token=localStorage.getItem('ygy_token');
+    var list=document.getElementById('page-msg-list');
+    if(!token){
+      if(list) list.innerHTML='<div style="padding:40px 20px;text-align:center;color:var(--muted)"><div style="font-size:40px;margin-bottom:10px">🔒</div><div style="font-size:13px">Connectez-vous pour voir vos messages</div></div>';
+      return;
+    }
+    if(list) list.innerHTML='<div style="padding:40px 20px;text-align:center;color:var(--muted)"><div style="font-size:40px;margin-bottom:10px">💬</div><div style="font-size:13px">Chargement...</div></div>';
+    fetch('/api/conversations',{headers:{'Authorization':'Bearer '+token}})
+    .then(function(r){return r.json();})
+    .then(function(data){
+      var convs=data.conversations||data||[];
+      _pageConvs=convs;
+      renderPageConvList(convs);
+      updateMsgBadge(convs);
+    }).catch(function(){
+      if(list) list.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">❌ Erreur de chargement</div>';
+    });
+  }
+  // ── Page Favoris ───────────────────────────────────────────────
+  if(page==='favs'){
+    var tokFavs=localStorage.getItem('ygy_token');
+    var grid=document.getElementById('page-favs-grid');
+    if(!tokFavs){
+      if(grid) grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted)"><div style="font-size:48px;margin-bottom:12px">🔒</div><div style="font-size:15px;font-weight:700">Connectez-vous pour voir vos favoris</div></div>';
+      return;
+    }
+    if(grid) grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)"><div style="font-size:28px;margin-bottom:8px">⏳</div><div>Chargement...</div></div>';
+    fetch('/api/me/favorites',{headers:{'Authorization':'Bearer '+tokFavs}})
+    .then(function(r){return r.ok?r.json():Promise.reject();})
+    .then(function(data){
+      DB.setFavs(data.favorites||[]);
+      var ads=data.ads||[];
+      if(!grid) return;
+      if(!ads.length){
+        grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted)">'+
+          '<div style="font-size:48px;margin-bottom:12px">❤️</div>'+
+          '<div style="font-size:15px;font-weight:700;margin-bottom:6px">Aucun favori</div>'+
+          '<div style="font-size:13px">Cliquez sur 🤍 sur une annonce pour l\'ajouter</div>'+
+        '</div>';
+      } else {
+        grid.innerHTML=ads.map(function(a){ return adCard(a,false); }).join('');
+      }
+    })
+    .catch(function(){
+      if(grid) grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">❌ Impossible de charger les favoris</div>';
+    });
+  }
 }
 function scrollToAds(){document.getElementById('ads-section').scrollIntoView({behavior:'smooth'});}
 
@@ -4404,51 +4465,12 @@ function navGoSearches(){
 
 function navGoFavs(){
   if(!DB.user()){openModal('auth');return;}
-  var grid = document.getElementById('page-favs-grid');
-  if(grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)"><div style="font-size:28px;margin-bottom:8px">⏳</div><div>Chargement...</div></div>';
   goTo('favs');
-  var tok = localStorage.getItem('ygy_token');
-  if(!tok) return;
-  fetch('/api/me/favorites',{headers:{'Authorization':'Bearer '+tok}})
-  .then(function(r){return r.ok?r.json():Promise.reject();})
-  .then(function(data){
-    DB.setFavs(data.favorites||[]);
-    var ads = data.ads||[];
-    if(!grid) return;
-    if(!ads.length){
-      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted)">'+
-        '<div style="font-size:48px;margin-bottom:12px">❤️</div>'+
-        '<div style="font-size:15px;font-weight:700;margin-bottom:6px">Aucun favori</div>'+
-        '<div style="font-size:13px">Cliquez sur 🤍 sur une annonce pour l\'ajouter</div>'+
-      '</div>';
-    } else {
-      grid.innerHTML = ads.map(function(a){ return adCard(a,false); }).join('');
-    }
-  })
-  .catch(function(){
-    if(grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">❌ Impossible de charger les favoris</div>';
-  });
 }
 
 function navGoMessages(){
   if(!DB.user()){openModal('auth');return;}
-  // Charger les conversations dans la page dédiée
-  var token = localStorage.getItem('ygy_token');
-  var list = document.getElementById('page-msg-list');
-  if(list) list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">⏳ Chargement...</div>';
   goTo('messages');
-  if(token){
-    fetch('/api/conversations',{headers:{'Authorization':'Bearer '+token}})
-    .then(function(r){return r.json();})
-    .then(function(data){
-      var convs = data.conversations||data||[];
-      _pageConvs = convs;
-      renderPageConvList(convs);
-      updateMsgBadge(convs);
-    }).catch(function(){
-      if(list) list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">❌ Erreur de chargement</div>';
-    });
-  }
 }
 
 function renderPageConvList(convs){
@@ -4622,16 +4644,41 @@ function sendPageMsg(){
   var text = (inp&&inp.value.trim())||'';
   if(!text) return;
   var token = localStorage.getItem('ygy_token');
+  var user = DB.user();
+
+  // Afficher le message localement immédiatement (UX optimiste)
+  var bubbles = document.getElementById('page-msg-bubbles');
+  if(bubbles){
+    var now = new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    var bubble = document.createElement('div');
+    bubble.className = 'pmsg-bubble-wrap mine';
+    bubble.innerHTML = '<div class="pmsg-bubble mine">'+text+'</div>'+
+      '<div class="pmsg-bubble-time">'+now+' · ✓</div>';
+    bubbles.appendChild(bubble);
+    bubbles.scrollTop = bubbles.scrollHeight;
+  }
+  if(inp) inp.value = '';
+
   fetch('/api/conversations/'+_pageConvId,{
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
     body:JSON.stringify({text:text})
   }).then(function(r){return r.json();})
-  .then(function(){
-    if(inp) inp.value='';
-    // Recharger les messages en gardant les infos de la conv courante
-    var convInfo = (_pageConvs||[]).find(function(c){return (c._id||c.id)===_pageConvId;})||{_id:_pageConvId};
-    openPageConv(_pageConvId, convInfo);
+  .then(function(data){
+    // Mettre à jour le dernier message dans la liste gauche
+    var convIdx = (_pageConvs||[]).findIndex(function(c){return (c._id||c.id)===_pageConvId;});
+    if(convIdx>=0){
+      _pageConvs[convIdx].lastMessage = text.substring(0,100);
+      _pageConvs[convIdx].updatedAt = new Date().toISOString();
+      renderPageConvList(_pageConvs);
+    }
+    // Marquer ✓✓ sur la bulle (lu côté serveur)
+    if(bubbles){
+      var times = bubbles.querySelectorAll('.pmsg-bubble-time');
+      var last = times[times.length-1];
+      if(last && last.textContent.includes('✓') && !last.textContent.includes('✓✓'))
+        last.textContent = last.textContent.replace('✓','✓✓');
+    }
   }).catch(function(){ toast('❌ Erreur envoi','err'); });
 }
 function updateNav(){
@@ -6413,25 +6460,30 @@ async function submitEnvoyerMessage(){
     closeModal('send-msg');
     toast('✅ Message envoyé !', 'ok');
 
-    // Aller sur la page messages et ouvrir la conversation
-    goTo('messages');
+    // Naviguer vers la page messages SANS recharger la liste (on va le faire nous-mêmes)
+    goTo('messages', {skipConvLoad: true});
+
+    // Construire les données de la conv pour affichage immédiat
     var convData = {
       _id: convId, adTitle: titre, sellerName: vendeur,
       buyerId: String((DB.user()||{})._id || (DB.user()||{}).id || '')
     };
-    openPageConv(convId, convData);
 
-    // Recharger la liste des conversations en arrière-plan
-    if(tok){
-      fetch('/api/conversations',{headers:{'Authorization':'Bearer '+tok}})
-      .then(function(r){return r.json();})
-      .then(function(d){
-        var convs = d.conversations||[];
-        _pageConvs = convs;
-        renderPageConvList(convs);
-        updateMsgBadge(convs);
-      }).catch(function(){});
-    }
+    // Charger la liste à gauche ET ouvrir le thread en parallèle
+    fetch('/api/conversations',{headers:{'Authorization':'Bearer '+tok}})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      var convs = d.conversations||[];
+      _pageConvs = convs;
+      renderPageConvList(convs);
+      updateMsgBadge(convs);
+      // Ouvrir la conversation après que la liste soit rendue
+      openPageConv(convId, convData);
+    })
+    .catch(function(){
+      // Fallback : ouvrir quand même la conversation
+      openPageConv(convId, convData);
+    });
 
   } catch(err) {
     toast('❌ Erreur réseau — vérifiez votre connexion', 'err');
