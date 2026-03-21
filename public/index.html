@@ -1757,6 +1757,8 @@ footer{background:transparent;margin-top:0}
             <div><div style="color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:700;margin-bottom:2px">Email</div><div id="p-email" style="font-weight:600">—</div></div>
             <div><div style="color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:700;margin-bottom:2px">Ville</div><div id="p-city" style="font-weight:600">—</div></div>
             <div><div style="color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:700;margin-bottom:2px">Vérification</div><div id="p-verif" style="font-weight:600">—</div></div>
+            <div><div style="color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:700;margin-bottom:2px">📅 Date de naissance</div><div id="p-dob" style="font-weight:600">—</div></div>
+            <div><div style="color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:700;margin-bottom:2px">📍 Lieu de naissance</div><div id="p-pob" style="font-weight:600">—</div></div>
           </div>
           <div class="vendor-stats-grid" id="vendor-stats-grid" style="margin-top:14px;margin-bottom:10px"></div>
           <button class="btn btn-ghost" style="margin-top:0" onclick="openEditProfile()">✏️ Modifier mon profil</button>
@@ -2252,6 +2254,10 @@ footer{background:transparent;margin-top:0}
         <div class="ph-row"><span class="ph-pfx">🇬🇳 +224</span><input type="tel" id="ep-phone" placeholder="620 00 00 00" maxlength="9"></div>
       </div>
       <div class="fg"><label>Ville</label><select id="ep-city"><option value="">Choisir...</option></select></div>
+      <div class="frow">
+        <div class="fg"><label>📅 Date de naissance</label><input type="date" id="ep-dob" style="width:100%;padding:10px 12px;border:1.5px solid var(--br);border-radius:8px;font-size:13px;font-family:inherit"></div>
+        <div class="fg"><label>📍 Lieu de naissance</label><input type="text" id="ep-pob" placeholder="Ex: Conakry, Kindia..." style="width:100%;padding:10px 12px;border:1.5px solid var(--br);border-radius:8px;font-size:13px;font-family:inherit"></div>
+      </div>
       <div class="fg"><label>Nouveau mot de passe (laisser vide = inchangé)</label><input type="password" id="ep-pw" placeholder="••••••••"></div>
       <button class="btn btn-or btn-full" style="border-radius:10px" onclick="saveProfile()">💾 Enregistrer</button>
     </div>
@@ -3978,62 +3984,65 @@ function doLogin(){
   });
 }
 function openEditProfile(){
-  // Lire les données utilisateur depuis l'API pour avoir les infos à jour
   var tok = localStorage.getItem('ygy_token');
+
+  function doOpen(u){
+    // Peupler les villes
+    var cityEl = document.getElementById('ep-city');
+    if(cityEl && cityEl.options.length <= 1 && typeof ALL_CITIES !== 'undefined'){
+      var opts = '<option value="">Choisir une ville...</option>';
+      ALL_CITIES.forEach(function(v){ opts += '<option value="'+v+'">'+v+'</option>'; });
+      cityEl.innerHTML = opts;
+    }
+    // Remplir les champs
+    var set = function(id,val){ var el=document.getElementById(id); if(el) el.value=val||''; };
+    var prenom = u.prenom||(u.name||'').split(' ')[0]||'';
+    var nom    = u.nom||(u.name||'').split(' ').slice(1).join(' ')||'';
+    var phone  = (u.phone||'').replace('+224','').replace(/\s/g,'');
+    set('ep-prenom',   prenom);
+    set('ep-nom',      nom);
+    set('ep-phone',    phone);
+    set('ep-city',     u.city||'');
+    set('ep-dob',      u.dob||'');
+    set('ep-pob',      u.pob||'');
+    set('ep-pw',       '');
+    openModal('editprofile');
+  }
+
   var u = DB.user();
-  if(!u){ toast('Connectez-vous','err'); return; }
-
-  // Peupler les villes immédiatement
-  var cityEl = document.getElementById('ep-city');
-  if(cityEl && cityEl.options.length <= 1 && typeof ALL_CITIES !== 'undefined'){
-    var opts = '<option value="">Choisir une ville...</option>';
-    ALL_CITIES.forEach(function(v){
-      opts += '<option value="'+v+'">'+v+'</option>';
-    });
-    cityEl.innerHTML = opts;
-  }
-
-  // Remplir depuis DB.user() (données locales)
-  function fillForm(data){
-    var prenom = data.prenom||(data.name||'').split(' ')[0]||'';
-    var nom    = data.nom||(data.name||'').split(' ').slice(1).join(' ')||'';
-    var phone  = (data.phone||'').replace('+224','').replace(/\s/g,'');
-    var set = function(id,val){ var el=document.getElementById(id); if(el) el.value=val; };
-    set('ep-prenom', prenom);
-    set('ep-nom',    nom);
-    set('ep-phone',  phone);
-    set('ep-city',   data.city||'');
-    set('ep-pw',     '');
-    // Sélectionner la ville dans le select
-    var cEl = document.getElementById('ep-city');
-    if(cEl && data.city) cEl.value = data.city;
-  }
-
-  // Remplir d'abord avec les données locales
-  fillForm(u);
-  // Ouvrir le modal immédiatement (sans attendre l'API)
-  openModal('editprofile');
-
-  // Puis enrichir avec les données serveur si disponible
-  if(tok){
-    fetch('/api/me',{headers:{'Authorization':'Bearer '+tok}})
-    .then(function(r){ return r.ok ? r.json() : null; })
-    .then(function(d){
-      if(d && d.user){
-        // Mettre à jour DB
+  if(u){
+    doOpen(u);
+    // Enrichir depuis serveur en arrière-plan
+    if(tok){
+      fetch('/api/me',{headers:{'Authorization':'Bearer '+tok}})
+      .then(function(r){ return r.ok?r.json():null; })
+      .then(function(d){
+        if(!d||!d.user) return;
         var lu = DB.user()||{};
-        if(d.user.prenom) lu.prenom = d.user.prenom;
-        if(d.user.nom)    lu.nom    = d.user.nom;
-        if(d.user.city)   lu.city   = d.user.city;
-        if(d.user.phone)  lu.phone  = d.user.phone;
+        ['prenom','nom','city','phone','dob','pob'].forEach(function(k){
+          if(d.user[k]) lu[k]=d.user[k];
+        });
         DB.login(lu);
-        // Re-remplir avec données fraîches (si le modal est encore ouvert)
-        var ov = document.getElementById('overlay-editprofile');
-        if(ov && ov.classList.contains('open')) fillForm(lu);
-      }
-    }).catch(function(){});
+        var ov=document.getElementById('overlay-editprofile');
+        if(ov&&ov.classList.contains('open')) doOpen(lu);
+      }).catch(function(){});
+    }
+  } else if(tok){
+    // DB.user() null mais token présent → charger depuis API
+    fetch('/api/me',{headers:{'Authorization':'Bearer '+tok}})
+    .then(function(r){ return r.ok?r.json():null; })
+    .then(function(d){
+      if(!d||!d.user){ toast('Connectez-vous','err'); return; }
+      var u2 = d.user;
+      u2._id = u2._id||u2.id;
+      DB.login(u2);
+      doOpen(u2);
+    }).catch(function(){ toast('Erreur de connexion','err'); });
+  } else {
+    toast('Connectez-vous pour modifier votre profil','err');
   }
 }
+
 
 async function saveProfile(){
   var u = DB.user(); if(!u) return;
@@ -4050,10 +4059,12 @@ async function saveProfile(){
   if(btn){ btn.disabled=true; btn.textContent='⏳ Enregistrement...'; }
 
   var tok = localStorage.getItem('ygy_token');
+  var dob = (document.getElementById('ep-dob')||{}).value||'';
+  var pob = (document.getElementById('ep-pob')||{}).value||'';
   var payload = { prenom:prenom, nom:nom };
-  if(city)  payload.city  = city;
-  // Le mot de passe est géré séparément
-  // Pas besoin d'envoyer le phone car il est lié au compte
+  if(city) payload.city = city;
+  if(dob)  payload.dob  = dob;
+  if(pob)  payload.pob  = pob;
 
   try {
     // 1. Sauvegarder sur le serveur
@@ -4073,6 +4084,8 @@ async function saveProfile(){
     u.name   = prenom+(nom?' '+nom:'');
     u.initials = (prenom.charAt(0)+(nom.charAt(0)||'')).toUpperCase();
     if(city) u.city = city;
+    if(dob)  u.dob  = dob;
+    if(pob)  u.pob  = pob;
     DB.login(u);
     DB.save();
 
@@ -4679,6 +4692,8 @@ function syncRoleFromServer(callback){
       if(data.user.phone)    u.phone    = data.user.phone;
       if(data.user.email)    u.email    = data.user.email;
       if(data.user.city)     u.city     = data.user.city;
+      if(data.user.dob)  u.dob = data.user.dob;
+      if(data.user.pob)  u.pob = data.user.pob;
       DB.login(u);
     }
     if(callback)callback();
@@ -4767,6 +4782,10 @@ function renderDash(){
   if(pc) pc.textContent=u.city||'Non renseignée';
   var pv=document.getElementById('p-verif');
   if(pv) pv.textContent=(u.method==='email'?'📧 Email':'📱 SMS')+' — Vérifié';
+  var pdob=document.getElementById('p-dob');
+  if(pdob) pdob.textContent=u.dob ? new Date(u.dob).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}) : 'Non renseignée';
+  var ppob=document.getElementById('p-pob');
+  if(ppob) ppob.textContent=u.pob||'Non renseigné';
 
   // Mes annonces : charger depuis l'API
   var myAds = [];
