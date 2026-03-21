@@ -243,7 +243,6 @@ const UserSchema = new mongoose.Schema({
   totalViews:   { type: Number, default: 0 },             // vues totales sur ses annonces
   totalContacts:{ type: Number, default: 0 },             // contacts reçus
   favorites:    [{ type: mongoose.Schema.Types.ObjectId, ref: 'Ad' }], // annonces favorites
-  dob:          { type: String },                         // date de naissance (YYYY-MM-DD) — aussi dans send-code
   createdAt:    { type: Date, default: Date.now },
 });
 UserSchema.index({ phone: 1 });
