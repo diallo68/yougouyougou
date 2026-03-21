@@ -1724,6 +1724,7 @@ footer{background:transparent;margin-top:0}
       </div>
       <nav class="dash-nav">
         <a onclick="showDashTab('profil')" class="active" id="dtab-profil">👤 Mon profil</a>
+        <a onclick="openEditProfile()" style="color:var(--or);font-weight:700">✏️ Modifier mon profil</a>
         <a onclick="showDashTab('ads')" id="dtab-ads">📋 <span id="dash-ads-label">Mes annonces</span> <span id="p-count-ads" style="background:var(--orl);color:var(--or);font-size:11px;padding:1px 6px;border-radius:10px;margin-left:auto">0</span></a>
         <a onclick="showDashTab('history')" id="dtab-history" class="dash-nav-user-only">🕐 Historique</a>
         <a onclick="showDashTab('payments')" id="dtab-payments">💳 Paiements</a>
@@ -3984,28 +3985,55 @@ function doLogin(){
   });
 }
 function openEditProfile(){
-  var tok = localStorage.getItem('ygy_token');
-  var u   = DB.user();
-
-  // Si pas connecté localement → essayer le token
-  if(!u && tok){
-    // Afficher le modal vide et le remplir quand /api/me répond
-    // Ouvrir IMMÉDIATEMENT le modal avec les champs vides
-    _openProfileModal({});
-    fetch('/api/me',{headers:{'Authorization':'Bearer '+tok}})
-    .then(function(r){return r.ok?r.json():null;})
-    .then(function(d){
-      if(d&&d.user){
-        var usr=d.user; usr._id=usr._id||usr.id;
-        DB.login(usr);
-        _fillProfileModal(usr);
-      }
-    }).catch(function(){});
-    return;
+  // Peupler les villes
+  var cityEl = document.getElementById('ep-city');
+  if(cityEl && cityEl.options.length <= 1 && typeof ALL_CITIES !== 'undefined'){
+    var opts = '<option value="">Choisir une ville...</option>';
+    ALL_CITIES.forEach(function(v){ opts += '<option value="'+v+'">'+v+'</option>'; });
+    cityEl.innerHTML = opts;
   }
 
-  if(!u){ toast('Veuillez vous connecter','err'); return; }
-  _openProfileModal(u);
+  // Remplir avec données locales ou vides
+  var u = DB.user() || {};
+  var set = function(id,val){ var el=document.getElementById(id); if(el) el.value = val||''; };
+  set('ep-prenom', u.prenom || (u.name||'').split(' ')[0] || '');
+  set('ep-nom',    u.nom    || (u.name||'').split(' ').slice(1).join(' ') || '');
+  set('ep-phone',  (u.phone||'').replace('+224','').replace(/\s/g,''));
+  set('ep-city',   u.city || '');
+  set('ep-dob',    u.dob  || '');
+  set('ep-pob',    u.pob  || '');
+  set('ep-pw',     '');
+
+  // Sélectionner la ville dans le select
+  var selCity = document.getElementById('ep-city');
+  if(selCity && u.city) selCity.value = u.city;
+
+  // Ouvrir le modal - forcer l'affichage direct sur le body
+  var overlay = document.getElementById('overlay-editprofile');
+  if(!overlay){ console.error('[PROFIL] overlay-editprofile introuvable'); return; }
+  // S'assurer que l'overlay est un enfant direct du body
+  if(overlay.parentElement !== document.body){
+    document.body.appendChild(overlay);
+  }
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;opacity:1;visibility:visible;pointer-events:all';
+  overlay.classList.add('open');
+
+  // Si token présent, enrichir depuis l'API
+  var tok = localStorage.getItem('ygy_token');
+  if(tok){
+    fetch('/api/me',{headers:{'Authorization':'Bearer '+tok}})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d){
+      if(!d||!d.user) return;
+      var usr = d.user;
+      if(usr.prenom) set('ep-prenom', usr.prenom);
+      if(usr.nom)    set('ep-nom',    usr.nom);
+      if(usr.city){  set('ep-city',   usr.city); if(selCity) selCity.value = usr.city; }
+      if(usr.dob)    set('ep-dob',    usr.dob);
+      if(usr.pob)    set('ep-pob',    usr.pob);
+      if(usr.phone)  set('ep-phone',  (usr.phone||'').replace('+224','').replace(/\s/g,''));
+    }).catch(function(){});
+  }
 }
 
 function _openProfileModal(u){
