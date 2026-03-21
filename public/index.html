@@ -2576,11 +2576,14 @@ function adCard(a,feat){
   if(feat) badges+='<span class="lbc-badge lbc-badge-une">★ À la une</span>';
   if(a.urgentBadge||a.urgent) badges+='<span class="lbc-badge lbc-badge-urgent">Urgent</span>';
   if(a.nego||a.negotiable) badges+='<span class="lbc-badge lbc-badge-nego">Négociable</span>';
+  var isFav = DB.favs().includes(adId);
+  var favStyle = isFav ? 'color:#CC1C0C;' : '';
+  var favTitle = isFav ? 'Retirer des favoris' : 'Ajouter aux favoris';
   return '<div class="lbc-card" data-id="'+adId+'" onclick="viewAd(\''+adId+'\')">'
     +'<div class="lbc-img" style="background:'+(a.bg||'#EBEBEB')+'">'
     +imgHTML+badges
-    +'<button class="lbc-fav" data-adid="'+adId+'" onclick="event.stopPropagation();favAd(\''+adId+'\')" title="Ajouter aux favoris">'
-    +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">'
+    +'<button class="lbc-fav" data-adid="'+adId+'" onclick="event.stopPropagation();favAd(\''+adId+'\')" title="'+favTitle+'" style="'+favStyle+'">'
+    +'<svg width="14" height="14" viewBox="0 0 24 24" fill="'+(isFav?'#CC1C0C':'none')+'" stroke="currentColor" stroke-width="2.2">'
     +'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>'
     +'</svg>'
     +'</button>'
@@ -3116,7 +3119,6 @@ function favAd(id){
   if(!user){ toast('🔒 Connectez-vous pour ajouter aux favoris','err'); setTimeout(function(){ openModal('auth'); },400); return; }
   var tok = localStorage.getItem('ygy_token');
   if(!tok){ toast('🔒 Reconnectez-vous','err'); return; }
-  var isFav = DB.favs().includes(String(id));
   fetch('/api/me/favorites/'+id, {
     method:'POST',
     headers:{'Authorization':'Bearer '+tok}
@@ -3127,10 +3129,12 @@ function favAd(id){
     DB.setFavs(data.favorites || []);
     var added = data.action === 'added';
     toast(added ? '❤️ Ajouté aux favoris !' : '💔 Retiré des favoris', added ? 'ok' : '');
-    // Mettre à jour l'icône sur toutes les cartes
+    // Mettre à jour visuellement les boutons de cette annonce
     document.querySelectorAll('.lbc-fav[data-adid="'+id+'"],.ad-card-fav[data-adid="'+id+'"]').forEach(function(btn){
       btn.style.color = added ? '#CC1C0C' : '';
       btn.title = added ? 'Retirer des favoris' : 'Ajouter aux favoris';
+      var path = btn.querySelector('path');
+      if(path) path.setAttribute('fill', added ? '#CC1C0C' : 'none');
     });
   })
   .catch(function(){ toast('❌ Erreur réseau','err'); });
@@ -5747,6 +5751,8 @@ function toggleFav(id){
     document.querySelectorAll('.lbc-fav[data-adid="'+sid+'"],.ad-card-fav[data-adid="'+sid+'"]').forEach(function(btn){
       btn.style.color = added ? '#CC1C0C' : '';
       btn.title = added ? 'Retirer des favoris' : 'Ajouter aux favoris';
+      var path = btn.querySelector('path');
+      if(path) path.setAttribute('fill', added ? '#CC1C0C' : 'none');
     });
   })
   .catch(function(){ toast('❌ Erreur réseau','err'); });
