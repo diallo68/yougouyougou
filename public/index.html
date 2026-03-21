@@ -452,7 +452,7 @@ footer{background:transparent;margin-top:0}
   z-index:200;
   overflow:hidden;
 }
-.pmsg-wrap{display:grid;grid-template-columns:320px 1fr 300px;min-height:0;overflow:hidden;border-top:1px solid var(--br)}
+.pmsg-wrap{display:grid;grid-template-columns:320px 1fr 300px;flex:1;min-height:0;overflow:hidden;border-top:1px solid var(--br)}
 .pmsg-left{display:flex;flex-direction:column;border-right:1px solid var(--br);background:#fff;overflow:hidden;min-height:0}
 .pmsg-left-head{display:flex;align-items:center;gap:8px;padding:0 16px;height:56px;border-bottom:1px solid var(--br);background:#fff;flex-shrink:0}
 .pmsg-back{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:13px;font-family:inherit;padding:0}
@@ -1484,7 +1484,7 @@ footer{background:transparent;margin-top:0}
       <!-- Sécurité -->
       <div class="det-safety">
         <div class="det-safety-title">🛡️ Conseils de sécurité</div>
-        Vérifiez l'article avant tout paiement. Privilégiez les échanges en lieu public. N'envoyez jamais d'argent à l'avance.
+        Vérifiez l'article avant tout paiement. Privilégiez les échanges en lieu public. N&#39;envoyez jamais d&#39;argent à l&#39;avance.
       </div>
     </div>
   </div>
@@ -4441,100 +4441,113 @@ function filterConvs(type, btn){
 }
 function openPageConv(convId, convData){
   _pageConvId = convId;
-  // actif géré par openPageConvById
-  var thread = document.getElementById('page-msg-thread');
-  if(!thread) return;
-  var user = DB.user();
-  var conv = convData || {};
-  var otherName = String(conv.buyerId)===(user&&String(user._id)) ? (conv.sellerName||'Vendeur') : (conv.buyerName||'Acheteur');
-  var adTitle = conv.adTitle||'';
-  thread.className = '';
-  thread.innerHTML =
-    '<div class="pmsg-thread-head">'+
-      '<div class="pmsg-thread-av">'+(otherName||'?').charAt(0).toUpperCase()+'</div>'+
-      '<div class="pmsg-thread-info">'+
-        '<div class="pmsg-thread-name">'+otherName+'</div>'+
-        (adTitle?'<div class="pmsg-thread-ad">📦 '+adTitle+'</div>':'')+
-      '</div>'+
-    '</div>'+
-    '<div class="pmsg-seller-card">'+
-      '<div class="pmsg-seller-card-title">À propos de ce vendeur</div>'+
-      '<div class="pmsg-seller-since">'+
-        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'+
-        'Membre YouGouYou'+
-      '</div>'+
-    '</div>'+
-    '<div class="pmsg-bubbles" id="page-msg-bubbles">'+
-      '<div class="pmsg-security">'+
-        '<strong>Soyez prudent lorsque votre interlocuteur vous demande ou vous envoie un numéro de téléphone / e-mail</strong>'+
-        'Ici nous garantissons la sécurité de vos échanges, c\'est pourquoi nous vous conseillons de rester sur la messagerie pour discuter et passer par le paiement sécurisé pour vos transactions.<br>'+
-        '<a href="#">→ En savoir plus</a>'+
-      '</div>'+
-      '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">⏳ Chargement...</div>'+
-    '</div>'+
-    '<div class="pmsg-input-wrap">'+
-      '<input class="pmsg-input" type="text" id="page-msg-input" placeholder="Écrivez votre message..." '+
-        'onkeydown="if(event.key===\'Enter\')sendPageMsg()">'+
-      '<button class="pmsg-send" onclick="sendPageMsg()">'+
-        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>'+
-      '</button>'+
-    '</div>';
-  // Remplir la colonne droite avec les infos vendeur
-  var panel = document.getElementById('page-msg-panel');
+  var center = document.getElementById('pmsg-center');
+  var panel  = document.getElementById('page-msg-panel');
+  if(!center) return;
+
+  var user      = DB.user();
+  var conv      = convData || {};
+  var isBuyer   = !conv.buyerId || String(conv.buyerId)===(user&&String(user._id||user.id));
+  var otherName = isBuyer ? (conv.sellerName||'Vendeur') : (conv.buyerName||'Acheteur');
+  var adTitle   = conv.adTitle || '';
+  var adPhoto   = conv.adPhoto || '';
+  var adPrice   = conv.adPrice ? Number(conv.adPrice).toLocaleString('fr-FR')+' GNF' : '';
+  var adId      = conv.adId || '';
+
+  // Marquer actif dans la liste gauche
+  document.querySelectorAll('.pmsg-conv').forEach(function(el){
+    el.classList.toggle('active',
+      (el.getAttribute('onclick')||'').includes(convId) ||
+      el.dataset.cid === convId);
+  });
+
+  // ── Construire le thread ──
+  var h = '';
+  h += '<div class="pmsg-thread-head">';
+  h +=   '<div class="pmsg-thread-av">'+otherName.charAt(0).toUpperCase()+'</div>';
+  h +=   '<div style="flex:1;min-width:0">';
+  h +=     '<div class="pmsg-thread-name">'+otherName+'</div>';
+  if(adTitle) h += '<div class="pmsg-thread-ad">\uD83D\uDCE6 '+adTitle+'</div>';
+  h +=   '</div>';
+  h += '</div>';
+  h += '<div class="pmsg-bubbles" id="page-msg-bubbles">';
+  h +=   '<div class="pmsg-security"><strong>YouGouYou</strong> - Restez prudents dans vos echanges.</div>';
+  h +=   '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">&#9203; Chargement...</div>';
+  h += '</div>';
+  h += '<div class="pmsg-input-wrap">';
+  h +=   '<input class="pmsg-input" type="text" id="page-msg-input" placeholder="Votre message...">';
+  h +=   '<button class="pmsg-send" id="page-msg-send-btn">';
+  h +=     '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">';
+  h +=       '<line x1="22" y1="2" x2="11" y2="13"/>';
+  h +=       '<polygon points="22 2 15 22 11 13 2 9 22 2"/>';
+  h +=     '</svg>';
+  h +=   '</button>';
+  h += '</div>';
+  center.innerHTML = h;
+
+  // Attacher les événements
+  var inp = document.getElementById('page-msg-input');
+  var sendBtn = document.getElementById('page-msg-send-btn');
+  if(inp){ inp.addEventListener('keydown', function(e){ if(e.key==='Enter') sendPageMsg(); }); }
+  if(sendBtn){ sendBtn.addEventListener('click', function(){ sendPageMsg(); }); }
+  setTimeout(function(){ if(inp) inp.focus(); }, 100);
+
+  // ── Panneau droit ──
   if(panel){
-    panel.innerHTML =
-      '<div class="pmsg-vendor-head">'+
-        '<div class="pmsg-vendor-av">'+(otherName||'?').charAt(0).toUpperCase()+'</div>'+
-        '<div>'+
-          '<div class="pmsg-vendor-name">'+otherName+'</div>'+
-          '<div class="pmsg-vendor-meta">'+
-            '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+
-            'Membre YouGouYou'+
-          '</div>'+
-        '</div>'+
-      '</div>'+
-      (adTitle?
-        '<div class="pmsg-ad-card">'+
-          '<div class="pmsg-ad-img">📦</div>'+
-          '<div class="pmsg-ad-info">'+
-            '<div class="pmsg-ad-title">'+adTitle+'</div>'+
-          '</div>'+
-        '</div>':'')+
-      '<div style="font-size:12px;color:var(--muted);line-height:1.7;background:#f9f9f9;border-radius:8px;padding:10px 12px;margin-top:8px">'+
-        '<strong style="color:var(--ink);display:block;margin-bottom:4px">🛡️ Paiement sécurisé</strong>'+
-        'Utilisez le paiement Orange Money intégré pour vos transactions. Ne payez jamais en dehors de la plateforme.'+
-      '</div>';
+    var p = '';
+    p += '<div class="pmsg-ad-card" onclick="viewAd(\''+adId+'\') ">';
+    if(adPhoto){
+      p += '<img src="'+adPhoto+'" class="pmsg-ad-img" style="width:100%;height:140px;object-fit:cover">';
+    } else {
+      p += '<div class="pmsg-ad-img">\uD83D\uDCE6</div>';
+    }
+    p += '<div class="pmsg-ad-info">';
+    p +=   '<div class="pmsg-ad-title">'+(adTitle||'Annonce')+'</div>';
+    if(adPrice) p += '<div class="pmsg-ad-price">'+adPrice+'</div>';
+    p += '</div></div>';
+    p += '<div class="pmsg-vendor-head">';
+    p +=   '<div class="pmsg-vendor-av">'+otherName.charAt(0).toUpperCase()+'</div>';
+    p +=   '<div><div class="pmsg-vendor-name">'+otherName+'</div>';
+    p +=   '<div class="pmsg-vendor-meta">Membre YouGouYou</div></div>';
+    p += '</div>';
+    p += '<div style="padding:0 0 14px"><button onclick="viewAd(\''+adId+'\') " ';
+    p +=   'style="width:100%;padding:10px;border:1.5px solid var(--br);border-radius:8px;';
+    p +=   'background:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">';
+    p +=   '\uD83D\uDD0D Voir l\u0027annonce</button></div>';
+    p += '<div style="font-size:12px;color:var(--muted);line-height:1.6;background:#f9f9f9;border-radius:8px;padding:10px 12px">';
+    p +=   '<strong style="color:var(--ink);display:block;margin-bottom:4px">\uD83D\uDEE1\uFE0F Paiement securise</strong>';
+    p +=   'Verifiez avant de payer. N\u0027envoyez jamais d\u0027argent a l\u0027avance.</div>';
+    panel.innerHTML = p;
   }
-  // Charger les messages
+
+  // ── Charger les messages ──
   var token = localStorage.getItem('ygy_token');
   if(token){
     fetch('/api/conversations/'+convId,{headers:{'Authorization':'Bearer '+token}})
     .then(function(r){return r.json();})
     .then(function(data){
-      var msgs = data.messages||[];
-      var container = document.getElementById('page-msg-bubbles');
-      if(!container) return;
+      var msgs    = data.messages||[];
+      var bubbles = document.getElementById('page-msg-bubbles');
+      if(!bubbles) return;
       if(!msgs.length){
-        container.innerHTML = '<div class="msg-security">🛡️ <strong>Conseils sécurité</strong> — Vérifiez l\'article avant paiement. Échangez en lieu public.</div>'+
-          '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Démarrez la conversation 👋</div>';
+        bubbles.innerHTML =
+          '<div class="pmsg-security"><strong>YouGouYou</strong> - Echangez en toute securite.</div>'+
+          '<div style="text-align:center;color:var(--muted);font-size:13px;padding:24px">'+
+            '<div style="font-size:32px;margin-bottom:10px">\uD83D\uDC4B</div>Demarrez la conversation !</div>';
         return;
       }
-      var html = '<div class="pmsg-security">'+
-        '<strong>Soyez prudent lorsque votre interlocuteur vous demande un numéro de téléphone / e-mail</strong>'+
-        'Restez sur la messagerie YouGouYou pour vos échanges. Passez par le paiement sécurisé pour vos transactions.'+
-      '</div>';
+      var html = '<div class="pmsg-security"><strong>Echangez en toute securite.</strong></div>';
       msgs.forEach(function(m){
-        var isMine = String(m.senderId)===(user&&String(user._id));
-        var t = m.createdAt?new Date(m.createdAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
-        html += '<div class="pmsg-bubble-wrap '+(isMine?'mine':'theirs')+'">'+
-          '<div class="pmsg-bubble '+(isMine?'mine':'theirs')+'">'+m.text+'</div>'+
-          '<div class="pmsg-bubble-time">'+t+(isMine?' · ✓✓':'')+'</div>'+
-        '</div>';
+        var isMine = String(m.senderId)===(user&&String(user._id||user.id));
+        var t = m.createdAt ? new Date(m.createdAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) : '';
+        html += '<div class="pmsg-bubble-wrap '+(isMine?'mine':'theirs')+'">';
+        html +=   '<div class="pmsg-bubble '+(isMine?'mine':'theirs')+'">'+m.text+'</div>';
+        html +=   '<div class="pmsg-bubble-time">'+t+(isMine?' \u00b7 \u2713\u2713':'')+'</div>';
+        html += '</div>';
       });
-      container.innerHTML = html;
-      container.scrollTop = container.scrollHeight;
+      bubbles.innerHTML = html;
+      bubbles.scrollTop = bubbles.scrollHeight;
     }).catch(function(){});
-    // Marquer comme lu
     fetch('/api/conversations/'+convId+'/read',{method:'PATCH',headers:{'Authorization':'Bearer '+token}}).catch(function(){});
   }
 }
