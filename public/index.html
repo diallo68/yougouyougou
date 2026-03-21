@@ -1836,35 +1836,16 @@ footer{background:transparent;margin-top:0}
 
       <!-- ═══ TAB MESSAGERIE ═══ -->
       <div class="dash-section" id="dsec-messages">
-        <div class="msg-layout">
-          <!-- Colonne gauche : liste conversations -->
-          <div style="display:flex;flex-direction:column;border-right:1px solid var(--br);overflow:hidden">
-            <div class="msg-list-header">💬 Conversations</div>
-            <div id="msg-list" style="flex:1;overflow-y:auto">
-              <div style="padding:32px 16px;text-align:center;color:var(--muted)">
-                <div style="font-size:40px;margin-bottom:10px">💬</div>
-                <div style="font-size:13px;font-weight:600;margin-bottom:6px">Aucune conversation</div>
-                <div style="font-size:12px">Contactez un vendeur pour commencer</div>
-              </div>
-            </div>
-          </div>
-          <!-- Colonne droite : thread actif -->
-          <div id="msg-thread" style="display:flex;flex-direction:column;height:100%">
-            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;color:var(--muted)">
-              <div style="font-size:48px">👈</div>
-              <div style="font-size:14px;font-weight:600">Sélectionnez une conversation</div>
-              <div style="font-size:12px">Vos échanges avec les vendeurs apparaissent ici</div>
-            </div>
-          </div>
-        </div>
-      </div>      <div class="msg-empty">
-              <div style="font-size:40px">👈</div>
-              <div>Sélectionnez une conversation</div>
-            </div>
-          </div>
+        <div class="dash-section-title">💬 Messages</div>
+        <div style="text-align:center;padding:40px 20px;background:#fff;border:1px solid var(--br);border-radius:12px">
+          <div style="font-size:48px;margin-bottom:12px">💬</div>
+          <div style="font-size:16px;font-weight:800;margin-bottom:8px">Votre messagerie</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:20px">Retrouvez tous vos échanges avec les vendeurs</div>
+          <button onclick="navGoMessages()" class="btn btn-or" style="padding:12px 28px;font-size:14px;border-radius:10px">
+            📨 Ouvrir la messagerie
+          </button>
         </div>
       </div>
-
 
       <!-- ═══ TAB ALERTES ═══ -->
       <div class="dash-section" id="dsec-alerts" >
@@ -5040,19 +5021,7 @@ function contactVendeur(){
   openCommission();
 }
 
-function envoyerMessage(){
-  var user = DB.user();
-  if(!user){
-    toast('🔒 Connectez-vous pour envoyer un message','err');
-    setTimeout(function(){ openModal('auth'); }, 600);
-    return;
-  }
-  openCommission();
-}
 
-// ══════════════════════════════════════════
-//  COMMISSION — VOIR NUMÉRO ANNONCEUR
-// ══════════════════════════════════════════
 function openCommission(){
   if(!curAd){return;}
   var price = curAd.p || curAd.price || 0;
