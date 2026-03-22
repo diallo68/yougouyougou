@@ -1093,8 +1093,8 @@ app.get('/api/me/favorites', auth, async (req, res) => {
     const ads = await Ad.find({ _id: { $in: favIds }, active: true })
       .select('-sellerPhone')
       .populate('seller', 'prenom nom city avgRating verified');
-    res.json({ favorites: favIds.map(String), ads });
-  } catch(err) { res.status(500).json({ error: err.message }); }
+    res.json({ favorites: favIds.map(String), ads: ads||[] });
+  } catch(err) { res.status(500).json({ error: err.message, favorites:[], ads:[] }); }
 });
 
 // Ajouter / retirer un favori (toggle)
@@ -1159,31 +1159,6 @@ app.post('/api/ads/:id/boost', auth, async (req, res) => {
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
-// ★ Note rapide d'une annonce (étoiles sur la page détail)
-app.post('/api/ads/:id/rate', auth, async (req, res) => {
-  try {
-    const { rating } = req.body;
-    if (!rating || rating < 1 || rating > 5)
-      return res.status(400).json({ error: 'Note entre 1 et 5' });
-    const ad = await Ad.findById(req.params.id);
-    if (!ad) return res.status(404).json({ error: 'Annonce introuvable' });
-    if (String(ad.seller) === req.user.id)
-      return res.status(400).json({ error: 'Vous ne pouvez pas noter votre propre annonce' });
-    const buyer = await User.findById(req.user.id).select('prenom nom');
-    await Review.findOneAndUpdate(
-      { reviewerId: req.user.id, sellerId: ad.seller },
-      { rating, reviewerName: `${buyer?.prenom||''} ${buyer?.nom||''}`.trim(), adId: ad._id, createdAt: new Date() },
-      { upsert: true, new: true }
-    );
-    await recalcSellerRating(ad.seller);
-    const seller = await User.findById(ad.seller).select('avgRating ratingCount');
-    res.json({ success: true, avgRating: seller?.avgRating||rating, ratingCount: seller?.ratingCount||1 });
-  } catch(err) {
-    if(err.code===11000){return res.json({success:true,avgRating:0,ratingCount:0});}
-    res.status(500).json({ error: err.message });
-  }
-});
-
 // ═══════════════════════════════════════════════════════════
 //  ★ MESSAGERIE INTERNE
 // ═══════════════════════════════════════════════════════════
@@ -1204,8 +1179,8 @@ app.get('/api/conversations', auth, async (req, res) => {
         unreadCount: isbuyer ? c.unreadBuyer : c.unreadSeller,
       };
     });
-    res.json({ conversations: result });
-  } catch(err) { res.status(500).json({ error: err.message }); }
+    res.json({ conversations: result||[] });
+  } catch(err) { res.status(500).json({ error: err.message, conversations:[] }); }
 });
 
 // Démarrer ou récupérer une conversation (depuis page détail annonce)
@@ -1904,9 +1879,7 @@ app.get('/api/admin/payments', auth, adminOnly, async (req, res) => {
     ]);
     res.json({ payments: pays, total, revenue: revenue[0]?.total || 0 });
   } catch(err) { res.status(500).json({ error: err.message }); }
-});
-
-// ── Route contact ─────────────────────────────────────────
+})// ── Route contact ─────────────────────────────────────────
 app.post('/api/contact', async (req, res) => {
   try {
     const { name, email, phone, subject, message } = req.body;
