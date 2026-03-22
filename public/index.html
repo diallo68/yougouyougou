@@ -441,9 +441,7 @@ footer{background:transparent;margin-top:0}
 
 /* ── Page Messages — fixe, sans scroll, 3 colonnes ── */
 #page-messages.active{
-  display:flex !important;
-  flex-direction:column;
-  position:fixed;
+  position:fixed !important;
   top:0;left:0;right:0;bottom:0;
   width:100%;height:100%;
   padding-top:var(--nav-h,92px);
@@ -451,9 +449,19 @@ footer{background:transparent;margin-top:0}
   background:#fff;
   z-index:200;
   overflow:hidden;
+  display:flex !important;
+  flex-direction:column;
 }
-.pmsg-wrap{display:grid;grid-template-columns:320px 1fr 300px;flex:1;min-height:0;overflow:hidden;border-top:1px solid var(--br)}
-.pmsg-left{display:flex;flex-direction:column;border-right:1px solid var(--br);background:#fff;overflow:hidden;min-height:0;flex:1}
+.pmsg-wrap{
+  flex:1;
+  display:grid;
+  grid-template-columns:320px 1fr 300px;
+  grid-template-rows:minmax(0,1fr);
+  min-height:0;
+  overflow:hidden;
+  border-top:1px solid var(--br);
+}
+.pmsg-left{display:flex;flex-direction:column;border-right:1px solid var(--br);background:#fff;overflow:hidden;min-height:0}
 .pmsg-left-head{display:flex;align-items:center;gap:8px;padding:0 16px;height:56px;border-bottom:1px solid var(--br);background:#fff;flex-shrink:0}
 .pmsg-back{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:13px;font-family:inherit;padding:0}
 .pmsg-back:hover{text-decoration:underline}
@@ -476,7 +484,7 @@ footer{background:transparent;margin-top:0}
 .pmsg-conv-meta{display:flex;align-items:center;gap:4px;margin-top:2px}
 .pmsg-conv-date{font-size:11px;color:#bbb}
 .pmsg-conv-unread{background:var(--or);color:#fff;border-radius:50%;min-width:18px;height:18px;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;padding:0 3px;position:absolute;right:10px;top:50%;transform:translateY(-50%)}
-.pmsg-center{display:flex;flex-direction:column;overflow:hidden;background:#f6f6f6;min-height:0;flex:1}
+.pmsg-center{display:flex;flex-direction:column;overflow:hidden;background:#f6f6f6;min-height:0}
 .pmsg-thread-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#ccc;padding:40px;background:#f6f6f6;text-align:center}
 .pmsg-thread-head{display:flex;align-items:center;gap:12px;padding:0 20px;height:56px;border-bottom:1px solid #eee;background:#fff;flex-shrink:0}
 .pmsg-thread-av{width:40px;height:40px;border-radius:50%;background:var(--or);color:#fff;font-weight:800;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -2313,8 +2321,6 @@ var DB={
       }
     }catch(e){}
     if(!Array.isArray(this._d.favs))this._d.favs=[];
-    if(!Array.isArray(this._d.users))this._d.users=[];
-    if(!Array.isArray(this._d.payments))this._d.payments=[];
   },
   save:function(){try{localStorage.setItem('ygy5',JSON.stringify(this._d));}catch(e){}},
   ads:function(){
@@ -2375,8 +2381,7 @@ function goTo(page, opts){
       _pageConvs=convs;
       renderPageConvList(convs);
       updateMsgBadge(convs);
-    }).catch(function(e){
-      console.error('[MSG]',e);
+    }).catch(function(e){console.error('[MSG]',e);
       if(list) list.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">❌ Erreur — <a href="#" onclick="loadConversations();return false;" style="color:var(--or)">Réessayer</a></div>';
     });
   }
@@ -4489,11 +4494,10 @@ function renderPageConvList(convs){
     '</div>';
     return;
   }
-  var uid=user?String(user._id||user.id||''):'';
+  var _uid=user?String(user._id||user.id||''):'';
   list.innerHTML = convs.map(function(conv){
-    try{
     var isUnread = (conv.unreadCount||0) > 0;
-    var isBuyer  = uid ? String(conv.buyerId)===uid : false;
+    var isBuyer  = _uid?String(conv.buyerId)===_uid:false;
     var name     = isBuyer ? (conv.sellerName||'Vendeur') : (conv.buyerName||'Acheteur');
     var last     = conv.lastMessage||'Nouvelle conversation';
     var time     = conv.updatedAt ? timeAgo(conv.updatedAt) : '';
@@ -4511,7 +4515,6 @@ function renderPageConvList(convs){
       '</div>'+
       (isUnread?'<div class="pmsg-conv-unread">'+conv.unreadCount+'</div>':'')+
     '</div>';
-  }catch(e){console.error('[conv]',e);return '';}
   }).join('');
 }
 
@@ -4541,7 +4544,7 @@ function openPageConv(convId, convData){
 
   var user      = DB.user();
   var conv      = convData || {};
-  var _uid2=user?String(user._id||user.id||''):''; var isBuyer=_uid2?String(conv.buyerId)===_uid2:true;
+  var _u2=user?String(user._id||user.id||''):''; var isBuyer=_u2?String(conv.buyerId)===_u2:true;
   var otherName = isBuyer ? (conv.sellerName||'Vendeur') : (conv.buyerName||'Acheteur');
   var adTitle   = conv.adTitle || '';
   var adPhoto   = conv.adPhoto || '';
@@ -4632,7 +4635,7 @@ function openPageConv(convId, convData){
       }
       var html = '<div class="pmsg-security"><strong>Echangez en toute securite.</strong></div>';
       msgs.forEach(function(m){
-        var _uid3=user?String(user._id||user.id||''):''; var isMine=!!(_uid3&&String(m.senderId)===_uid3);
+        var _u3=user?String(user._id||user.id||''):''; var isMine=!!(_u3&&String(m.senderId)===_u3);
         var t = m.createdAt ? new Date(m.createdAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) : '';
         html += '<div class="pmsg-bubble-wrap '+(isMine?'mine':'theirs')+'">';
         html +=   '<div class="pmsg-bubble '+(isMine?'mine':'theirs')+'">'+m.text+'</div>';
@@ -6849,10 +6852,10 @@ document.addEventListener('DOMContentLoaded',function(){
   renderNavCats();
   initBanner();
   renderPostCats();
-  function _setNavH(){var n=document.querySelector('nav');if(n){var h=n.getBoundingClientRect().height;if(h>0)document.documentElement.style.setProperty('--nav-h',Math.round(h)+'px');}}
-  requestAnimationFrame(function(){requestAnimationFrame(_setNavH);});
-  setTimeout(_setNavH,300); setTimeout(_setNavH,800);
-  window.addEventListener('resize',_setNavH);
+  function _snh(){var n=document.querySelector('nav');if(n){var h=n.getBoundingClientRect().height;if(h>0)document.documentElement.style.setProperty('--nav-h',Math.round(h)+'px');}}
+  requestAnimationFrame(function(){requestAnimationFrame(_snh);});
+  setTimeout(_snh,300);setTimeout(_snh,800);
+  window.addEventListener('resize',_snh);
   updateNav();
   // Charger les annonces depuis l'API MongoDB
   fetchAdsFromAPI(function(){ 
