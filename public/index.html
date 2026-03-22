@@ -1689,6 +1689,7 @@ footer{background:transparent;margin-top:0}
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           <span style="color:#1D4ED8;font-weight:800">Panel Admin</span>
         </a>
+        <div class="dash-nav-sep" id="dash-nav-admin-sep" style="display:none"></div>
         <div class="dash-nav-sep"></div>
         <a onclick="logout()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
@@ -4903,6 +4904,22 @@ function syncRoleFromServer(callback){
       if(data.user._id)      u._id      = data.user._id;
       u.role    = data.user.role;   // toujours depuis MongoDB — source de vérité
       u.isPro   = data.user.isPro   || false;
+      // Révéler Panel Admin seulement si MongoDB confirme role='admin'
+      var _adminBtn = document.getElementById('nav-admin-btn');
+      var _adminLnk = document.getElementById('nav-admin-link');
+      var _adminBox = document.getElementById('dash-admin-box');
+      var _roleB    = document.getElementById('p-role-badge');
+      if(data.user.role === 'admin'){
+        if(_adminBtn) _adminBtn.style.display = 'inline-flex';
+        if(_adminLnk) _adminLnk.removeAttribute('hidden');
+        if(_adminBox) _adminBox.style.display = 'block';
+        if(_roleB)    _roleB.innerHTML = '<span class="lbc-profile-badge admin">👑 Administrateur</span>';
+      } else {
+        if(_adminBtn) _adminBtn.style.display = 'none';
+        if(_adminLnk) _adminLnk.setAttribute('hidden','');
+        if(_adminBox) _adminBox.style.display = 'none';
+        // badge reste vérifié/pro selon isPro
+      }
       if(data.user.proUntil) u.proUntil = data.user.proUntil;
       if(data.user.prenom)   u.prenom   = data.user.prenom;
       if(data.user.nom)      u.nom      = data.user.nom;
@@ -4942,6 +4959,8 @@ function adaptDashNav(isAdmin, isPro, isUser){
   document.querySelectorAll('.dash-nav-admin-only').forEach(function(el){
     el.style.display = isAdmin ? 'flex' : 'none';
   });
+  var adminSep = document.getElementById('dash-nav-admin-sep');
+  if(adminSep) adminSep.style.display = isAdmin ? 'block' : 'none';
   // User seulement : Historique et Alertes (cachés pour admin)
   document.querySelectorAll('.dash-nav-user-only').forEach(function(el){
     el.style.display = isAdmin ? 'none' : 'flex';
@@ -4959,15 +4978,23 @@ function adaptDashNav(isAdmin, isPro, isUser){
 function renderDash(){
   var u=DB.user(); if(!u) return;
 
+  // ── Masquer Panel Admin par défaut (sera révélé seulement si /api/me confirme admin) ──
+  var adminLinkEl = document.getElementById('nav-admin-link');
+  if(adminLinkEl) adminLinkEl.setAttribute('hidden','');
+  var adminNavBtn = document.getElementById('nav-admin-btn');
+  if(adminNavBtn) adminNavBtn.style.display='none';
+
   // ── Infos sidebar ──
   var initials=(u.prenom||u.name||'U').charAt(0).toUpperCase()+((u.nom||'').charAt(0)||'').toUpperCase();
   document.getElementById('d-av').textContent=initials||'U';
   document.getElementById('d-nm').textContent=u.name||u.prenom||'Utilisateur';
   document.getElementById('d-ph').textContent=u.phone||u.email||'';
 
-  // ── Rôle effectif ──
-  var isAdmin = (u.role==='admin');
-  var isPro   = !isAdmin && !!(u.isPro && u.proUntil && new Date(u.proUntil)>new Date());
+  // ── Rôle effectif depuis localStorage (provisoire — sera corrigé par syncRoleFromServer) ──
+  // On ne fait JAMAIS confiance à role='admin' venant du localStorage
+  // seul /api/me (MongoDB) fait autorité
+  var isAdmin = false; // forcé à false — sera mis à true seulement par syncRoleFromServer
+  var isPro   = !!(u.isPro && u.proUntil && new Date(u.proUntil)>new Date());
 
   // ── Adapter toute la nav selon le rôle ──
   var isUser = !isAdmin && !isPro;
@@ -4994,12 +5021,13 @@ function renderDash(){
   if(pns) pns.textContent=(u.prenom||u.name||'—')+' '+(u.nom||'');
   var rb=document.getElementById('p-role-badge');
   if(rb){
-    if(u.role==='admin') rb.innerHTML='<span class="lbc-profile-badge admin">👑 Administrateur</span>';
-    else if(isPro) rb.innerHTML='<span class="lbc-profile-badge pro">⭐ Compte Pro</span>';
+    // isAdmin est forcé false ici — le badge admin ne peut s'afficher
+    // que si syncRoleFromServer confirme plus tard (via re-render ou update direct)
+    if(isPro) rb.innerHTML='<span class="lbc-profile-badge pro">⭐ Compte Pro</span>';
     else rb.innerHTML='<span class="lbc-profile-badge verified">✅ Membre vérifié</span>';
   }
   var adminBox = document.getElementById('dash-admin-box');
-  if(adminBox) adminBox.style.display = (u.role==='admin') ? 'block' : 'none';
+  if(adminBox) adminBox.style.display = 'none'; // caché par défaut, révélé par syncRoleFromServer
   var pp=document.getElementById('p-phone');
   if(pp) pp.textContent=u.phone||'Non renseigné';
   var pe=document.getElementById('p-email');
