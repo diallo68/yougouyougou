@@ -36,9 +36,6 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 .page{display:none}.page.active{display:block}
-/* Pages spéciales qui nécessitent display:flex plutôt que block */
-#page-messages.active{display:none!important}
-#page-favs.active{display:none!important}
 #app-wrapper{background:#fff;max-width:1280px;margin:0 auto;min-height:100vh;box-shadow:0 2px 12px rgba(0,0,0,.08)}
 
 /* ── DÉSACTIVÉS ── */
@@ -141,7 +138,7 @@ nav{background:#fff;border-bottom:1px solid var(--br);position:sticky;top:0;z-in
 .lbc-badge-une{background:var(--or);color:#fff}
 .lbc-badge-urgent{background:var(--re);color:#fff}
 .lbc-badge-nego{background:#1A1A1A;color:#fff}
-.lbc-fav{display:none!important}
+.lbc-fav{position:absolute;top:7px;right:7px;background:rgba(255,255,255,.9);border:none;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);z-index:2;transition:color .12s,background .12s}
 .lbc-fav:hover{color:var(--re);background:#fff}
 .lbc-body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:3px}
 .lbc-title{font-size:13px;font-weight:400;color:var(--ink2);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -286,51 +283,20 @@ footer{background:transparent;margin-top:0}
 .btn-post-submit{width:100%;padding:13px;border-radius:6px;background:var(--or);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:background .12s;display:flex;align-items:center;justify-content:center;gap:6px;font-family:var(--font)}
 .btn-post-submit:hover{background:var(--or2)}
 .btn-post-submit:disabled{opacity:.6;cursor:not-allowed}
-.dash-layout{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 62px)}
-.dash-side{background:#fff;border-right:1px solid var(--br);padding:0;position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto}
-.dash-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--or),#ff8c42);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;flex-shrink:0}
-.dash-user-info{padding:20px 16px 16px;border-bottom:1px solid var(--br);display:flex;align-items:center;gap:12px}
-.dash-user-name{font-size:15px;font-weight:800;color:var(--ink)}
-.dash-user-phone{font-size:12px;color:var(--muted);margin-top:2px}
-.dash-nav{padding:8px 0}
-.dash-nav a{display:flex;align-items:center;gap:10px;padding:11px 20px;font-size:14px;font-weight:500;color:#555;cursor:pointer;transition:all .12s;text-decoration:none;border-left:3px solid transparent}
-.dash-nav a:hover{background:#f7f7f7;color:var(--ink)}
-.dash-nav a.active{background:#fff7f2;color:var(--or);font-weight:700;border-left-color:var(--or)}
-.dash-nav .dash-nav-sep{height:1px;background:var(--br);margin:6px 0}
-.dash-main{padding:28px 32px;background:#f5f5f5;min-height:calc(100vh - 62px)}
+.dash-layout{display:grid;grid-template-columns:200px 1fr;min-height:calc(100vh - 62px)}
+.dash-side{background:#fff;border-right:1px solid var(--br);padding:14px 10px;position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto}
+.dash-avatar{width:46px;height:46px;border-radius:50%;background:var(--or);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;margin-bottom:8px}
+.dash-user-info{padding:10px 6px 14px;border-bottom:1px solid var(--br);margin-bottom:10px;text-align:center}
+.dash-user-name{font-size:13px;font-weight:700;color:var(--ink)}
+.dash-user-phone{font-size:11px;color:var(--muted);margin-top:2px}
+.dash-nav a{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;font-size:13px;font-weight:400;color:var(--muted);cursor:pointer;transition:all .12s;text-decoration:none;margin-bottom:2px}
+.dash-nav a:hover,.dash-nav a.active{background:var(--orl);color:var(--or);font-weight:600}
+.dash-main{padding:20px 24px;background:var(--bg)}
 .dash-section{display:none}.dash-section.active{display:block}
-.dash-section-title{font-size:18px;font-weight:800;color:var(--ink);margin-bottom:20px}
-/* Carte profil style Leboncoin */
-.lbc-profile-hero{background:#fff;border-radius:12px;padding:24px;margin-bottom:16px;display:flex;align-items:center;gap:20px;border:1px solid var(--br)}
-.lbc-profile-av{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--or),#ff8c42);color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;flex-shrink:0}
-.lbc-profile-name{font-size:22px;font-weight:800;color:var(--ink)}
-.lbc-profile-sub{font-size:13px;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.lbc-profile-badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px}
-.lbc-profile-badge.verified{background:#DCFCE7;color:#166534}
-.lbc-profile-badge.admin{background:#EFF6FF;color:#1D4ED8}
-.lbc-profile-badge.pro{background:#FFF7ED;color:#C2410C}
-/* Cards activité style Leboncoin */
-.lbc-activity-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
-.lbc-activity-card{background:#fff;border-radius:12px;padding:20px 24px;border:1px solid var(--br);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:16px}
-.lbc-activity-card:hover{border-color:var(--or);box-shadow:0 2px 12px rgba(255,92,0,.1)}
-.lbc-activity-icon{width:44px;height:44px;border-radius:10px;background:#FFF3EE;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-.lbc-activity-label{font-size:15px;font-weight:700;color:var(--ink)}
-.lbc-activity-sub{font-size:12px;color:var(--muted);margin-top:2px}
-/* Section Mon compte */
-.lbc-account-section{background:#fff;border-radius:12px;border:1px solid var(--br);overflow:hidden;margin-bottom:16px}
-.lbc-account-section-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:16px 20px 10px}
-.lbc-account-row{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1px solid var(--br);cursor:pointer;transition:background .12s}
-.lbc-account-row:hover{background:#f9f9f9}
-.lbc-account-row:first-of-type{border-top:none}
-.lbc-account-row-left{display:flex;align-items:center;gap:12px}
-.lbc-account-row-icon{width:36px;height:36px;border-radius:8px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.lbc-account-row-label{font-size:14px;font-weight:600;color:var(--ink)}
-.lbc-account-row-sub{font-size:12px;color:var(--muted)}
-.lbc-account-row-arrow{color:#ccc;font-size:16px}
-.lbc-notif-badge{background:var(--or);color:#fff;border-radius:50%;width:20px;height:20px;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.dash-section-title{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:14px}
 .stat-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
-.stat-card{background:#fff;border-radius:10px;padding:16px;border:1px solid var(--br);display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
-.stat-card-val{font-size:24px;font-weight:800;color:var(--or)}
+.stat-card{background:#fff;border-radius:6px;padding:14px;border:1px solid var(--br);display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.stat-card-val{font-size:22px;font-weight:800;color:var(--or)}
 .stat-card-label{font-size:11px;color:var(--muted);font-weight:500}
 .admin-layout{display:grid;grid-template-columns:190px 1fr;width:100%;height:100%;overflow:hidden}
 .admin-side{background:#1A1A1A;padding:14px 10px;overflow-y:auto;height:100%}
@@ -486,62 +452,159 @@ footer{background:transparent;margin-top:0}
   z-index:200;
   overflow:hidden;
 }
-.pmsg-wrap{display:grid;grid-template-columns:320px 1fr 300px;flex:1;height:100%;min-height:0;overflow:hidden;border-top:1px solid var(--br)}
-.pmsg-left{display:flex;flex-direction:column;border-right:1px solid var(--br);background:#fff;overflow:hidden;min-height:0}
-.pmsg-left-head{display:flex;align-items:center;gap:8px;padding:0 16px;height:56px;border-bottom:1px solid var(--br);background:#fff;flex-shrink:0}
-.pmsg-back{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:13px;font-family:inherit;padding:0}
+.pmsg-wrap{
+  display:grid;
+  grid-template-columns:280px 1fr 300px;
+  flex:1;
+  height:100%;
+  overflow:hidden;
+  border-top:1px solid var(--br);
+}
+/* Colonne gauche — liste conversations */
+.pmsg-left{
+  display:flex;flex-direction:column;
+  border-right:1px solid var(--br);
+  background:#fff;overflow:hidden;
+}
+.pmsg-left-head{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 16px;border-bottom:1px solid var(--br);
+  background:#fff;flex-shrink:0;
+}
+.pmsg-back{
+  background:none;border:none;color:var(--or);
+  font-weight:700;cursor:pointer;font-size:13px;
+  font-family:inherit;padding:0;white-space:nowrap;
+}
 .pmsg-back:hover{text-decoration:underline}
-.pmsg-search-wrap{padding:10px 12px;border-bottom:1px solid var(--br);background:#fafafa;flex-shrink:0}
-.pmsg-search{width:100%;padding:8px 14px;border:1.5px solid #e0e0e0;border-radius:20px;font-size:13px;font-family:inherit;outline:none;background:#fff;box-sizing:border-box}
-.pmsg-search:focus{border-color:var(--or)}
-.pmsg-filters{display:flex;gap:6px;padding:10px 12px;border-bottom:1px solid var(--br);flex-shrink:0}
-.pmsg-filter{background:#fff;border:1.5px solid #ddd;border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:#555;transition:all .12s}
-.pmsg-filter.active{background:#1A1A2E;color:#fff;border-color:#1A1A2E}
+.pmsg-filters{
+  display:flex;gap:8px;padding:10px 14px;
+  border-bottom:1px solid var(--br);background:#fafafa;flex-shrink:0;
+}
+.pmsg-filter{
+  background:#fff;border:1.5px solid #ddd;
+  border-radius:20px;padding:5px 14px;
+  font-size:12px;font-weight:700;cursor:pointer;
+  font-family:inherit;color:var(--ink);transition:all .15s;
+  display:flex;align-items:center;gap:5px;
+}
+.pmsg-filter.active{background:var(--ink);color:#fff;border-color:var(--ink)}
 .pmsg-list{flex:1;overflow-y:auto}
-.pmsg-conv{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-bottom:1px solid #f0f0f0;cursor:pointer;transition:background .1s;position:relative;border-left:3px solid transparent}
-.pmsg-conv:hover{background:#f9f9f9}
-.pmsg-conv.active{background:#FFF5EE;border-left-color:var(--or)}
-.pmsg-conv-thumb{width:52px;height:52px;border-radius:8px;flex-shrink:0;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:var(--or);overflow:hidden;border:1px solid #eee}
-.pmsg-conv-thumb img{width:100%;height:100%;object-fit:cover;border-radius:7px}
+.pmsg-conv{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 14px;border-bottom:1px solid var(--brl);
+  cursor:pointer;transition:background .12s;
+  position:relative;border-left:3px solid transparent;
+}
+.pmsg-conv:hover{background:#fafafa}
+.pmsg-conv.active{background:#FFF3EE;border-left-color:var(--or)}
+.pmsg-conv-thumb{
+  width:50px;height:50px;border-radius:8px;
+  flex-shrink:0;background:var(--brl);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:800;color:var(--or);
+  overflow:hidden;
+}
+.pmsg-conv-thumb img{width:100%;height:100%;object-fit:cover;border-radius:8px}
 .pmsg-conv-info{flex:1;min-width:0}
-.pmsg-conv-title{font-size:13px;font-weight:700;color:#1A1A2E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
-.pmsg-conv-preview{font-size:12px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pmsg-conv-who{font-size:12px;color:#888;margin-bottom:2px}
+.pmsg-conv-title{font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px}
+.pmsg-conv-preview{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pmsg-conv-meta{display:flex;align-items:center;gap:4px;margin-top:2px}
-.pmsg-conv-date{font-size:11px;color:#bbb}
-.pmsg-conv-unread{background:var(--or);color:#fff;border-radius:50%;min-width:18px;height:18px;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;padding:0 3px;position:absolute;right:10px;top:50%;transform:translateY(-50%)}
-.pmsg-center{display:flex;flex-direction:column;overflow:hidden;background:#f6f6f6;min-height:0}
-.pmsg-thread-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#ccc;padding:40px;background:#f6f6f6;text-align:center}
-.pmsg-thread-head{display:flex;align-items:center;gap:12px;padding:0 20px;height:56px;border-bottom:1px solid #eee;background:#fff;flex-shrink:0}
-.pmsg-thread-av{width:40px;height:40px;border-radius:50%;background:var(--or);color:#fff;font-weight:800;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.pmsg-thread-name{font-size:14px;font-weight:800;color:#1A1A2E}
-.pmsg-thread-ad{font-size:12px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pmsg-bubbles{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:2px}
-.pmsg-date-sep{text-align:center;font-size:11px;color:#bbb;margin:12px 0;font-weight:600}
-.pmsg-security{background:#FFFBEA;border:1px solid #FDE68A;border-radius:10px;padding:10px 14px;font-size:12px;color:#92400E;display:flex;gap:8px;margin-bottom:12px;line-height:1.5;flex-shrink:0}
-.pmsg-bubble-wrap{display:flex;flex-direction:column;margin-bottom:4px}
-.pmsg-bubble-wrap.mine{align-items:flex-end}.pmsg-bubble-wrap.theirs{align-items:flex-start}
-.pmsg-bubble{max-width:65%;padding:10px 14px;font-size:14px;line-height:1.55;word-break:break-word}
-.pmsg-bubble.mine{background:var(--or);color:#fff;border-radius:20px 20px 4px 20px}
-.pmsg-bubble.theirs{background:#fff;color:#1A1A2E;border-radius:20px 20px 20px 4px;border:1px solid #e8e8e8;box-shadow:0 1px 3px rgba(0,0,0,.05)}
-.pmsg-bubble-time{font-size:10px;color:#bbb;margin-top:3px;padding:0 4px}
-.pmsg-input-wrap{display:flex;align-items:center;gap:10px;padding:12px 16px;border-top:1.5px solid #eee;background:#fff;flex-shrink:0}
-.pmsg-input{flex:1;border:1.5px solid #ddd;border-radius:24px;padding:11px 18px;font-size:14px;font-family:inherit;outline:none;background:#fafafa;transition:border-color .2s}
+.pmsg-conv-who{font-size:11px;color:var(--muted)}
+.pmsg-conv-date{font-size:11px;color:var(--muted)}
+.pmsg-conv-unread{
+  background:var(--or);color:#fff;border-radius:50%;
+  min-width:18px;height:18px;font-size:10px;font-weight:900;
+  display:flex;align-items:center;justify-content:center;
+  padding:0 3px;position:absolute;right:10px;top:50%;transform:translateY(-50%);
+}
+/* Colonne centrale — fil de messages */
+.pmsg-center{display:flex;flex-direction:column;overflow:hidden;background:#f8f8f8}
+.pmsg-thread-empty{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;height:100%;color:var(--muted);padding:40px;
+  background:#f8f8f8;
+}
+.pmsg-thread-head{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 18px;border-bottom:1px solid var(--br);
+  background:#fff;flex-shrink:0;
+}
+.pmsg-thread-av{
+  width:40px;height:40px;border-radius:50%;
+  background:var(--or);color:#fff;
+  font-weight:800;font-size:16px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.pmsg-thread-name{font-size:14px;font-weight:800;color:var(--ink)}
+.pmsg-thread-ad{font-size:12px;color:var(--muted)}
+.pmsg-bubbles{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:6px}
+.pmsg-date-sep{text-align:center;font-size:11px;color:var(--muted);margin:8px 0;font-weight:600}
+.pmsg-security{
+  background:#FFF8DC;border:1px solid #FFD700;border-radius:12px;
+  padding:14px 16px;font-size:12px;color:#5D4037;line-height:1.7;margin-bottom:8px;
+}
+.pmsg-security strong{display:block;margin-bottom:6px;font-size:13px;color:#333}
+.pmsg-security a{color:var(--or);font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-top:4px}
+.pmsg-bubble-wrap{display:flex;flex-direction:column;margin-bottom:2px}
+.pmsg-bubble-wrap.mine{align-items:flex-end}
+.pmsg-bubble-wrap.theirs{align-items:flex-start}
+.pmsg-bubble{
+  max-width:68%;padding:10px 14px;
+  font-size:13px;line-height:1.6;word-break:break-word;
+}
+.pmsg-bubble.mine{
+  background:var(--or);color:#fff;
+  border-radius:18px 18px 4px 18px;
+}
+.pmsg-bubble.theirs{
+  background:#fff;color:var(--ink);
+  border-radius:18px 18px 18px 4px;
+  border:1px solid #e0e0e0;
+}
+.pmsg-bubble-time{font-size:10px;color:var(--muted);margin-top:3px;padding:0 4px}
+.pmsg-input-wrap{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 18px;border-top:1px solid var(--br);
+  background:#fff;flex-shrink:0;
+}
+.pmsg-input{
+  flex:1;border:1.5px solid #ddd;border-radius:24px;
+  padding:10px 18px;font-size:13px;font-family:inherit;
+  outline:none;transition:border-color .2s;background:#fafafa;
+}
 .pmsg-input:focus{border-color:var(--or);background:#fff}
-.pmsg-send{background:var(--or);color:#fff;border:none;border-radius:50%;width:44px;height:44px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .15s}
-.pmsg-send:hover{opacity:.85}
-.pmsg-right-panel{display:flex;flex-direction:column;border-left:1px solid var(--br);background:#fff;overflow-y:auto;min-height:0;padding:16px}
+.pmsg-send{
+  background:var(--or);color:#fff;border:none;border-radius:50%;
+  width:42px;height:42px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:background .15s;
+}
+.pmsg-send:hover{background:var(--or2)}
+/* Colonne droite — infos vendeur */
+.pmsg-right-panel{
+  display:flex;flex-direction:column;
+  border-left:1px solid var(--br);background:#fff;
+  overflow-y:auto;padding:16px;
+}
 .pmsg-vendor-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
-.pmsg-vendor-av{width:52px;height:52px;border-radius:50%;background:var(--or);color:#fff;font-size:20px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pmsg-vendor-av{
+  width:52px;height:52px;border-radius:50%;
+  background:var(--or);color:#fff;font-size:20px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
 .pmsg-vendor-name{font-size:16px;font-weight:800;color:var(--ink)}
 .pmsg-vendor-meta{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px;margin-top:3px}
-.pmsg-ad-card{border:1px solid var(--br);border-radius:10px;overflow:hidden;margin-bottom:14px;cursor:pointer}
+.pmsg-ad-card{border:1px solid var(--br);border-radius:10px;overflow:hidden;margin-bottom:14px}
 .pmsg-ad-img{width:100%;height:140px;object-fit:cover;background:var(--brl);display:flex;align-items:center;justify-content:center;font-size:40px}
 .pmsg-ad-info{padding:10px 12px}
 .pmsg-ad-title{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px}
 .pmsg-ad-price{font-size:18px;font-weight:800;color:var(--ink)}
-@media(max-width:900px){.pmsg-wrap{grid-template-columns:280px 1fr}.pmsg-right-panel{display:none!important}}
-@media(max-width:640px){.pmsg-wrap{grid-template-columns:1fr}}
+.pmsg-ad-desc{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.6}
+.pmsg-section-title{font-size:13px;font-weight:700;color:var(--ink);margin:14px 0 8px}
+.pmsg-crit{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--brl)}
+.pmsg-crit-label{font-size:12px;color:var(--muted);flex:1}
+.pmsg-crit-val{font-size:12px;font-weight:700;color:var(--ink)}
 
 /* ── Profil Vendeur ── */
 .seller-back{background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:13px;font-family:inherit;padding:0;display:inline-flex;align-items:center;gap:5px;margin-bottom:20px}
@@ -1169,12 +1232,19 @@ footer{background:transparent;margin-top:0}
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
       <span>Mes recherches</span>
     </button>
-
+    <button class="nav-lbc-btn" id="nav-favs-btn" onclick="navGoFavs()" title="Favoris">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <span>Favoris</span>
+    </button>
     <!-- Bouton Visitez les Boutiques -->
     <button class="nav-boutiques-btn" onclick="goToBoutiques()" title="Boutiques & Magasins Pro">
       🏪 <span>Boutiques</span>
     </button>
-
+    <button class="nav-lbc-btn" id="nav-msgs-btn" onclick="navGoMessages()" title="Messages">
+      <span id="nav-msg-badge" style="display:none;position:absolute;top:3px;right:3px;background:var(--or);color:#fff;border-radius:50%;width:15px;height:15px;font-size:9px;font-weight:900;align-items:center;justify-content:center;line-height:15px">0</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>Messages</span>
+    </button>
     <button class="nav-lbc-btn nav-lbc-auth" id="nav-auth-btn" onclick="openModal('auth')">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       <span id="nav-user-label">Se connecter</span>
@@ -1497,8 +1567,8 @@ footer{background:transparent;margin-top:0}
         </div>
         <div class="det-btns">
           <button class="btn-contact" onclick="contactVendeur()">📞 Contacter le vendeur</button>
-
-
+          <button class="btn-msg" onclick="envoyerMessage()">💬 Envoyer un message</button>
+          <button class="btn-fav-det" onclick="addFav()">🤍 Ajouter aux favoris</button>
           <button class="btn-share" onclick="shareAd()">🔗 Partager l'annonce</button>
         </div>
         <!-- Boutons proprio / admin -->
@@ -1511,7 +1581,7 @@ footer{background:transparent;margin-top:0}
       <!-- Sécurité -->
       <div class="det-safety">
         <div class="det-safety-title">🛡️ Conseils de sécurité</div>
-        Vérifiez l'article avant tout paiement. Privilégiez les échanges en lieu public. N&#39;envoyez jamais d&#39;argent à l&#39;avance.
+        Vérifiez l'article avant tout paiement. Privilégiez les échanges en lieu public. N'envoyez jamais d'argent à l'avance.
       </div>
     </div>
   </div>
@@ -1648,228 +1718,52 @@ footer{background:transparent;margin-top:0}
   <div class="dash-layout">
     <div class="dash-side">
       <div class="dash-user-info">
-        <div class="dash-avatar" id="d-av">?</div>
-        <div>
-          <div class="dash-user-name" id="d-nm">Utilisateur</div>
-          <div class="dash-user-phone" id="d-ph"></div>
-        </div>
+        <div class="dash-avatar" id="d-av">MD</div>
+        <div class="dash-user-name" id="d-nm">Utilisateur</div>
+        <div class="dash-user-phone" id="d-ph"></div>
       </div>
       <nav class="dash-nav">
-        <a onclick="showDashTab('profil')" class="active" id="dtab-profil">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Mon profil
-        </a>
-        <a onclick="showDashTab('ads')" id="dtab-ads">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
-          Mes annonces
-          <span id="p-count-ads" style="margin-left:auto;background:var(--orl);color:var(--or);font-size:11px;font-weight:800;padding:1px 7px;border-radius:10px">0</span>
-        </a>
-        <a onclick="showDashTab('history')" id="dtab-history" class="dash-nav-user-only">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          Historique
-        </a>
-        <a onclick="showDashTab('payments')" id="dtab-payments">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-          Paiements
-        </a>
-        <a onclick="showDashTab('alerts')" id="dtab-alerts" class="dash-nav-user-only">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
-          Alertes
-        </a>
-        <a onclick="showDashTab('pro')" id="dtab-pro" class="dash-nav-pro-only" style="display:none">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          <span style="color:var(--or)">YouGouYou Pro</span>
-        </a>
-        <div class="dash-nav-sep"></div>
-        <a onclick="showDashTab('users-admin')" id="dtab-users-admin" class="dash-nav-admin-only" style="display:none">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-          <span style="color:#1D4ED8">Utilisateurs</span>
-        </a>
-        <a id="nav-admin-link" hidden onclick="goAdmin()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <span style="color:#1D4ED8;font-weight:800">Panel Admin</span>
-        </a>
-        <div class="dash-nav-sep" id="dash-nav-admin-sep" style="display:none"></div>
-        <div class="dash-nav-sep"></div>
-        <a onclick="logout()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-          <span style="color:#DC2626">Déconnexion</span>
-        </a>
+        <a onclick="showDashTab('profil')" class="active" id="dtab-profil">👤 Mon profil</a>
+        <a onclick="openEditProfile()" style="color:var(--or);font-weight:700">✏️ Modifier mon profil</a>
+        <a onclick="showDashTab('ads')" id="dtab-ads">📋 <span id="dash-ads-label">Mes annonces</span> <span id="p-count-ads" style="background:var(--orl);color:var(--or);font-size:11px;padding:1px 6px;border-radius:10px;margin-left:auto">0</span></a>
+        <a onclick="showDashTab('history')" id="dtab-history" class="dash-nav-user-only">🕐 Historique</a>
+        <a onclick="showDashTab('payments')" id="dtab-payments">💳 Paiements</a>
+        <a onclick="showDashTab('alerts')" id="dtab-alerts" class="dash-nav-user-only">🔔 Alertes</a>
+        <a onclick="showDashTab('pro')" id="dtab-pro" class="dash-nav-pro-only" style="display:none;color:var(--or);font-weight:700">⭐ YouGouYou Pro</a>
+        <a onclick="showDashTab('users-admin')" id="dtab-users-admin" class="dash-nav-admin-only" style="display:none;color:#1D4ED8;font-weight:700">👥 Utilisateurs</a>
+        <a id="nav-admin-link" hidden onclick="goAdmin()" style="color:#1D4ED8!important;font-weight:800!important">👑 Panel Admin</a>
+        <a onclick="logout()" style="color:var(--re)!important;margin-top:20px">🚪 Déconnexion</a>
       </nav>
     </div>
     <div class="dash-main">
 
-      <!-- Profil style Leboncoin -->
+      <!-- Profil -->
       <div class="dash-section active" id="dsec-profil">
-
-        <!-- Hero carte profil -->
-        <div class="lbc-profile-hero">
-          <div class="lbc-profile-av" id="p-avatar">?</div>
-          <div style="flex:1">
-            <div class="lbc-profile-name" id="p-name">—</div>
-            <div class="lbc-profile-sub">
-              <span id="p-role-badge"></span>
-              <span id="p-city-hero" style="display:flex;align-items:center;gap:4px">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                <span id="p-city">—</span>
-              </span>
-            </div>
-          </div>
-          <button onclick="openEditProfile()" style="background:#fff;border:1.5px solid var(--br);border-radius:8px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--ink);display:flex;align-items:center;gap:6px;white-space:nowrap;transition:border-color .15s" onmouseover="this.style.borderColor='var(--or)'" onmouseout="this.style.borderColor='var(--br)'">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            Modifier
-          </button>
+        <div class="dash-section-title">Mon profil</div>
+        <div class="stat-cards">
+          <div class="stat-card"><div style="font-size:24px">📋</div><div class="stat-card-val" id="p-count-ads2">0</div><div class="stat-card-label">Annonces</div></div>
+          <div class="stat-card"><div style="font-size:24px">❤️</div><div class="stat-card-val" id="p-count-favs">0</div><div class="stat-card-label">Favoris</div></div>
+          <div class="stat-card"><div style="font-size:24px">💳</div><div class="stat-card-val" id="p-count-pay">0</div><div class="stat-card-label">Paiements</div></div>
         </div>
-
-        <!-- Mes activités -->
-        <div class="dash-section-title">Mes activités</div>
-        <div class="lbc-activity-grid">
-          <div class="lbc-activity-card" onclick="showDashTab('ads')">
-            <div class="lbc-activity-icon">📋</div>
+        <div style="background:#fff;border-radius:var(--rad);padding:20px;box-shadow:var(--sh)">
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+            <div class="dash-avatar" id="p-avatar" style="width:52px;height:52px;font-size:18px">MD</div>
             <div>
-              <div class="lbc-activity-label">Annonces</div>
-              <div class="lbc-activity-sub">Gérer mes annonces déposées</div>
+              <div style="font-size:16px;font-weight:800" id="p-name">—</div>
+              <div id="p-role-badge" style="margin-top:4px"></div>
             </div>
-            <svg style="margin-left:auto;color:#ccc;flex-shrink:0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
           </div>
-          <div class="lbc-activity-card" onclick="showDashTab('payments')">
-            <div class="lbc-activity-icon">💳</div>
-            <div>
-              <div class="lbc-activity-label">Paiements</div>
-              <div class="lbc-activity-sub">Suivre mes transactions</div>
-            </div>
-            <svg style="margin-left:auto;color:#ccc;flex-shrink:0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px">
+            <div><div style="color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:700;margin-bottom:2px">Téléphone</div><div id="p-phone" style="font-weight:600">—</div></div>
+            <div><div style="color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:700;margin-bottom:2px">Email</div><div id="p-email" style="font-weight:600">—</div></div>
+            <div><div style="color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:700;margin-bottom:2px">Ville</div><div id="p-city" style="font-weight:600">—</div></div>
+            <div><div style="color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:700;margin-bottom:2px">Vérification</div><div id="p-verif" style="font-weight:600">—</div></div>
+            <div><div style="color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:700;margin-bottom:2px">📅 Date de naissance</div><div id="p-dob" style="font-weight:600">—</div></div>
+            <div><div style="color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:700;margin-bottom:2px">📍 Lieu de naissance</div><div id="p-pob" style="font-weight:600">—</div></div>
           </div>
-          <div class="lbc-activity-card" onclick="showDashTab('history')">
-            <div class="lbc-activity-icon">🕐</div>
-            <div>
-              <div class="lbc-activity-label">Historique</div>
-              <div class="lbc-activity-sub">Annonces consultées récemment</div>
-            </div>
-            <svg style="margin-left:auto;color:#ccc;flex-shrink:0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-          </div>
-          <div class="lbc-activity-card" onclick="showDashTab('alerts')">
-            <div class="lbc-activity-icon">🔔</div>
-            <div>
-              <div class="lbc-activity-label">Alertes</div>
-              <div class="lbc-activity-sub">Mes alertes de recherche</div>
-            </div>
-            <svg style="margin-left:auto;color:#ccc;flex-shrink:0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-          </div>
+          <div class="vendor-stats-grid" id="vendor-stats-grid" style="margin-top:14px;margin-bottom:10px"></div>
+          <button class="btn btn-ghost" style="margin-top:0" onclick="openEditProfile()">✏️ Modifier mon profil</button>
         </div>
-
-        <!-- Mon compte -->
-        <div class="dash-section-title" style="margin-top:8px">Mon compte</div>
-        <div class="lbc-account-section">
-          <div class="lbc-account-section-title">Informations personnelles</div>
-          <div class="lbc-account-row" onclick="openEditProfile()">
-            <div class="lbc-account-row-left">
-              <div class="lbc-account-row-icon">👤</div>
-              <div>
-                <div class="lbc-account-row-label">Nom complet</div>
-                <div class="lbc-account-row-sub" id="p-name-sub">—</div>
-              </div>
-            </div>
-            <svg class="lbc-account-row-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-          </div>
-          <div class="lbc-account-row" onclick="openEditProfile()">
-            <div class="lbc-account-row-left">
-              <div class="lbc-account-row-icon">📱</div>
-              <div>
-                <div class="lbc-account-row-label">Téléphone</div>
-                <div class="lbc-account-row-sub" id="p-phone">—</div>
-              </div>
-            </div>
-            <svg class="lbc-account-row-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-          </div>
-          <div class="lbc-account-row" onclick="openEditProfile()">
-            <div class="lbc-account-row-left">
-              <div class="lbc-account-row-icon">✉️</div>
-              <div>
-                <div class="lbc-account-row-label">Email</div>
-                <div class="lbc-account-row-sub" id="p-email">—</div>
-              </div>
-            </div>
-            <svg class="lbc-account-row-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-          </div>
-          <div class="lbc-account-row" onclick="openEditProfile()">
-            <div class="lbc-account-row-left">
-              <div class="lbc-account-row-icon">📅</div>
-              <div>
-                <div class="lbc-account-row-label">Date de naissance</div>
-                <div class="lbc-account-row-sub" id="p-dob">—</div>
-              </div>
-            </div>
-            <svg class="lbc-account-row-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-          </div>
-          <div class="lbc-account-row" onclick="openEditProfile()">
-            <div class="lbc-account-row-left">
-              <div class="lbc-account-row-icon">📍</div>
-              <div>
-                <div class="lbc-account-row-label">Lieu de naissance</div>
-                <div class="lbc-account-row-sub" id="p-pob">—</div>
-              </div>
-            </div>
-            <svg class="lbc-account-row-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-          </div>
-        </div>
-
-        <!-- Connexion et sécurité -->
-        <div class="lbc-account-section">
-          <div class="lbc-account-section-title">Connexion &amp; Sécurité</div>
-          <div class="lbc-account-row" onclick="openEditProfile()">
-            <div class="lbc-account-row-left">
-              <div class="lbc-account-row-icon">🔐</div>
-              <div>
-                <div class="lbc-account-row-label">Mot de passe</div>
-                <div class="lbc-account-row-sub">Modifier mon mot de passe</div>
-              </div>
-            </div>
-            <svg class="lbc-account-row-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-          </div>
-          <div class="lbc-account-row">
-            <div class="lbc-account-row-left">
-              <div class="lbc-account-row-icon">✅</div>
-              <div>
-                <div class="lbc-account-row-label">Vérification</div>
-                <div class="lbc-account-row-sub" id="p-verif">—</div>
-              </div>
-            </div>
-            <span style="font-size:12px;font-weight:700;color:#16a34a;background:#dcfce7;padding:3px 10px;border-radius:20px">Vérifié</span>
-          </div>
-        </div>
-
-        <!-- Bloc Admin uniquement -->
-        <div id="dash-admin-box" style="display:none">
-          <div class="lbc-account-section">
-            <div class="lbc-account-section-title">Administration</div>
-            <div class="lbc-account-row" onclick="goAdmin()">
-              <div class="lbc-account-row-left">
-                <div class="lbc-account-row-icon">👑</div>
-                <div>
-                  <div class="lbc-account-row-label" style="color:#1D4ED8">Panel Admin</div>
-                  <div class="lbc-account-row-sub">Gérer le site et les utilisateurs</div>
-                </div>
-              </div>
-              <svg class="lbc-account-row-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-            </div>
-          </div>
-        </div>
-
-        <!-- Déconnexion -->
-        <div class="lbc-account-section">
-          <div class="lbc-account-row" onclick="logout()" style="color:#DC2626">
-            <div class="lbc-account-row-left">
-              <div class="lbc-account-row-icon" style="background:#FEF2F2">🚪</div>
-              <div>
-                <div class="lbc-account-row-label" style="color:#DC2626">Déconnexion</div>
-                <div class="lbc-account-row-sub">Se déconnecter de mon compte</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="vendor-stats-grid" id="vendor-stats-grid" style="margin-top:0"></div>
       </div>
 
       <!-- Mes annonces -->
@@ -1883,9 +1777,9 @@ footer{background:transparent;margin-top:0}
       </div>
 
       <!-- Favoris -->
-      <div class="dash-section" id="dsec-favs" style="display:none!important">
+      <div class="dash-section" id="dsec-favs">
         <div class="dash-section-title">Mes favoris</div>
-        <div id="d-favs"></div>
+        <div id="d-favs" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px"></div>
       </div>
 
       <!-- Historique -->
@@ -1941,7 +1835,17 @@ footer{background:transparent;margin-top:0}
       </div>
 
       <!-- ═══ TAB MESSAGERIE ═══ -->
-      <div class="dash-section" id="dsec-messages" style="display:none!important"></div>
+      <div class="dash-section" id="dsec-messages">
+        <div class="dash-section-title">💬 Messages</div>
+        <div style="text-align:center;padding:40px 20px;background:#fff;border:1px solid var(--br);border-radius:12px">
+          <div style="font-size:48px;margin-bottom:12px">💬</div>
+          <div style="font-size:16px;font-weight:800;margin-bottom:8px">Votre messagerie</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:20px">Retrouvez tous vos échanges avec les vendeurs</div>
+          <button onclick="navGoMessages()" class="btn btn-or" style="padding:12px 28px;font-size:14px;border-radius:10px">
+            📨 Ouvrir la messagerie
+          </button>
+        </div>
+      </div>
 
       <!-- ═══ TAB ALERTES ═══ -->
       <div class="dash-section" id="dsec-alerts" >
@@ -1990,7 +1894,7 @@ footer{background:transparent;margin-top:0}
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
           WhatsApp
         </button>
-
+        <button class="boutique-btn-msg" onclick="openConversationWithSeller()">💬 Message</button>
         <button class="boutique-btn-rate" onclick="openRateModal(_curSellerId,document.getElementById('seller-name').textContent)">⭐ Avis</button>
         <!-- Réseaux sociaux -->
         <div class="boutique-socials" id="boutique-socials"></div>
@@ -2521,83 +2425,23 @@ var DB={
   payments:function(){return this._d.payments||[];},
   addPayment:function(p){this._d.payments.unshift(p);this.save();},
   favs:function(){return this._d.favs||[];},
-  addFav:function(id){if(!this._d.favs)this._d.favs=[];if(!this._d.favs.includes(id)){this._d.favs.push(id);this.save();}},
-  removeFav:function(id){this._d.favs=(this._d.favs||[]).filter(function(f){return String(f)!==String(id);});this.save();},
-  setFavs:function(ids){this._d.favs=ids||[];this.save();}
+  addFav:function(id){if(!this._d.favs)this._d.favs=[];if(!this._d.favs.includes(id)){this._d.favs.push(id);this.save();}}
 };
 
 // ══════════════════════════════════════════
 //  ROUTING
 // ══════════════════════════════════════════
-function goTo(page, opts){
-  opts = opts || {};
+function goTo(page){
   // Fermer tous les overlays ouverts et libérer le scroll
   document.querySelectorAll('.overlay.open').forEach(function(o){o.classList.remove('open');});
   document.body.style.overflow='';
   // Changer de page
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   var el=document.getElementById('page-'+page);
-  if(el){
-    el.classList.add('active');
-    // Ne pas scroller pour les pages en position:fixed (messages)
-    if(page!=='messages') window.scrollTo({top:0,behavior:'smooth'});
-  }
-  if(page==='dashboard'){ loadDash(); setTimeout(function(){ var tok=localStorage.getItem('ygy_token'); if(tok){ fetch('/api/me',{headers:{'Authorization':'Bearer '+tok}}).then(function(r){return r.ok?r.json():null;}).then(function(d){ if(d&&d.user){ var u=DB.user()||{}; u.role=d.user.role; u.isPro=d.user.isPro||false; DB.login(u); updateNav(); var al=document.getElementById('nav-admin-link'); if(al){ if(u.role==='admin') al.removeAttribute('hidden'); else al.setAttribute('hidden',''); } } }).catch(function(){}); } }, 300); }
-  if(page==='home') renderAds();
-  if(page==='seller'&&typeof _curSellerId!=='undefined'&&_curSellerId) loadSellerProfile(_curSellerId);
-  // ── Page Messages ──────────────────────────────────────────────
-  if(page==='messages'){
-    startMsgPolling();
-    // opts.skipConvLoad=true quand appelé depuis submitEnvoyerMessage
-    // (qui ouvre directement la conv — on ne recharge pas la liste pour ne pas écraser)
-    if(opts.skipConvLoad) return;
-    var token=localStorage.getItem('ygy_token');
-    var list=document.getElementById('page-msg-list');
-    if(!token){
-      if(list) list.innerHTML='<div style="padding:40px 20px;text-align:center;color:var(--muted)"><div style="font-size:40px;margin-bottom:10px">🔒</div><div style="font-size:13px">Connectez-vous pour voir vos messages</div></div>';
-      return;
-    }
-    if(list) list.innerHTML='<div style="padding:40px 20px;text-align:center;color:var(--muted)"><div style="font-size:40px;margin-bottom:10px">💬</div><div style="font-size:13px">Chargement...</div></div>';
-    fetch('/api/conversations',{headers:{'Authorization':'Bearer '+token}})
-    .then(function(r){return r.json();})
-    .then(function(data){
-      var convs=data.conversations||data||[];
-      _pageConvs=convs;
-      renderPageConvList(convs);
-      updateMsgBadge(convs);
-    }).catch(function(){
-      if(list) list.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">❌ Erreur de chargement</div>';
-    });
-  }
-  // ── Page Favoris ───────────────────────────────────────────────
-  if(page==='favs'){
-    var tokFavs=localStorage.getItem('ygy_token');
-    var grid=document.getElementById('page-favs-grid');
-    if(!tokFavs){
-      if(grid) grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted)"><div style="font-size:48px;margin-bottom:12px">🔒</div><div style="font-size:15px;font-weight:700">Connectez-vous pour voir vos favoris</div></div>';
-      return;
-    }
-    if(grid) grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)"><div style="font-size:28px;margin-bottom:8px">⏳</div><div>Chargement...</div></div>';
-    fetch('/api/me/favorites',{headers:{'Authorization':'Bearer '+tokFavs}})
-    .then(function(r){return r.ok?r.json():Promise.reject();})
-    .then(function(data){
-      DB.setFavs(data.favorites||[]);
-      var ads=data.ads||[];
-      if(!grid) return;
-      if(!ads.length){
-        grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted)">'+
-          '<div style="font-size:48px;margin-bottom:12px">❤️</div>'+
-          '<div style="font-size:15px;font-weight:700;margin-bottom:6px">Aucun favori</div>'+
-          '<div style="font-size:13px">Cliquez sur 🤍 sur une annonce pour l\'ajouter</div>'+
-        '</div>';
-      } else {
-        grid.innerHTML=ads.map(function(a){ return adCard(a,false); }).join('');
-      }
-    })
-    .catch(function(){
-      if(grid) grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">❌ Impossible de charger les favoris</div>';
-    });
-  }
+  if(el){el.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+  if(page==='dashboard'){ loadDash(); setTimeout(function(){ var tok=localStorage.getItem('ygy_token'); if(tok){ fetch('/api/me',{headers:{'Authorization':'Bearer '+tok}}).then(function(r){return r.ok?r.json():null;}).then(function(d){ if(d&&d.user){ var u=DB.user()||{}; u.role=d.user.role; u.isPro=d.user.isPro||false; DB.login(u); updateNav(); } }).catch(function(){}); } }, 300); }
+  if(page==='home')renderAds();
+  if(page==='seller'&&typeof _curSellerId!=='undefined'&&_curSellerId)loadSellerProfile(_curSellerId);
 }
 function scrollToAds(){document.getElementById('ads-section').scrollIntoView({behavior:'smooth'});}
 
@@ -2827,14 +2671,11 @@ function adCard(a,feat){
   if(feat) badges+='<span class="lbc-badge lbc-badge-une">★ À la une</span>';
   if(a.urgentBadge||a.urgent) badges+='<span class="lbc-badge lbc-badge-urgent">Urgent</span>';
   if(a.nego||a.negotiable) badges+='<span class="lbc-badge lbc-badge-nego">Négociable</span>';
-  var isFav = DB.favs().includes(adId);
-  var favStyle = isFav ? 'color:#CC1C0C;' : '';
-  var favTitle = isFav ? 'Retirer des favoris' : 'Ajouter aux favoris';
   return '<div class="lbc-card" data-id="'+adId+'" onclick="viewAd(\''+adId+'\')">'
     +'<div class="lbc-img" style="background:'+(a.bg||'#EBEBEB')+'">'
     +imgHTML+badges
-    +'<button class="lbc-fav" data-adid="'+adId+'" onclick="event.stopPropagation();favAd(\''+adId+'\')" title="'+favTitle+'" style="'+favStyle+'">'
-    +'<svg width="14" height="14" viewBox="0 0 24 24" fill="'+(isFav?'#CC1C0C':'none')+'" stroke="currentColor" stroke-width="2.2">'
+    +'<button class="lbc-fav" onclick="event.stopPropagation();favAd(\''+adId+'\')">'
+    +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">'
     +'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>'
     +'</svg>'
     +'</button>'
@@ -3365,34 +3206,8 @@ function switchPhotoIdx(idx, el){
   });
   if(el){el.classList.add('active');el.style.border='2px solid var(--or)';}
 }
-function favAd(id){
-  var user = DB.user();
-  if(!user){ toast('🔒 Connectez-vous pour ajouter aux favoris','err'); setTimeout(function(){ openModal('auth'); },400); return; }
-  var tok = localStorage.getItem('ygy_token');
-  if(!tok){ toast('🔒 Reconnectez-vous','err'); return; }
-  fetch('/api/me/favorites/'+id, {
-    method:'POST',
-    headers:{'Authorization':'Bearer '+tok}
-  })
-  .then(function(r){return r.json();})
-  .then(function(data){
-    if(data.error){ toast('❌ '+data.error,'err'); return; }
-    DB.setFavs(data.favorites || []);
-    var added = data.action === 'added';
-    toast(added ? '❤️ Ajouté aux favoris !' : '💔 Retiré des favoris', added ? 'ok' : '');
-    // Mettre à jour visuellement les boutons de cette annonce
-    document.querySelectorAll('.lbc-fav[data-adid="'+id+'"],.ad-card-fav[data-adid="'+id+'"]').forEach(function(btn){
-      btn.style.color = added ? '#CC1C0C' : '';
-      btn.title = added ? 'Retirer des favoris' : 'Ajouter aux favoris';
-      var path = btn.querySelector('path');
-      if(path) path.setAttribute('fill', added ? '#CC1C0C' : 'none');
-    });
-  })
-  .catch(function(){ toast('❌ Erreur réseau','err'); });
-}
-function addFav(){
-  if(curAd){ favAd(curAd._id || curAd.id); }
-}
+function favAd(id){DB.addFav(id);toast('❤️ Ajouté aux favoris !','ok');}
+function addFav(){if(curAd){DB.addFav(curAd.id);toast('❤️ Ajouté aux favoris !','ok');}}
 
 // ══════════════════════════════════════════
 //  POST AD
@@ -3697,10 +3512,6 @@ function renderAuthForm(tab){
       '<div id="pw-match-msg" style="margin-top:-10px;margin-bottom:12px;font-size:13px;font-weight:700;display:none"></div>'+
       // Ville
       '<div class="fg"><label>📍 Préfecture / Ville *</label><select id="rct">'+opts+'</select></div>'+
-      // Date de naissance
-      '<div class="fg"><label>📅 Date de naissance * <span style="font-size:11px;color:var(--muted);font-weight:400">(vous devez avoir au moins 18 ans)</span></label>'+
-        '<input type="date" id="rdob" max="'+new Date(new Date().setFullYear(new Date().getFullYear()-18)).toISOString().split('T')[0]+'" style="width:100%;padding:10px 12px;border:1.5px solid var(--br);border-radius:8px;font-size:13px;font-family:inherit;outline:none;transition:border-color .2s" onfocus="this.style.borderColor=\'var(--or)\'" onblur="this.style.borderColor=\'var(--br)\'">'+
-      '</div>'+
       // Bouton envoyer
       '<button class="btn btn-or btn-full" style="border-radius:12px" id="btn-sendcode" onclick="sendVerifCode()">📱 Recevoir le code SMS →</button>'+
       '<p style="text-align:center;font-size:13px;color:var(--muted);margin-top:14px">Déjà un compte ? <a style="color:var(--or);cursor:pointer;font-weight:700" onclick="authTab(\'login\')">Se connecter</a></p>';
@@ -3800,7 +3611,6 @@ function sendVerifCode(){
   var pw=(document.getElementById('rpw')||{value:''}).value.trim();
   var pw2=(document.getElementById('rpw2')||{value:''}).value.trim();
   var city=(document.getElementById('rct')||{value:''}).value;
-  var dob=(document.getElementById('rdob')||{value:''}).value.trim();
 
   var ok=true;
   if(!fn){markField(document.getElementById('rfn'),false);ok=false;}
@@ -3809,24 +3619,6 @@ function sendVerifCode(){
   if(!pw||pw.length<8){markField(document.getElementById('rpw'),false);ok=false;}
   if(!pw2||pw!==pw2){markField(document.getElementById('rpw2'),false);ok=false;}
   if(!city){markField(document.getElementById('rct'),false);ok=false;}
-
-  // Validation date de naissance + age minimum 18 ans
-  if(!dob){
-    markField(document.getElementById('rdob'),false);
-    ok=false;
-  } else {
-    var birth = new Date(dob);
-    var today = new Date();
-    var age = today.getFullYear() - birth.getFullYear();
-    var m = today.getMonth() - birth.getMonth();
-    if(m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
-    if(age < 18){
-      markField(document.getElementById('rdob'),false);
-      toast('⚠️ Vous devez avoir au moins 18 ans pour vous inscrire','err');
-      ok=false;
-    }
-  }
-
   if(!ok){toast('⚠️ Remplissez les champs en rouge','err');return;}
 
   pendingUser={
@@ -3836,7 +3628,6 @@ function sendVerifCode(){
     email: regMode==='email' ? em : '',
     password:pw,
     city: city,
-    dob: dob,
     method: regMode==='email'?'email':'sms',
     initials:(fn.charAt(0)+((document.getElementById('rln')||{value:''}).value.trim().charAt(0)||'')).toUpperCase()
   };
@@ -3968,7 +3759,6 @@ function verifyCode(){
         email: pendingUser.email||'',
         password: pendingUser.password,
         city: pendingUser.city||'',
-        dob: pendingUser.dob||'',
         code: entered,
         method: pendingUser.method||'sms'
       })
@@ -4653,9 +4443,46 @@ function navGoSearches(){
   setTimeout(function(){ showDashTab('alerts'); }, 300);
 }
 
-function navGoFavs(){ return; } // désactivé temporairement
+function navGoFavs(){
+  if(!DB.user()){openModal('auth');return;}
+  // Charger les favoris dans la page dédiée
+  var favIds = DB.favs();
+  var favAds = DB.ads().filter(function(a){ return favIds.includes(a.id||a._id) || favIds.includes(String(a.id||a._id)); });
+  var grid = document.getElementById('page-favs-grid');
+  if(grid){
+    if(!favAds.length){
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted)">'+
+        '<div style="font-size:48px;margin-bottom:12px">❤️</div>'+
+        '<div style="font-size:15px;font-weight:700;margin-bottom:6px">Aucun favori</div>'+
+        '<div style="font-size:13px">Cliquez sur 🤍 sur une annonce pour l\'ajouter</div>'+
+      '</div>';
+    } else {
+      grid.innerHTML = favAds.map(function(a){ return adCard(a,false); }).join('');
+    }
+  }
+  goTo('favs');
+}
 
-function navGoMessages(){ return; } // désactivé temporairement
+function navGoMessages(){
+  if(!DB.user()){openModal('auth');return;}
+  // Charger les conversations dans la page dédiée
+  var token = localStorage.getItem('ygy_token');
+  var list = document.getElementById('page-msg-list');
+  if(list) list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">⏳ Chargement...</div>';
+  goTo('messages');
+  if(token){
+    fetch('/api/conversations',{headers:{'Authorization':'Bearer '+token}})
+    .then(function(r){return r.json();})
+    .then(function(data){
+      var convs = data.conversations||data||[];
+      _pageConvs = convs;
+      renderPageConvList(convs);
+      updateMsgBadge(convs);
+    }).catch(function(){
+      if(list) list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">❌ Erreur de chargement</div>';
+    });
+  }
+}
 
 function renderPageConvList(convs){
   var list = document.getElementById('page-msg-list');
@@ -4711,113 +4538,100 @@ function filterConvs(type, btn){
 }
 function openPageConv(convId, convData){
   _pageConvId = convId;
-  var center = document.getElementById('pmsg-center');
-  var panel  = document.getElementById('page-msg-panel');
-  if(!center) return;
-
-  var user      = DB.user();
-  var conv      = convData || {};
-  var isBuyer   = !conv.buyerId || String(conv.buyerId)===(user&&String(user._id||user.id));
-  var otherName = isBuyer ? (conv.sellerName||'Vendeur') : (conv.buyerName||'Acheteur');
-  var adTitle   = conv.adTitle || '';
-  var adPhoto   = conv.adPhoto || '';
-  var adPrice   = conv.adPrice ? Number(conv.adPrice).toLocaleString('fr-FR')+' GNF' : '';
-  var adId      = conv.adId || '';
-
-  // Marquer actif dans la liste gauche
-  document.querySelectorAll('.pmsg-conv').forEach(function(el){
-    el.classList.toggle('active',
-      (el.getAttribute('onclick')||'').includes(convId) ||
-      el.dataset.cid === convId);
-  });
-
-  // ── Construire le thread ──
-  var h = '';
-  h += '<div class="pmsg-thread-head">';
-  h +=   '<div class="pmsg-thread-av">'+otherName.charAt(0).toUpperCase()+'</div>';
-  h +=   '<div style="flex:1;min-width:0">';
-  h +=     '<div class="pmsg-thread-name">'+otherName+'</div>';
-  if(adTitle) h += '<div class="pmsg-thread-ad">\uD83D\uDCE6 '+adTitle+'</div>';
-  h +=   '</div>';
-  h += '</div>';
-  h += '<div class="pmsg-bubbles" id="page-msg-bubbles">';
-  h +=   '<div class="pmsg-security"><strong>YouGouYou</strong> - Restez prudents dans vos echanges.</div>';
-  h +=   '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">&#9203; Chargement...</div>';
-  h += '</div>';
-  h += '<div class="pmsg-input-wrap">';
-  h +=   '<input class="pmsg-input" type="text" id="page-msg-input" placeholder="Votre message...">';
-  h +=   '<button class="pmsg-send" id="page-msg-send-btn">';
-  h +=     '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">';
-  h +=       '<line x1="22" y1="2" x2="11" y2="13"/>';
-  h +=       '<polygon points="22 2 15 22 11 13 2 9 22 2"/>';
-  h +=     '</svg>';
-  h +=   '</button>';
-  h += '</div>';
-  center.innerHTML = h;
-
-  // Attacher les événements
-  var inp = document.getElementById('page-msg-input');
-  var sendBtn = document.getElementById('page-msg-send-btn');
-  if(inp){ inp.addEventListener('keydown', function(e){ if(e.key==='Enter') sendPageMsg(); }); }
-  if(sendBtn){ sendBtn.addEventListener('click', function(){ sendPageMsg(); }); }
-  setTimeout(function(){ if(inp) inp.focus(); }, 100);
-
-  // ── Panneau droit ──
+  // actif géré par openPageConvById
+  var thread = document.getElementById('page-msg-thread');
+  if(!thread) return;
+  var user = DB.user();
+  var conv = convData || {};
+  var otherName = String(conv.buyerId)===(user&&String(user._id)) ? (conv.sellerName||'Vendeur') : (conv.buyerName||'Acheteur');
+  var adTitle = conv.adTitle||'';
+  thread.className = '';
+  thread.innerHTML =
+    '<div class="pmsg-thread-head">'+
+      '<div class="pmsg-thread-av">'+(otherName||'?').charAt(0).toUpperCase()+'</div>'+
+      '<div class="pmsg-thread-info">'+
+        '<div class="pmsg-thread-name">'+otherName+'</div>'+
+        (adTitle?'<div class="pmsg-thread-ad">📦 '+adTitle+'</div>':'')+
+      '</div>'+
+    '</div>'+
+    '<div class="pmsg-seller-card">'+
+      '<div class="pmsg-seller-card-title">À propos de ce vendeur</div>'+
+      '<div class="pmsg-seller-since">'+
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'+
+        'Membre YouGouYou'+
+      '</div>'+
+    '</div>'+
+    '<div class="pmsg-bubbles" id="page-msg-bubbles">'+
+      '<div class="pmsg-security">'+
+        '<strong>Soyez prudent lorsque votre interlocuteur vous demande ou vous envoie un numéro de téléphone / e-mail</strong>'+
+        'Ici nous garantissons la sécurité de vos échanges, c\'est pourquoi nous vous conseillons de rester sur la messagerie pour discuter et passer par le paiement sécurisé pour vos transactions.<br>'+
+        '<a href="#">→ En savoir plus</a>'+
+      '</div>'+
+      '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">⏳ Chargement...</div>'+
+    '</div>'+
+    '<div class="pmsg-input-wrap">'+
+      '<input class="pmsg-input" type="text" id="page-msg-input" placeholder="Écrivez votre message..." '+
+        'onkeydown="if(event.key===\'Enter\')sendPageMsg()">'+
+      '<button class="pmsg-send" onclick="sendPageMsg()">'+
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>'+
+      '</button>'+
+    '</div>';
+  // Remplir la colonne droite avec les infos vendeur
+  var panel = document.getElementById('page-msg-panel');
   if(panel){
-    var p = '';
-    p += '<div class="pmsg-ad-card" onclick="viewAd(\''+adId+'\') ">';
-    if(adPhoto){
-      p += '<img src="'+adPhoto+'" class="pmsg-ad-img" style="width:100%;height:140px;object-fit:cover">';
-    } else {
-      p += '<div class="pmsg-ad-img">\uD83D\uDCE6</div>';
-    }
-    p += '<div class="pmsg-ad-info">';
-    p +=   '<div class="pmsg-ad-title">'+(adTitle||'Annonce')+'</div>';
-    if(adPrice) p += '<div class="pmsg-ad-price">'+adPrice+'</div>';
-    p += '</div></div>';
-    p += '<div class="pmsg-vendor-head">';
-    p +=   '<div class="pmsg-vendor-av">'+otherName.charAt(0).toUpperCase()+'</div>';
-    p +=   '<div><div class="pmsg-vendor-name">'+otherName+'</div>';
-    p +=   '<div class="pmsg-vendor-meta">Membre YouGouYou</div></div>';
-    p += '</div>';
-    p += '<div style="padding:0 0 14px"><button onclick="viewAd(\''+adId+'\') " ';
-    p +=   'style="width:100%;padding:10px;border:1.5px solid var(--br);border-radius:8px;';
-    p +=   'background:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">';
-    p +=   '\uD83D\uDD0D Voir l\u0027annonce</button></div>';
-    p += '<div style="font-size:12px;color:var(--muted);line-height:1.6;background:#f9f9f9;border-radius:8px;padding:10px 12px">';
-    p +=   '<strong style="color:var(--ink);display:block;margin-bottom:4px">\uD83D\uDEE1\uFE0F Paiement securise</strong>';
-    p +=   'Verifiez avant de payer. N\u0027envoyez jamais d\u0027argent a l\u0027avance.</div>';
-    panel.innerHTML = p;
+    panel.innerHTML =
+      '<div class="pmsg-vendor-head">'+
+        '<div class="pmsg-vendor-av">'+(otherName||'?').charAt(0).toUpperCase()+'</div>'+
+        '<div>'+
+          '<div class="pmsg-vendor-name">'+otherName+'</div>'+
+          '<div class="pmsg-vendor-meta">'+
+            '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+
+            'Membre YouGouYou'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      (adTitle?
+        '<div class="pmsg-ad-card">'+
+          '<div class="pmsg-ad-img">📦</div>'+
+          '<div class="pmsg-ad-info">'+
+            '<div class="pmsg-ad-title">'+adTitle+'</div>'+
+          '</div>'+
+        '</div>':'')+
+      '<div style="font-size:12px;color:var(--muted);line-height:1.7;background:#f9f9f9;border-radius:8px;padding:10px 12px;margin-top:8px">'+
+        '<strong style="color:var(--ink);display:block;margin-bottom:4px">🛡️ Paiement sécurisé</strong>'+
+        'Utilisez le paiement Orange Money intégré pour vos transactions. Ne payez jamais en dehors de la plateforme.'+
+      '</div>';
   }
-
-  // ── Charger les messages ──
+  // Charger les messages
   var token = localStorage.getItem('ygy_token');
   if(token){
     fetch('/api/conversations/'+convId,{headers:{'Authorization':'Bearer '+token}})
     .then(function(r){return r.json();})
     .then(function(data){
-      var msgs    = data.messages||[];
-      var bubbles = document.getElementById('page-msg-bubbles');
-      if(!bubbles) return;
+      var msgs = data.messages||[];
+      var container = document.getElementById('page-msg-bubbles');
+      if(!container) return;
       if(!msgs.length){
-        bubbles.innerHTML =
-          '<div class="pmsg-security"><strong>YouGouYou</strong> - Echangez en toute securite.</div>'+
-          '<div style="text-align:center;color:var(--muted);font-size:13px;padding:24px">'+
-            '<div style="font-size:32px;margin-bottom:10px">\uD83D\uDC4B</div>Demarrez la conversation !</div>';
+        container.innerHTML = '<div class="msg-security">🛡️ <strong>Conseils sécurité</strong> — Vérifiez l\'article avant paiement. Échangez en lieu public.</div>'+
+          '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Démarrez la conversation 👋</div>';
         return;
       }
-      var html = '<div class="pmsg-security"><strong>Echangez en toute securite.</strong></div>';
+      var html = '<div class="pmsg-security">'+
+        '<strong>Soyez prudent lorsque votre interlocuteur vous demande un numéro de téléphone / e-mail</strong>'+
+        'Restez sur la messagerie YouGouYou pour vos échanges. Passez par le paiement sécurisé pour vos transactions.'+
+      '</div>';
       msgs.forEach(function(m){
-        var isMine = String(m.senderId)===(user&&String(user._id||user.id));
-        var t = m.createdAt ? new Date(m.createdAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) : '';
-        html += '<div class="pmsg-bubble-wrap '+(isMine?'mine':'theirs')+'">';
-        html +=   '<div class="pmsg-bubble '+(isMine?'mine':'theirs')+'">'+m.text+'</div>';
-        html +=   '<div class="pmsg-bubble-time">'+t+(isMine?' \u00b7 \u2713\u2713':'')+'</div>';
-        html += '</div>';
+        var isMine = String(m.senderId)===(user&&String(user._id));
+        var t = m.createdAt?new Date(m.createdAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
+        html += '<div class="pmsg-bubble-wrap '+(isMine?'mine':'theirs')+'">'+
+          '<div class="pmsg-bubble '+(isMine?'mine':'theirs')+'">'+m.text+'</div>'+
+          '<div class="pmsg-bubble-time">'+t+(isMine?' · ✓✓':'')+'</div>'+
+        '</div>';
       });
-      bubbles.innerHTML = html;
-      bubbles.scrollTop = bubbles.scrollHeight;
+      container.innerHTML = html;
+      container.scrollTop = container.scrollHeight;
     }).catch(function(){});
+    // Marquer comme lu
     fetch('/api/conversations/'+convId+'/read',{method:'PATCH',headers:{'Authorization':'Bearer '+token}}).catch(function(){});
   }
 }
@@ -4828,41 +4642,15 @@ function sendPageMsg(){
   var text = (inp&&inp.value.trim())||'';
   if(!text) return;
   var token = localStorage.getItem('ygy_token');
-  var user = DB.user();
-
-  // Afficher le message localement immédiatement (UX optimiste)
-  var bubbles = document.getElementById('page-msg-bubbles');
-  if(bubbles){
-    var now = new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-    var bubble = document.createElement('div');
-    bubble.className = 'pmsg-bubble-wrap mine';
-    bubble.innerHTML = '<div class="pmsg-bubble mine">'+text+'</div>'+
-      '<div class="pmsg-bubble-time">'+now+' · ✓</div>';
-    bubbles.appendChild(bubble);
-    bubbles.scrollTop = bubbles.scrollHeight;
-  }
-  if(inp) inp.value = '';
-
   fetch('/api/conversations/'+_pageConvId,{
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
     body:JSON.stringify({text:text})
   }).then(function(r){return r.json();})
-  .then(function(data){
-    // Mettre à jour le dernier message dans la liste gauche
-    var convIdx = (_pageConvs||[]).findIndex(function(c){return (c._id||c.id)===_pageConvId;});
-    if(convIdx>=0){
-      _pageConvs[convIdx].lastMessage = text.substring(0,100);
-      _pageConvs[convIdx].updatedAt = new Date().toISOString();
-      renderPageConvList(_pageConvs);
-    }
-    // Marquer ✓✓ sur la bulle (lu côté serveur)
-    if(bubbles){
-      var times = bubbles.querySelectorAll('.pmsg-bubble-time');
-      var last = times[times.length-1];
-      if(last && last.textContent.includes('✓') && !last.textContent.includes('✓✓'))
-        last.textContent = last.textContent.replace('✓','✓✓');
-    }
+  .then(function(){
+    if(inp) inp.value='';
+    // Recharger les messages
+    openPageConv(_pageConvId, {buyerId:'', sellerName:'', adTitle:''});
   }).catch(function(){ toast('❌ Erreur envoi','err'); });
 }
 function updateNav(){
@@ -4878,15 +4666,12 @@ function updateNav(){
     btn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span id="nav-user-label">Se connecter</span>';
     btn.onclick=function(){openModal('auth');};
   }
-  // Bouton Admin nav principale + lien Admin dashboard
+  // Bouton Admin + lien sidebar : gérés UNIQUEMENT par syncRoleFromServer (source=MongoDB)
+  // updateNav() ne les touche jamais pour éviter les faux positifs depuis le localStorage
   var adminNavBtn = document.getElementById('nav-admin-btn');
-  var adminLink   = document.getElementById('nav-admin-link');
-  var isAdmin = (u && u.role==='admin');
-  if(adminNavBtn) adminNavBtn.style.display = isAdmin ? 'inline-flex' : 'none';
-  if(adminLink){
-    if(isAdmin) adminLink.removeAttribute('hidden');
-    else adminLink.setAttribute('hidden','');
-  }
+  if(adminNavBtn) adminNavBtn.style.display='none';
+  var adminLink = document.getElementById('nav-admin-link');
+  if(adminLink) adminLink.setAttribute('hidden','');
 }
 
 // ══════════════════════════════════════════
@@ -4900,26 +4685,11 @@ function syncRoleFromServer(callback){
   .then(function(data){
     if(data&&data.user){
       var u=DB.user()||{};
+      // Stocker TOUS les champs utiles, dont _id pour les appels API
       if(data.user.id)       u._id      = data.user.id;
       if(data.user._id)      u._id      = data.user._id;
-      u.role    = data.user.role;   // toujours depuis MongoDB — source de vérité
+      u.role    = data.user.role;
       u.isPro   = data.user.isPro   || false;
-      // Révéler Panel Admin seulement si MongoDB confirme role='admin'
-      var _adminBtn = document.getElementById('nav-admin-btn');
-      var _adminLnk = document.getElementById('nav-admin-link');
-      var _adminBox = document.getElementById('dash-admin-box');
-      var _roleB    = document.getElementById('p-role-badge');
-      if(data.user.role === 'admin'){
-        if(_adminBtn) _adminBtn.style.display = 'inline-flex';
-        if(_adminLnk) _adminLnk.removeAttribute('hidden');
-        if(_adminBox) _adminBox.style.display = 'block';
-        if(_roleB)    _roleB.innerHTML = '<span class="lbc-profile-badge admin">👑 Administrateur</span>';
-      } else {
-        if(_adminBtn) _adminBtn.style.display = 'none';
-        if(_adminLnk) _adminLnk.setAttribute('hidden','');
-        if(_adminBox) _adminBox.style.display = 'none';
-        // badge reste vérifié/pro selon isPro
-      }
       if(data.user.proUntil) u.proUntil = data.user.proUntil;
       if(data.user.prenom)   u.prenom   = data.user.prenom;
       if(data.user.nom)      u.nom      = data.user.nom;
@@ -4927,14 +4697,25 @@ function syncRoleFromServer(callback){
       if(data.user.phone)    u.phone    = data.user.phone;
       if(data.user.email)    u.email    = data.user.email;
       if(data.user.city)     u.city     = data.user.city;
-      if(data.user.dob)      u.dob      = data.user.dob;
-      if(data.user.pob)      u.pob      = data.user.pob;
+      if(data.user.dob)  u.dob = data.user.dob;
+      if(data.user.pob)  u.pob = data.user.pob;
       DB.login(u);
-      // Charger les favoris depuis MongoDB en arrière-plan
-      fetch('/api/me/favorites',{headers:{'Authorization':'Bearer '+token}})
-      .then(function(r){return r.ok?r.json():null;})
-      .then(function(fd){ if(fd&&fd.favorites) DB.setFavs(fd.favorites); })
-      .catch(function(){});
+      // ── Rendu conditionnel Panel Admin : source de vérité = MongoDB ──
+      var _btn = document.getElementById('nav-admin-btn');
+      var _lnk = document.getElementById('nav-admin-link');
+      var _box = document.getElementById('dash-admin-box');
+      var _ftb = document.getElementById('ft-admin-btn');
+      if(data.user.role === 'admin'){
+        if(_btn) _btn.style.display = 'inline-flex';
+        if(_lnk) _lnk.removeAttribute('hidden');
+        if(_box) _box.style.display = 'block';
+        if(_ftb) _ftb.style.display = 'block';
+      } else {
+        if(_btn) _btn.style.display = 'none';
+        if(_lnk) _lnk.setAttribute('hidden','');
+        if(_box) _box.style.display = 'none';
+        if(_ftb) _ftb.style.display = 'none';
+      }
     }
     if(callback)callback();
   })
@@ -4959,8 +4740,6 @@ function adaptDashNav(isAdmin, isPro, isUser){
   document.querySelectorAll('.dash-nav-admin-only').forEach(function(el){
     el.style.display = isAdmin ? 'flex' : 'none';
   });
-  var adminSep = document.getElementById('dash-nav-admin-sep');
-  if(adminSep) adminSep.style.display = isAdmin ? 'block' : 'none';
   // User seulement : Historique et Alertes (cachés pour admin)
   document.querySelectorAll('.dash-nav-user-only').forEach(function(el){
     el.style.display = isAdmin ? 'none' : 'flex';
@@ -4968,21 +4747,14 @@ function adaptDashNav(isAdmin, isPro, isUser){
   // Label annonces selon rôle
   var adsLabel = document.getElementById('dash-ads-label');
   if(adsLabel) adsLabel.textContent = isAdmin ? 'Les annonces' : 'Mes annonces';
-  // Lien Panel Admin dans sidebar
-  var adminLink = document.getElementById('nav-admin-link');
-  if(adminLink){
-    if(isAdmin) adminLink.removeAttribute('hidden');
-    else adminLink.setAttribute('hidden','');
-  }
+  // nav-admin-link géré uniquement par syncRoleFromServer (MongoDB)
 }
 function renderDash(){
   var u=DB.user(); if(!u) return;
 
-  // ── Masquer Panel Admin par défaut (sera révélé seulement si /api/me confirme admin) ──
-  var adminLinkEl = document.getElementById('nav-admin-link');
-  if(adminLinkEl) adminLinkEl.setAttribute('hidden','');
-  var adminNavBtn = document.getElementById('nav-admin-btn');
-  if(adminNavBtn) adminNavBtn.style.display='none';
+  // Masquer Panel Admin dès le début — syncRoleFromServer le révèle si MongoDB=admin
+  var _rb=document.getElementById('nav-admin-btn'); if(_rb) _rb.style.display='none';
+  var _rl=document.getElementById('nav-admin-link'); if(_rl) _rl.setAttribute('hidden','');
 
   // ── Infos sidebar ──
   var initials=(u.prenom||u.name||'U').charAt(0).toUpperCase()+((u.nom||'').charAt(0)||'').toUpperCase();
@@ -4990,11 +4762,9 @@ function renderDash(){
   document.getElementById('d-nm').textContent=u.name||u.prenom||'Utilisateur';
   document.getElementById('d-ph').textContent=u.phone||u.email||'';
 
-  // ── Rôle effectif depuis localStorage (provisoire — sera corrigé par syncRoleFromServer) ──
-  // On ne fait JAMAIS confiance à role='admin' venant du localStorage
-  // seul /api/me (MongoDB) fait autorité
-  var isAdmin = false; // forcé à false — sera mis à true seulement par syncRoleFromServer
-  var isPro   = !!(u.isPro && u.proUntil && new Date(u.proUntil)>new Date());
+  // ── Rôle effectif ──
+  var isAdmin = (u.role==='admin');
+  var isPro   = !isAdmin && !!(u.isPro && u.proUntil && new Date(u.proUntil)>new Date());
 
   // ── Adapter toute la nav selon le rôle ──
   var isUser = !isAdmin && !isPro;
@@ -5012,32 +4782,26 @@ function renderDash(){
   var payGrid=document.getElementById('dash-pay-period-stats');
   if(payGrid) payGrid.style.display=isAdmin?'grid':'none';
 
-  // ── Onglet Profil — infos style Leboncoin ──
+  // Onglet Profil — infos personnelles
   var av=document.getElementById('p-avatar');
   if(av) av.textContent=initials||'U';
   var pn=document.getElementById('p-name');
-  if(pn) pn.textContent=(u.prenom||(u.name||'').split(' ')[0]||'—')+' '+((u.nom||(u.name||'').split(' ').slice(1).join(' '))||'');
-  var pns=document.getElementById('p-name-sub');
-  if(pns) pns.textContent=(u.prenom||u.name||'—')+' '+(u.nom||'');
+  if(pn) pn.textContent=u.name||u.prenom||'—';
   var rb=document.getElementById('p-role-badge');
-  if(rb){
-    // isAdmin est forcé false ici — le badge admin ne peut s'afficher
-    // que si syncRoleFromServer confirme plus tard (via re-render ou update direct)
-    if(isPro) rb.innerHTML='<span class="lbc-profile-badge pro">⭐ Compte Pro</span>';
-    else rb.innerHTML='<span class="lbc-profile-badge verified">✅ Membre vérifié</span>';
-  }
+  if(rb) rb.innerHTML=u.role==='admin'
+    ? '<span style="background:#EFF6FF;color:#1D4ED8;font-size:11px;font-weight:800;padding:3px 10px;border-radius:50px">👑 Administrateur</span>'
+    : '<span style="background:#D1FAE5;color:#065F46;font-size:11px;font-weight:800;padding:3px 10px;border-radius:50px">✅ Membre vérifié</span>';
+  // Bloc accès admin direct dans le profil
   var adminBox = document.getElementById('dash-admin-box');
-  if(adminBox) adminBox.style.display = 'none'; // caché par défaut, révélé par syncRoleFromServer
+  if(adminBox) adminBox.style.display = (u.role==='admin') ? 'block' : 'none';
   var pp=document.getElementById('p-phone');
   if(pp) pp.textContent=u.phone||'Non renseigné';
   var pe=document.getElementById('p-email');
   if(pe) pe.textContent=u.email||'Non renseigné';
   var pc=document.getElementById('p-city');
   if(pc) pc.textContent=u.city||'Non renseignée';
-  var pch=document.getElementById('p-city-hero');
-  if(pch) pch.style.display=u.city?'flex':'none';
   var pv=document.getElementById('p-verif');
-  if(pv) pv.textContent=(u.method==='email'?'Email':'SMS');
+  if(pv) pv.textContent=(u.method==='email'?'📧 Email':'📱 SMS')+' — Vérifié';
   var pdob=document.getElementById('p-dob');
   if(pdob) pdob.textContent=u.dob ? new Date(u.dob).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}) : 'Non renseignée';
   var ppob=document.getElementById('p-pob');
@@ -5112,28 +4876,12 @@ function renderDash(){
     }
   }
 
-  // Onglet Favoris — charger depuis l'API
+  // Onglet Favoris
+  var favAds=DB.ads().filter(function(a){return favIds.includes(a.id);});
   var df=document.getElementById('d-favs');
-  if(df){
-    df.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted)">⏳ Chargement...</div>';
-    var tokFav=localStorage.getItem('ygy_token');
-    if(tokFav){
-      fetch('/api/me/favorites',{headers:{'Authorization':'Bearer '+tokFav}})
-      .then(function(r){return r.ok?r.json():Promise.reject();})
-      .then(function(data){
-        DB.setFavs(data.favorites||[]);
-        var pcf=document.getElementById('p-count-favs');
-        if(pcf) pcf.textContent=(data.favorites||[]).length;
-        var favAds=data.ads||[];
-        df.innerHTML=favAds.length
-          ? favAds.map(function(a){return adCard(a,false);}).join('')
-          : '<div style="grid-column:1/-1;background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:48px;text-align:center;color:var(--muted);box-shadow:var(--sh)"><div style="font-size:52px;margin-bottom:14px">❤️</div><p>Aucun favori</p></div>';
-      })
-      .catch(function(){ df.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted)">❌ Impossible de charger les favoris</div>'; });
-    } else {
-      df.innerHTML='<div style="grid-column:1/-1;background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:48px;text-align:center;color:var(--muted);box-shadow:var(--sh)"><div style="font-size:52px;margin-bottom:14px">❤️</div><p>Aucun favori</p></div>';
-    }
-  }
+  if(df) df.innerHTML=favAds.length
+    ? favAds.map(function(a){return adCard(a,false);}).join('')
+    : '<div style="grid-column:1/-1;background:var(--wh);border:1px solid var(--br);border-radius:var(--rad);padding:48px;text-align:center;color:var(--muted);box-shadow:var(--sh)"><div style="font-size:52px;margin-bottom:14px">❤️</div><p>Aucun favori</p></div>';
 }
 function dashRow(a, idx){
   var adId = a._id||a.id||'';
@@ -5276,11 +5024,12 @@ function toast(msg,type,dur){
 function contactVendeur(){
   var user = DB.user();
   if(!user){
+    // Pas connecté → alerte + ouvre modal auth
     toast('🔒 Connectez-vous pour contacter le vendeur','err');
     setTimeout(function(){ openModal('auth'); }, 600);
     return;
   }
-  // Connecté → ouvrir le modal de commission (paiement pour voir le numéro)
+  // Connecté → ouvrir le modal de commission
   openCommission();
 }
 
@@ -5431,31 +5180,23 @@ function goAdmin(){
   var tok = localStorage.getItem('ygy_token');
   if(!tok){ openModal('auth'); return; }
 
-  // Vérifier le rôle directement via /api/me (source de vérité MongoDB)
-  // Si role==='admin' → accès autorisé. Sinon → refus.
-  fetch('/api/me',{headers:{'Authorization':'Bearer '+tok}})
-  .then(function(r){return r.ok?r.json():Promise.reject('http_'+r.status);})
-  .then(function(data){
-    if(!data||!data.user) throw new Error('no_user');
-    if(data.user.role !== 'admin'){
+  // Vérifier le rôle directement via /api/admin/stats
+  // Si la requête réussit (200) → l'utilisateur est admin
+  // Si 403 → pas admin
+  fetch('/api/admin/stats',{headers:{'Authorization':'Bearer '+tok}})
+  .then(function(r){
+    if(r.ok){
+      // Confirmer le role admin localement + stocker _id depuis le token
+      u.role = 'admin';
+      if(!u._id) u._id = u.id || (tok ? JSON.parse(atob(tok.split('.')[1])).id : null);
+      DB.login(u);
+      updateNav();
+      goTo('admin');
+      adminTab('stats');
+      loadAdmin();
+    } else {
       toast('Accès réservé aux administrateurs','err');
-      // S'assurer que le bouton Admin est bien masqué
-      var btn = document.getElementById('nav-admin-btn');
-      if(btn) btn.style.display = 'none';
-      var lnk = document.getElementById('nav-admin-link');
-      if(lnk) lnk.setAttribute('hidden','');
-      return;
     }
-    // Rôle confirmé depuis MongoDB → mettre à jour localement
-    var uu = DB.user()||{};
-    uu.role = 'admin';
-    if(data.user.id)  uu._id = data.user.id;
-    if(data.user._id) uu._id = data.user._id;
-    DB.login(uu);
-    updateNav();
-    goTo('admin');
-    adminTab('stats');
-    loadAdmin();
   })
   .catch(function(){ toast('Erreur de connexion','err'); });
 }
@@ -5995,30 +5736,28 @@ function showDashTab(tab){
 }
 
 function toggleFav(id){
-  var user = DB.user();
-  if(!user){ toast('🔒 Connectez-vous pour ajouter aux favoris','err'); setTimeout(function(){ openModal('auth'); },400); return; }
-  var tok = localStorage.getItem('ygy_token');
-  if(!tok){ toast('🔒 Reconnectez-vous','err'); return; }
-  var sid = String(id);
-  fetch('/api/me/favorites/'+sid, {
-    method:'POST',
-    headers:{'Authorization':'Bearer '+tok}
-  })
-  .then(function(r){return r.json();})
-  .then(function(data){
-    if(data.error){ toast('❌ '+data.error,'err'); return; }
-    DB.setFavs(data.favorites || []);
-    var added = data.action === 'added';
-    toast(added ? '❤️ Ajouté aux favoris !' : '💔 Retiré des favoris', added ? 'ok' : '');
-    // Mettre à jour visuellement tous les boutons favoris de cette annonce
-    document.querySelectorAll('.lbc-fav[data-adid="'+sid+'"],.ad-card-fav[data-adid="'+sid+'"]').forEach(function(btn){
-      btn.style.color = added ? '#CC1C0C' : '';
-      btn.title = added ? 'Retirer des favoris' : 'Ajouter aux favoris';
-      var path = btn.querySelector('path');
-      if(path) path.setAttribute('fill', added ? '#CC1C0C' : 'none');
-    });
-  })
-  .catch(function(){ toast('❌ Erreur réseau','err'); });
+  var favIds = DB.favs();
+  var isFav = favIds.includes(id);
+  if(isFav){
+    DB._d.favs = favIds.filter(function(f){ return f !== id; });
+    toast('💔 Retiré des favoris');
+  } else {
+    DB.addFav(id);
+    toast('❤️ Ajouté aux favoris !', 'ok');
+  }
+  DB.save();
+  // Rafraîchir le bouton dans la grille
+  document.querySelectorAll('.ad-card-fav').forEach(function(btn){
+    var card = btn.closest('.ad-card');
+    if(card && card.onclick){
+      var onclick = card.getAttribute('onclick')||card.onclick.toString();
+      if(onclick.includes(id)){
+        var newFav = DB.favs().includes(id);
+        btn.textContent = newFav ? '❤️' : '🤍';
+        btn.classList.toggle('active', newFav);
+      }
+    }
+  });
 }
 
 function toggleMobileFilters(){
@@ -6422,190 +6161,160 @@ function deleteAlert(id){
 var _currentConvId=null;
 var _convPollTimer=null;
 
-// Alias : ces fonctions sont des ponts vers le Système B (pmsg-*)
 function loadConversations(){
+  var list=document.getElementById('page-msg-list');
+  if(!list) return;
   var token=localStorage.getItem('ygy_token');
-  if(!token) return;
+  if(!token){ list.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">Connectez-vous pour voir vos messages</div>'; return; }
   fetch('/api/conversations',{headers:{'Authorization':'Bearer '+token}})
   .then(function(r){return r.json();})
   .then(function(data){
     var convs=data.conversations||data||[];
-    _pageConvs=convs;
-    renderPageConvList(convs);
+    renderConversationList(convs);
     updateMsgBadge(convs);
-  }).catch(function(){});
+  }).catch(function(){
+    list.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px"><div style="font-size:28px;margin-bottom:8px">💬</div>Messagerie disponible<br>après connexion au serveur</div>';
+  });
 }
 
 function renderConversationList(convs){
-  _pageConvs=convs;
-  renderPageConvList(convs);
+  window._cachedConvs=convs;
+  var list=document.getElementById('page-msg-list');
+  if(!list) return;
+  if(!convs.length){
+    list.innerHTML='<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px"><div style="font-size:28px;margin-bottom:8px">💬</div>Aucune conversation<br><small>Contactez un vendeur pour commencer</small></div>';
+    return;
+  }
+  var user=DB.user();
+  list.innerHTML=convs.map(function(conv){
+    var isUnread=(conv.unreadCount||0)>0;
+    var name=conv.buyerId===(user&&user._id)?conv.sellerName:conv.buyerName;
+    var last=conv.lastMessage||'Nouvelle conversation';
+    var time=conv.updatedAt?timeAgo(conv.updatedAt):'';
+    var active=_currentConvId===conv._id?'active':'';
+    var cid=conv._id||conv.id||'';
+    return '<div class="msg-list-item '+active+'" onclick="openConvById(\''+cid+'\')">'
+      +'<div class="msg-av">'+(name||'?').charAt(0).toUpperCase()+'</div>'
+      +'<div class="msg-info">'
+        +'<div class="msg-name">'+(name||'Utilisateur')+'</div>'
+        +'<div class="msg-preview">'+last.substring(0,40)+'</div>'
+        +(isUnread?'<span class="msg-badge">'+conv.unreadCount+'</span>':'')
+      +'</div>'
+      +'<div class="msg-time">'+time+'</div>'
+      +'</div>';
+  }).join('');
 }
 
-function openConvById(convId){
-  openPageConvById(convId);
+function openConvById(convId){ 
+  var convs=window._cachedConvs||[];
+  var conv=convs.find(function(c){return c._id===convId;})||{_id:convId,adTitle:'Conversation'};
+  openConversation(convId,conv);
 }
-
 function openConversation(convId, conv){
   _currentConvId=convId;
-  openPageConv(convId, conv);
+  document.querySelectorAll('.msg-list-item').forEach(function(i){i.classList.remove('active');});
+  var items=document.querySelectorAll('.msg-list-item');
+  items.forEach(function(item){ if(item.onclick && item.onclick.toString().includes(convId)) item.classList.add('active'); });
+  var thread=document.getElementById('page-msg-thread');
+  if(!thread) return;
+  var user=DB.user();
+  var otherName=conv.buyerId===(user&&user._id)?conv.sellerName:conv.buyerName;
+  var adTitle=(conv.adTitle||'');
+  thread.innerHTML=
+    '<div class="msg-thread-head">'+
+      '<div class="msg-av" style="width:38px;height:38px;font-size:15px;flex-shrink:0">'+(otherName||'?').charAt(0).toUpperCase()+'</div>'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="font-size:14px;font-weight:700;color:var(--ink)">'+otherName+'</div>'+
+        (adTitle?'<div style="font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">📦 '+adTitle+'</div>':'')+
+      '</div>'+
+    '</div>'+
+    '<div class="msg-bubbles" id="msg-bubbles-'+convId+'">'+
+      '<div class="msg-security">'+
+        '🛡️ <strong>Conseils sécurité</strong> — Vérifiez l\'article avant paiement. Échangez en lieu public. N\'envoyez jamais d\'argent à l\'avance.'+
+      '</div>'+
+      '<div style="text-align:center;padding:16px;color:var(--muted);font-size:12px">⏳ Chargement...</div>'+
+    '</div>'+
+    '<div class="msg-input-row">'+
+      '<input type="text" id="msg-input-text" placeholder="Votre message..." '+
+        'onkeydown="if(event.key===\'Enter\')sendMsgInThread()" '+
+        'onfocus="this.style.borderColor=\'var(--or)\'" onblur="this.style.borderColor=\'var(--br)\'">'+
+      '<button class="msg-send-btn" onclick="sendMsgInThread()">'+
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>'+
+      '</button>'+
+    '</div>';
+  loadMessages(convId);
+  // Marquer comme lu
+  var token=localStorage.getItem('ygy_token');
+  if(token) fetch('/api/conversations/'+convId+'/read',{method:'PATCH',headers:{'Authorization':'Bearer '+token}}).catch(function(){});
 }
 
 function loadMessages(convId){
-  // Géré par openPageConv
+  var token=localStorage.getItem('ygy_token');
+  if(!token) return;
+  fetch('/api/conversations/'+convId,{headers:{'Authorization':'Bearer '+token}})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var msgs=data.messages||[];
+    renderMessages(convId,msgs);
+  }).catch(function(){ console.log('Messagerie: connexion serveur requise'); });
 }
 
-function renderMessages(convId, msgs){
-  // Géré par openPageConv
+function renderMessages(convId,msgs){
+  var container=document.getElementById('msg-bubbles-'+convId);
+  if(!container) return;
+  var user=DB.user();
+  if(!msgs.length){
+    container.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Démarrez la conversation 👋</div>';
+    return;
+  }
+  container.innerHTML=msgs.map(function(m){
+    var isMine=String(m.senderId)===(user&&String(user._id));
+    var t=m.createdAt?new Date(m.createdAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
+    return '<div style="display:flex;flex-direction:column;align-items:'+(isMine?'flex-end':'flex-start')+';margin-bottom:4px">'+
+      '<div class="msg-bubble '+(isMine?'mine':'theirs')+'">'+
+        '<div>'+m.text+'</div>'+
+        '<div style="font-size:10px;opacity:.65;margin-top:4px;text-align:'+(isMine?'right':'left')+'">'+
+          t+(isMine?' &nbsp;'+(m.read?'✓✓':'✓'):'')+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  container.scrollTop=container.scrollHeight;
 }
 
 function sendMsgInThread(){
-  sendPageMsg();
+  if(!_currentConvId){ toast('Selectionnez une conversation','warn'); return; }
+  var input=document.getElementById('msg-input-text');
+  var text=(input&&input.value.trim())||'';
+  if(!text) return;
+  var token=localStorage.getItem('ygy_token');
+  fetch('/api/conversations/'+_currentConvId,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},
+    body:JSON.stringify({text:text})
+  }).then(function(r){return r.json();})
+  .then(function(data){
+    if(input) input.value='';
+    loadMessages(_currentConvId);
+  }).catch(function(){
+    // Mode démo
+    if(input) input.value='';
+    toast('✅ Message envoyé','ok');
+  });
 }
 
 // Modal message rapide depuis page detail
-async function envoyerMessage(){
-  var user = DB.user();
-  if(!user){
-    toast('🔒 Connectez-vous pour envoyer un message','err');
-    setTimeout(function(){ openModal('auth'); }, 400);
-    return;
-  }
-  if(!curAd){ toast('Annonce non disponible','err'); return; }
-
-  var adId    = curAd._id || curAd.id;
-  var titre   = curAd.t   || curAd.title || 'Annonce';
-  var vendeur = curAd.sellerName || curAd.seller_name || 'Vendeur';
-  var sellerId = curAd.seller || curAd.sellerId || curAd.sid;
-
-  if(!adId){ toast('ID annonce manquant','err'); return; }
-
-  // Empêcher d'écrire à soi-même
-  if(sellerId && String(sellerId) === String(user._id || user.id)){
-    toast('Vous ne pouvez pas vous envoyer un message','warn');
-    return;
-  }
-
-  // Ouvrir le modal de saisie de message
-  var overlay = document.getElementById('overlay-send-msg');
-  if(!overlay){
-    // Créer le modal dynamiquement s'il n'existe pas encore
-    overlay = document.createElement('div');
-    overlay.id = 'overlay-send-msg';
-    overlay.className = 'overlay';
-    overlay.innerHTML =
-      '<div class="modal" style="max-width:420px">' +
-        '<div class="modal-head">' +
-          '<span class="modal-title">💬 Envoyer un message</span>' +
-          '<button class="modal-close" onclick="closeModal(\'send-msg\')">✕</button>' +
-        '</div>' +
-        '<div class="modal-body">' +
-          '<div id="send-msg-to" style="font-size:13px;color:var(--muted);margin-bottom:12px"></div>' +
-          '<textarea id="send-msg-text" rows="4" placeholder="Bonjour, je suis intéressé(e) par votre annonce. Est-elle toujours disponible ?" ' +
-            'style="width:100%;border:1.5px solid var(--br);border-radius:8px;padding:10px 12px;font-size:13px;font-family:inherit;resize:vertical;outline:none;transition:border-color .2s" ' +
-            'onfocus="this.style.borderColor=\'var(--or)\'" onblur="this.style.borderColor=\'var(--br)\'"></textarea>' +
-          '<div style="font-size:11px;color:var(--muted);margin-top:6px">Votre message sera envoyé à <strong id="send-msg-seller"></strong></div>' +
-        '</div>' +
-        '<div style="padding:0 20px 18px;display:flex;gap:10px">' +
-          '<button class="btn btn-ghost" style="flex:1" onclick="closeModal(\'send-msg\')">Annuler</button>' +
-          '<button class="btn btn-or" style="flex:1" id="send-msg-btn" onclick="submitEnvoyerMessage()">📤 Envoyer</button>' +
-        '</div>' +
-      '</div>';
-    document.body.appendChild(overlay);
-  }
-
-  // Pré-remplir
-  var toEl = document.getElementById('send-msg-to');
-  var sellerEl = document.getElementById('send-msg-seller');
-  var textEl = document.getElementById('send-msg-text');
-  if(toEl) toEl.textContent = 'Annonce : ' + titre;
-  if(sellerEl) sellerEl.textContent = vendeur;
-  if(textEl){
-    textEl.value = '';
-    textEl.style.borderColor = 'var(--br)';
-  }
-  var sendBtn = document.getElementById('send-msg-btn');
-  if(sendBtn){ sendBtn.disabled = false; sendBtn.textContent = '📤 Envoyer'; }
-
-  openModal('send-msg');
-  setTimeout(function(){ if(textEl) textEl.focus(); }, 200);
+function envoyerMessage(){
+  var user=DB.user();
+  if(!user){ toast('🔒 Connectez-vous','err'); openModal('auth'); return; }
+  if(!curAd) return;
+  var prev=document.getElementById('msg-ad-preview');
+  if(prev) prev.innerHTML='📦 <strong>'+(curAd.t||curAd.title||'Annonce')+'</strong><br>'+
+    '<span style="color:var(--or);font-weight:700">'+(curAd.p||curAd.price||0).toLocaleString('fr-FR')+' GNF</span>';
+  var txt=document.getElementById('quick-msg-text');
+  if(txt) txt.value='Bonjour, votre annonce m interesse. Est-elle toujours disponible ?';
+  openModal('message');
 }
-
-async function submitEnvoyerMessage(){
-  var tok = localStorage.getItem('ygy_token');
-  var textEl = document.getElementById('send-msg-text');
-  var msgText = textEl ? textEl.value.trim() : '';
-
-  if(!msgText){
-    if(textEl){ textEl.style.borderColor='#DC2626'; textEl.focus(); }
-    toast('⚠️ Entrez votre message','err');
-    return;
-  }
-  if(!curAd){ toast('Annonce non disponible','err'); return; }
-
-  var adId  = curAd._id || curAd.id;
-  var titre = curAd.t || curAd.title || 'Annonce';
-  var vendeur = curAd.sellerName || 'Vendeur';
-
-  var sendBtn = document.getElementById('send-msg-btn');
-  if(sendBtn){ sendBtn.disabled = true; sendBtn.textContent = '⏳...'; }
-
-  try {
-    var res = await fetch('/api/conversations', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json','Authorization':'Bearer '+tok},
-      body: JSON.stringify({adId: adId, message: msgText})
-    });
-    var data = await res.json();
-
-    if(!res.ok){
-      if(res.status === 401){
-        toast('🔒 Session expirée — reconnectez-vous', 'err');
-        localStorage.removeItem('ygy_token');
-        DB.logout(); updateNav();
-        closeModal('send-msg');
-        setTimeout(function(){ openModal('auth'); }, 600);
-        return;
-      }
-      toast('❌ ' + (data.error || 'Erreur'), 'err');
-      return;
-    }
-
-    var convId = data.conversationId;
-    closeModal('send-msg');
-    toast('✅ Message envoyé !', 'ok');
-
-    // Naviguer vers la page messages SANS recharger la liste (on va le faire nous-mêmes)
-    goTo('messages', {skipConvLoad: true});
-
-    // Construire les données de la conv pour affichage immédiat
-    var convData = {
-      _id: convId, adTitle: titre, sellerName: vendeur,
-      buyerId: String((DB.user()||{})._id || (DB.user()||{}).id || '')
-    };
-
-    // Charger la liste à gauche ET ouvrir le thread en parallèle
-    fetch('/api/conversations',{headers:{'Authorization':'Bearer '+tok}})
-    .then(function(r){return r.json();})
-    .then(function(d){
-      var convs = d.conversations||[];
-      _pageConvs = convs;
-      renderPageConvList(convs);
-      updateMsgBadge(convs);
-      // Ouvrir la conversation après que la liste soit rendue
-      openPageConv(convId, convData);
-    })
-    .catch(function(){
-      // Fallback : ouvrir quand même la conversation
-      openPageConv(convId, convData);
-    });
-
-  } catch(err) {
-    toast('❌ Erreur réseau — vérifiez votre connexion', 'err');
-  } finally {
-    if(sendBtn){ sendBtn.disabled = false; sendBtn.textContent = '📤 Envoyer'; }
-  }
-}
-
 
 function sendQuickMessage(){
   var user=DB.user();
@@ -6928,8 +6637,8 @@ function viewAdEnhanced(id){
 
 // Patch goTo pour enrichir la page detail
 var _origGoTo=goTo;
-goTo=function(page, opts){
-  _origGoTo(page, opts);
+goTo=function(page){
+  _origGoTo(page);
   if(page==='detail'){
     setTimeout(function(){
       if(curAd) injectOGMeta(curAd);
@@ -6939,24 +6648,6 @@ goTo=function(page, opts){
 
 document.addEventListener('DOMContentLoaded',function(){
   DB.load();
-  // Auto-refresh du token si présent (silencieux)
-  (function(){
-    var tok = localStorage.getItem('ygy_token');
-    if(tok){
-      fetch('/api/auth/refresh',{
-        method:'POST',
-        headers:{'Authorization':'Bearer '+tok}
-      })
-      .then(function(r){ return r.ok ? r.json() : null; })
-      .then(function(d){
-        if(d && d.token){
-          localStorage.setItem('ygy_token', d.token);
-          console.log('[AUTH] Token renouvelé automatiquement');
-        }
-      }).catch(function(){});
-    }
-  })();
-
   // Sync rôle + Pro depuis MongoDB au chargement, puis mettre à jour toute la nav
   (function(){
     var token = localStorage.getItem('ygy_token');
@@ -7061,7 +6752,7 @@ document.addEventListener('DOMContentLoaded',function(){
     renderAds();
     setTimeout(initInfiniteScroll, 500);
     setTimeout(markSeenAds, 800);
-    // startMsgPolling désactivé temporairement
+    setTimeout(startMsgPolling, 2000);
   });
   startInactivityWatch();
   // Init PWA
@@ -7284,46 +6975,43 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <!-- ══ PAGE MESSAGES ══ -->
 <div id="page-messages" class="page">
-  <div class="pmsg-wrap">
-    <!-- COL 1 : liste -->
-    <div class="pmsg-left">
-      <div class="pmsg-left-head">
-        <button class="pmsg-back" onclick="goTo('home')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg> Retour
-        </button>
-        <span style="font-size:15px;font-weight:800;flex:1">Messages</span>
-      </div>
-      <div class="pmsg-search-wrap">
-        <input class="pmsg-search" id="pmsg-q" type="text" placeholder="🔍 Rechercher..."
-          oninput="filterPageConvsBySearch(this.value)">
-      </div>
-      <div class="pmsg-filters">
-        <button class="pmsg-filter active" onclick="filterConvs('all',this)">Tous</button>
-        <button class="pmsg-filter" onclick="filterConvs('unread',this)">Non lus</button>
-      </div>
-      <div id="page-msg-list" class="pmsg-list">
-        <div style="padding:40px 20px;text-align:center;color:var(--muted)">
-          <div style="font-size:40px;margin-bottom:10px">💬</div>
-          <div style="font-size:13px">Chargement...</div>
-        </div>
-      </div>
+<div class="pmsg-wrap">
+  <!-- COL 1 : liste conversations -->
+  <div class="pmsg-left">
+    <div class="pmsg-left-head">
+      <button onclick="goTo('home')" class="pmsg-back">← Retour</button>
+      <span style="font-weight:800;font-size:15px">Messages</span>
     </div>
-    <!-- COL 2 : thread -->
-    <div class="pmsg-center" id="pmsg-center">
-      <div id="page-msg-thread" class="pmsg-thread-empty">
-        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        <div style="font-size:16px;font-weight:800;color:#999;margin-top:14px">Sélectionnez une conversation</div>
-        <div style="font-size:13px;margin-top:6px">Vos échanges apparaissent ici</div>
-      </div>
+    <div class="pmsg-filters">
+      <button class="pmsg-filter active" onclick="filterConvs('all',this)">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Tout
+      </button>
+      <button class="pmsg-filter" onclick="filterConvs('unread',this)">Non lus</button>
     </div>
-    <!-- COL 3 : infos vendeur -->
-    <div class="pmsg-right-panel" id="page-msg-panel">
-      <div style="padding:40px 16px;text-align:center;color:var(--muted)">
-        <div style="font-size:36px;margin-bottom:8px">ℹ️</div>
-        <div style="font-size:13px">Sélectionnez une conversation</div>
+    <div id="page-msg-list" class="pmsg-list">
+      <div style="padding:32px 16px;text-align:center;color:var(--muted)">
+        <div style="font-size:36px;margin-bottom:8px">💬</div>
+        <div style="font-size:13px">Aucune conversation</div>
       </div>
     </div>
   </div>
+  <!-- COL 2 : fil messages -->
+  <div class="pmsg-center">
+    <div id="page-msg-thread" class="pmsg-thread-empty">
+      <div style="font-size:48px;margin-bottom:12px">👈</div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:6px">Sélectionnez une conversation</div>
+      <div style="font-size:13px;color:var(--muted)">Vos échanges apparaissent ici</div>
+    </div>
+  </div>
+  <!-- COL 3 : infos vendeur -->
+  <div class="pmsg-right-panel" id="page-msg-panel">
+    <div style="padding:40px 16px;text-align:center;color:var(--muted)">
+      <div style="font-size:36px;margin-bottom:8px">ℹ️</div>
+      <div style="font-size:13px">Infos vendeur</div>
+    </div>
+  </div>
+</div>
 </div>
 
 <!-- ══ PAGE FAVORIS ══ -->
@@ -8372,8 +8060,8 @@ function adaptProPageForRole(){
 // Appeler quand on arrive sur la page Pro
 var _origGoTo = typeof _origGoTo !== 'undefined' ? _origGoTo : null;
 var _origGoToFunc = goTo;
-goTo = function(page, opts){
-  _origGoToFunc(page, opts);
+goTo = function(page){
+  _origGoToFunc(page);
   if(page === 'pro') setTimeout(adaptProPageForRole, 50);
 };
 
@@ -9476,17 +9164,6 @@ function viewBoutiqueById(userId){
   goTo('seller');
 }
 
-
-function filterPageConvsBySearch(q){
-  q=(q||'').toLowerCase().trim();
-  var filtered=(_pageConvs||[]).filter(function(conv){
-    return !q
-      ||(conv.adTitle||'').toLowerCase().includes(q)
-      ||(conv.sellerName||conv.buyerName||'').toLowerCase().includes(q)
-      ||(conv.lastMessage||'').toLowerCase().includes(q);
-  });
-  renderPageConvList(filtered);
-}
 </script>
 </body>
 </html>
