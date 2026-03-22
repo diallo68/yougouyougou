@@ -6958,18 +6958,21 @@ var _currentConvId=null;
 var _convPollTimer=null;
 
 function loadConversations(){
-  var list=document.getElementById('page-msg-list');
-  if(!list) return;
   var token=localStorage.getItem('ygy_token');
-  if(!token){ list.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">Connectez-vous pour voir vos messages</div>'; return; }
+  if(!token){ return; }
+  var list=document.getElementById('page-msg-list');
+  if(list) list.innerHTML='<div style="padding:40px 16px;text-align:center;color:#aaa;font-size:13px">⏳ Chargement...</div>';
   fetch('/api/conversations',{headers:{'Authorization':'Bearer '+token}})
-  .then(function(r){return r.json();})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(data){
-    var convs=data.conversations||data||[];
-    renderConversationList(convs);
+    // Normaliser : accepte {conversations:[...]} ou [...]
+    var convs=Array.isArray(data)?data:(Array.isArray(data.conversations)?data.conversations:[]);
+    _pageConvs=convs;
+    renderPageConvList(convs);
     updateMsgBadge(convs);
-  }).catch(function(){
-    list.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px"><div style="font-size:28px;margin-bottom:8px">💬</div>Messagerie disponible<br>après connexion au serveur</div>';
+  }).catch(function(e){
+    console.error('[loadConversations]',e);
+    if(list) list.innerHTML='<div style="padding:40px 16px;text-align:center;color:#aaa;font-size:13px">❌ Erreur de chargement<br><a href="#" onclick="loadConversations();return false;" style="color:var(--or)">Réessayer</a></div>';
   });
 }
 
