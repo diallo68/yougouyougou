@@ -1879,7 +1879,9 @@ app.get('/api/admin/payments', auth, adminOnly, async (req, res) => {
     ]);
     res.json({ payments: pays, total, revenue: revenue[0]?.total || 0 });
   } catch(err) { res.status(500).json({ error: err.message }); }
-})// ── Route contact ─────────────────────────────────────────
+});
+
+// ── Route contact ─────────────────────────────────────────
 app.post('/api/contact', async (req, res) => {
   try {
     const { name, email, phone, subject, message } = req.body;
