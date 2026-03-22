@@ -1093,8 +1093,8 @@ app.get('/api/me/favorites', auth, async (req, res) => {
     const ads = await Ad.find({ _id: { $in: favIds }, active: true })
       .select('-sellerPhone')
       .populate('seller', 'prenom nom city avgRating verified');
-    res.json({ favorites: favIds.map(String), ads: ads||[] });
-  } catch(err) { res.status(500).json({ error: err.message, favorites:[], ads:[] }); }
+    res.json({ favorites: favIds.map(String), ads });
+  } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
 // Ajouter / retirer un favori (toggle)
@@ -1179,8 +1179,8 @@ app.get('/api/conversations', auth, async (req, res) => {
         unreadCount: isbuyer ? c.unreadBuyer : c.unreadSeller,
       };
     });
-    res.json({ conversations: result||[] });
-  } catch(err) { res.status(500).json({ error: err.message, conversations:[] }); }
+    res.json({ conversations: result });
+  } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
 // Démarrer ou récupérer une conversation (depuis page détail annonce)
@@ -1878,6 +1878,17 @@ app.get('/api/admin/payments', auth, adminOnly, async (req, res) => {
       { $group: { _id: null, total: { $sum: '$amount' } } }
     ]);
     res.json({ payments: pays, total, revenue: revenue[0]?.total || 0 });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// Activer/désactiver un compte pro (admin)
+app.patch('/api/admin/users/:id/pro', auth, adminOnly, async (req, res) => {
+  try {
+    const { isPro, months = 1 } = req.body;
+    const update = { isPro };
+    if (isPro) update.proUntil = new Date(Date.now() + months * 30 * 24 * 3600 * 1000);
+    const user = await User.findByIdAndUpdate(req.params.id, update, { new: true }).select('-password');
+    res.json({ success: true, user });
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
