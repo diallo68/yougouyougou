@@ -3180,6 +3180,12 @@ function goTo(page){
   if(page==='dashboard'){ loadDash(); setTimeout(function(){ var tok=localStorage.getItem('ygy_token'); if(tok){ fetch('/api/me',{headers:{'Authorization':'Bearer '+tok}}).then(function(r){return r.ok?r.json():null;}).then(function(d){ if(d&&d.user){ var u=DB.user()||{}; u.role=d.user.role; u.isPro=d.user.isPro||false; DB.login(u); updateNav(); } }).catch(function(){}); } }, 300); }
   if(page==='home')renderAds();
   if(page==='seller'&&typeof _curSellerId!=='undefined'&&_curSellerId)loadSellerProfile(_curSellerId);
+  // Messages : ne pas scroller (position:fixed) + recharger les convs
+  if(page==='messages'){
+    window.scrollTo({top:0});
+    var _mtok=localStorage.getItem('ygy_token');
+    if(_mtok && typeof loadConversations==='function') loadConversations();
+  }
 }
 function scrollToAds(){document.getElementById('ads-section').scrollIntoView({behavior:'smooth'});}
 
@@ -5202,24 +5208,11 @@ function navGoFavs(){
 }
 
 function navGoMessages(){
-  if(!DB.user()){openModal('auth');return;}
-  // Charger les conversations dans la page dédiée
+  // Vérifier token OU user en mémoire (après refresh, token est là mais pas DB.user())
   var token = localStorage.getItem('ygy_token');
-  var list = document.getElementById('page-msg-list');
-  if(list) list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">⏳ Chargement...</div>';
+  if(!DB.user() && !token){openModal('auth');return;}
   goTo('messages');
-  if(token){
-    fetch('/api/conversations',{headers:{'Authorization':'Bearer '+token}})
-    .then(function(r){return r.json();})
-    .then(function(data){
-      var convs = data.conversations||data||[];
-      _pageConvs = convs;
-      renderPageConvList(convs);
-      updateMsgBadge(convs);
-    }).catch(function(){
-      if(list) list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">❌ Erreur de chargement</div>';
-    });
-  }
+  // loadConversations() sera appelé par goTo() handler
 }
 
 function renderPageConvList(convs){
