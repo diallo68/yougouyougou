@@ -286,20 +286,51 @@ footer{background:transparent;margin-top:0}
 .btn-post-submit{width:100%;padding:13px;border-radius:6px;background:var(--or);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:background .12s;display:flex;align-items:center;justify-content:center;gap:6px;font-family:var(--font)}
 .btn-post-submit:hover{background:var(--or2)}
 .btn-post-submit:disabled{opacity:.6;cursor:not-allowed}
-.dash-layout{display:grid;grid-template-columns:200px 1fr;min-height:calc(100vh - 62px)}
-.dash-side{background:#fff;border-right:1px solid var(--br);padding:14px 10px;position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto}
-.dash-avatar{width:46px;height:46px;border-radius:50%;background:var(--or);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;margin-bottom:8px}
-.dash-user-info{padding:10px 6px 14px;border-bottom:1px solid var(--br);margin-bottom:10px;text-align:center}
-.dash-user-name{font-size:13px;font-weight:700;color:var(--ink)}
-.dash-user-phone{font-size:11px;color:var(--muted);margin-top:2px}
-.dash-nav a{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;font-size:13px;font-weight:400;color:var(--muted);cursor:pointer;transition:all .12s;text-decoration:none;margin-bottom:2px}
-.dash-nav a:hover,.dash-nav a.active{background:var(--orl);color:var(--or);font-weight:600}
-.dash-main{padding:20px 24px;background:var(--bg)}
+.dash-layout{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 62px)}
+.dash-side{background:#fff;border-right:1px solid var(--br);padding:0;position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto}
+.dash-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--or),#ff8c42);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;flex-shrink:0}
+.dash-user-info{padding:20px 16px 16px;border-bottom:1px solid var(--br);display:flex;align-items:center;gap:12px}
+.dash-user-name{font-size:15px;font-weight:800;color:var(--ink)}
+.dash-user-phone{font-size:12px;color:var(--muted);margin-top:2px}
+.dash-nav{padding:8px 0}
+.dash-nav a{display:flex;align-items:center;gap:10px;padding:11px 20px;font-size:14px;font-weight:500;color:#555;cursor:pointer;transition:all .12s;text-decoration:none;border-left:3px solid transparent}
+.dash-nav a:hover{background:#f7f7f7;color:var(--ink)}
+.dash-nav a.active{background:#fff7f2;color:var(--or);font-weight:700;border-left-color:var(--or)}
+.dash-nav .dash-nav-sep{height:1px;background:var(--br);margin:6px 0}
+.dash-main{padding:28px 32px;background:#f5f5f5;min-height:calc(100vh - 62px)}
 .dash-section{display:none}.dash-section.active{display:block}
-.dash-section-title{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:14px}
+.dash-section-title{font-size:18px;font-weight:800;color:var(--ink);margin-bottom:20px}
+/* Carte profil style Leboncoin */
+.lbc-profile-hero{background:#fff;border-radius:12px;padding:24px;margin-bottom:16px;display:flex;align-items:center;gap:20px;border:1px solid var(--br)}
+.lbc-profile-av{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--or),#ff8c42);color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;flex-shrink:0}
+.lbc-profile-name{font-size:22px;font-weight:800;color:var(--ink)}
+.lbc-profile-sub{font-size:13px;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.lbc-profile-badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px}
+.lbc-profile-badge.verified{background:#DCFCE7;color:#166534}
+.lbc-profile-badge.admin{background:#EFF6FF;color:#1D4ED8}
+.lbc-profile-badge.pro{background:#FFF7ED;color:#C2410C}
+/* Cards activité style Leboncoin */
+.lbc-activity-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.lbc-activity-card{background:#fff;border-radius:12px;padding:20px 24px;border:1px solid var(--br);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:16px}
+.lbc-activity-card:hover{border-color:var(--or);box-shadow:0 2px 12px rgba(255,92,0,.1)}
+.lbc-activity-icon{width:44px;height:44px;border-radius:10px;background:#FFF3EE;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.lbc-activity-label{font-size:15px;font-weight:700;color:var(--ink)}
+.lbc-activity-sub{font-size:12px;color:var(--muted);margin-top:2px}
+/* Section Mon compte */
+.lbc-account-section{background:#fff;border-radius:12px;border:1px solid var(--br);overflow:hidden;margin-bottom:16px}
+.lbc-account-section-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:16px 20px 10px}
+.lbc-account-row{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1px solid var(--br);cursor:pointer;transition:background .12s}
+.lbc-account-row:hover{background:#f9f9f9}
+.lbc-account-row:first-of-type{border-top:none}
+.lbc-account-row-left{display:flex;align-items:center;gap:12px}
+.lbc-account-row-icon{width:36px;height:36px;border-radius:8px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.lbc-account-row-label{font-size:14px;font-weight:600;color:var(--ink)}
+.lbc-account-row-sub{font-size:12px;color:var(--muted)}
+.lbc-account-row-arrow{color:#ccc;font-size:16px}
+.lbc-notif-badge{background:var(--or);color:#fff;border-radius:50%;width:20px;height:20px;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center}
 .stat-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
-.stat-card{background:#fff;border-radius:6px;padding:14px;border:1px solid var(--br);display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
-.stat-card-val{font-size:22px;font-weight:800;color:var(--or)}
+.stat-card{background:#fff;border-radius:10px;padding:16px;border:1px solid var(--br);display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.stat-card-val{font-size:24px;font-weight:800;color:var(--or)}
 .stat-card-label{font-size:11px;color:var(--muted);font-weight:500}
 .admin-layout{display:grid;grid-template-columns:190px 1fr;width:100%;height:100%;overflow:hidden}
 .admin-side{background:#1A1A1A;padding:14px 10px;overflow-y:auto;height:100%}
@@ -1617,52 +1648,227 @@ footer{background:transparent;margin-top:0}
   <div class="dash-layout">
     <div class="dash-side">
       <div class="dash-user-info">
-        <div class="dash-avatar" id="d-av">MD</div>
-        <div class="dash-user-name" id="d-nm">Utilisateur</div>
-        <div class="dash-user-phone" id="d-ph"></div>
+        <div class="dash-avatar" id="d-av">?</div>
+        <div>
+          <div class="dash-user-name" id="d-nm">Utilisateur</div>
+          <div class="dash-user-phone" id="d-ph"></div>
+        </div>
       </div>
       <nav class="dash-nav">
-        <a onclick="showDashTab('profil')" class="active" id="dtab-profil">👤 Mon profil</a>
-        <a onclick="openEditProfile()" style="color:var(--or);font-weight:700">✏️ Modifier mon profil</a>
-        <a onclick="showDashTab('ads')" id="dtab-ads">📋 <span id="dash-ads-label">Mes annonces</span> <span id="p-count-ads" style="background:var(--orl);color:var(--or);font-size:11px;padding:1px 6px;border-radius:10px;margin-left:auto">0</span></a>
-        <a onclick="showDashTab('history')" id="dtab-history" class="dash-nav-user-only">🕐 Historique</a>
-        <a onclick="showDashTab('payments')" id="dtab-payments">💳 Paiements</a>
-        <a onclick="showDashTab('alerts')" id="dtab-alerts" class="dash-nav-user-only">🔔 Alertes</a>
-        <a onclick="showDashTab('pro')" id="dtab-pro" class="dash-nav-pro-only" style="display:none;color:var(--or);font-weight:700">⭐ YouGouYou Pro</a>
-        <a onclick="showDashTab('users-admin')" id="dtab-users-admin" class="dash-nav-admin-only" style="display:none;color:#1D4ED8;font-weight:700">👥 Utilisateurs</a>
-        <a id="nav-admin-link" hidden onclick="goAdmin()" style="color:#1D4ED8!important;font-weight:800!important">👑 Panel Admin</a>
-        <a onclick="logout()" style="color:var(--re)!important;margin-top:20px">🚪 Déconnexion</a>
+        <a onclick="showDashTab('profil')" class="active" id="dtab-profil">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Mon profil
+        </a>
+        <a onclick="showDashTab('ads')" id="dtab-ads">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+          Mes annonces
+          <span id="p-count-ads" style="margin-left:auto;background:var(--orl);color:var(--or);font-size:11px;font-weight:800;padding:1px 7px;border-radius:10px">0</span>
+        </a>
+        <a onclick="showDashTab('history')" id="dtab-history" class="dash-nav-user-only">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Historique
+        </a>
+        <a onclick="showDashTab('payments')" id="dtab-payments">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          Paiements
+        </a>
+        <a onclick="showDashTab('alerts')" id="dtab-alerts" class="dash-nav-user-only">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+          Alertes
+        </a>
+        <a onclick="showDashTab('pro')" id="dtab-pro" class="dash-nav-pro-only" style="display:none">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <span style="color:var(--or)">YouGouYou Pro</span>
+        </a>
+        <div class="dash-nav-sep"></div>
+        <a onclick="showDashTab('users-admin')" id="dtab-users-admin" class="dash-nav-admin-only" style="display:none">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          <span style="color:#1D4ED8">Utilisateurs</span>
+        </a>
+        <a id="nav-admin-link" hidden onclick="goAdmin()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span style="color:#1D4ED8;font-weight:800">Panel Admin</span>
+        </a>
+        <div class="dash-nav-sep"></div>
+        <a onclick="logout()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+          <span style="color:#DC2626">Déconnexion</span>
+        </a>
       </nav>
     </div>
     <div class="dash-main">
 
-      <!-- Profil -->
+      <!-- Profil style Leboncoin -->
       <div class="dash-section active" id="dsec-profil">
-        <div class="dash-section-title">Mon profil</div>
-        <div class="stat-cards">
-          <div class="stat-card"><div style="font-size:24px">📋</div><div class="stat-card-val" id="p-count-ads2">0</div><div class="stat-card-label">Annonces</div></div>
 
-          <div class="stat-card"><div style="font-size:24px">💳</div><div class="stat-card-val" id="p-count-pay">0</div><div class="stat-card-label">Paiements</div></div>
-        </div>
-        <div style="background:#fff;border-radius:var(--rad);padding:20px;box-shadow:var(--sh)">
-          <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
-            <div class="dash-avatar" id="p-avatar" style="width:52px;height:52px;font-size:18px">MD</div>
-            <div>
-              <div style="font-size:16px;font-weight:800" id="p-name">—</div>
-              <div id="p-role-badge" style="margin-top:4px"></div>
+        <!-- Hero carte profil -->
+        <div class="lbc-profile-hero">
+          <div class="lbc-profile-av" id="p-avatar">?</div>
+          <div style="flex:1">
+            <div class="lbc-profile-name" id="p-name">—</div>
+            <div class="lbc-profile-sub">
+              <span id="p-role-badge"></span>
+              <span id="p-city-hero" style="display:flex;align-items:center;gap:4px">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span id="p-city">—</span>
+              </span>
             </div>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px">
-            <div><div style="color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:700;margin-bottom:2px">Téléphone</div><div id="p-phone" style="font-weight:600">—</div></div>
-            <div><div style="color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:700;margin-bottom:2px">Email</div><div id="p-email" style="font-weight:600">—</div></div>
-            <div><div style="color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:700;margin-bottom:2px">Ville</div><div id="p-city" style="font-weight:600">—</div></div>
-            <div><div style="color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:700;margin-bottom:2px">Vérification</div><div id="p-verif" style="font-weight:600">—</div></div>
-            <div><div style="color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:700;margin-bottom:2px">📅 Date de naissance</div><div id="p-dob" style="font-weight:600">—</div></div>
-            <div><div style="color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:700;margin-bottom:2px">📍 Lieu de naissance</div><div id="p-pob" style="font-weight:600">—</div></div>
-          </div>
-          <div class="vendor-stats-grid" id="vendor-stats-grid" style="margin-top:14px;margin-bottom:10px"></div>
-          <button class="btn btn-ghost" style="margin-top:0" onclick="openEditProfile()">✏️ Modifier mon profil</button>
+          <button onclick="openEditProfile()" style="background:#fff;border:1.5px solid var(--br);border-radius:8px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--ink);display:flex;align-items:center;gap:6px;white-space:nowrap;transition:border-color .15s" onmouseover="this.style.borderColor='var(--or)'" onmouseout="this.style.borderColor='var(--br)'">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Modifier
+          </button>
         </div>
+
+        <!-- Mes activités -->
+        <div class="dash-section-title">Mes activités</div>
+        <div class="lbc-activity-grid">
+          <div class="lbc-activity-card" onclick="showDashTab('ads')">
+            <div class="lbc-activity-icon">📋</div>
+            <div>
+              <div class="lbc-activity-label">Annonces</div>
+              <div class="lbc-activity-sub">Gérer mes annonces déposées</div>
+            </div>
+            <svg style="margin-left:auto;color:#ccc;flex-shrink:0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="lbc-activity-card" onclick="showDashTab('payments')">
+            <div class="lbc-activity-icon">💳</div>
+            <div>
+              <div class="lbc-activity-label">Paiements</div>
+              <div class="lbc-activity-sub">Suivre mes transactions</div>
+            </div>
+            <svg style="margin-left:auto;color:#ccc;flex-shrink:0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="lbc-activity-card" onclick="showDashTab('history')">
+            <div class="lbc-activity-icon">🕐</div>
+            <div>
+              <div class="lbc-activity-label">Historique</div>
+              <div class="lbc-activity-sub">Annonces consultées récemment</div>
+            </div>
+            <svg style="margin-left:auto;color:#ccc;flex-shrink:0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="lbc-activity-card" onclick="showDashTab('alerts')">
+            <div class="lbc-activity-icon">🔔</div>
+            <div>
+              <div class="lbc-activity-label">Alertes</div>
+              <div class="lbc-activity-sub">Mes alertes de recherche</div>
+            </div>
+            <svg style="margin-left:auto;color:#ccc;flex-shrink:0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </div>
+
+        <!-- Mon compte -->
+        <div class="dash-section-title" style="margin-top:8px">Mon compte</div>
+        <div class="lbc-account-section">
+          <div class="lbc-account-section-title">Informations personnelles</div>
+          <div class="lbc-account-row" onclick="openEditProfile()">
+            <div class="lbc-account-row-left">
+              <div class="lbc-account-row-icon">👤</div>
+              <div>
+                <div class="lbc-account-row-label">Nom complet</div>
+                <div class="lbc-account-row-sub" id="p-name-sub">—</div>
+              </div>
+            </div>
+            <svg class="lbc-account-row-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="lbc-account-row" onclick="openEditProfile()">
+            <div class="lbc-account-row-left">
+              <div class="lbc-account-row-icon">📱</div>
+              <div>
+                <div class="lbc-account-row-label">Téléphone</div>
+                <div class="lbc-account-row-sub" id="p-phone">—</div>
+              </div>
+            </div>
+            <svg class="lbc-account-row-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="lbc-account-row" onclick="openEditProfile()">
+            <div class="lbc-account-row-left">
+              <div class="lbc-account-row-icon">✉️</div>
+              <div>
+                <div class="lbc-account-row-label">Email</div>
+                <div class="lbc-account-row-sub" id="p-email">—</div>
+              </div>
+            </div>
+            <svg class="lbc-account-row-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="lbc-account-row" onclick="openEditProfile()">
+            <div class="lbc-account-row-left">
+              <div class="lbc-account-row-icon">📅</div>
+              <div>
+                <div class="lbc-account-row-label">Date de naissance</div>
+                <div class="lbc-account-row-sub" id="p-dob">—</div>
+              </div>
+            </div>
+            <svg class="lbc-account-row-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="lbc-account-row" onclick="openEditProfile()">
+            <div class="lbc-account-row-left">
+              <div class="lbc-account-row-icon">📍</div>
+              <div>
+                <div class="lbc-account-row-label">Lieu de naissance</div>
+                <div class="lbc-account-row-sub" id="p-pob">—</div>
+              </div>
+            </div>
+            <svg class="lbc-account-row-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </div>
+
+        <!-- Connexion et sécurité -->
+        <div class="lbc-account-section">
+          <div class="lbc-account-section-title">Connexion &amp; Sécurité</div>
+          <div class="lbc-account-row" onclick="openEditProfile()">
+            <div class="lbc-account-row-left">
+              <div class="lbc-account-row-icon">🔐</div>
+              <div>
+                <div class="lbc-account-row-label">Mot de passe</div>
+                <div class="lbc-account-row-sub">Modifier mon mot de passe</div>
+              </div>
+            </div>
+            <svg class="lbc-account-row-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="lbc-account-row">
+            <div class="lbc-account-row-left">
+              <div class="lbc-account-row-icon">✅</div>
+              <div>
+                <div class="lbc-account-row-label">Vérification</div>
+                <div class="lbc-account-row-sub" id="p-verif">—</div>
+              </div>
+            </div>
+            <span style="font-size:12px;font-weight:700;color:#16a34a;background:#dcfce7;padding:3px 10px;border-radius:20px">Vérifié</span>
+          </div>
+        </div>
+
+        <!-- Bloc Admin uniquement -->
+        <div id="dash-admin-box" style="display:none">
+          <div class="lbc-account-section">
+            <div class="lbc-account-section-title">Administration</div>
+            <div class="lbc-account-row" onclick="goAdmin()">
+              <div class="lbc-account-row-left">
+                <div class="lbc-account-row-icon">👑</div>
+                <div>
+                  <div class="lbc-account-row-label" style="color:#1D4ED8">Panel Admin</div>
+                  <div class="lbc-account-row-sub">Gérer le site et les utilisateurs</div>
+                </div>
+              </div>
+              <svg class="lbc-account-row-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Déconnexion -->
+        <div class="lbc-account-section">
+          <div class="lbc-account-row" onclick="logout()" style="color:#DC2626">
+            <div class="lbc-account-row-left">
+              <div class="lbc-account-row-icon" style="background:#FEF2F2">🚪</div>
+              <div>
+                <div class="lbc-account-row-label" style="color:#DC2626">Déconnexion</div>
+                <div class="lbc-account-row-sub">Se déconnecter de mon compte</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="vendor-stats-grid" id="vendor-stats-grid" style="margin-top:0"></div>
       </div>
 
       <!-- Mes annonces -->
@@ -4779,16 +4985,19 @@ function renderDash(){
   var payGrid=document.getElementById('dash-pay-period-stats');
   if(payGrid) payGrid.style.display=isAdmin?'grid':'none';
 
-  // Onglet Profil — infos personnelles
+  // ── Onglet Profil — infos style Leboncoin ──
   var av=document.getElementById('p-avatar');
   if(av) av.textContent=initials||'U';
   var pn=document.getElementById('p-name');
-  if(pn) pn.textContent=u.name||u.prenom||'—';
+  if(pn) pn.textContent=(u.prenom||(u.name||'').split(' ')[0]||'—')+' '+((u.nom||(u.name||'').split(' ').slice(1).join(' '))||'');
+  var pns=document.getElementById('p-name-sub');
+  if(pns) pns.textContent=(u.prenom||u.name||'—')+' '+(u.nom||'');
   var rb=document.getElementById('p-role-badge');
-  if(rb) rb.innerHTML=u.role==='admin'
-    ? '<span style="background:#EFF6FF;color:#1D4ED8;font-size:11px;font-weight:800;padding:3px 10px;border-radius:50px">👑 Administrateur</span>'
-    : '<span style="background:#D1FAE5;color:#065F46;font-size:11px;font-weight:800;padding:3px 10px;border-radius:50px">✅ Membre vérifié</span>';
-  // Bloc accès admin direct dans le profil
+  if(rb){
+    if(u.role==='admin') rb.innerHTML='<span class="lbc-profile-badge admin">👑 Administrateur</span>';
+    else if(isPro) rb.innerHTML='<span class="lbc-profile-badge pro">⭐ Compte Pro</span>';
+    else rb.innerHTML='<span class="lbc-profile-badge verified">✅ Membre vérifié</span>';
+  }
   var adminBox = document.getElementById('dash-admin-box');
   if(adminBox) adminBox.style.display = (u.role==='admin') ? 'block' : 'none';
   var pp=document.getElementById('p-phone');
@@ -4797,8 +5006,10 @@ function renderDash(){
   if(pe) pe.textContent=u.email||'Non renseigné';
   var pc=document.getElementById('p-city');
   if(pc) pc.textContent=u.city||'Non renseignée';
+  var pch=document.getElementById('p-city-hero');
+  if(pch) pch.style.display=u.city?'flex':'none';
   var pv=document.getElementById('p-verif');
-  if(pv) pv.textContent=(u.method==='email'?'📧 Email':'📱 SMS')+' — Vérifié';
+  if(pv) pv.textContent=(u.method==='email'?'Email':'SMS');
   var pdob=document.getElementById('p-dob');
   if(pdob) pdob.textContent=u.dob ? new Date(u.dob).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}) : 'Non renseignée';
   var ppob=document.getElementById('p-pob');
