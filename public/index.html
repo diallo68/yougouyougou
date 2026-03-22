@@ -38,7 +38,7 @@ body{
 .page{display:none}.page.active{display:block}
 /* Pages spéciales qui nécessitent display:flex plutôt que block */
 #page-messages.active{display:flex !important}
-#page-favs.active{display:block !important}
+#page-favs.active{display:block !important;min-height:calc(100vh - var(--nav-h,92px))}
 #app-wrapper{background:#fff;max-width:1280px;margin:0 auto;min-height:100vh;box-shadow:0 2px 12px rgba(0,0,0,.08)}
 
 /* ── DÉSACTIVÉS ── */
@@ -445,18 +445,18 @@ footer{background:transparent;margin-top:0}
   display:flex !important;
   flex-direction:column;
   position:fixed;
-  top:var(--nav-h, 104px);
+  top:var(--nav-h, 92px);
   left:50%;
   transform:translateX(-50%);
   width:100%;
   max-width:1280px;
-  height:calc(100vh - var(--nav-h, 104px));
+  height:calc(100vh - var(--nav-h, 92px));
   background:#fff;
   z-index:200;
   overflow:hidden;
 }
-.pmsg-wrap{display:grid;grid-template-columns:320px 1fr 300px;flex:1;min-height:0;overflow:hidden;border-top:1px solid var(--br);height:100%}
-.pmsg-left{display:flex;flex-direction:column;border-right:1px solid var(--br);background:#fff;overflow:hidden;min-height:0}
+.pmsg-wrap{display:grid;grid-template-columns:320px 1fr 300px;grid-template-rows:1fr;flex:1;min-height:0;overflow:hidden;border-top:1px solid var(--br);align-items:stretch}
+.pmsg-left{display:flex;flex-direction:column;border-right:1px solid var(--br);background:#fff;overflow:hidden;min-height:0;height:100%}
 .pmsg-left-head{display:flex;align-items:center;gap:8px;padding:0 16px;height:56px;border-bottom:1px solid var(--br);background:#fff;flex-shrink:0}
 .pmsg-back{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:13px;font-family:inherit;padding:0}
 .pmsg-back:hover{text-decoration:underline}
@@ -479,7 +479,7 @@ footer{background:transparent;margin-top:0}
 .pmsg-conv-meta{display:flex;align-items:center;gap:4px;margin-top:2px}
 .pmsg-conv-date{font-size:11px;color:#bbb}
 .pmsg-conv-unread{background:var(--or);color:#fff;border-radius:50%;min-width:18px;height:18px;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;padding:0 3px;position:absolute;right:10px;top:50%;transform:translateY(-50%)}
-.pmsg-center{display:flex;flex-direction:column;overflow:hidden;background:#f6f6f6;min-height:0}
+.pmsg-center{display:flex;flex-direction:column;overflow:hidden;background:#f6f6f6;min-height:0;height:100%}
 .pmsg-thread-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#ccc;padding:40px;background:#f6f6f6;text-align:center}
 .pmsg-thread-head{display:flex;align-items:center;gap:12px;padding:0 20px;height:56px;border-bottom:1px solid #eee;background:#fff;flex-shrink:0}
 .pmsg-thread-av{width:40px;height:40px;border-radius:50%;background:var(--or);color:#fff;font-weight:800;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -499,7 +499,7 @@ footer{background:transparent;margin-top:0}
 .pmsg-input:focus{border-color:var(--or);background:#fff}
 .pmsg-send{background:var(--or);color:#fff;border:none;border-radius:50%;width:44px;height:44px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .15s}
 .pmsg-send:hover{opacity:.85}
-.pmsg-right-panel{display:flex;flex-direction:column;border-left:1px solid var(--br);background:#fff;overflow-y:auto;min-height:0;padding:16px}
+.pmsg-right-panel{display:flex;flex-direction:column;border-left:1px solid var(--br);background:#fff;overflow-y:auto;min-height:0;padding:16px;height:100%}
 .pmsg-vendor-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
 .pmsg-vendor-av{width:52px;height:52px;border-radius:50%;background:var(--or);color:#fff;font-size:20px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .pmsg-vendor-name{font-size:16px;font-weight:800;color:var(--ink)}
@@ -670,12 +670,12 @@ footer{background:transparent;margin-top:0}
 #page-pro.active{
   display:block !important;
   position:fixed;
-  top:var(--nav-h,104px);
+  top:var(--nav-h,92px);
   left:50%;
   transform:translateX(-50%);
   width:100%;
   max-width:1280px;
-  height:calc(100vh - var(--nav-h,104px));
+  height:calc(100vh - var(--nav-h,92px));
   background:var(--bg);
   z-index:200;
   overflow-y:auto;
@@ -686,12 +686,12 @@ footer{background:transparent;margin-top:0}
   display:flex !important;
   flex-direction:column;
   position:fixed;
-  top:var(--nav-h,104px);
+  top:var(--nav-h,92px);
   left:50%;
   transform:translateX(-50%);
   width:100%;
   max-width:1280px;
-  height:calc(100vh - var(--nav-h,104px));
+  height:calc(100vh - var(--nav-h,92px));
   z-index:200;
   overflow:hidden;
   background:#fff;
@@ -885,7 +885,7 @@ footer{background:transparent;margin-top:0}
    BOUTIQUE PRO — CSS COMPLET
 ══════════════════════════════════════════════ */
 .boutique-page-wrap{max-width:1100px;margin:0 auto;padding:0 0 40px}
-#page-seller.active{display:block!important;position:fixed;top:var(--nav-h,104px);left:50%;transform:translateX(-50%);width:100%;max-width:1280px;height:calc(100vh - var(--nav-h,104px));z-index:200;overflow-y:auto;overflow-x:hidden;background:var(--bg)}
+#page-seller.active{display:block!important;position:fixed;top:var(--nav-h,92px);left:50%;transform:translateX(-50%);width:100%;max-width:1280px;height:calc(100vh - var(--nav-h,92px));z-index:200;overflow-y:auto;overflow-x:hidden;background:var(--bg)}
 
 /* Hero */
 .boutique-hero{position:relative;background:#1A1A1A;color:#fff;border-radius:0 0 12px 12px;overflow:hidden;margin-bottom:0}
@@ -995,8 +995,8 @@ footer{background:transparent;margin-top:0}
 /* ── Page Boutiques liste ── */
 #page-boutiques.active{
   display:block!important;
-  position:fixed;top:var(--nav-h,104px);left:50%;transform:translateX(-50%);
-  width:100%;max-width:1280px;height:calc(100vh - var(--nav-h,104px));
+  position:fixed;top:var(--nav-h,92px);left:50%;transform:translateX(-50%);
+  width:100%;max-width:1280px;height:calc(100vh - var(--nav-h,92px));
   z-index:200;overflow-y:auto;background:var(--bg);
 }
 .boutiques-header{
@@ -6907,13 +6907,19 @@ document.addEventListener('DOMContentLoaded',function(){
     var nav = document.querySelector('nav');
     if (nav) {
       var h = nav.getBoundingClientRect().height;
-      document.documentElement.style.setProperty('--nav-h', Math.round(h) + 'px');
+      if (h > 0) {
+        document.documentElement.style.setProperty('--nav-h', Math.round(h) + 'px');
+      }
     }
   }
-  updateNavHeight();
-  // Re-calculer après rendu des catégories (JS async)
-  setTimeout(updateNavHeight, 300);
-  setTimeout(updateNavHeight, 800);
+  // Mesurer APRÈS que le browser a rendu les catégories
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      updateNavHeight();
+    });
+  });
+  setTimeout(updateNavHeight, 200);
+  setTimeout(updateNavHeight, 600);
   window.addEventListener('resize', updateNavHeight);
   updateNav();
   // Charger les annonces depuis l'API MongoDB
