@@ -445,17 +445,17 @@ footer{background:transparent;margin-top:0}
   display:flex !important;
   flex-direction:column;
   position:fixed;
-  top:104px;           /* nav-top 62px + nav-cats 42px */
+  top:var(--nav-h, 104px);
   left:50%;
   transform:translateX(-50%);
   width:100%;
   max-width:1280px;
-  height:calc(100vh - 104px);
+  height:calc(100vh - var(--nav-h, 104px));
   background:#fff;
   z-index:200;
   overflow:hidden;
 }
-.pmsg-wrap{display:grid;grid-template-columns:320px 1fr 300px;flex:1;height:100%;min-height:0;overflow:hidden;border-top:1px solid var(--br)}
+.pmsg-wrap{display:grid;grid-template-columns:320px 1fr 300px;flex:1;min-height:0;overflow:hidden;border-top:1px solid var(--br);height:100%}
 .pmsg-left{display:flex;flex-direction:column;border-right:1px solid var(--br);background:#fff;overflow:hidden;min-height:0}
 .pmsg-left-head{display:flex;align-items:center;gap:8px;padding:0 16px;height:56px;border-bottom:1px solid var(--br);background:#fff;flex-shrink:0}
 .pmsg-back{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:13px;font-family:inherit;padding:0}
@@ -670,12 +670,12 @@ footer{background:transparent;margin-top:0}
 #page-pro.active{
   display:block !important;
   position:fixed;
-  top:104px;
+  top:var(--nav-h,104px);
   left:50%;
   transform:translateX(-50%);
   width:100%;
   max-width:1280px;
-  height:calc(100vh - 104px);
+  height:calc(100vh - var(--nav-h,104px));
   background:var(--bg);
   z-index:200;
   overflow-y:auto;
@@ -686,12 +686,12 @@ footer{background:transparent;margin-top:0}
   display:flex !important;
   flex-direction:column;
   position:fixed;
-  top:104px;
+  top:var(--nav-h,104px);
   left:50%;
   transform:translateX(-50%);
   width:100%;
   max-width:1280px;
-  height:calc(100vh - 104px);
+  height:calc(100vh - var(--nav-h,104px));
   z-index:200;
   overflow:hidden;
   background:#fff;
@@ -885,7 +885,7 @@ footer{background:transparent;margin-top:0}
    BOUTIQUE PRO — CSS COMPLET
 ══════════════════════════════════════════════ */
 .boutique-page-wrap{max-width:1100px;margin:0 auto;padding:0 0 40px}
-#page-seller.active{display:block!important;position:fixed;top:104px;left:50%;transform:translateX(-50%);width:100%;max-width:1280px;height:calc(100vh - 104px);z-index:200;overflow-y:auto;overflow-x:hidden;background:var(--bg)}
+#page-seller.active{display:block!important;position:fixed;top:var(--nav-h,104px);left:50%;transform:translateX(-50%);width:100%;max-width:1280px;height:calc(100vh - var(--nav-h,104px));z-index:200;overflow-y:auto;overflow-x:hidden;background:var(--bg)}
 
 /* Hero */
 .boutique-hero{position:relative;background:#1A1A1A;color:#fff;border-radius:0 0 12px 12px;overflow:hidden;margin-bottom:0}
@@ -995,8 +995,8 @@ footer{background:transparent;margin-top:0}
 /* ── Page Boutiques liste ── */
 #page-boutiques.active{
   display:block!important;
-  position:fixed;top:104px;left:50%;transform:translateX(-50%);
-  width:100%;max-width:1280px;height:calc(100vh - 104px);
+  position:fixed;top:var(--nav-h,104px);left:50%;transform:translateX(-50%);
+  width:100%;max-width:1280px;height:calc(100vh - var(--nav-h,104px));
   z-index:200;overflow-y:auto;background:var(--bg);
 }
 .boutiques-header{
@@ -2369,14 +2369,26 @@ function goTo(page, opts){
     }
     if(list) list.innerHTML='<div style="padding:40px 20px;text-align:center;color:var(--muted)"><div style="font-size:40px;margin-bottom:10px">💬</div><div style="font-size:13px">Chargement...</div></div>';
     fetch('/api/conversations',{headers:{'Authorization':'Bearer '+token}})
-    .then(function(r){return r.json();})
+    .then(function(r){
+      if(r.status===401){
+        // Token expiré → nettoyer et demander reconnexion
+        localStorage.removeItem('ygy_token');
+        DB.logout(); updateNav();
+        if(list) list.innerHTML='<div style="padding:40px 20px;text-align:center;color:var(--muted)"><div style="font-size:40px;margin-bottom:10px">🔒</div><div style="font-size:13px">Session expirée — <a href="#" onclick="openModal(\'auth\');return false;" style="color:var(--or)">Reconnectez-vous</a></div></div>';
+        return null;
+      }
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return r.json();
+    })
     .then(function(data){
+      if(!data) return;
       var convs=data.conversations||data||[];
       _pageConvs=convs;
       renderPageConvList(convs);
       updateMsgBadge(convs);
-    }).catch(function(){
-      if(list) list.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">❌ Erreur de chargement</div>';
+    }).catch(function(err){
+      console.error('[Messages] Erreur chargement:', err);
+      if(list) list.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">❌ Erreur de chargement — <a href="#" onclick="loadConversations();return false;" style="color:var(--or)">Réessayer</a></div>';
     });
   }
   // ── Page Favoris ───────────────────────────────────────────────
@@ -2389,12 +2401,24 @@ function goTo(page, opts){
     }
     if(grid) grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)"><div style="font-size:28px;margin-bottom:8px">⏳</div><div>Chargement...</div></div>';
     fetch('/api/me/favorites',{headers:{'Authorization':'Bearer '+tokFavs}})
-    .then(function(r){return r.ok?r.json():Promise.reject();})
+    .then(function(r){
+      if(r.status===401){
+        localStorage.removeItem('ygy_token');
+        DB.logout(); updateNav();
+        if(grid) grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted)"><div style="font-size:48px;margin-bottom:12px">🔒</div><div style="font-size:15px;font-weight:700">Session expirée — <a href="#" onclick="openModal(\'auth\');return false;" style="color:var(--or)">Reconnectez-vous</a></div></div>';
+        return null;
+      }
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return r.json();
+    })
     .then(function(data){
+      if(!data) return;
       DB.setFavs(data.favorites||[]);
       var ads=data.ads||[];
       if(!grid) return;
       if(!ads.length){
+        // Si favoris locaux existent mais pas encore en base → afficher message utile
+        var localFavs = DB.favs();
         grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted)">'+
           '<div style="font-size:48px;margin-bottom:12px">❤️</div>'+
           '<div style="font-size:15px;font-weight:700;margin-bottom:6px">Aucun favori</div>'+
@@ -2404,8 +2428,9 @@ function goTo(page, opts){
         grid.innerHTML=ads.map(function(a){ return adCard(a,false); }).join('');
       }
     })
-    .catch(function(){
-      if(grid) grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">❌ Impossible de charger les favoris</div>';
+    .catch(function(err){
+      console.error('[Favoris] Erreur:', err);
+      if(grid) grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">❌ Impossible de charger les favoris — <a href="#" onclick="goTo(\'favs\');return false;" style="color:var(--or)">Réessayer</a></div>';
     });
   }
 }
@@ -4481,12 +4506,14 @@ function navGoSearches(){
 }
 
 function navGoFavs(){
-  if(!DB.user()){openModal('auth');return;}
+  var hasAuth = DB.user() || localStorage.getItem('ygy_token');
+  if(!hasAuth){openModal('auth');return;}
   goTo('favs');
 }
 
 function navGoMessages(){
-  if(!DB.user()){openModal('auth');return;}
+  var hasAuth = DB.user() || localStorage.getItem('ygy_token');
+  if(!hasAuth){openModal('auth');return;}
   goTo('messages');
 }
 
@@ -4627,7 +4654,10 @@ function openPageConv(convId, convData){
   var token = localStorage.getItem('ygy_token');
   if(token){
     fetch('/api/conversations/'+convId,{headers:{'Authorization':'Bearer '+token}})
-    .then(function(r){return r.json();})
+    .then(function(r){
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return r.json();
+    })
     .then(function(data){
       var msgs    = data.messages||[];
       var bubbles = document.getElementById('page-msg-bubbles');
@@ -4639,9 +4669,10 @@ function openPageConv(convId, convData){
             '<div style="font-size:32px;margin-bottom:10px">\uD83D\uDC4B</div>Demarrez la conversation !</div>';
         return;
       }
+      var uid = user && String(user._id||user.id);
       var html = '<div class="pmsg-security"><strong>Echangez en toute securite.</strong></div>';
       msgs.forEach(function(m){
-        var isMine = String(m.senderId)===(user&&String(user._id||user.id));
+        var isMine = uid && String(m.senderId)===uid;
         var t = m.createdAt ? new Date(m.createdAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) : '';
         html += '<div class="pmsg-bubble-wrap '+(isMine?'mine':'theirs')+'">';
         html +=   '<div class="pmsg-bubble '+(isMine?'mine':'theirs')+'">'+m.text+'</div>';
@@ -4650,7 +4681,11 @@ function openPageConv(convId, convData){
       });
       bubbles.innerHTML = html;
       bubbles.scrollTop = bubbles.scrollHeight;
-    }).catch(function(){});
+    }).catch(function(err){
+      var bubbles = document.getElementById('page-msg-bubbles');
+      if(bubbles) bubbles.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">❌ Erreur chargement messages</div>';
+      console.error('[openPageConv] fetch error:', err);
+    });
     fetch('/api/conversations/'+convId+'/read',{method:'PATCH',headers:{'Authorization':'Bearer '+token}}).catch(function(){});
   }
 }
@@ -6235,13 +6270,16 @@ function loadConversations(){
   var token=localStorage.getItem('ygy_token');
   if(!token) return;
   fetch('/api/conversations',{headers:{'Authorization':'Bearer '+token}})
-  .then(function(r){return r.json();})
+  .then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.json();
+  })
   .then(function(data){
     var convs=data.conversations||data||[];
     _pageConvs=convs;
     renderPageConvList(convs);
     updateMsgBadge(convs);
-  }).catch(function(){});
+  }).catch(function(err){ console.error('[loadConversations]', err); });
 }
 
 function renderConversationList(convs){
@@ -6863,6 +6901,20 @@ document.addEventListener('DOMContentLoaded',function(){
   renderNavCats();
   initBanner();
   renderPostCats();
+
+  // Calcul dynamique de la hauteur de la nav pour les pages fixed
+  function updateNavHeight() {
+    var nav = document.querySelector('nav');
+    if (nav) {
+      var h = nav.getBoundingClientRect().height;
+      document.documentElement.style.setProperty('--nav-h', Math.round(h) + 'px');
+    }
+  }
+  updateNavHeight();
+  // Re-calculer après rendu des catégories (JS async)
+  setTimeout(updateNavHeight, 300);
+  setTimeout(updateNavHeight, 800);
+  window.addEventListener('resize', updateNavHeight);
   updateNav();
   // Charger les annonces depuis l'API MongoDB
   fetchAdsFromAPI(function(){ 
