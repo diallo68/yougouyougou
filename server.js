@@ -1160,48 +1160,26 @@ app.post('/api/ads/:id/boost', auth, async (req, res) => {
 });
 
 // ★ Note rapide d'une annonce (étoiles sur la page détail)
-// Redirige vers le système d'avis vendeur existant
 app.post('/api/ads/:id/rate', auth, async (req, res) => {
   try {
     const { rating } = req.body;
     if (!rating || rating < 1 || rating > 5)
-      return res.status(400).json({ error: 'Note entre 1 et 5 requise' });
-
+      return res.status(400).json({ error: 'Note entre 1 et 5' });
     const ad = await Ad.findById(req.params.id);
     if (!ad) return res.status(404).json({ error: 'Annonce introuvable' });
-
-    const sellerId = ad.seller;
-    if (String(sellerId) === req.user.id)
+    if (String(ad.seller) === req.user.id)
       return res.status(400).json({ error: 'Vous ne pouvez pas noter votre propre annonce' });
-
     const buyer = await User.findById(req.user.id).select('prenom nom');
-
-    // Upsert dans le système d'avis existant (1 avis par acheteur/vendeur)
     await Review.findOneAndUpdate(
-      { reviewerId: req.user.id, sellerId },
-      {
-        rating,
-        reviewerName: `${buyer?.prenom||''} ${buyer?.nom||''}`.trim(),
-        adId: ad._id,
-        createdAt: new Date(),
-      },
+      { reviewerId: req.user.id, sellerId: ad.seller },
+      { rating, reviewerName: `${buyer?.prenom||''} ${buyer?.nom||''}`.trim(), adId: ad._id, createdAt: new Date() },
       { upsert: true, new: true }
     );
-
-    await recalcSellerRating(sellerId);
-
-    const seller = await User.findById(sellerId).select('avgRating ratingCount');
-    res.json({
-      success: true,
-      avgRating:   seller?.avgRating   || rating,
-      ratingCount: seller?.ratingCount || 1,
-    });
+    await recalcSellerRating(ad.seller);
+    const seller = await User.findById(ad.seller).select('avgRating ratingCount');
+    res.json({ success: true, avgRating: seller?.avgRating||rating, ratingCount: seller?.ratingCount||1 });
   } catch(err) {
-    if (err.code === 11000) {
-      // Déjà noté — renvoyer quand même la note actuelle
-      const ad = await Ad.findById(req.params.id).populate('seller', 'avgRating ratingCount');
-      return res.json({ success: true, avgRating: ad?.seller?.avgRating || 0, ratingCount: ad?.seller?.ratingCount || 0 });
-    }
+    if(err.code===11000){return res.json({success:true,avgRating:0,ratingCount:0});}
     res.status(500).json({ error: err.message });
   }
 });
