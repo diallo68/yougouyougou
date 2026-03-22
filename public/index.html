@@ -2960,6 +2960,15 @@ function viewAd(id){
 function viewAd_display(ad){
   curAd=ad;
 
+  // Initialiser l'état du bouton favori sur la page détail
+  var favBtn = document.querySelector('.btn-fav-det');
+  if(favBtn){
+    var alreadyFav = DB.favs().includes(String(ad._id || ad.id));
+    favBtn.textContent = alreadyFav ? '❤️ Retirer des favoris' : '🤍 Ajouter aux favoris';
+    favBtn.style.color = alreadyFav ? '#CC1C0C' : '';
+    favBtn.style.borderColor = alreadyFav ? '#CC1C0C' : '';
+  }
+
   // Enregistrer dans l'historique de navigation
   if(!DB._d.history) DB._d.history=[];
   DB._d.history=DB._d.history.filter(function(h){return h.id!==(ad._id||ad.id);}); // éviter doublons
@@ -3190,13 +3199,20 @@ function favAd(id){
     DB.setFavs(data.favorites || []);
     var added = data.action === 'added';
     toast(added ? '❤️ Ajouté aux favoris !' : '💔 Retiré des favoris', added ? 'ok' : '');
-    // Mettre à jour visuellement les boutons de cette annonce
+    // Mettre à jour visuellement les boutons de cette annonce (cartes + page détail)
     document.querySelectorAll('.lbc-fav[data-adid="'+id+'"],.ad-card-fav[data-adid="'+id+'"]').forEach(function(btn){
       btn.style.color = added ? '#CC1C0C' : '';
       btn.title = added ? 'Retirer des favoris' : 'Ajouter aux favoris';
       var path = btn.querySelector('path');
       if(path) path.setAttribute('fill', added ? '#CC1C0C' : 'none');
     });
+    // Mettre à jour le bouton de la page détail annonce
+    var favDetBtn = document.querySelector('.btn-fav-det');
+    if(favDetBtn){
+      favDetBtn.textContent = added ? '❤️ Retirer des favoris' : '🤍 Ajouter aux favoris';
+      favDetBtn.style.color = added ? '#CC1C0C' : '';
+      favDetBtn.style.borderColor = added ? '#CC1C0C' : '';
+    }
   })
   .catch(function(){ toast('❌ Erreur réseau','err'); });
 }
@@ -3962,6 +3978,7 @@ function doLogin(){
       return;
     }
     var u=data.user;
+    u._id = u._id || u.id; // normaliser l'id (serveur renvoie "id", pas "_id")
     u.initials=((u.prenom||u.name||'U').charAt(0)+((u.nom||'').charAt(0)||'')).toUpperCase();
     DB.login(u);
     if(data.token) localStorage.setItem('ygy_token',data.token);
@@ -4486,7 +4503,7 @@ function renderPageConvList(convs){
   }
   list.innerHTML = convs.map(function(conv){
     var isUnread = (conv.unreadCount||0) > 0;
-    var isBuyer  = String(conv.buyerId)===(user&&String(user._id));
+    var isBuyer  = String(conv.buyerId)===(user&&String(user._id||user.id));
     var name     = isBuyer ? (conv.sellerName||'Vendeur') : (conv.buyerName||'Acheteur');
     var last     = conv.lastMessage||'Nouvelle conversation';
     var time     = conv.updatedAt ? timeAgo(conv.updatedAt) : '';
@@ -5801,6 +5818,13 @@ function toggleFav(id){
       var path = btn.querySelector('path');
       if(path) path.setAttribute('fill', added ? '#CC1C0C' : 'none');
     });
+    // Mettre à jour le bouton de la page détail annonce
+    var favDetBtn = document.querySelector('.btn-fav-det');
+    if(favDetBtn){
+      favDetBtn.textContent = added ? '❤️ Retirer des favoris' : '🤍 Ajouter aux favoris';
+      favDetBtn.style.color = added ? '#CC1C0C' : '';
+      favDetBtn.style.borderColor = added ? '#CC1C0C' : '';
+    }
   })
   .catch(function(){ toast('❌ Erreur réseau','err'); });
 }
