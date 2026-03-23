@@ -439,221 +439,155 @@ footer{background:transparent;margin-top:0}
 
 /* ── Page Messages — fixe, sans scroll, 3 colonnes ── */
 #page-messages.active{
-  display:flex !important;
-  flex-direction:column;
   position:fixed;
-  top:104px;           /* nav-top 62px + nav-cats 42px */
-  left:50%;
-  transform:translateX(-50%);
-  width:100%;
-  max-width:1100px;
-  height:calc(100vh - 104px);
-  background:#fff;
+  top:104px;left:0;right:0;bottom:0;
+  display:flex!important;
+  flex-direction:column;
+  background:#f5f5f5;
   z-index:200;
   overflow:hidden;
 }
+/* Barre titre */
+.pmsg-topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;height:52px;
+  background:#fff;border-bottom:1px solid #e8e8e8;flex-shrink:0;
+}
+.pmsg-topbar-title{font-size:18px;font-weight:800;color:#1a1a1a}
+.pmsg-topbar-close{
+  background:none;border:none;cursor:pointer;color:#666;
+  font-size:13px;font-family:inherit;display:flex;align-items:center;gap:5px;
+  padding:6px 10px;border-radius:6px;
+}
+.pmsg-topbar-close:hover{background:#f0f0f0}
+/* Grille 2 colonnes */
 .pmsg-wrap{
+  flex:1;min-height:0;
   display:grid;
-  grid-template-columns:280px 1fr 300px;
-  flex:1;
-  height:100%;
+  grid-template-columns:320px 1fr;
   overflow:hidden;
-  border-top:1px solid var(--br);
 }
-/* Colonne gauche — liste conversations */
-.pmsg-left{
-  display:flex;flex-direction:column;
-  border-right:1px solid var(--br);
-  background:#fff;overflow:hidden;
-}
-.pmsg-left-head{
-  display:flex;align-items:center;gap:10px;
-  padding:12px 16px;border-bottom:1px solid var(--br);
-  background:#fff;flex-shrink:0;
-}
-.pmsg-back{
-  background:none;border:none;color:var(--or);
-  font-weight:700;cursor:pointer;font-size:13px;
-  font-family:inherit;padding:0;white-space:nowrap;
-}
-.pmsg-back:hover{text-decoration:underline}
-.pmsg-filters{
-  display:flex;gap:8px;padding:10px 14px;
-  border-bottom:1px solid var(--br);background:#fafafa;flex-shrink:0;
-}
+/* Col gauche */
+.pmsg-left{display:flex;flex-direction:column;background:#fff;border-right:1px solid #e8e8e8;overflow:hidden}
+.pmsg-left-head{padding:14px 16px 8px;border-bottom:1px solid #f0f0f0;flex-shrink:0}
+.pmsg-left-title{font-size:15px;font-weight:800;color:#1a1a1a;margin-bottom:10px}
+.pmsg-filters{display:flex;align-items:center;gap:6px}
 .pmsg-filter{
-  background:#fff;border:1.5px solid #ddd;
-  border-radius:20px;padding:5px 14px;
-  font-size:12px;font-weight:700;cursor:pointer;
-  font-family:inherit;color:var(--ink);transition:all .15s;
-  display:flex;align-items:center;gap:5px;
+  display:inline-flex;align-items:center;gap:4px;
+  border:1.5px solid #ddd;border-radius:20px;padding:5px 12px;
+  font-size:12px;font-weight:700;cursor:pointer;background:#fff;color:#555;
+  font-family:inherit;transition:all .12s;
 }
-.pmsg-filter.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.pmsg-filter.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
 .pmsg-list{flex:1;overflow-y:auto}
+/* Item conversation */
 .pmsg-conv{
   display:flex;align-items:center;gap:12px;
-  padding:12px 14px;border-bottom:1px solid var(--brl);
-  cursor:pointer;transition:background .12s;
-  position:relative;border-left:3px solid transparent;
+  padding:14px 16px;border-bottom:1px solid #f2f2f2;
+  cursor:pointer;transition:background .1s;
+  border-left:3px solid transparent;
 }
 .pmsg-conv:hover{background:#fafafa}
-.pmsg-conv.active{background:#FFF3EE;border-left-color:var(--or)}
+.pmsg-conv.active,.pmsg-conv.pmsg-conv-unread-row{background:#fff8f0;border-left-color:var(--or)}
 .pmsg-conv-thumb{
-  width:50px;height:50px;border-radius:8px;
-  flex-shrink:0;background:var(--brl);
+  width:52px;height:52px;border-radius:8px;flex-shrink:0;
+  background:#f0f0f0;overflow:hidden;
   display:flex;align-items:center;justify-content:center;
-  font-size:18px;font-weight:800;color:var(--or);
-  overflow:hidden;
+  font-size:20px;font-weight:800;color:var(--or);
 }
-.pmsg-conv-thumb img{width:100%;height:100%;object-fit:cover;border-radius:8px}
-.pmsg-conv-info{flex:1;min-width:0}
-.pmsg-conv-title{font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px}
-.pmsg-conv-preview{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pmsg-conv-meta{display:flex;align-items:center;gap:4px;margin-top:2px}
-.pmsg-conv-who{font-size:11px;color:var(--muted)}
-.pmsg-conv-date{font-size:11px;color:var(--muted)}
-.pmsg-conv-unread{
+.pmsg-conv-thumb img{width:100%;height:100%;object-fit:cover}
+.pmsg-conv-body{flex:1;min-width:0}
+.pmsg-conv-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px}
+.pmsg-conv-name{font-size:14px;font-weight:700;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pmsg-conv-time{font-size:11px;color:#aaa;white-space:nowrap;margin-left:8px;flex-shrink:0}
+.pmsg-conv-ad{font-size:12px;color:#999;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
+.pmsg-conv-row{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.pmsg-conv-preview{font-size:13px;color:#777;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+.pmsg-conv-preview.bold{font-weight:700;color:#1a1a1a}
+.pmsg-conv-badge{
   background:var(--or);color:#fff;border-radius:50%;
-  min-width:18px;height:18px;font-size:10px;font-weight:900;
-  display:flex;align-items:center;justify-content:center;
-  padding:0 3px;position:absolute;right:10px;top:50%;transform:translateY(-50%);
+  min-width:20px;height:20px;font-size:11px;font-weight:900;
+  display:flex;align-items:center;justify-content:center;padding:0 4px;flex-shrink:0;
 }
-/* Colonne centrale — fil de messages */
-.pmsg-center{display:flex;flex-direction:column;overflow:hidden;background:#f8f8f8}
+.pmsg-conv-deleted{font-size:11px;color:#bbb;font-style:italic}
+/* Col droite */
+.pmsg-center{display:flex;flex-direction:column;background:#f6f6f6;overflow:hidden;min-height:0}
 .pmsg-thread-empty{
-  display:flex;flex-direction:column;align-items:center;
-  justify-content:center;height:100%;color:var(--muted);padding:40px;
-  background:#f8f8f8;
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;color:#bbb;text-align:center;padding:40px;
 }
 .pmsg-thread-head{
   display:flex;align-items:center;gap:12px;
-  padding:12px 18px;border-bottom:1px solid var(--br);
+  padding:12px 18px;border-bottom:1px solid #e8e8e8;
   background:#fff;flex-shrink:0;
 }
 .pmsg-thread-av{
-  width:40px;height:40px;border-radius:50%;
-  background:var(--or);color:#fff;
-  font-weight:800;font-size:16px;
+  width:42px;height:42px;border-radius:50%;
+  background:var(--or);color:#fff;font-size:16px;font-weight:800;
   display:flex;align-items:center;justify-content:center;flex-shrink:0;
 }
-.pmsg-thread-name{font-size:14px;font-weight:800;color:var(--ink)}
-.pmsg-thread-ad{font-size:12px;color:var(--muted)}
-.pmsg-bubbles{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:6px}
-.pmsg-date-sep{text-align:center;font-size:11px;color:var(--muted);margin:8px 0;font-weight:600}
+.pmsg-thread-info{flex:1;min-width:0}
+.pmsg-thread-name{font-size:15px;font-weight:800;color:#1a1a1a}
+.pmsg-thread-sub{font-size:12px;color:#888;overflow:hidden;text-overflow:ellipsis}
 .pmsg-security{
-  background:#FFF8DC;border:1px solid #FFD700;border-radius:12px;
-  padding:14px 16px;font-size:12px;color:#5D4037;line-height:1.7;margin-bottom:8px;
+  background:#fff8f0;border:1px solid #ffe4c4;border-radius:10px;
+  padding:14px 16px;margin:12px 16px;font-size:12.5px;color:#555;line-height:1.65;flex-shrink:0;
 }
-.pmsg-security strong{display:block;margin-bottom:6px;font-size:13px;color:#333}
-.pmsg-security a{color:var(--or);font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-top:4px}
+.pmsg-security strong{display:block;font-size:13px;font-weight:800;color:#1a1a1a;margin-bottom:6px}
+.pmsg-security a{color:var(--or);font-weight:700;text-decoration:none}
+.pmsg-bubbles{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:4px;min-height:0}
+.pmsg-date-sep{
+  text-align:center;font-size:11px;color:#aaa;margin:10px 0;
+  display:flex;align-items:center;gap:8px;
+}
+.pmsg-date-sep::before,.pmsg-date-sep::after{content:'';flex:1;height:1px;background:#e8e8e8}
 .pmsg-bubble-wrap{display:flex;flex-direction:column;margin-bottom:2px}
 .pmsg-bubble-wrap.mine{align-items:flex-end}
 .pmsg-bubble-wrap.theirs{align-items:flex-start}
-.pmsg-bubble{
-  max-width:68%;padding:10px 14px;
-  font-size:13px;line-height:1.6;word-break:break-word;
-}
-.pmsg-bubble.mine{
-  background:var(--or);color:#fff;
-  border-radius:18px 18px 4px 18px;
-}
-.pmsg-bubble.theirs{
-  background:#fff;color:var(--ink);
-  border-radius:18px 18px 18px 4px;
-  border:1px solid #e0e0e0;
-}
-.pmsg-bubble-time{font-size:10px;color:var(--muted);margin-top:3px;padding:0 4px}
+.pmsg-bubble{max-width:68%;padding:10px 14px;font-size:13.5px;line-height:1.55;word-break:break-word;border-radius:18px}
+.pmsg-bubble.mine{background:var(--or);color:#fff;border-radius:18px 18px 4px 18px}
+.pmsg-bubble.theirs{background:#fff;color:#1a1a1a;border:1px solid #e0e0e0;border-radius:18px 18px 18px 4px}
+.pmsg-bubble-time{font-size:11px;color:#aaa;margin-top:3px;padding:0 2px}
 .pmsg-input-wrap{
   display:flex;align-items:center;gap:10px;
-  padding:12px 18px;border-top:1px solid var(--br);
-  background:#fff;flex-shrink:0;
+  padding:12px 16px;border-top:1px solid #e8e8e8;background:#fff;flex-shrink:0;
 }
 .pmsg-input{
-  flex:1;border:1.5px solid #ddd;border-radius:24px;
-  padding:10px 18px;font-size:13px;font-family:inherit;
-  outline:none;transition:border-color .2s;background:#fafafa;
+  flex:1;border:1.5px solid #ddd;border-radius:22px;
+  padding:10px 16px;font-size:13px;font-family:inherit;
+  outline:none;transition:border-color .15s;background:#fafafa;
 }
 .pmsg-input:focus{border-color:var(--or);background:#fff}
 .pmsg-send{
-  background:var(--or);color:#fff;border:none;border-radius:50%;
-  width:42px;height:42px;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;transition:background .15s;
+  width:42px;height:42px;border-radius:50%;
+  background:var(--or);color:#fff;border:none;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:background .12s;
 }
-.pmsg-send:hover{background:var(--or2)}
-/* Colonne droite — infos vendeur */
-.pmsg-right-panel{
-  display:flex;flex-direction:column;
-  border-left:1px solid var(--br);background:#fff;
-  overflow-y:auto;padding:16px;
+.pmsg-send:hover{background:#e8620a}
+.pmsg-send:disabled{background:#ccc;cursor:not-allowed}
+#nav-msg-badge{
+  position:absolute;top:-6px;right:-8px;
+  background:var(--or);color:#fff;border-radius:50%;
+  min-width:18px;height:18px;font-size:10px;font-weight:900;
+  display:none;align-items:center;justify-content:center;
+  padding:0 3px;border:2px solid #fff;
 }
-.pmsg-vendor-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
-.pmsg-vendor-av{
-  width:52px;height:52px;border-radius:50%;
-  background:var(--or);color:#fff;font-size:20px;font-weight:800;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+.pmsg-new-notif{
+  position:fixed;bottom:24px;right:24px;
+  background:#1a1a1a;color:#fff;border-radius:12px;padding:12px 18px;
+  font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;
+  box-shadow:0 4px 20px rgba(0,0,0,.3);z-index:9999;cursor:pointer;
+  animation:pmsgSlide .3s ease;
 }
-.pmsg-vendor-name{font-size:16px;font-weight:800;color:var(--ink)}
-.pmsg-vendor-meta{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px;margin-top:3px}
-.pmsg-ad-card{border:1px solid var(--br);border-radius:10px;overflow:hidden;margin-bottom:14px}
-.pmsg-ad-img{width:100%;height:140px;object-fit:cover;background:var(--brl);display:flex;align-items:center;justify-content:center;font-size:40px}
-.pmsg-ad-info{padding:10px 12px}
-.pmsg-ad-title{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px}
-.pmsg-ad-price{font-size:18px;font-weight:800;color:var(--ink)}
-.pmsg-ad-desc{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.6}
-.pmsg-section-title{font-size:13px;font-weight:700;color:var(--ink);margin:14px 0 8px}
-.pmsg-crit{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--brl)}
-.pmsg-crit-label{font-size:12px;color:var(--muted);flex:1}
-.pmsg-crit-val{font-size:12px;font-weight:700;color:var(--ink)}
-
-/* ── Profil Vendeur ── */
-.seller-back{background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:13px;font-family:inherit;padding:0;display:inline-flex;align-items:center;gap:5px;margin-bottom:20px}
-.seller-back:hover{text-decoration:underline}
-.seller-hero-new{display:flex;align-items:center;justify-content:space-between;gap:20px;background:#fff;border:1px solid var(--br);border-radius:14px;padding:24px 28px;margin-bottom:16px;flex-wrap:wrap}
-.seller-hero-left{display:flex;align-items:center;gap:18px}
-.seller-av-big{width:72px;height:72px;border-radius:50%;background:var(--or);color:#fff;font-size:28px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.seller-hero-name{font-size:22px;font-weight:900;color:var(--ink);margin-bottom:4px}
-.seller-hero-meta{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px}
-.seller-sep{color:var(--br)}
-.seller-hero-rating{font-size:14px;font-weight:700;margin-top:4px}
-.seller-pro{background:#FFF3EE;color:var(--or);font-size:12px;font-weight:800;padding:3px 10px;border-radius:20px;border:1px solid var(--orm)}
-.seller-hero-actions{display:flex;flex-direction:column;gap:10px}
-.seller-btn-contact{background:var(--or);color:#fff;border:none;border-radius:10px;padding:12px 22px;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px;transition:background .15s}
-.seller-btn-contact:hover{background:var(--or2)}
-.seller-btn-rate{background:#fff;color:var(--ink);border:1.5px solid var(--br);border-radius:10px;padding:12px 22px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px;transition:all .15s}
-.seller-btn-rate:hover{border-color:var(--or);color:var(--or)}
-.seller-stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
-.seller-stat-card{background:#fff;border:1px solid var(--br);border-radius:10px;padding:16px;text-align:center}
-.seller-stat-n{font-size:22px;font-weight:900;color:var(--or);margin-bottom:4px}
-.seller-stat-l{font-size:12px;color:var(--muted);font-weight:600}
-.seller-body{display:grid;grid-template-columns:1fr 280px;gap:20px;align-items:start}
-.seller-main{}
-.seller-aside{}
-.seller-section{background:#fff;border:1px solid var(--br);border-radius:12px;padding:20px}
-.seller-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.seller-section-head h3{margin:0;font-size:15px;font-weight:800}
-.seller-section-count{background:var(--brl);color:var(--muted);font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px}
-.seller-card{background:#fff;border:1px solid var(--br);border-radius:12px;padding:16px;margin-bottom:14px}
-.seller-card-title{font-size:13px;font-weight:800;color:var(--ink);margin-bottom:12px}
-.seller-card-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink);padding:6px 0;border-bottom:1px solid var(--brl)}
-.seller-card-row:last-child{border-bottom:none}
-.seller-security-card{background:#FFF3EE;border:1px solid var(--orm);border-radius:12px;padding:14px 16px}
-.seller-security-title{font-size:13px;font-weight:800;color:var(--or2);margin-bottom:10px}
-.seller-security-list{margin:0;padding-left:16px;font-size:12px;color:var(--ink);line-height:1.9}
-/* Avis */
-.seller-review{padding:14px 0;border-bottom:1px solid var(--brl)}
-.seller-review:last-child{border-bottom:none}
-.seller-review-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-.seller-review-author{font-size:13px;font-weight:700;color:var(--ink)}
-.seller-review-stars{color:#FBBF24;font-size:14px}
-.seller-review-date{font-size:11px;color:var(--muted)}
-.seller-review-text{font-size:13px;color:var(--ink);line-height:1.6}
+@keyframes pmsgSlide{from{transform:translateX(120px);opacity:0}to{transform:translateX(0);opacity:1}}
 @media(max-width:768px){
-  .seller-stats-row{grid-template-columns:repeat(2,1fr)}
-  .seller-body{grid-template-columns:1fr}
-  .seller-hero-actions{flex-direction:row}
-}
-</style>
+  #page-messages.active{top:62px}
+  .pmsg-wrap{grid-template-columns:1fr}
+  .pmsg-center{display:none}
+  .pmsg-left.pmsg-hidden{display:none}
+  .pmsg-center.pmsg-visible{display:flex}
+}</style>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#FF5C00">
   <meta name="mobile-web-app-capable" content="yes">
@@ -3360,70 +3294,80 @@ function navGoFavs(){
 
 function navGoMessages(){
   if(!DB.user()){openModal('auth');return;}
-  // Charger les conversations dans la page dédiée
-  var token = localStorage.getItem('ygy_token');
-  var list = document.getElementById('page-msg-list');
-  if(list) list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">⏳ Chargement...</div>';
+  var token=localStorage.getItem('ygy_token');
   goTo('messages');
+  var list=document.getElementById('page-msg-list');
+  if(list)list.innerHTML='<div style="padding:40px;text-align:center;color:#bbb;font-size:13px">⏳ Chargement...</div>';
   if(token){
     fetch('/api/conversations',{headers:{'Authorization':'Bearer '+token}})
     .then(function(r){return r.json();})
     .then(function(data){
-      var convs = data.conversations||data||[];
-      _pageConvs = convs;
+      var convs=Array.isArray(data)?data:(data.conversations||[]);
+      _pageConvs=convs;
       renderPageConvList(convs);
       updateMsgBadge(convs);
     }).catch(function(){
-      if(list) list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">❌ Erreur de chargement</div>';
+      if(list)list.innerHTML='<div style="padding:40px;text-align:center;color:#bbb;font-size:13px">❌ Erreur — <a href="#" onclick="navGoMessages();return false" style="color:var(--or)">Réessayer</a></div>';
     });
   }
 }
 
 function renderPageConvList(convs){
-  var list = document.getElementById('page-msg-list');
+  var list=document.getElementById('page-msg-list');
   if(!list) return;
-  var user = DB.user();
+  var user=DB.user();
+  var uid=user?String(user._id||user.id||''):'';
   if(!convs||!convs.length){
-    list.innerHTML = '<div style="padding:32px 16px;text-align:center;color:var(--muted)">'+
-      '<div style="font-size:36px;margin-bottom:8px">💬</div>'+
-      '<div style="font-size:13px;font-weight:600">Aucune conversation</div>'+
-    '</div>';
+    list.innerHTML='<div style="padding:48px 16px;text-align:center;color:#bbb">'
+      +'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5" style="display:block;margin:0 auto 12px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'
+      +'<div style="font-size:14px;font-weight:600;color:#999">Aucune conversation</div>'
+      +'<div style="font-size:12px;margin-top:4px">Contactez un vendeur pour démarrer</div>'
+      +'</div>';
     return;
   }
-  list.innerHTML = convs.map(function(conv){
-    var isUnread = (conv.unreadCount||0) > 0;
-    var isBuyer  = String(conv.buyerId)===(user&&String(user._id));
-    var name     = isBuyer ? (conv.sellerName||'Vendeur') : (conv.buyerName||'Acheteur');
-    var last     = conv.lastMessage||'Nouvelle conversation';
-    var time     = conv.updatedAt ? timeAgo(conv.updatedAt) : '';
-    var cid      = conv._id||conv.id||'';
-    var adTitle  = conv.adTitle||'';
-    return '<div class="pmsg-conv" onclick="openPageConvById(\''+cid+'\')">'+
-      '<div class="pmsg-conv-thumb">'+name.charAt(0).toUpperCase()+'</div>'+
-      '<div class="pmsg-conv-info">'+
-        '<div class="pmsg-conv-title">'+(adTitle||name)+'</div>'+
-        '<div class="pmsg-conv-preview">'+last.substring(0,45)+'</div>'+
-        '<div class="pmsg-conv-meta">'+
-          '<span class="pmsg-conv-who">'+name+'</span>'+
-          '<span class="pmsg-conv-date">· '+time+'</span>'+
-        '</div>'+
-      '</div>'+
-      (isUnread?'<div class="pmsg-conv-unread">'+conv.unreadCount+'</div>':'')+
-    '</div>';
+  // Trier par plus récent
+  convs=convs.slice().sort(function(a,b){return new Date(b.updatedAt||0)-new Date(a.updatedAt||0);});
+  list.innerHTML=convs.map(function(conv){
+    var isBuyer=String(conv.buyerId)===uid;
+    var name=isBuyer?(conv.sellerName||'Vendeur'):(conv.buyerName||'Acheteur');
+    var unread=isBuyer?(conv.unreadBuyer||conv.unreadCount||0):(conv.unreadSeller||conv.unreadCount||0);
+    var preview=conv.lastMessage||'Nouvelle conversation';
+    var adTitle=conv.adTitle||'';
+    var adPhoto=conv.adPhoto||'';
+    var deleted=conv.adDeleted||false;
+    var t=conv.updatedAt?timeAgo(conv.updatedAt):'';
+    var cid=String(conv._id||'');
+    var thumb=adPhoto?'<img src="'+adPhoto+'" alt="">':'<span>'+name.charAt(0).toUpperCase()+'</span>';
+    var adLine=deleted?'<div class="pmsg-conv-deleted">🗑 Annonce supprimée</div>'
+      :(adTitle?'<div class="pmsg-conv-ad">'+adTitle+'</div>':'');
+    return '<div class="pmsg-conv'+(unread?' pmsg-conv-unread-row':'')+'" data-cid="'+cid+'" onclick="openPageConvById(this)">'
+      +'<div class="pmsg-conv-thumb">'+thumb+'</div>'
+      +'<div class="pmsg-conv-body">'
+        +'<div class="pmsg-conv-top"><span class="pmsg-conv-name">'+name+'</span><span class="pmsg-conv-time">'+t+'</span></div>'
+        +adLine
+        +'<div class="pmsg-conv-row">'
+          +'<span class="pmsg-conv-preview'+(unread?' bold':'')+'">'+preview.substring(0,55)+'</span>'
+          +(unread?'<span class="pmsg-conv-badge">'+(unread>99?'99+':unread)+'</span>':'')
+        +'</div>'
+      +'</div>'
+    +'</div>';
   }).join('');
 }
 
-var _pageConvId = null;
-var _pageConvs  = [];
-function openPageConvById(cid){
-  var conv = _pageConvs.find(function(c){return (c._id||c.id)===cid;})||{_id:cid};
-  // Marquer actif
-  document.querySelectorAll('.pmsg-conv').forEach(function(i){i.classList.remove('active');});
-  document.querySelectorAll('.pmsg-conv').forEach(function(el){
-    if(el.getAttribute('onclick')&&el.getAttribute('onclick').includes(cid)) el.classList.add('active');
-  });
-  openPageConv(cid, conv);
+function openPageConvById(cidOrEl){
+  var cid=(cidOrEl&&typeof cidOrEl==='object'&&cidOrEl.dataset)?cidOrEl.dataset.cid:String(cidOrEl||'');
+  if(!cid) return;
+  document.querySelectorAll('.pmsg-conv').forEach(function(el){el.classList.toggle('active',el.dataset.cid===cid);});
+  var conv=(_pageConvs||[]).find(function(c){return String(c._id||c.id)===cid;})||{_id:cid};
+  openPageConv(cid,conv);
+  if(window.innerWidth<=768){
+    var l=document.getElementById('pmsg-left-panel');
+    var c=document.getElementById('pmsg-center-panel');
+    if(l)l.classList.add('pmsg-hidden');
+    if(c)c.classList.add('pmsg-visible');
+  }
 }
+
 function filterConvs(type, btn){
   document.querySelectorAll('.pmsg-filter').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
@@ -3431,123 +3375,107 @@ function filterConvs(type, btn){
   if(type==='unread') convs = convs.filter(function(c){return (c.unreadCount||0)>0;});
   renderPageConvList(convs);
 }
-function openPageConv(convId, convData){
-  _pageConvId = convId;
-  // actif géré par openPageConvById
-  var thread = document.getElementById('page-msg-thread');
+function openPageConv(convId,convData){
+  _pageConvId=convId;
+  var thread=document.getElementById('page-msg-thread');
   if(!thread) return;
-  var user = DB.user();
-  var conv = convData || {};
-  var otherName = String(conv.buyerId)===(user&&String(user._id)) ? (conv.sellerName||'Vendeur') : (conv.buyerName||'Acheteur');
-  var adTitle = conv.adTitle||'';
-  thread.className = '';
-  thread.innerHTML =
-    '<div class="pmsg-thread-head">'+
-      '<div class="pmsg-thread-av">'+(otherName||'?').charAt(0).toUpperCase()+'</div>'+
-      '<div class="pmsg-thread-info">'+
-        '<div class="pmsg-thread-name">'+otherName+'</div>'+
-        (adTitle?'<div class="pmsg-thread-ad">📦 '+adTitle+'</div>':'')+
-      '</div>'+
-    '</div>'+
-    '<div class="pmsg-seller-card">'+
-      '<div class="pmsg-seller-card-title">À propos de ce vendeur</div>'+
-      '<div class="pmsg-seller-since">'+
-        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'+
-        'Membre YouGouYou'+
-      '</div>'+
-    '</div>'+
-    '<div class="pmsg-bubbles" id="page-msg-bubbles">'+
-      '<div class="pmsg-security">'+
-        '<strong>Soyez prudent lorsque votre interlocuteur vous demande ou vous envoie un numéro de téléphone / e-mail</strong>'+
-        'Ici nous garantissons la sécurité de vos échanges, c\'est pourquoi nous vous conseillons de rester sur la messagerie pour discuter et passer par le paiement sécurisé pour vos transactions.<br>'+
-        '<a href="#">→ En savoir plus</a>'+
-      '</div>'+
-      '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">⏳ Chargement...</div>'+
-    '</div>'+
-    '<div class="pmsg-input-wrap">'+
-      '<input class="pmsg-input" type="text" id="page-msg-input" placeholder="Écrivez votre message..." '+
-        'onkeydown="if(event.key===\'Enter\')sendPageMsg()">'+
-      '<button class="pmsg-send" onclick="sendPageMsg()">'+
-        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>'+
-      '</button>'+
-    '</div>';
-  // Remplir la colonne droite avec les infos vendeur
-  var panel = document.getElementById('page-msg-panel');
-  if(panel){
-    panel.innerHTML =
-      '<div class="pmsg-vendor-head">'+
-        '<div class="pmsg-vendor-av">'+(otherName||'?').charAt(0).toUpperCase()+'</div>'+
-        '<div>'+
-          '<div class="pmsg-vendor-name">'+otherName+'</div>'+
-          '<div class="pmsg-vendor-meta">'+
-            '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+
-            'Membre YouGouYou'+
-          '</div>'+
-        '</div>'+
-      '</div>'+
-      (adTitle?
-        '<div class="pmsg-ad-card">'+
-          '<div class="pmsg-ad-img">📦</div>'+
-          '<div class="pmsg-ad-info">'+
-            '<div class="pmsg-ad-title">'+adTitle+'</div>'+
-          '</div>'+
-        '</div>':'')+
-      '<div style="font-size:12px;color:var(--muted);line-height:1.7;background:#f9f9f9;border-radius:8px;padding:10px 12px;margin-top:8px">'+
-        '<strong style="color:var(--ink);display:block;margin-bottom:4px">🛡️ Paiement sécurisé</strong>'+
-        'Utilisez le paiement Orange Money intégré pour vos transactions. Ne payez jamais en dehors de la plateforme.'+
-      '</div>';
-  }
-  // Charger les messages
-  var token = localStorage.getItem('ygy_token');
+  var user=DB.user();
+  var uid=user?String(user._id||user.id||''):'';
+  var conv=convData||{};
+  var isBuyer=String(conv.buyerId)===uid;
+  var otherName=isBuyer?(conv.sellerName||'Vendeur'):(conv.buyerName||'Acheteur');
+  var adTitle=conv.adTitle||'';
+  var deleted=conv.adDeleted||false;
+  var token=localStorage.getItem('ygy_token');
+  thread.className='';
+  thread.style.cssText='display:flex;flex-direction:column;flex:1;overflow:hidden;min-height:0';
+  thread.innerHTML=
+    '<div class="pmsg-thread-head">'
+      +'<div class="pmsg-thread-av">'+otherName.charAt(0).toUpperCase()+'</div>'
+      +'<div class="pmsg-thread-info">'
+        +'<div class="pmsg-thread-name">'+otherName+'</div>'
+        +(deleted?'<div class="pmsg-thread-sub" style="color:#bbb">🗑 Annonce supprimée</div>'
+         :(adTitle?'<div class="pmsg-thread-sub">📦 '+adTitle+'</div>':''))
+      +'</div>'
+      +'<button onclick="retourListe()" id="pmsg-back-btn" style="display:none;margin-left:auto;background:none;border:none;font-size:22px;cursor:pointer;color:#888;padding:4px 8px">←</button>'
+    +'</div>'
+    +'<div class="pmsg-security"><strong>🛡️ Restez prudent</strong>'
+      +'Ne partagez jamais vos coordonnées personnelles. Échangez uniquement sur YouGouYou. '
+      +'<a href="#">En savoir plus →</a></div>'
+    +'<div class="pmsg-bubbles" id="page-msg-bubbles">'
+      +'<div style="text-align:center;color:#bbb;font-size:13px;padding:24px">⏳ Chargement...</div>'
+    +'</div>'
+    +'<div class="pmsg-input-wrap">'
+      +'<input class="pmsg-input" id="page-msg-input" type="text" placeholder="Écrivez votre message..." '
+        +'onkeydown="if(event.key===\'Enter\')sendPageMsg()">'
+      +'<button class="pmsg-send" id="pmsg-send-btn" onclick="sendPageMsg()">'
+        +'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>'
+      +'</button>'
+    +'</div>';
+  if(window.innerWidth<=768){var b=document.getElementById('pmsg-back-btn');if(b)b.style.display='block';}
+  // Démarrer polling
+  if(typeof startMsgPoll==='function') startMsgPoll(convId);
+  // Charger messages
   if(token){
     fetch('/api/conversations/'+convId,{headers:{'Authorization':'Bearer '+token}})
     .then(function(r){return r.json();})
-    .then(function(data){
-      var msgs = data.messages||[];
-      var container = document.getElementById('page-msg-bubbles');
-      if(!container) return;
-      if(!msgs.length){
-        container.innerHTML = '<div class="msg-security">🛡️ <strong>Conseils sécurité</strong> — Vérifiez l\'article avant paiement. Échangez en lieu public.</div>'+
-          '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Démarrez la conversation 👋</div>';
-        return;
-      }
-      var html = '<div class="pmsg-security">'+
-        '<strong>Soyez prudent lorsque votre interlocuteur vous demande un numéro de téléphone / e-mail</strong>'+
-        'Restez sur la messagerie YouGouYou pour vos échanges. Passez par le paiement sécurisé pour vos transactions.'+
-      '</div>';
-      msgs.forEach(function(m){
-        var isMine = String(m.senderId)===(user&&String(user._id));
-        var t = m.createdAt?new Date(m.createdAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
-        html += '<div class="pmsg-bubble-wrap '+(isMine?'mine':'theirs')+'">'+
-          '<div class="pmsg-bubble '+(isMine?'mine':'theirs')+'">'+m.text+'</div>'+
-          '<div class="pmsg-bubble-time">'+t+(isMine?' · ✓✓':'')+'</div>'+
-        '</div>';
-      });
-      container.innerHTML = html;
-      container.scrollTop = container.scrollHeight;
+    .then(function(data){renderMsgBubbles(data.messages||[],uid);})
+    .catch(function(){
+      var c=document.getElementById('page-msg-bubbles');
+      if(c)c.innerHTML='<div style="text-align:center;color:#bbb;padding:24px">Démarrez la conversation 👋</div>';
+    });
+    // Marquer lu
+    fetch('/api/conversations/'+convId+'/read',{method:'PATCH',headers:{'Authorization':'Bearer '+token}})
+    .then(function(){
+      (_pageConvs||[]).forEach(function(c){if(String(c._id)===String(convId)){c.unreadBuyer=0;c.unreadSeller=0;c.unreadCount=0;}});
+      updateMsgBadge(_pageConvs||[]);
+      var el=document.querySelector('.pmsg-conv[data-cid="'+convId+'"]');
+      if(el){var b=el.querySelector('.pmsg-conv-badge');if(b)b.remove();var p=el.querySelector('.pmsg-conv-preview');if(p)p.classList.remove('bold');el.classList.remove('pmsg-conv-unread-row');}
     }).catch(function(){});
-    // Marquer comme lu
-    fetch('/api/conversations/'+convId+'/read',{method:'PATCH',headers:{'Authorization':'Bearer '+token}}).catch(function(){});
   }
 }
 
 function sendPageMsg(){
   if(!_pageConvId) return;
-  var inp = document.getElementById('page-msg-input');
-  var text = (inp&&inp.value.trim())||'';
+  var inp=document.getElementById('page-msg-input');
+  var btn=document.getElementById('pmsg-send-btn');
+  var text=(inp&&inp.value.trim())||'';
   if(!text) return;
-  var token = localStorage.getItem('ygy_token');
+  var token=localStorage.getItem('ygy_token');
+  if(!token){toast('🔒 Connectez-vous','err');return;}
+  if(btn)btn.disabled=true;
+  if(inp)inp.value='';
+  var user=DB.user();
+  var uid=user?String(user._id||user.id||''):''; 
+  // Bulle optimiste
+  var container=document.getElementById('page-msg-bubbles');
+  if(container){
+    var now=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    var div=document.createElement('div');
+    div.className='pmsg-bubble-wrap mine';
+    div.innerHTML='<div class="pmsg-bubble mine">'+text+'</div><div class="pmsg-bubble-time">'+now+' ✓</div>';
+    container.appendChild(div);
+    container.scrollTop=container.scrollHeight;
+  }
+  // MàJ preview liste
+  var li=document.querySelector('.pmsg-conv[data-cid="'+_pageConvId+'"]');
+  if(li){var p=li.querySelector('.pmsg-conv-preview');var t=li.querySelector('.pmsg-conv-time');if(p){p.textContent=text.substring(0,55);p.classList.remove('bold');}if(t)t.textContent='maintenant';document.getElementById('page-msg-list').insertBefore(li,document.getElementById('page-msg-list').firstChild);}
+  // Envoi
   fetch('/api/conversations/'+_pageConvId,{
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-    body:JSON.stringify({text:text})
+    body:JSON.stringify({text:text,message:text})
   }).then(function(r){return r.json();})
   .then(function(){
-    if(inp) inp.value='';
-    // Recharger les messages
-    openPageConv(_pageConvId, {buyerId:'', sellerName:'', adTitle:''});
-  }).catch(function(){ toast('❌ Erreur envoi','err'); });
+    if(btn)btn.disabled=false;
+    var tok2=localStorage.getItem('ygy_token');
+    var u2=DB.user();var uid2=u2?String(u2._id||u2.id||''):'';
+    fetch('/api/conversations/'+_pageConvId,{headers:{'Authorization':'Bearer '+tok2}})
+    .then(function(r){return r.json();})
+    .then(function(d){renderMsgBubbles(d.messages||[],uid2);}).catch(function(){});
+  }).catch(function(){if(btn)btn.disabled=false;toast('❌ Erreur envoi','err');});
 }
+
 function updateNav(){
   var btn=document.getElementById('nav-auth-btn');if(!btn)return;
   var u=DB.user();
@@ -5106,6 +5034,92 @@ function updateMsgBadge(convs){
 }
 
 // Polling messages non lus
+// ── Rendu bulles messages ──────────────────────────────────────
+function renderMsgBubbles(msgs,uid){
+  var c=document.getElementById('page-msg-bubbles');
+  if(!c) return;
+  if(!msgs.length){
+    c.innerHTML='<div class="pmsg-security"><strong>🛡️ Restez prudent</strong>Ne partagez pas vos coordonnées.</div>'
+      +'<div style="text-align:center;color:#bbb;font-size:13px;padding:24px">Démarrez la conversation 👋</div>';
+    return;
+  }
+  var h='<div class="pmsg-security"><strong>🛡️ Restez prudent</strong>Ne partagez pas vos coordonnées. <a href="#">En savoir plus →</a></div>';
+  var lastDate='';
+  msgs.forEach(function(m){
+    var isMine=!!(uid&&String(m.senderId)===uid);
+    var t=m.createdAt?new Date(m.createdAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
+    var d=m.createdAt?new Date(m.createdAt).toLocaleDateString('fr-FR',{day:'numeric',month:'long'}):'';
+    if(d&&d!==lastDate){h+='<div class="pmsg-date-sep">'+d+'</div>';lastDate=d;}
+    h+='<div class="pmsg-bubble-wrap '+(isMine?'mine':'theirs')+'">'
+      +'<div class="pmsg-bubble '+(isMine?'mine':'theirs')+'">'+m.text+'</div>'
+      +'<div class="pmsg-bubble-time">'+t+(isMine?' ✓✓':'')+'</div></div>';
+  });
+  c.innerHTML=h;
+  c.scrollTop=c.scrollHeight;
+}
+
+// ── Retour liste mobile ──────────────────────────────────────
+function retourListe(){
+  var l=document.getElementById('pmsg-left-panel');
+  var c=document.getElementById('pmsg-center-panel');
+  if(l)l.classList.remove('pmsg-hidden');
+  if(c)c.classList.remove('pmsg-visible');
+}
+
+// ── Polling messages actifs ──────────────────────────────────
+var _msgPollTimer=null;
+function startMsgPoll(convId){
+  if(_msgPollTimer){clearInterval(_msgPollTimer);_msgPollTimer=null;}
+  _msgPollTimer=setInterval(function(){
+    if(!convId||convId!==_pageConvId) return;
+    var tok=localStorage.getItem('ygy_token');
+    if(!tok) return;
+    var user=DB.user();
+    var uid=user?String(user._id||user.id||''):'';
+    fetch('/api/conversations/'+convId,{headers:{'Authorization':'Bearer '+tok}})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      var msgs=d.messages||[];
+      var c=document.getElementById('page-msg-bubbles');
+      if(!c) return;
+      var cur=c.querySelectorAll('.pmsg-bubble-wrap').length;
+      if(msgs.length>cur){
+        renderMsgBubbles(msgs,uid);
+        var last=msgs[msgs.length-1];
+        if(last&&String(last.senderId)!==uid) showMsgNotif(last.text);
+      }
+    }).catch(function(){});
+  },3000);
+}
+
+// ── Notification nouveau message ────────────────────────────
+function showMsgNotif(text){
+  var ex=document.querySelector('.pmsg-new-notif');
+  if(ex)ex.remove();
+  var div=document.createElement('div');
+  div.className='pmsg-new-notif';
+  div.innerHTML='💬 '+text.substring(0,45)+'...';
+  div.onclick=function(){this.remove();navGoMessages();};
+  document.body.appendChild(div);
+  setTimeout(function(){if(div.parentNode)div.remove();},5000);
+}
+
+// ── Polling badge global ──────────────────────────────────
+function startBadgePoll(){
+  setInterval(function(){
+    var tok=localStorage.getItem('ygy_token');
+    if(!tok) return;
+    fetch('/api/conversations/unread',{headers:{'Authorization':'Bearer '+tok}})
+    .then(function(r){return r.ok?r.json():{count:0};})
+    .then(function(d){
+      var n=d.count||d.unread||0;
+      var b=document.getElementById('nav-msg-badge');
+      if(b){if(n>0){b.textContent=n>99?'99+':n;b.style.display='flex';}else b.style.display='none';}
+    }).catch(function(){});
+  },15000);
+}
+
+
 function startMsgPolling(){
   if(_convPollTimer) clearInterval(_convPollTimer);
   _convPollTimer=setInterval(function(){
@@ -5558,7 +5572,8 @@ document.addEventListener('DOMContentLoaded',function(){
             else adminLink.setAttribute('hidden','');
           }
         }
-      }).catch(function(){});
+      }).catch(function(){
+  if(localStorage.getItem('ygy_token') && typeof startBadgePoll==='function') setTimeout(startBadgePoll,3000);});
     }
   })();
 
@@ -5856,46 +5871,44 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <!-- ══ PAGE MESSAGES ══ -->
 <div id="page-messages" class="page">
-<div class="pmsg-wrap">
-  <!-- COL 1 : liste conversations -->
-  <div class="pmsg-left">
-    <div class="pmsg-left-head">
-      <button onclick="goTo('home')" class="pmsg-back">← Retour</button>
-      <span style="font-weight:800;font-size:15px">Messages</span>
+  <div class="pmsg-topbar">
+    <span class="pmsg-topbar-title">Messages</span>
+    <button class="pmsg-topbar-close" onclick="goTo('home')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      Fermer
+    </button>
+  </div>
+  <div class="pmsg-wrap">
+    <!-- Col gauche : liste convs -->
+    <div class="pmsg-left" id="pmsg-left-panel">
+      <div class="pmsg-left-head">
+        <div class="pmsg-left-title">Conversations</div>
+        <div class="pmsg-filters">
+          <button class="pmsg-filter active" onclick="filterConvs('all',this)">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Tout
+          </button>
+          <button class="pmsg-filter" onclick="filterConvs('unread',this)">Non lus</button>
+        </div>
+      </div>
+      <div id="page-msg-list" class="pmsg-list">
+        <div style="padding:48px 16px;text-align:center;color:#bbb">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5" style="display:block;margin:0 auto 12px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <div style="font-size:14px;font-weight:600;color:#999">Aucune conversation</div>
+          <div style="font-size:12px;margin-top:4px">Contactez un vendeur pour démarrer</div>
+        </div>
+      </div>
     </div>
-    <div class="pmsg-filters">
-      <button class="pmsg-filter active" onclick="filterConvs('all',this)">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-        Tout
-      </button>
-      <button class="pmsg-filter" onclick="filterConvs('unread',this)">Non lus</button>
-    </div>
-    <div id="page-msg-list" class="pmsg-list">
-      <div style="padding:32px 16px;text-align:center;color:var(--muted)">
-        <div style="font-size:36px;margin-bottom:8px">💬</div>
-        <div style="font-size:13px">Aucune conversation</div>
+    <!-- Col droite : thread -->
+    <div class="pmsg-center" id="pmsg-center-panel">
+      <div id="page-msg-thread" class="pmsg-thread-empty">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.2" style="margin-bottom:16px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <div style="font-size:16px;font-weight:700;color:#aaa;margin-bottom:6px">Sélectionnez une conversation</div>
+        <div style="font-size:13px;color:#ccc">Vos échanges apparaissent ici</div>
       </div>
     </div>
   </div>
-  <!-- COL 2 : fil messages -->
-  <div class="pmsg-center">
-    <div id="page-msg-thread" class="pmsg-thread-empty">
-      <div style="font-size:48px;margin-bottom:12px">👈</div>
-      <div style="font-size:15px;font-weight:700;margin-bottom:6px">Sélectionnez une conversation</div>
-      <div style="font-size:13px;color:var(--muted)">Vos échanges apparaissent ici</div>
-    </div>
-  </div>
-  <!-- COL 3 : infos vendeur -->
-  <div class="pmsg-right-panel" id="page-msg-panel">
-    <div style="padding:40px 16px;text-align:center;color:var(--muted)">
-      <div style="font-size:36px;margin-bottom:8px">ℹ️</div>
-      <div style="font-size:13px">Infos vendeur</div>
-    </div>
-  </div>
-</div>
 </div>
 
-<!-- ══ PAGE FAVORIS ══ -->
 <div id="page-favs" class="page">
   <div style="max-width:1100px;margin:0 auto;padding:20px 20px">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
