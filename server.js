@@ -242,6 +242,7 @@ const UserSchema = new mongoose.Schema({
   ratingCount:  { type: Number, default: 0 },             // nb d'avis
   totalViews:   { type: Number, default: 0 },             // vues totales sur ses annonces
   totalContacts:{ type: Number, default: 0 },             // contacts reçus
+  favorites:    [{ type: mongoose.Schema.Types.ObjectId, ref: 'Ad' }], // annonces favorites
   createdAt:    { type: Date, default: Date.now },
 });
 UserSchema.index({ phone: 1 });
@@ -304,6 +305,7 @@ const Payment = mongoose.model('Payment', PaymentSchema);
 const MessageSchema = new mongoose.Schema({
   senderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   text:     { type: String, required: true, maxlength: 2000 },
+  isSystem: { type: Boolean, default: false },  // message système (frais, info auto)
   read:     { type: Boolean, default: false },
   createdAt:{ type: Date, default: Date.now },
 });
@@ -569,9 +571,20 @@ app.post('/api/auth/send-code', async (req, res) => {
 // Étape 2 : vérifier le code et créer le compte
 app.post('/api/register', async (req, res) => {
   try {
-    const { prenom, nom, phone, email, password, city, code, method = 'sms' } = req.body;
+    const { prenom, nom, phone, email, password, city, code, method = 'sms', dob } = req.body;
     if (!prenom || !password || !code)
       return res.status(400).json({ error: 'Champs requis manquants' });
+
+    // ── Vérification âge minimum 18 ans ──────────────────────────
+    if (!dob) return res.status(400).json({ error: 'Date de naissance requise' });
+    const birthDate = new Date(dob);
+    if (isNaN(birthDate.getTime())) return res.status(400).json({ error: 'Date de naissance invalide' });
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
+    if (age < 18) return res.status(400).json({ error: 'Vous devez avoir au moins 18 ans pour créer un compte' });
+    // ─────────────────────────────────────────────────────────────
 
     // Chercher le user temporaire créé lors du send-code
     let pending = null;
@@ -607,6 +620,7 @@ app.post('/api/register', async (req, res) => {
     pending.nom       = nom || '';
     pending.password  = hashed;
     pending.city      = city || '';
+    pending.dob       = dob;
     pending.verified  = true;
     pending.verifyCode  = null;
     pending.codeExpiry  = null;
@@ -1067,6 +1081,50 @@ app.get('/api/my-ads', auth, async (req, res) => {
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
+// ═══════════════════════════════════════════════════════════
+//  ★ FAVORIS
+// ═══════════════════════════════════════════════════════════
+
+// Lister mes favoris
+app.get('/api/me/favorites', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('favorites');
+    if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
+    const favIds = user.favorites || [];
+    const ads = await Ad.find({ _id: { $in: favIds }, active: true })
+      .select('-sellerPhone')
+      .populate('seller', 'prenom nom city avgRating verified');
+    res.json({ favorites: favIds.map(String), ads });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// Ajouter / retirer un favori (toggle)
+app.post('/api/me/favorites/:adId', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('favorites');
+    if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
+
+    const adId = req.params.adId;
+    const favs = (user.favorites || []).map(String);
+    const idx  = favs.indexOf(adId);
+    let action;
+
+    if (idx >= 0) {
+      // Retirer
+      await User.findByIdAndUpdate(req.user.id, { $pull: { favorites: adId } });
+      action = 'removed';
+    } else {
+      // Ajouter (max 200 favoris)
+      if (favs.length >= 200) return res.status(400).json({ error: 'Maximum 200 favoris' });
+      await User.findByIdAndUpdate(req.user.id, { $addToSet: { favorites: adId } });
+      action = 'added';
+    }
+    // Retourner la liste à jour
+    const updated = await User.findById(req.user.id).select('favorites');
+    res.json({ success: true, action, favorites: (updated.favorites || []).map(String) });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
 // ★ Boost / Mise en avant d'une annonce
 app.post('/api/ads/:id/boost', auth, async (req, res) => {
   try {
@@ -1129,8 +1187,13 @@ app.get('/api/conversations', auth, async (req, res) => {
 // Démarrer ou récupérer une conversation (depuis page détail annonce)
 app.post('/api/conversations', auth, async (req, res) => {
   try {
-    const { adId, message } = req.body;
-    if (!adId || !message) return res.status(400).json({ error: 'adId et message requis' });
+    const { adId, message, initContact } = req.body;
+
+    // initContact = true  → ouverture via bouton "Contacter le vendeur 3%"
+    //               (pas de message user obligatoire, message système auto injecté)
+    // message     = texte → ancien flux (compatibilité)
+    if (!adId) return res.status(400).json({ error: 'adId requis' });
+    if (!initContact && !message) return res.status(400).json({ error: 'adId et message requis' });
 
     const ad = await Ad.findById(adId);
     if (!ad) return res.status(404).json({ error: 'Annonce introuvable' });
@@ -1138,32 +1201,56 @@ app.post('/api/conversations', auth, async (req, res) => {
     if (String(ad.seller) === req.user.id)
       return res.status(400).json({ error: 'Vous ne pouvez pas vous envoyer un message' });
 
-    const buyer = await User.findById(req.user.id).select('prenom nom');
+    const buyer  = await User.findById(req.user.id).select('prenom nom');
     const seller = await User.findById(ad.seller).select('prenom nom');
 
     // Trouver ou créer la conversation unique (adId + buyerId)
     let conv = await Conversation.findOne({ adId, buyerId: req.user.id });
+    const isNew = !conv;
+
     if (!conv) {
       conv = await Conversation.create({
         adId, adTitle: ad.title,
-        buyerId: req.user.id,
-        buyerName: `${buyer?.prenom||''} ${buyer?.nom||''}`.trim(),
-        sellerId: ad.seller,
+        buyerId:    req.user.id,
+        buyerName:  `${buyer?.prenom||''} ${buyer?.nom||''}`.trim(),
+        sellerId:   ad.seller,
         sellerName: `${seller?.prenom||''} ${seller?.nom||''}`.trim(),
-        messages: [],
+        messages:   [],
         unreadBuyer: 0, unreadSeller: 0,
       });
     }
 
-    // Ajouter le message
-    conv.messages.push({ senderId: req.user.id, text: message });
-    conv.lastMessage = message.substring(0,100);
-    conv.updatedAt   = new Date();
-    conv.unreadSeller += 1;   // le vendeur a un nouveau message non lu
+    // ── Message système automatique (frais 3%) ──────────────────
+    // Injecté uniquement à la création d'une nouvelle conversation via "Contacter le vendeur"
+    const SYSTEM_ID = new mongoose.Types.ObjectId('000000000000000000000000');
+    if (isNew) {
+      const sysText = 'Des frais de mise en relation de 3% s\'appliquent pour contacter ce vendeur via YouGouYou.';
+      conv.messages.push({
+        senderId:  SYSTEM_ID,
+        text:      sysText,
+        isSystem:  true,
+        createdAt: new Date(),
+        read:      true,   // jamais compté dans les non-lus
+      });
+      conv.lastMessage = sysText.substring(0, 100);
+      conv.updatedAt   = new Date();
+    }
+
+    // ── Message de l'utilisateur (si fourni) ────────────────────
+    if (message && message.trim()) {
+      const msgText = message.trim();
+      conv.messages.push({ senderId: req.user.id, text: msgText });
+      conv.lastMessage  = msgText.substring(0, 100);
+      conv.updatedAt    = new Date();
+      conv.unreadSeller += 1;
+    }
+
     await conv.save();
 
-    // Incrémenter contacts du vendeur
-    User.findByIdAndUpdate(ad.seller, { $inc: { totalContacts: 1 } }).catch(()=>{});
+    // Incrémenter contacts du vendeur (uniquement si nouvelle conv)
+    if (isNew) {
+      User.findByIdAndUpdate(ad.seller, { $inc: { totalContacts: 1 } }).catch(()=>{});
+    }
 
     res.json({ success: true, conversationId: conv._id });
   } catch(err) {
@@ -1174,6 +1261,23 @@ app.post('/api/conversations', auth, async (req, res) => {
     }
     res.status(500).json({ error: err.message });
   }
+});
+
+// Total messages non lus  ← DOIT être avant /:id pour éviter le conflit Express
+app.get('/api/conversations/unread', auth, async (req, res) => {
+  try {
+    const uid = req.user.id;
+    const asBuyer  = await Conversation.aggregate([
+      { $match: { buyerId: new mongoose.Types.ObjectId(uid) } },
+      { $group: { _id: null, total: { $sum: '$unreadBuyer' } } }
+    ]);
+    const asSeller = await Conversation.aggregate([
+      { $match: { sellerId: new mongoose.Types.ObjectId(uid) } },
+      { $group: { _id: null, total: { $sum: '$unreadSeller' } } }
+    ]);
+    const count = (asBuyer[0]?.total||0) + (asSeller[0]?.total||0);
+    res.json({ count });
+  } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
 // Lire les messages d'une conversation
@@ -1237,23 +1341,6 @@ app.patch('/api/conversations/:id/read', auth, async (req, res) => {
     }
     await conv.save();
     res.json({ success: true });
-  } catch(err) { res.status(500).json({ error: err.message }); }
-});
-
-// Total messages non lus
-app.get('/api/conversations/unread', auth, async (req, res) => {
-  try {
-    const uid = req.user.id;
-    const asBuyer  = await Conversation.aggregate([
-      { $match: { buyerId: new mongoose.Types.ObjectId(uid) } },
-      { $group: { _id: null, total: { $sum: '$unreadBuyer' } } }
-    ]);
-    const asSeller = await Conversation.aggregate([
-      { $match: { sellerId: new mongoose.Types.ObjectId(uid) } },
-      { $group: { _id: null, total: { $sum: '$unreadSeller' } } }
-    ]);
-    const count = (asBuyer[0]?.total||0) + (asSeller[0]?.total||0);
-    res.json({ count });
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
