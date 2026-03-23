@@ -283,8 +283,8 @@ footer{background:transparent;margin-top:0}
 .btn-post-submit{width:100%;padding:13px;border-radius:6px;background:var(--or);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:background .12s;display:flex;align-items:center;justify-content:center;gap:6px;font-family:var(--font)}
 .btn-post-submit:hover{background:var(--or2)}
 .btn-post-submit:disabled{opacity:.6;cursor:not-allowed}
-.dash-layout{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 62px)}
-.dash-side{background:#fff;border-right:1px solid var(--br);padding:0;position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto}
+.dash-layout{display:block;min-height:calc(100vh - 62px)}
+.dash-side{display:none!important}
 .dash-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--or),#ff8c42);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;flex-shrink:0}
 .dash-user-info{padding:18px 16px;border-bottom:1px solid var(--br);display:flex;align-items:center;gap:12px}
 .dash-user-name{font-size:14px;font-weight:800;color:var(--ink)}
@@ -294,9 +294,9 @@ footer{background:transparent;margin-top:0}
 .dash-nav a:hover{background:#f7f7f7;color:var(--ink)}
 .dash-nav a.active{background:#fff7f2;color:var(--or);font-weight:700;border-left-color:var(--or)}
 .dash-nav-sep{height:1px;background:var(--br);margin:4px 0}
-.dash-main{padding:28px 32px;background:#f5f5f5;min-height:calc(100vh - 62px)}
+.dash-main{padding:28px 20px;background:#f5f5f5;min-height:calc(100vh - 62px);max-width:900px;margin:0 auto}
 /* Leboncoin-style profile cards */
-.lbc-profile-hero{background:#fff;border-radius:12px;border:1px solid #e8e8e8;padding:24px 28px;display:flex;align-items:center;gap:20px;margin-bottom:8px}
+.lbc-profile-hero{background:#fff;border-radius:12px;border:1px solid #e8e8e8;padding:28px 32px;display:flex;align-items:center;gap:24px;margin-bottom:12px}
 .lbc-profile-av-wrap{position:relative;flex-shrink:0}
 .lbc-profile-av{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--or),#ff8c42);color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800}
 .lbc-av-edit{position:absolute;bottom:0;right:0;width:26px;height:26px;border-radius:50%;background:var(--or);color:#fff;border:2px solid #fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px}
@@ -307,7 +307,7 @@ footer{background:transparent;margin-top:0}
 .lbc-badge-admin{display:inline-flex;align-items:center;gap:4px;background:#EFF6FF;color:#1D4ED8;font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px}
 .lbc-profile-meta{font-size:13px;color:#666;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 /* Sections activités / projets / compte */
-.lbc-section-title{font-size:16px;font-weight:800;color:var(--ink);margin:20px 0 10px}
+.lbc-section-title{font-size:18px;font-weight:800;color:var(--ink);margin:24px 0 12px}
 .lbc-cards-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
 .lbc-card{background:#fff;border-radius:12px;border:1px solid #e8e8e8;padding:18px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .15s;text-decoration:none}
 .lbc-card:hover{border-color:var(--or);box-shadow:0 2px 12px rgba(255,92,0,.1)}
@@ -325,7 +325,7 @@ footer{background:transparent;margin-top:0}
 .lbc-project-link{font-size:12px;color:#888;display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f0f0f0}
 .lbc-project-link:last-child{border-bottom:none;padding-bottom:0}
 /* Mon compte section */
-.lbc-account-section{background:#fff;border-radius:12px;border:1px solid #e8e8e8;overflow:hidden;margin-bottom:8px}
+.lbc-account-section{background:#fff;border-radius:12px;border:1px solid #e8e8e8;overflow:hidden;margin-bottom:12px}
 .lbc-account-section-head{font-size:12px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;padding:14px 20px 8px}
 .lbc-account-row{display:flex;align-items:center;padding:14px 20px;border-top:1px solid #f0f0f0;cursor:pointer;transition:background .1s}
 .lbc-account-row:first-of-type{border-top:none}
@@ -1334,8 +1334,8 @@ footer{background:transparent;margin-top:0}
 .btn-post-submit{width:100%;padding:13px;border-radius:6px;background:var(--or);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:background .12s;display:flex;align-items:center;justify-content:center;gap:6px;font-family:var(--font)}
 .btn-post-submit:hover{background:var(--or2)}
 .btn-post-submit:disabled{opacity:.6;cursor:not-allowed}
-.dash-layout{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 62px)}
-.dash-side{background:#fff;border-right:1px solid var(--br);padding:0;position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto}
+.dash-layout{display:block;min-height:calc(100vh - 62px)}
+.dash-side{display:none!important}
 .dash-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--or),#ff8c42);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;flex-shrink:0}
 .dash-user-info{padding:18px 16px;border-bottom:1px solid var(--br);display:flex;align-items:center;gap:12px}
 .dash-user-name{font-size:14px;font-weight:800;color:var(--ink)}
@@ -1345,9 +1345,9 @@ footer{background:transparent;margin-top:0}
 .dash-nav a:hover{background:#f7f7f7;color:var(--ink)}
 .dash-nav a.active{background:#fff7f2;color:var(--or);font-weight:700;border-left-color:var(--or)}
 .dash-nav-sep{height:1px;background:var(--br);margin:4px 0}
-.dash-main{padding:28px 32px;background:#f5f5f5;min-height:calc(100vh - 62px)}
+.dash-main{padding:28px 20px;background:#f5f5f5;min-height:calc(100vh - 62px);max-width:900px;margin:0 auto}
 /* Leboncoin-style profile cards */
-.lbc-profile-hero{background:#fff;border-radius:12px;border:1px solid #e8e8e8;padding:24px 28px;display:flex;align-items:center;gap:20px;margin-bottom:8px}
+.lbc-profile-hero{background:#fff;border-radius:12px;border:1px solid #e8e8e8;padding:28px 32px;display:flex;align-items:center;gap:24px;margin-bottom:12px}
 .lbc-profile-av-wrap{position:relative;flex-shrink:0}
 .lbc-profile-av{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--or),#ff8c42);color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800}
 .lbc-av-edit{position:absolute;bottom:0;right:0;width:26px;height:26px;border-radius:50%;background:var(--or);color:#fff;border:2px solid #fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px}
@@ -1358,7 +1358,7 @@ footer{background:transparent;margin-top:0}
 .lbc-badge-admin{display:inline-flex;align-items:center;gap:4px;background:#EFF6FF;color:#1D4ED8;font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px}
 .lbc-profile-meta{font-size:13px;color:#666;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 /* Sections activités / projets / compte */
-.lbc-section-title{font-size:16px;font-weight:800;color:var(--ink);margin:20px 0 10px}
+.lbc-section-title{font-size:18px;font-weight:800;color:var(--ink);margin:24px 0 12px}
 .lbc-cards-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
 .lbc-card{background:#fff;border-radius:12px;border:1px solid #e8e8e8;padding:18px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .15s;text-decoration:none}
 .lbc-card:hover{border-color:var(--or);box-shadow:0 2px 12px rgba(255,92,0,.1)}
@@ -1376,7 +1376,7 @@ footer{background:transparent;margin-top:0}
 .lbc-project-link{font-size:12px;color:#888;display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f0f0f0}
 .lbc-project-link:last-child{border-bottom:none;padding-bottom:0}
 /* Mon compte section */
-.lbc-account-section{background:#fff;border-radius:12px;border:1px solid #e8e8e8;overflow:hidden;margin-bottom:8px}
+.lbc-account-section{background:#fff;border-radius:12px;border:1px solid #e8e8e8;overflow:hidden;margin-bottom:12px}
 .lbc-account-section-head{font-size:12px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;padding:14px 20px 8px}
 .lbc-account-row{display:flex;align-items:center;padding:14px 20px;border-top:1px solid #f0f0f0;cursor:pointer;transition:background .1s}
 .lbc-account-row:first-of-type{border-top:none}
@@ -2591,7 +2591,7 @@ footer{background:transparent;margin-top:0}
 <!-- ══ PAGE DASHBOARD ══ -->
 <div id="page-dashboard" class="page">
   <div class="dash-layout">
-    <div class="dash-side">
+    <div class="dash-side" style="display:none!important" aria-hidden="true">
       <div class="dash-user-info">
         <div class="dash-avatar" id="d-av">?</div>
         <div>
