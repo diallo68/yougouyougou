@@ -480,297 +480,575 @@ footer{background:transparent;margin-top:0}
 .msg-send-btn:hover{background:var(--or2)}
 
 /* ── Page Messages — fixe, sans scroll, 3 colonnes ── */
-/* ═══════════════════════════════════════════
-   MESSAGERIE STYLE LEBONCOIN
-═══════════════════════════════════════════ */
+/* ══════════════════════════════════
+   MESSAGERIE — STYLE LEBONCOIN
+══════════════════════════════════ */
+
+/* Page entière = position fixed, couvre tout l'écran */
 #page-messages.active{
   position:fixed!important;
-  top:0;left:0;right:0;bottom:0;
-  width:100%;height:100%;
-  padding-top:var(--nav-h,104px);
-  box-sizing:border-box;
+  inset:0;
+  display:flex!important;
+  flex-direction:column;
   background:#fff;
   z-index:200;
   overflow:hidden;
-  display:flex!important;
-  flex-direction:column;
 }
-/* Barre de nav interne */
-.pmsg-topbar{
-  display:flex;align-items:center;gap:0;
+
+/* ── Barre nav interne (titre + fermer) ── */
+.pmsg-navbar{
+  height:56px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 20px;
   border-bottom:1px solid #e8e8e8;
-  background:#fff;flex-shrink:0;
-  height:52px;padding:0 18px;
+  background:#fff;
+  flex-shrink:0;
 }
-.pmsg-topbar-title{font-size:18px;font-weight:800;color:#1a1a1a;flex:1}
-/* Grille 3 colonnes */
+.pmsg-navbar-title{
+  font-size:20px;
+  font-weight:800;
+  color:#1a1a1a;
+}
+.pmsg-navbar-close{
+  background:none;
+  border:none;
+  cursor:pointer;
+  color:#666;
+  font-size:13px;
+  font-family:inherit;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 10px;
+  border-radius:6px;
+  transition:background .1s;
+}
+.pmsg-navbar-close:hover{background:#f5f5f5}
+
+/* ── Grille 3 colonnes ── */
 .pmsg-wrap{
+  flex:1;
   display:grid;
-  grid-template-columns:320px 1fr 310px;
+  grid-template-columns:320px 1fr 300px;
   grid-template-rows:minmax(0,1fr);
-  flex:1;min-height:0;overflow:hidden;
+  min-height:0;
+  overflow:hidden;
 }
-/* ── COL GAUCHE ── */
+
+/* ══ COLONNE GAUCHE ══ */
 .pmsg-left{
-  display:flex;flex-direction:column;
+  display:flex;
+  flex-direction:column;
   border-right:1px solid #e8e8e8;
-  background:#fff;overflow:hidden;
+  background:#fff;
+  overflow:hidden;
+  min-height:0;
 }
 .pmsg-left-head{
-  padding:14px 16px 10px;
+  padding:12px 16px 8px;
   border-bottom:1px solid #f0f0f0;
   flex-shrink:0;
 }
-.pmsg-left-title{font-size:16px;font-weight:800;color:#1a1a1a;margin-bottom:10px}
-/* Filtres "Tout / Non lus / Sélectionner" style LBC */
-.pmsg-filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pmsg-left-title{
+  font-size:15px;
+  font-weight:800;
+  color:#1a1a1a;
+  margin-bottom:10px;
+}
+/* Filtres Tout / Non lus */
+.pmsg-filters{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
 .pmsg-filter{
-  display:inline-flex;align-items:center;gap:5px;
-  border:1.5px solid #d8d8d8;border-radius:20px;
-  padding:5px 14px;font-size:13px;font-weight:600;
-  cursor:pointer;background:#fff;color:#555;
-  font-family:inherit;transition:all .15s;
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  border:1.5px solid #d8d8d8;
+  border-radius:20px;
+  padding:5px 12px;
+  font-size:12px;
+  font-weight:600;
+  cursor:pointer;
+  background:#fff;
+  color:#555;
+  font-family:inherit;
+  transition:all .12s;
 }
 .pmsg-filter.active{
-  background:#1a1a1a;color:#fff;border-color:#1a1a1a;
+  background:#1a1a1a;
+  color:#fff;
+  border-color:#1a1a1a;
 }
-.pmsg-filter:hover:not(.active){border-color:#999;color:#1a1a1a}
+.pmsg-filter:hover:not(.active){border-color:#888;color:#1a1a1a}
 .pmsg-select-btn{
-  margin-left:auto;background:none;border:none;
-  font-size:13px;font-weight:600;color:#888;cursor:pointer;
-  font-family:inherit;padding:0;
+  margin-left:auto;
+  background:none;
+  border:none;
+  font-size:12px;
+  font-weight:600;
+  color:#999;
+  cursor:pointer;
+  font-family:inherit;
+  padding:0;
 }
-.pmsg-list{flex:1;overflow-y:auto}
-/* Conversation item style LBC */
+/* Liste conversations */
+.pmsg-list{
+  flex:1;
+  overflow-y:auto;
+  min-height:0;
+}
+/* Item conversation — fidèle Leboncoin */
 .pmsg-conv{
-  display:flex;align-items:center;gap:12px;
-  padding:14px 16px;border-bottom:1px solid #f0f0f0;
-  cursor:pointer;transition:background .1s;position:relative;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:14px 16px;
+  border-bottom:1px solid #f2f2f2;
+  cursor:pointer;
+  transition:background .1s;
+  position:relative;
 }
 .pmsg-conv:hover{background:#fafafa}
-.pmsg-conv.active{background:#f5f5f5}
+.pmsg-conv.active{background:#f0f0f0}
+/* Vignette annonce (photo ou initiale) */
 .pmsg-conv-thumb{
-  width:52px;height:52px;border-radius:10px;
-  flex-shrink:0;background:#f0f0f0;
-  display:flex;align-items:center;justify-content:center;
-  font-size:18px;font-weight:800;color:#666;
-  overflow:hidden;position:relative;
+  width:56px;
+  height:56px;
+  border-radius:8px;
+  flex-shrink:0;
+  background:#f0f0f0;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  font-weight:800;
+  color:#888;
 }
-.pmsg-conv-thumb img{width:100%;height:100%;object-fit:cover}
-.pmsg-conv-del-icon{
-  position:absolute;inset:0;display:flex;
-  align-items:center;justify-content:center;
-  background:#f0f0f0;font-size:22px;color:#bbb;
+.pmsg-conv-thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
 }
-.pmsg-conv-info{flex:1;min-width:0}
-.pmsg-conv-title{
-  font-size:14px;font-weight:600;color:#1a1a1a;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+/* Infos texte */
+.pmsg-conv-info{
+  flex:1;
+  min-width:0;
+}
+.pmsg-conv-name{
+  font-size:14px;
+  font-weight:700;
+  color:#1a1a1a;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
   margin-bottom:2px;
+}
+.pmsg-conv-ad{
+  font-size:12px;
+  color:#888;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  margin-bottom:3px;
 }
 .pmsg-conv-preview{
-  font-size:13px;color:#666;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  margin-bottom:2px;
+  font-size:13px;
+  color:#666;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
-.pmsg-conv-meta{display:flex;align-items:center;gap:6px}
-.pmsg-conv-who{font-size:12px;color:#888}
-.pmsg-conv-date{font-size:12px;color:#aaa}
-.pmsg-conv-unread{
-  width:10px;height:10px;border-radius:50%;
-  background:var(--or);flex-shrink:0;margin-left:auto;
+.pmsg-conv-preview.unread{
+  font-weight:700;
+  color:#1a1a1a;
 }
-.pmsg-conv-unread-count{
-  background:var(--or);color:#fff;border-radius:50%;
-  min-width:20px;height:20px;font-size:11px;font-weight:900;
-  display:flex;align-items:center;justify-content:center;
-  padding:0 4px;margin-left:auto;
+/* Méta droite : date + badge */
+.pmsg-conv-right{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:6px;
+  flex-shrink:0;
 }
-/* ── COL CENTRALE ── */
+.pmsg-conv-time{
+  font-size:11px;
+  color:#aaa;
+  white-space:nowrap;
+}
+.pmsg-conv-badge{
+  background:var(--or);
+  color:#fff;
+  border-radius:50%;
+  min-width:20px;
+  height:20px;
+  font-size:11px;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 4px;
+}
+
+/* ══ COLONNE CENTRALE ══ */
 .pmsg-center{
-  display:flex;flex-direction:column;
-  overflow:hidden;background:#f8f8f8;
-  border-right:1px solid #e8e8e8;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  background:#f6f6f6;
+  min-height:0;
 }
 .pmsg-thread-empty{
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  height:100%;color:#aaa;padding:40px;text-align:center;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  color:#bbb;
+  padding:40px;
+  text-align:center;
 }
-/* Barre haute du thread */
+/* Header thread */
 .pmsg-thread-head{
-  display:flex;align-items:center;gap:12px;
-  padding:12px 18px;border-bottom:1px solid #e8e8e8;
-  background:#fff;flex-shrink:0;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px 18px;
+  border-bottom:1px solid #e8e8e8;
+  background:#fff;
+  flex-shrink:0;
 }
 .pmsg-thread-av{
-  width:40px;height:40px;border-radius:50%;
-  background:var(--or);color:#fff;
-  font-weight:800;font-size:15px;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  background:var(--or);
+  color:#fff;
+  font-weight:800;
+  font-size:15px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
 }
-.pmsg-thread-info{flex:1;min-width:0}
-.pmsg-thread-name{font-size:14px;font-weight:800;color:#1a1a1a}
-.pmsg-thread-status{font-size:12px;color:#22c55e;display:flex;align-items:center;gap:4px;margin-top:1px}
-/* Carte "À propos de ce vendeur" en haut du thread */
-.pmsg-seller-card{
-  background:#fff;border-bottom:1px solid #e8e8e8;
-  padding:14px 18px;flex-shrink:0;
+.pmsg-thread-name{font-size:15px;font-weight:800;color:#1a1a1a}
+.pmsg-thread-sub{font-size:12px;color:#888;margin-top:1px}
+/* Bannière "À propos de ce vendeur" style LBC */
+.pmsg-seller-banner{
+  background:#fff;
+  border-bottom:1px solid #e8e8e8;
+  padding:10px 18px;
+  font-size:12px;
+  color:#555;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-shrink:0;
 }
-.pmsg-seller-card-title{font-size:13px;font-weight:700;color:#1a1a1a;margin-bottom:6px}
-.pmsg-seller-since{
-  display:flex;align-items:center;gap:6px;
-  font-size:12px;color:#666;
-}
-/* Zone de bulles */
+/* Zone bulles */
 .pmsg-bubbles{
-  flex:1;overflow-y:auto;
-  padding:16px 20px;
-  display:flex;flex-direction:column;gap:4px;
+  flex:1;
+  overflow-y:auto;
+  padding:16px 18px;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  min-height:0;
 }
 .pmsg-date-sep{
-  text-align:center;font-size:11px;color:#aaa;
-  margin:10px 0;font-weight:600;
-  display:flex;align-items:center;gap:8px;
+  text-align:center;
+  font-size:11px;
+  color:#aaa;
+  margin:12px 0;
+  display:flex;
+  align-items:center;
+  gap:8px;
 }
 .pmsg-date-sep::before,.pmsg-date-sep::after{
-  content:'';flex:1;height:1px;background:#e8e8e8;
+  content:'';
+  flex:1;
+  height:1px;
+  background:#e8e8e8;
 }
-/* Message sécurité style LBC */
-.pmsg-security{
-  background:#fff;border:1px solid #e8e8e8;
-  border-radius:12px;padding:16px 18px;
-  font-size:13px;color:#444;line-height:1.7;
-  margin-bottom:12px;
+/* Alerte sécurité style LBC exact */
+.pmsg-security-banner{
+  background:#fff;
+  border:1px solid #e8e8e8;
+  border-radius:10px;
+  padding:14px 16px;
+  margin-bottom:16px;
+  font-size:12.5px;
+  color:#333;
+  line-height:1.65;
 }
-.pmsg-security strong{
-  display:block;margin-bottom:8px;
-  font-size:14px;color:#1a1a1a;font-weight:800;
-}
-.pmsg-security-link{
-  color:var(--or);font-weight:700;text-decoration:none;
-  display:inline-flex;align-items:center;gap:4px;margin-top:8px;
-  font-size:13px;
+.pmsg-security-banner strong{
+  display:block;
+  font-size:13.5px;
+  font-weight:800;
+  color:#1a1a1a;
+  margin-bottom:6px;
 }
 .pmsg-security-time{
-  text-align:right;font-size:11px;color:#aaa;margin-top:6px;
+  text-align:right;
+  font-size:11px;
+  color:#aaa;
+  margin-top:8px;
 }
-/* Bulles */
-.pmsg-bubble-wrap{display:flex;flex-direction:column;margin-bottom:4px}
+.pmsg-security-link{
+  color:var(--or);
+  font-weight:700;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  margin-top:6px;
+  font-size:12px;
+}
+/* Bulles messages */
+.pmsg-bubble-wrap{
+  display:flex;
+  flex-direction:column;
+  margin-bottom:2px;
+}
 .pmsg-bubble-wrap.mine{align-items:flex-end}
 .pmsg-bubble-wrap.theirs{align-items:flex-start}
 .pmsg-bubble{
-  max-width:65%;padding:10px 14px;
-  font-size:13px;line-height:1.6;word-break:break-word;
+  max-width:65%;
+  padding:10px 14px;
+  font-size:13.5px;
+  line-height:1.55;
+  word-break:break-word;
+  border-radius:18px;
 }
 .pmsg-bubble.mine{
-  background:var(--or);color:#fff;
+  background:var(--or);
+  color:#fff;
   border-radius:18px 18px 4px 18px;
 }
 .pmsg-bubble.theirs{
-  background:#fff;color:#1a1a1a;
+  background:#fff;
+  color:#1a1a1a;
   border-radius:18px 18px 18px 4px;
-  border:1px solid #e8e8e8;
+  border:1px solid #e0e0e0;
 }
-.pmsg-bubble-time{font-size:11px;color:#aaa;margin-top:3px;padding:0 2px}
-/* Boutons action bas thread style LBC */
-.pmsg-actions-bar{
-  display:flex;gap:10px;
-  padding:12px 18px;border-top:1px solid #e8e8e8;
-  background:#fff;flex-shrink:0;
+.pmsg-bubble-time{
+  font-size:11px;
+  color:#aaa;
+  margin-top:3px;
+  padding:0 2px;
+}
+/* Boutons Faire une offre / Acheter — LBC style */
+.pmsg-action-bar{
+  display:flex;
+  gap:10px;
+  padding:10px 16px;
+  background:#fff;
+  border-top:1px solid #e8e8e8;
+  flex-shrink:0;
 }
 .pmsg-btn-offer{
-  flex:1;background:#fff;color:#1a1a1a;
-  border:1.5px solid #d8d8d8;border-radius:10px;
-  padding:12px;font-size:14px;font-weight:700;
-  cursor:pointer;font-family:inherit;transition:all .15s;
+  flex:1;
+  background:#fff;
+  color:#1a1a1a;
+  border:1.5px solid #d0d0d0;
+  border-radius:10px;
+  padding:11px;
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+  font-family:inherit;
+  transition:border-color .12s;
 }
-.pmsg-btn-offer:hover{border-color:#999}
-.pmsg-btn-buy{
-  flex:1;background:var(--or);color:#fff;
-  border:none;border-radius:10px;
-  padding:12px;font-size:14px;font-weight:700;
-  cursor:pointer;font-family:inherit;transition:background .15s;
+.pmsg-btn-offer:hover{border-color:#888}
+.pmsg-btn-see{
+  flex:1;
+  background:#1a1a1a;
+  color:#fff;
+  border:none;
+  border-radius:10px;
+  padding:11px;
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+  font-family:inherit;
+  transition:background .12s;
 }
-.pmsg-btn-buy:hover{background:var(--or2)}
-/* Zone saisie */
-.pmsg-input-wrap{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 16px;border-top:1px solid #e8e8e8;
-  background:#fff;flex-shrink:0;
+.pmsg-btn-see:hover{background:#333}
+/* Zone saisie message */
+.pmsg-input-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 16px;
+  border-top:1px solid #e8e8e8;
+  background:#fff;
+  flex-shrink:0;
 }
-.pmsg-input-attach{
-  width:36px;height:36px;border-radius:50%;border:1.5px solid #d8d8d8;
-  background:#fff;cursor:pointer;display:flex;align-items:center;
-  justify-content:center;flex-shrink:0;font-size:16px;transition:border-color .15s;
+.pmsg-input-plus{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  border:1.5px solid #d0d0d0;
+  background:#fff;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  color:#666;
+  flex-shrink:0;
+  transition:border-color .12s;
 }
-.pmsg-input-attach:hover{border-color:#999}
+.pmsg-input-plus:hover{border-color:#888}
 .pmsg-input{
-  flex:1;border:1.5px solid #d8d8d8;border-radius:24px;
-  padding:10px 18px;font-size:13px;font-family:inherit;
-  outline:none;transition:border-color .2s;background:#fafafa;
+  flex:1;
+  border:1.5px solid #d0d0d0;
+  border-radius:22px;
+  padding:9px 16px;
+  font-size:13px;
+  font-family:inherit;
+  outline:none;
+  transition:border-color .15s;
+  background:#fafafa;
+  resize:none;
   line-height:1.4;
 }
 .pmsg-input:focus{border-color:var(--or);background:#fff}
 .pmsg-send{
-  background:var(--or);color:#fff;border:none;border-radius:50%;
-  width:40px;height:40px;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;transition:background .15s;
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  background:var(--or);
+  color:#fff;
+  border:none;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  transition:background .12s;
 }
 .pmsg-send:hover{background:var(--or2)}
-/* ── COL DROITE ── */
-.pmsg-right-panel{
-  display:flex;flex-direction:column;
-  background:#fff;overflow-y:auto;
+
+/* ══ COLONNE DROITE ══ */
+.pmsg-right{
+  display:flex;
+  flex-direction:column;
+  border-left:1px solid #e8e8e8;
+  background:#fff;
+  overflow-y:auto;
+  min-height:0;
 }
-/* Header vendeur dans col droite */
-.pmsg-vendor-head{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:14px 16px;border-bottom:1px solid #f0f0f0;
+/* Header vendeur col droite */
+.pmsg-right-vendor{
+  display:flex;
+  align-items:center;
+  padding:14px 16px;
+  border-bottom:1px solid #f0f0f0;
+  gap:12px;
 }
-.pmsg-vendor-av-wrap{position:relative}
-.pmsg-vendor-av{
-  width:48px;height:48px;border-radius:50%;
-  background:var(--or);color:#fff;font-size:18px;font-weight:800;
-  display:flex;align-items:center;justify-content:center;
+.pmsg-right-av{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  background:var(--or);
+  color:#fff;
+  font-size:16px;
+  font-weight:800;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  position:relative;
 }
-.pmsg-online-dot{
-  width:12px;height:12px;border-radius:50%;background:#22c55e;
-  border:2px solid #fff;position:absolute;bottom:0;right:0;
+.pmsg-right-online{
+  width:11px;
+  height:11px;
+  border-radius:50%;
+  background:#22c55e;
+  border:2px solid #fff;
+  position:absolute;
+  bottom:0;
+  right:0;
 }
-.pmsg-vendor-info{flex:1;margin-left:12px}
-.pmsg-vendor-name{font-size:15px;font-weight:800;color:#1a1a1a}
-.pmsg-vendor-status{font-size:12px;color:#22c55e;margin-top:2px}
-.pmsg-vendor-more{
-  background:none;border:none;cursor:pointer;
-  color:#888;font-size:20px;padding:4px;display:flex;align-items:center;
+.pmsg-right-name{font-size:14px;font-weight:800;color:#1a1a1a}
+.pmsg-right-status{font-size:12px;color:#22c55e;margin-top:2px}
+.pmsg-right-more{
+  margin-left:auto;
+  background:none;
+  border:none;
+  font-size:20px;
+  color:#888;
+  cursor:pointer;
+  padding:4px;
+  flex-shrink:0;
 }
-/* Annonce dans col droite */
-.pmsg-ad-card{
-  margin:12px;border:1px solid #e8e8e8;
-  border-radius:10px;overflow:hidden;
+/* Carte annonce col droite */
+.pmsg-right-ad{
+  margin:12px;
+  border:1px solid #e8e8e8;
+  border-radius:10px;
+  overflow:hidden;
 }
-.pmsg-ad-img{
-  width:100%;height:120px;object-fit:cover;
-  background:#f0f0f0;display:flex;
-  align-items:center;justify-content:center;font-size:36px;
+.pmsg-right-ad-img{
+  width:100%;
+  height:110px;
+  object-fit:cover;
+  background:#f0f0f0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:32px;
 }
-.pmsg-ad-img img{width:100%;height:100%;object-fit:cover}
-.pmsg-ad-info{padding:10px 12px}
-.pmsg-ad-title{font-size:13px;font-weight:700;color:#1a1a1a;margin-bottom:4px}
-.pmsg-ad-price{font-size:18px;font-weight:800;color:#1a1a1a}
-/* Description + critères */
-.pmsg-panel-section{padding:12px 16px;border-top:1px solid #f0f0f0}
-.pmsg-panel-section-title{font-size:13px;font-weight:800;color:#1a1a1a;margin-bottom:8px}
-.pmsg-panel-desc{font-size:13px;color:#555;line-height:1.6}
-.pmsg-panel-link{
-  color:var(--or);font-size:13px;font-weight:700;
-  text-decoration:none;display:inline-block;margin-top:6px;
+.pmsg-right-ad-img img{width:100%;height:100%;object-fit:cover}
+.pmsg-right-ad-info{padding:10px 12px}
+.pmsg-right-ad-title{font-size:13px;font-weight:700;color:#1a1a1a;margin-bottom:4px}
+.pmsg-right-ad-price{font-size:17px;font-weight:800;color:#1a1a1a}
+/* Sections description/critères */
+.pmsg-right-section{
+  padding:12px 16px;
+  border-top:1px solid #f0f0f0;
 }
-.pmsg-crit-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f5f5f5;font-size:13px}
-.pmsg-crit-label{color:#888}
-.pmsg-crit-val{font-weight:700;color:#1a1a1a}
+.pmsg-right-section-title{
+  font-size:13px;
+  font-weight:800;
+  color:#1a1a1a;
+  margin-bottom:8px;
+}
+.pmsg-right-desc{
+  font-size:12.5px;
+  color:#555;
+  line-height:1.6;
+}
+.pmsg-right-link{
+  color:var(--or);
+  font-size:12.5px;
+  font-weight:700;
+  text-decoration:none;
+  display:inline-block;
+  margin-top:6px;
+}
+/* Sécurité col droite */
+.pmsg-right-security{
+  margin:12px;
+  background:#FFF8DC;
+  border:1px solid #FFD700;
+  border-radius:10px;
+  padding:12px 14px;
+  font-size:12px;
+  color:#5D4037;
+  line-height:1.65;
+}
+.pmsg-right-security strong{
+  display:block;
+  font-size:12.5px;
+  color:#333;
+  margin-bottom:4px;
+}
 
 .om-pin{width:52px;height:52px;border:2px solid var(--br);border-radius:10px;text-align:center;font-size:22px;font-family:inherit;outline:none;transition:border-color .2s;background:#fff}
 .om-pin:focus{border-color:var(--or)}>
@@ -5218,47 +5496,51 @@ function navGoMessages(){
 function renderPageConvList(convs){
   var list = document.getElementById('page-msg-list');
   if(!list) return;
-  var user = DB.user();
-  if(!convs||!Array.isArray(convs)||!convs.length){
-    list.innerHTML = '<div style="padding:40px 16px;text-align:center;color:#aaa">'+
-      '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5" style="margin-bottom:10px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'+
-      '<div style="font-size:14px;font-weight:600">Aucune conversation</div>'+
-      '<div style="font-size:12px;margin-top:4px">Contactez un vendeur pour démarrer</div>'+
-    '</div>';
+  if(!convs || !Array.isArray(convs) || !convs.length){
+    list.innerHTML =
+      '<div style="padding:48px 16px;text-align:center;color:#bbb">'+
+        '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5" style="margin-bottom:12px;display:block;margin-left:auto;margin-right:auto"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'+
+        '<div style="font-size:14px;font-weight:600;color:#888">Aucune conversation</div>'+
+        '<div style="font-size:12px;margin-top:4px">Contactez un vendeur pour démarrer</div>'+
+      '</div>';
     return;
   }
-  var uid = user ? String(user._id||user.id||'') : '';
+  var user = DB.user();
+  var uid  = user ? String(user._id||user.id||'') : '';
   list.innerHTML = convs.map(function(conv){
     try{
-      var unread  = conv.unreadCount||0;
       var cid     = String(conv._id||'');
+      if(!cid) return '';
       var isBuyer = uid ? String(conv.buyerId)===uid : false;
-      var name    = isBuyer ? (conv.sellerName||'Vendeur') : (conv.buyerName||'Acheteur');
-      var adTitle = conv.adTitle||name;
-      var last    = conv.lastMessage||'Nouvelle conversation';
-      var time    = conv.updatedAt ? timeAgo(conv.updatedAt) : '';
-      var photo   = conv.adPhoto||'';
-      var thumb   = photo
+      var otherName = isBuyer ? (conv.sellerName||'Vendeur') : (conv.buyerName||'Acheteur');
+      var adTitle   = conv.adTitle || otherName;
+      var lastMsg   = conv.lastMessage || 'Nouvelle conversation';
+      var unread    = conv.unreadCount || 0;
+      var time      = conv.updatedAt ? timeAgo(conv.updatedAt) : '';
+      var photo     = conv.adPhoto || '';
+      // Vignette : photo annonce ou initiale
+      var thumbInner = photo
         ? '<img src="'+photo+'" alt="" style="width:100%;height:100%;object-fit:cover">'
-        : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#999">'+name.charAt(0).toUpperCase()+'</div>';
-      return '<div class="pmsg-conv" onclick="openPageConvById(this.dataset.cid)" data-cid="'+cid+'">'+
-        '<div class="pmsg-conv-thumb">'+thumb+'</div>'+
+        : '<span>'+otherName.charAt(0).toUpperCase()+'</span>';
+      return '<div class="pmsg-conv'+(unread?' pmsg-conv-unread':'')+'" data-cid="'+cid+'" onclick="openPageConvById(this)">'+
+        '<div class="pmsg-conv-thumb">'+thumbInner+'</div>'+
         '<div class="pmsg-conv-info">'+
-          '<div class="pmsg-conv-title" style="font-weight:'+(unread?800:600)+'">'+adTitle+'</div>'+
-          '<div class="pmsg-conv-preview" style="font-weight:'+(unread?700:400)+';color:'+(unread?'#333':'#888')+'">'+last.substring(0,50)+'</div>'+
-          '<div class="pmsg-conv-meta">'+
-            '<span class="pmsg-conv-who">'+name+'</span>'+
-            '<span class="pmsg-conv-date"> · '+time+'</span>'+
+          '<div class="pmsg-conv-name">'+otherName+'</div>'+
+          '<div class="pmsg-conv-ad">'+adTitle+'</div>'+
+          '<div class="pmsg-conv-preview'+(unread?' unread':'')+'">'+
+            (unread?'<strong>':'')+ lastMsg.substring(0,48) +(unread?'</strong>':'')+
           '</div>'+
         '</div>'+
-        (unread>0?'<div class="pmsg-conv-unread-count">'+unread+'</div>':'')+
+        '<div class="pmsg-conv-right">'+
+          '<div class="pmsg-conv-time">'+time+'</div>'+
+          (unread>0?'<div class="pmsg-conv-badge">'+unread+'</div>':'')+
+        '</div>'+
       '</div>';
-    }catch(e){return '';}
+    }catch(e2){return '';}
   }).join('');
 }
 
-var _pageConvId = null;
-var _pageConvs  = [];
+
 function openPageConvById(cidOrEl){
   var cid = (cidOrEl && typeof cidOrEl==='object' && cidOrEl.dataset) ? cidOrEl.dataset.cid : String(cidOrEl||'');
   var conv = _pageConvs.find(function(c){return String(c._id||c.id)===String(cid);})||{_id:cid};
@@ -5280,115 +5562,115 @@ function openPageConv(convId, convData){
   _pageConvId = convId;
   var thread = document.getElementById('page-msg-thread');
   if(!thread) return;
-  var user = DB.user();
-  var conv = convData || {};
-  var uid  = user ? String(user._id||user.id||'') : '';
+  var user    = DB.user();
+  var conv    = convData || {};
+  var uid     = user ? String(user._id||user.id||'') : '';
   var isBuyer = uid ? String(conv.buyerId)===uid : true;
   var otherName = isBuyer ? (conv.sellerName||'Vendeur') : (conv.buyerName||'Acheteur');
-  var adTitle   = conv.adTitle||'';
-  var adPhoto   = conv.adPhoto||'';
-  var adPrice   = conv.adPrice ? Number(conv.adPrice).toLocaleString('fr-FR')+' GNF' : '';
+  var adTitle   = conv.adTitle  || '';
+  var adPhoto   = conv.adPhoto  || '';
+  var adPrice   = conv.adPrice  ? Number(conv.adPrice).toLocaleString('fr-FR')+' GNF' : '';
+  var adId      = String(conv.adId||'');
+
+  // Marquer actif dans la liste
+  document.querySelectorAll('.pmsg-conv').forEach(function(el){
+    el.classList.toggle('active', el.dataset.cid===String(convId));
+  });
+
+  // Construire le thread
   thread.className = '';
+  thread.style.display = 'flex';
+  thread.style.flexDirection = 'column';
+  thread.style.flex = '1';
+  thread.style.overflow = 'hidden';
+  thread.style.minHeight = '0';
+
   thread.innerHTML =
-    // ── Header thread ──
+    // ── Header ──
     '<div class="pmsg-thread-head">'+
-      '<div class="pmsg-thread-av">'+(otherName||'?').charAt(0).toUpperCase()+'</div>'+
-      '<div class="pmsg-thread-info">'+
+      '<div class="pmsg-thread-av">'+otherName.charAt(0).toUpperCase()+'</div>'+
+      '<div>'+
         '<div class="pmsg-thread-name">'+otherName+'</div>'+
-        (adTitle?'<div style="font-size:12px;color:#888;margin-top:1px">📦 '+adTitle+'</div>':'')+
+        (adTitle?'<div class="pmsg-thread-sub">📦 '+adTitle+'</div>':'')+
       '</div>'+
     '</div>'+
-    // ── Carte "À propos de ce vendeur" ──
-    '<div class="pmsg-seller-card">'+
-      '<div class="pmsg-seller-card-title">À propos de ce vendeur</div>'+
-      '<div class="pmsg-seller-since">'+
-        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'+
-        'Membre YouGouYou'+
-      '</div>'+
+    // ── Bannière "À propos" ──
+    '<div class="pmsg-seller-banner">'+
+      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'+
+      'À propos de ce vendeur — <strong>Membre YouGouYou</strong>'+
     '</div>'+
-    // ── Zone bulles ──
+    // ── Bulles ──
     '<div class="pmsg-bubbles" id="page-msg-bubbles">'+
-      '<div class="pmsg-security">'+
-        '<strong>Soyez prudent lorsque votre interlocuteur vous demande ou vous envoie un numéro de téléphone / e-mail</strong>'+
-        'Ici nous garantissons la sécurité de vos échanges. Restez sur la messagerie YouGouYou pour vos transactions.'+
+      '<div class="pmsg-security-banner">'+
+        '<strong>Soyez prudent lorsque votre interlocuteur vous demande un numéro de téléphone / e-mail</strong>'+
+        'Ici nous garantissons la sécurité de vos échanges. Restez sur la messagerie pour discuter et passer par le paiement sécurisé.'+
         '<br><a href="#" class="pmsg-security-link">→ En savoir plus</a>'+
         '<div class="pmsg-security-time">Message automatique</div>'+
       '</div>'+
-      '<div style="text-align:center;padding:20px;color:#bbb;font-size:12px">⏳ Chargement...</div>'+
+      '<div style="text-align:center;padding:24px;color:#bbb;font-size:13px">⏳ Chargement...</div>'+
     '</div>'+
-    // ── Boutons Faire une offre / Acheter (si annonce liée) ──
+    // ── Boutons action (si annonce liée) ──
     (adTitle?
-      '<div class="pmsg-actions-bar" id="pmsg-actions"></div>':'')+
-    
-    // ── Saisie message ──
-    '<div class="pmsg-input-wrap">'+
-      '<button class="pmsg-input-attach" title="Joindre une photo">+</button>'+
-      '<input class="pmsg-input" type="text" id="page-msg-input" placeholder="Écrivez votre message..." '+
-        'onkeydown="if(event.key===\'Enter\')sendPageMsg()">'+
+      '<div class="pmsg-action-bar" id="pmsg-action-bar">'+
+        '<button class="pmsg-btn-offer">Faire une offre</button>'+
+        '<button class="pmsg-btn-see">Voir annonce</button>'+
+      '</div>':'')+
+    // ── Saisie ──
+    '<div class="pmsg-input-row">'+
+      '<button class="pmsg-input-plus" title="Joindre">+</button>'+
+      '<input class="pmsg-input" id="page-msg-input" type="text" placeholder="Écrivez votre message..." '+
+        'onkeydown="if(event.key==\'Enter\')sendPageMsg()">'+
       '<button class="pmsg-send" onclick="sendPageMsg()">'+
         '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>'+
       '</button>'+
     '</div>';
-  // ── Panneau droit : vendeur + annonce ──
+
+  // ── Panneau droit (col 3) ──
   var panel = document.getElementById('page-msg-panel');
   if(panel){
     panel.innerHTML =
-      // Header vendeur
-      '<div class="pmsg-vendor-head">'+
-        '<div class="pmsg-vendor-av-wrap">'+
-          '<div class="pmsg-vendor-av">'+(otherName||'?').charAt(0).toUpperCase()+'</div>'+
-          '<div class="pmsg-online-dot"></div>'+
+      '<div class="pmsg-right-vendor">'+
+        '<div class="pmsg-right-av">'+
+          otherName.charAt(0).toUpperCase()+
+          '<div class="pmsg-right-online"></div>'+
         '</div>'+
-        '<div class="pmsg-vendor-info">'+
-          '<div class="pmsg-vendor-name">'+otherName+'</div>'+
-          '<div class="pmsg-vendor-status">En ligne</div>'+
+        '<div>'+
+          '<div class="pmsg-right-name">'+otherName+'</div>'+
+          '<div class="pmsg-right-status">En ligne</div>'+
         '</div>'+
-        '<button class="pmsg-vendor-more" title="Plus d\'options">⋯</button>'+
+        '<button class="pmsg-right-more">⋯</button>'+
       '</div>'+
-      // Carte annonce
       (adTitle?
-        '<div class="pmsg-ad-card">'+
-          '<div class="pmsg-ad-img">'+(adPhoto?'<img src="'+adPhoto+'" alt="">':'📦')+'</div>'+
-          '<div class="pmsg-ad-info">'+
-            '<div class="pmsg-ad-title">'+adTitle+'</div>'+
-            (adPrice?'<div class="pmsg-ad-price">'+adPrice+'</div>':'')+
+        '<div class="pmsg-right-ad">'+
+          '<div class="pmsg-right-ad-img">'+(adPhoto?'<img src="'+adPhoto+'" alt="">':'📦')+'</div>'+
+          '<div class="pmsg-right-ad-info">'+
+            '<div class="pmsg-right-ad-title">'+adTitle+'</div>'+
+            (adPrice?'<div class="pmsg-right-ad-price">'+adPrice+'</div>':'')+
           '</div>'+
         '</div>':'')+
-      // Description
-      '<div class="pmsg-panel-section">'+
-        '<div class="pmsg-panel-section-title">Description</div>'+
-        '<div class="pmsg-panel-desc" id="pmsg-panel-desc">—</div>'+
-        '<a href="#" class="pmsg-panel-link">Voir plus</a>'+
+      '<div class="pmsg-right-section">'+
+        '<div class="pmsg-right-section-title">Description</div>'+
+        '<div class="pmsg-right-desc" id="pmsg-desc">—</div>'+
+        '<a href="#" class="pmsg-right-link">Voir plus</a>'+
       '</div>'+
-      // Critères
-      '<div class="pmsg-panel-section">'+
-        '<div class="pmsg-panel-section-title">Critères</div>'+
-        '<div id="pmsg-panel-criteria">'+
-          '<div class="pmsg-crit-row"><span class="pmsg-crit-label">État</span><span class="pmsg-crit-val" id="pmsg-crit-etat">—</span></div>'+
-        '</div>'+
-      '</div>'+
-      // Sécurité
-      '<div class="pmsg-panel-section">'+
-        '<div style="background:#FFF8DC;border:1px solid #FFD700;border-radius:10px;padding:12px 14px;font-size:12px;color:#5D4037;line-height:1.7">'+
-          '<strong style="display:block;margin-bottom:4px;color:#333">🛡️ Paiement sécurisé YouGouYou</strong>'+
-          'Ne payez jamais en dehors de la plateforme. Utilisez Orange Money intégré pour vos transactions.'+
-        '</div>'+
+      '<div class="pmsg-right-security">'+
+        '<strong>🛡️ Paiement sécurisé YouGouYou</strong>'+
+        'Ne payez jamais en dehors de la plateforme. Utilisez Orange Money intégré.'+
       '</div>';
-    // Charger la description depuis l'API si adId disponible
-    var adId = String(conv.adId||'');
+
+    // Charger desc depuis API si adId disponible
     if(adId){
-      var tok = localStorage.getItem('ygy_token');
+      var tok=localStorage.getItem('ygy_token');
       fetch('/api/ads/'+adId,{headers:tok?{'Authorization':'Bearer '+tok}:{}})
       .then(function(r){return r.ok?r.json():null;})
       .then(function(d){
         if(!d) return;
-        var desc = document.getElementById('pmsg-panel-desc');
-        if(desc) desc.textContent = (d.description||d.desc||'').substring(0,150);
-        var etat = document.getElementById('pmsg-crit-etat');
-        if(etat) etat.textContent = d.condition||d.etat||'Bon état';
+        var el=document.getElementById('pmsg-desc');
+        if(el) el.textContent=(d.description||d.desc||'').substring(0,160)||'—';
       }).catch(function(){});
     }
   }
+
   // Charger les messages
   var token = localStorage.getItem('ygy_token');
   if(token){
@@ -5398,37 +5680,49 @@ function openPageConv(convId, convData){
       var msgs = data.messages||[];
       var container = document.getElementById('page-msg-bubbles');
       if(!container) return;
+      var secBanner =
+        '<div class="pmsg-security-banner">'+
+          '<strong>Soyez prudent lorsque votre interlocuteur vous demande un numéro de téléphone / e-mail</strong>'+
+          'Restez sur la messagerie YouGouYou pour vos échanges.'+
+          '<br><a href="#" class="pmsg-security-link">→ En savoir plus</a>'+
+          '<div class="pmsg-security-time">Message automatique</div>'+
+        '</div>';
       if(!msgs.length){
-        container.innerHTML = '<div class="msg-security">🛡️ <strong>Conseils sécurité</strong> — Vérifiez l\'article avant paiement. Échangez en lieu public.</div>'+
-          '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Démarrez la conversation 👋</div>';
+        container.innerHTML = secBanner +
+          '<div style="text-align:center;color:#bbb;font-size:13px;padding:24px">Démarrez la conversation 👋</div>';
         return;
       }
-      var html = '<div class="pmsg-security">'+
-        '<strong>Soyez prudent lorsque votre interlocuteur vous demande un numéro de téléphone / e-mail</strong>'+
-        'Restez sur la messagerie YouGouYou pour vos échanges. Passez par le paiement sécurisé pour vos transactions.'+
-      '</div>';
+      var html = secBanner;
+      var lastDate = '';
       msgs.forEach(function(m){
-        var isMine = String(m.senderId)===(user&&String(user._id));
-        var t = m.createdAt?new Date(m.createdAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
-        html += '<div class="pmsg-bubble-wrap '+(isMine?'mine':'theirs')+'">'+
-          '<div class="pmsg-bubble '+(isMine?'mine':'theirs')+'">'+m.text+'</div>'+
-          '<div class="pmsg-bubble-time">'+t+(isMine?' · ✓✓':'')+'</div>'+
-        '</div>';
+        var isMine = !!(uid && String(m.senderId)===uid);
+        var t = m.createdAt ? new Date(m.createdAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) : '';
+        var d = m.createdAt ? new Date(m.createdAt).toLocaleDateString('fr-FR',{day:'numeric',month:'long'}) : '';
+        if(d && d!==lastDate){
+          html += '<div class="pmsg-date-sep">'+d+'</div>';
+          lastDate = d;
+        }
+        html +=
+          '<div class="pmsg-bubble-wrap '+(isMine?'mine':'theirs')+'">'+
+            '<div class="pmsg-bubble '+(isMine?'mine':'theirs')+'">'+m.text+'</div>'+
+            '<div class="pmsg-bubble-time">'+t+(isMine?' · ✓✓':'')+'</div>'+
+          '</div>';
       });
       container.innerHTML = html;
       container.scrollTop = container.scrollHeight;
-      // Boutons action (Faire une offre / Voir l'annonce)
-      var actBar = document.getElementById('pmsg-actions');
-      if(actBar && adTitle){
-        actBar.innerHTML =
-          '<button class="pmsg-btn-offer">Faire une offre</button>'+
-          '<button class="pmsg-btn-buy">Voir l\'annonce</button>';
+      // Boutons action
+      var ab = document.getElementById('pmsg-action-bar');
+      if(ab && adTitle){
+        ab.querySelector('.pmsg-btn-see') && (ab.querySelector('.pmsg-btn-see').onclick = function(){
+          if(adId) { goTo('home'); }
+        });
       }
     }).catch(function(){});
-    // Marquer comme lu
+    // Marquer lu
     fetch('/api/conversations/'+convId+'/read',{method:'PATCH',headers:{'Authorization':'Bearer '+token}}).catch(function(){});
   }
 }
+
 
 function sendPageMsg(){
   if(!_pageConvId) return;
@@ -7775,17 +8069,21 @@ document.addEventListener('DOMContentLoaded',function(){
 <!-- ══ PAGE MESSAGES ══ -->
 <div id="page-messages" class="page">
 
-  <!-- Barre supérieure -->
-  <div class="pmsg-topbar">
-    <span class="pmsg-topbar-title">Messages</span>
-    <button onclick="goTo('home')" style="background:none;border:none;color:#888;cursor:pointer;font-size:13px;font-family:inherit;display:flex;align-items:center;gap:4px">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  <!-- Barre nav interne style Leboncoin -->
+  <div class="pmsg-navbar">
+    <span class="pmsg-navbar-title">Messages</span>
+    <button class="pmsg-navbar-close" onclick="goTo('home')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
       Fermer
     </button>
   </div>
 
+  <!-- Grille 3 colonnes -->
   <div class="pmsg-wrap">
-    <!-- ── COL 1 : Liste conversations ── -->
+
+    <!-- ── COL 1 : Liste des conversations ── -->
     <div class="pmsg-left">
       <div class="pmsg-left-head">
         <div class="pmsg-left-title">Conversations</div>
@@ -7798,31 +8096,40 @@ document.addEventListener('DOMContentLoaded',function(){
           <button class="pmsg-select-btn">Sélectionner</button>
         </div>
       </div>
+
+      <!-- Liste -->
       <div id="page-msg-list" class="pmsg-list">
-        <div style="padding:40px 16px;text-align:center;color:#aaa">
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5" style="margin-bottom:10px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <div style="font-size:14px;font-weight:600">Aucune conversation</div>
+        <div style="padding:48px 16px;text-align:center;color:#bbb">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5" style="margin-bottom:12px;display:block;margin-left:auto;margin-right:auto">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <div style="font-size:14px;font-weight:600;color:#888">Aucune conversation</div>
           <div style="font-size:12px;margin-top:4px">Contactez un vendeur pour démarrer</div>
         </div>
       </div>
     </div>
 
-    <!-- ── COL 2 : Thread messages ── -->
+    <!-- ── COL 2 : Thread (fil de messages) ── -->
     <div class="pmsg-center">
       <div id="page-msg-thread" class="pmsg-thread-empty">
-        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.2" style="margin-bottom:16px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        <div style="font-size:16px;font-weight:700;color:#888;margin-bottom:6px">Sélectionnez une conversation</div>
+        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.2" style="margin-bottom:18px">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <div style="font-size:16px;font-weight:700;color:#999;margin-bottom:6px">Sélectionnez une conversation</div>
         <div style="font-size:13px;color:#bbb">Vos échanges avec les vendeurs apparaissent ici</div>
       </div>
     </div>
 
     <!-- ── COL 3 : Infos vendeur + annonce ── -->
-    <div class="pmsg-right-panel" id="page-msg-panel">
-      <div style="padding:40px 16px;text-align:center;color:#bbb">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <div style="font-size:13px;margin-top:8px">Infos du vendeur</div>
+    <div class="pmsg-right" id="page-msg-panel">
+      <div style="padding:48px 16px;text-align:center;color:#bbb">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5" style="margin-bottom:10px;display:block;margin-left:auto;margin-right:auto">
+          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+        </svg>
+        <div style="font-size:13px;color:#bbb">Infos du vendeur</div>
       </div>
     </div>
+
   </div>
 </div>
 
