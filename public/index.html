@@ -5513,9 +5513,11 @@ function renderPageConvList(convs){
       if(!cid) return '';
       var isBuyer = uid ? String(conv.buyerId)===uid : false;
       var otherName = isBuyer ? (conv.sellerName||'Vendeur') : (conv.buyerName||'Acheteur');
+      var adTitle   = typeof escapeHtml==='function' ? escapeHtml(conv.adTitle||'') : (conv.adTitle||'');
+      otherName = typeof escapeHtml==='function' ? escapeHtml(otherName) : otherName;
       var adTitle   = conv.adTitle || otherName;
       var lastMsg   = conv.lastMessage || 'Nouvelle conversation';
-      var unread    = conv.unreadCount || 0;
+      var unread    = isBuyer ? (conv.unreadBuyer||0) : (conv.unreadSeller||0);
       var time      = conv.updatedAt ? timeAgo(conv.updatedAt) : '';
       var photo     = conv.adPhoto || '';
       // Vignette : photo annonce ou initiale
@@ -5573,6 +5575,8 @@ function openPageConv(convId, convData){
   var uid     = user ? String(user._id||user.id||'') : '';
   var isBuyer = uid ? String(conv.buyerId)===uid : true;
   var otherName = isBuyer ? (conv.sellerName||'Vendeur') : (conv.buyerName||'Acheteur');
+      var adTitle   = typeof escapeHtml==='function' ? escapeHtml(conv.adTitle||'') : (conv.adTitle||'');
+      otherName = typeof escapeHtml==='function' ? escapeHtml(otherName) : otherName;
   var adTitle   = conv.adTitle  || '';
   var adPhoto   = conv.adPhoto  || '';
   var adPrice   = conv.adPrice  ? Number(conv.adPrice).toLocaleString('fr-FR')+' GNF' : '';
@@ -7451,74 +7455,8 @@ function envoyerMessage(){
   var user = DB.user();
   if(!user){ toast('🔒 Connectez-vous','err'); openModal('auth'); return; }
   if(!curAd) return;
-
-  var token = localStorage.getItem('ygy_token');
-  var adId  = String(curAd._id||curAd.id||'');
-  var adTitle = curAd.t||curAd.title||'Annonce';
-
-  // Vérifier que ce n'est pas sa propre annonce
-  var uid = String(user._id||user.id||'');
-  var sellerId = String(curAd.userId||curAd.sellerId||curAd.user||'');
-  if(sellerId && uid && sellerId===uid){
-    toast('⚠️ Vous ne pouvez pas vous envoyer un message','warn');
-    return;
-  }
-
-  toast('⏳ Ouverture de la messagerie...','ok',2000);
-
-  // Créer ou récupérer la conversation
-  fetch('/api/conversations',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},
-    body:JSON.stringify({
-      adId: adId,
-      message: 'Bonjour, votre annonce m\'interesse. Est-elle toujours disponible ?'
-    })
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(data){
-    if(data.error){ toast('❌ '+data.error,'err'); return; }
-    // Récupérer l'ID de la conv créée/existante
-    var convId = data.conversationId || data._id || (data.conversation && (data.conversation._id||data.conversation.id));
-    if(!convId){ toast('❌ Impossible d\'ouvrir la messagerie','err'); return; }
-
-    // Construire les données de la conv pour l'affichage
-    var convData = {
-      _id:       convId,
-      adId:      adId,
-      adTitle:   adTitle,
-      adPhoto:   (curAd.imgs&&curAd.imgs[0]) || curAd.photo || '',
-      adPrice:   curAd.p||curAd.price||0,
-      sellerId:  sellerId,
-      sellerName: curAd.sellerName || curAd.userName || 'Vendeur',
-      buyerId:   uid,
-      buyerName: user.name||user.nom||'Moi'
-    };
-
-    // Recharger les convs et ouvrir la messagerie sur cette conv
-    navGoMessages();
-    // Attendre que la page soit rendue puis ouvrir la conv
-    setTimeout(function(){
-      var existing = (_pageConvs||[]).find(function(c){
-        return String(c._id)===String(convId);
-      });
-      if(existing){
-        openPageConvById(String(convId));
-      } else {
-        // Ajouter manuellement si pas encore dans la liste
-        _pageConvs = _pageConvs||[];
-        _pageConvs.unshift(convData);
-        renderPageConvList(_pageConvs);
-        openPageConvById(String(convId));
-      }
-    }, 800);
-  })
-  .catch(function(e){
-    console.error('envoyerMessage error:', e);
-    // Fallback : ouvrir la messagerie sans conv spécifique
-    navGoMessages();
-    toast('✅ Messagerie ouverte','ok');
-  });
+  // Déléguer à startConversation() — version unifiée
+  startConversation(curAd._id||curAd.id, curAd);
 }
 
 function sendQuickMessage(){
@@ -7529,13 +7467,19 @@ function sendQuickMessage(){
 }
 
 function updateMsgBadge(convs){
-  var total=(convs||[]).reduce(function(acc,c){return acc+(c.unreadCount||0);},0);
-  // Badge dans le dashboard
+  // Calcul précis : unreadBuyer ou unreadSeller selon le rôle
+  var total = typeof countUnreadForUser==='function'
+    ? countUnreadForUser(convs)
+    : (convs||[]).reduce(function(acc,c){return acc+(c.unreadCount||c.unreadBuyer||c.unreadSeller||0);},0);
+  // Badge dashboard
   var badge=document.getElementById('msg-badge');
   if(badge){ if(total>0){badge.textContent=total;badge.style.display='flex';}else badge.style.display='none'; }
-  // Badge dans la nav top
+  // Badge nav
   var navBadge=document.getElementById('nav-msg-badge');
-  if(navBadge){ if(total>0){navBadge.textContent=total;navBadge.style.display='flex';}else navBadge.style.display='none'; }
+  if(navBadge){
+    if(total>0){ navBadge.textContent=total>99?'99+':total; navBadge.style.display='flex'; }
+    else navBadge.style.display='none';
+  }
 }
 
 // Polling messages non lus
@@ -7544,6 +7488,8 @@ function startMsgPolling(){
   if(_convPollTimer) clearInterval(_convPollTimer);
   _convPollTimer=setInterval(function(){
     if(_wsConnected) return; // WS actif, pas besoin du polling
+      // Recharger le badge non lus
+      if(typeof loadUnreadCount==='function') loadUnreadCount();
     var token=localStorage.getItem('ygy_token');
     if(!token) return;
     fetch('/api/conversations/unread',{headers:{'Authorization':'Bearer '+token}})
@@ -7692,6 +7638,136 @@ function updateMsgBadgeFromWS(){
       else navBadge.style.display='none';
     }
   }).catch(function(){});
+}
+
+
+// ══════════════════════════════════════════════════
+// FONCTIONS MESSAGERIE COMPLÉMENTAIRES
+// Adaptées à YouGouYou (ygy_token, DB.user())
+// ══════════════════════════════════════════════════
+
+// Décoder le JWT pour extraire l'ID utilisateur
+function getCurrentUserId(){
+  var user = DB.user();
+  if(user) return String(user._id||user.id||'');
+  // Fallback : décoder le JWT
+  var token = localStorage.getItem('ygy_token');
+  if(!token) return null;
+  try{
+    var payload = JSON.parse(atob(token.split('.')[1]));
+    return String(payload.id||payload.sub||payload.userId||payload._id||'');
+  }catch(e){ return null; }
+}
+
+// Échapper le HTML pour éviter les injections XSS
+function escapeHtml(str){
+  if(!str) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#039;');
+}
+
+// Charger le compteur non lus depuis /api/conversations/unread
+function loadUnreadCount(){
+  var token = localStorage.getItem('ygy_token');
+  if(!token) return;
+  fetch('/api/conversations/unread',{
+    headers:{'Authorization':'Bearer '+token}
+  }).then(function(r){ return r.ok ? r.json() : {count:0}; })
+  .then(function(data){
+    var count = data.count || data.unread || 0;
+    var badge = document.getElementById('nav-msg-badge');
+    if(badge){
+      if(count>0){ badge.textContent = count>99?'99+':count; badge.style.display='flex'; }
+      else badge.style.display='none';
+    }
+  }).catch(function(){});
+}
+
+// MàJ preview de la conv dans la liste sans recharger tout
+function updateConversationInList(convId, lastMessage){
+  var el = document.querySelector('.pmsg-conv[data-cid="'+convId+'"]');
+  if(!el) return;
+  var prev = el.querySelector('.pmsg-conv-preview');
+  var time = el.querySelector('.pmsg-conv-time');
+  if(prev) prev.textContent = lastMessage;
+  if(time) time.textContent = 'maintenant';
+}
+
+// Créer ou récupérer une conversation et l'ouvrir
+// Remplace envoyerMessage() avec la logique complète
+function startConversation(adId, adData){
+  var token = localStorage.getItem('ygy_token');
+  if(!token){ toast('🔒 Connectez-vous','err'); openModal('auth'); return; }
+
+  var user = DB.user();
+  var uid  = user ? String(user._id||user.id||'') : '';
+  var sellerId = adData ? String(adData.userId||adData.sellerId||'') : '';
+
+  if(sellerId && uid && sellerId===uid){
+    toast('⚠️ Vous ne pouvez pas vous contacter','warn'); return;
+  }
+
+  toast('⏳ Ouverture messagerie...','ok',1500);
+
+  fetch('/api/conversations',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+    body:JSON.stringify({
+      adId: String(adId||''),
+      message: 'Bonjour, votre annonce m\'interesse. Est-elle toujours disponible ?'
+    })
+  }).then(function(r){ return r.json(); })
+  .then(function(data){
+    if(data.error){ toast('❌ '+data.error,'err'); return; }
+    var convId = data.conversationId||data._id||(data.conversation&&(data.conversation._id||data.conversation.id));
+    if(!convId){ toast('❌ Erreur messagerie','err'); return; }
+
+    // Construire convData depuis adData
+    var convData = {
+      _id: convId, adId: String(adId||''),
+      adTitle: adData ? (adData.t||adData.title||'') : '',
+      adPhoto: adData ? ((adData.imgs&&adData.imgs[0])||adData.photo||'') : '',
+      adPrice: adData ? (adData.p||adData.price||0) : 0,
+      sellerId: sellerId,
+      sellerName: adData ? (adData.sellerName||adData.userName||'Vendeur') : 'Vendeur',
+      buyerId: uid,
+      buyerName: user ? (user.name||user.nom||'Moi') : 'Moi',
+      unreadBuyer:0, unreadSeller:0,
+      lastMessage: 'Bonjour, votre annonce m\'intéresse...'
+    };
+
+    // Ouvrir la messagerie
+    navGoMessages();
+    setTimeout(function(){
+      // Chercher la conv dans la liste ou l'ajouter
+      var found = (_pageConvs||[]).find(function(c){ return String(c._id)===String(convId); });
+      if(!found){
+        _pageConvs = _pageConvs||[];
+        _pageConvs.unshift(convData);
+        renderPageConvList(_pageConvs);
+      }
+      openPageConvById(String(convId));
+    }, 900);
+  })
+  .catch(function(e){
+    console.error('[MSG] startConversation error:',e);
+    navGoMessages();
+  });
+}
+
+// unreadBuyer / unreadSeller — comptage précis selon rôle
+function countUnreadForUser(convs){
+  var uid = getCurrentUserId()||'';
+  var total = 0;
+  (convs||[]).forEach(function(c){
+    var isBuyer = String(c.buyerId)===uid;
+    total += isBuyer ? (c.unreadBuyer||0) : (c.unreadSeller||0);
+  });
+  return total;
 }
 
 // ── markAsRead — marquer une conv comme lue ──
@@ -7997,6 +8073,10 @@ document.addEventListener('DOMContentLoaded',function(){
   // Connecter WebSocket si déjà connecté
   if(localStorage.getItem('ygy_token') && typeof connectWS==='function'){
     setTimeout(connectWS, 500);
+  }
+  // Charger le compteur non lus
+  if(localStorage.getItem('ygy_token') && typeof loadUnreadCount==='function'){
+    setTimeout(loadUnreadCount, 800);
   }
   // Sync rôle + Pro depuis MongoDB au chargement, puis mettre à jour toute la nav
   (function(){
