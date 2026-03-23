@@ -242,7 +242,6 @@ const UserSchema = new mongoose.Schema({
   ratingCount:  { type: Number, default: 0 },             // nb d'avis
   totalViews:   { type: Number, default: 0 },             // vues totales sur ses annonces
   totalContacts:{ type: Number, default: 0 },             // contacts reçus
-  favorites:    [{ type: mongoose.Schema.Types.ObjectId, ref: 'Ad' }], // annonces favorites
   createdAt:    { type: Date, default: Date.now },
 });
 UserSchema.index({ phone: 1 });
@@ -570,20 +569,9 @@ app.post('/api/auth/send-code', async (req, res) => {
 // Étape 2 : vérifier le code et créer le compte
 app.post('/api/register', async (req, res) => {
   try {
-    const { prenom, nom, phone, email, password, city, code, method = 'sms', dob } = req.body;
+    const { prenom, nom, phone, email, password, city, code, method = 'sms' } = req.body;
     if (!prenom || !password || !code)
       return res.status(400).json({ error: 'Champs requis manquants' });
-
-    // ── Vérification âge minimum 18 ans ──────────────────────────
-    if (!dob) return res.status(400).json({ error: 'Date de naissance requise' });
-    const birthDate = new Date(dob);
-    if (isNaN(birthDate.getTime())) return res.status(400).json({ error: 'Date de naissance invalide' });
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
-    if (age < 18) return res.status(400).json({ error: 'Vous devez avoir au moins 18 ans pour créer un compte' });
-    // ─────────────────────────────────────────────────────────────
 
     // Chercher le user temporaire créé lors du send-code
     let pending = null;
@@ -619,7 +607,6 @@ app.post('/api/register', async (req, res) => {
     pending.nom       = nom || '';
     pending.password  = hashed;
     pending.city      = city || '';
-    pending.dob       = dob;
     pending.verified  = true;
     pending.verifyCode  = null;
     pending.codeExpiry  = null;
@@ -1080,50 +1067,6 @@ app.get('/api/my-ads', auth, async (req, res) => {
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
-// ═══════════════════════════════════════════════════════════
-//  ★ FAVORIS
-// ═══════════════════════════════════════════════════════════
-
-// Lister mes favoris
-app.get('/api/me/favorites', auth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select('favorites');
-    if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
-    const favIds = user.favorites || [];
-    const ads = await Ad.find({ _id: { $in: favIds }, active: true })
-      .select('-sellerPhone')
-      .populate('seller', 'prenom nom city avgRating verified');
-    res.json({ favorites: favIds.map(String), ads });
-  } catch(err) { res.status(500).json({ error: err.message }); }
-});
-
-// Ajouter / retirer un favori (toggle)
-app.post('/api/me/favorites/:adId', auth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select('favorites');
-    if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
-
-    const adId = req.params.adId;
-    const favs = (user.favorites || []).map(String);
-    const idx  = favs.indexOf(adId);
-    let action;
-
-    if (idx >= 0) {
-      // Retirer
-      await User.findByIdAndUpdate(req.user.id, { $pull: { favorites: adId } });
-      action = 'removed';
-    } else {
-      // Ajouter (max 200 favoris)
-      if (favs.length >= 200) return res.status(400).json({ error: 'Maximum 200 favoris' });
-      await User.findByIdAndUpdate(req.user.id, { $addToSet: { favorites: adId } });
-      action = 'added';
-    }
-    // Retourner la liste à jour
-    const updated = await User.findById(req.user.id).select('favorites');
-    res.json({ success: true, action, favorites: (updated.favorites || []).map(String) });
-  } catch(err) { res.status(500).json({ error: err.message }); }
-});
-
 // ★ Boost / Mise en avant d'une annonce
 app.post('/api/ads/:id/boost', auth, async (req, res) => {
   try {
@@ -1233,23 +1176,6 @@ app.post('/api/conversations', auth, async (req, res) => {
   }
 });
 
-// Total messages non lus  ← DOIT être avant /:id pour éviter le conflit Express
-app.get('/api/conversations/unread', auth, async (req, res) => {
-  try {
-    const uid = req.user.id;
-    const asBuyer  = await Conversation.aggregate([
-      { $match: { buyerId: new mongoose.Types.ObjectId(uid) } },
-      { $group: { _id: null, total: { $sum: '$unreadBuyer' } } }
-    ]);
-    const asSeller = await Conversation.aggregate([
-      { $match: { sellerId: new mongoose.Types.ObjectId(uid) } },
-      { $group: { _id: null, total: { $sum: '$unreadSeller' } } }
-    ]);
-    const count = (asBuyer[0]?.total||0) + (asSeller[0]?.total||0);
-    res.json({ count });
-  } catch(err) { res.status(500).json({ error: err.message }); }
-});
-
 // Lire les messages d'une conversation
 app.get('/api/conversations/:id', auth, async (req, res) => {
   try {
@@ -1311,6 +1237,23 @@ app.patch('/api/conversations/:id/read', auth, async (req, res) => {
     }
     await conv.save();
     res.json({ success: true });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// Total messages non lus
+app.get('/api/conversations/unread', auth, async (req, res) => {
+  try {
+    const uid = req.user.id;
+    const asBuyer  = await Conversation.aggregate([
+      { $match: { buyerId: new mongoose.Types.ObjectId(uid) } },
+      { $group: { _id: null, total: { $sum: '$unreadBuyer' } } }
+    ]);
+    const asSeller = await Conversation.aggregate([
+      { $match: { sellerId: new mongoose.Types.ObjectId(uid) } },
+      { $group: { _id: null, total: { $sum: '$unreadSeller' } } }
+    ]);
+    const count = (asBuyer[0]?.total||0) + (asSeller[0]?.total||0);
+    res.json({ count });
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
