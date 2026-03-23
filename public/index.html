@@ -2343,24 +2343,25 @@ function goTo(page, opts){
   // ── Page Messages ──────────────────────────────────────────────
   if(page==='messages'){
     startMsgPolling();
-    if(opts.skipConvLoad) return;
+    // Le chargement des convs est géré par navGoMessages()
+    // Si goTo('messages') est appelé directement (ex: depuis contacterVendeur3pct),
+    // on charge les convs ici aussi (renderPageConvList gère window._pendingOpenConvId)
     var token=localStorage.getItem('ygy_token');
     var list=document.getElementById('page-msg-list');
     if(!token){
       if(list) list.innerHTML='<div style="padding:40px 20px;text-align:center;color:var(--muted)"><div style="font-size:40px;margin-bottom:10px">🔒</div><div style="font-size:13px">Connectez-vous pour voir vos messages</div></div>';
       return;
     }
-    if(list) list.innerHTML='<div style="padding:40px 20px;text-align:center;color:var(--muted)"><div style="font-size:40px;margin-bottom:10px">💬</div><div style="font-size:13px">Chargement...</div></div>';
+    if(list) list.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">⏳ Chargement...</div>';
     fetch('/api/conversations',{headers:{'Authorization':'Bearer '+token}})
     .then(function(r){return r.json();})
     .then(function(data){
       var convs=data.conversations||data||[];
       _pageConvs=convs;
-      renderPageConvList(convs);   // gère aussi window._pendingOpenConvId
+      renderPageConvList(convs);
       updateMsgBadge(convs);
     }).catch(function(){
       if(list) list.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">❌ Erreur de chargement</div>';
-      // Même en cas d'erreur, ouvrir la conv en attente si elle existe
       if(window._pendingOpenConvId){
         var pid=window._pendingOpenConvId, pdat=window._pendingOpenConvData||{_id:pid};
         window._pendingOpenConvId=null; window._pendingOpenConvData=null;
@@ -4454,9 +4455,207 @@ function navGoSearches(){
 
 function navGoFavs(){ return; } // désactivé temporairement
 
-function navGoMessages(){ return; } // désactivé temporairement
+// ══════════════════════════════════════════
+//  MESSAGERIE — basée sur v25-11 (version stable)
+// ══════════════════════════════════════════
+
+function navGoMessages(){
+  if(!DB.user()){openModal('auth');return;}
+  var token = localStorage.getItem('ygy_token');
+  var list = document.getElementById('page-msg-list');
+  if(list) list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">⏳ Chargement...</div>';
+  goTo('messages');
+  if(token){
+    fetch('/api/conversations',{headers:{'Authorization':'Bearer '+token}})
+    .then(function(r){return r.json();})
+    .then(function(data){
+      var convs = data.conversations||data||[];
+      _pageConvs = convs;
+      renderPageConvList(convs);
+      updateMsgBadge(convs);
+    }).catch(function(){
+      if(list) list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">❌ Erreur de chargement</div>';
+    });
+  }
+}
 
 function renderPageConvList(convs){
+  var list = document.getElementById('page-msg-list');
+  if(!list) return;
+  var user = DB.user();
+  if(!convs||!convs.length){
+    list.innerHTML = '<div style="padding:32px 16px;text-align:center;color:var(--muted)">'+
+      '<div style="font-size:36px;margin-bottom:8px">💬</div>'+
+      '<div style="font-size:13px;font-weight:600">Aucune conversation</div>'+
+    '</div>';
+    if(window._pendingOpenConvId){
+      var pid=window._pendingOpenConvId, pdat=window._pendingOpenConvData||{_id:pid};
+      window._pendingOpenConvId=null; window._pendingOpenConvData=null;
+      setTimeout(function(){ openPageConv(pid, pdat); }, 50);
+    }
+    return;
+  }
+  list.innerHTML = convs.map(function(conv){
+    var isUnread = (conv.unreadCount||0) > 0;
+    var isBuyer  = String(conv.buyerId)===(user&&String(user._id));
+    var name     = isBuyer ? (conv.sellerName||'Vendeur') : (conv.buyerName||'Acheteur');
+    var last     = conv.lastMessage||'Nouvelle conversation';
+    var time     = conv.updatedAt ? timeAgo(conv.updatedAt) : '';
+    var cid      = conv._id||conv.id||'';
+    var adTitle  = conv.adTitle||'';
+    return '<div class="pmsg-conv" onclick="openPageConvById(\''+cid+'\')">'+
+      '<div class="pmsg-conv-thumb">'+name.charAt(0).toUpperCase()+'</div>'+
+      '<div class="pmsg-conv-info">'+
+        '<div class="pmsg-conv-title">'+(adTitle||name)+'</div>'+
+        '<div class="pmsg-conv-preview">'+last.substring(0,45)+'</div>'+
+        '<div class="pmsg-conv-meta">'+
+          '<span class="pmsg-conv-who">'+name+'</span>'+
+          '<span class="pmsg-conv-date">· '+time+'</span>'+
+        '</div>'+
+      '</div>'+
+      (isUnread?'<div class="pmsg-conv-unread">'+conv.unreadCount+'</div>':'')+
+    '</div>';
+  }).join('');
+  // Ouvrir automatiquement la conv en attente après navigation
+  if(window._pendingOpenConvId){
+    var pid=window._pendingOpenConvId, pdat=window._pendingOpenConvData||{_id:pid};
+    window._pendingOpenConvId=null; window._pendingOpenConvData=null;
+    setTimeout(function(){ openPageConv(pid, pdat); }, 50);
+  }
+}
+
+var _pageConvId = null;
+var _pageConvs  = [];
+
+function openPageConvById(cid){
+  var conv = _pageConvs.find(function(c){return (c._id||c.id)===cid;})||{_id:cid};
+  document.querySelectorAll('.pmsg-conv').forEach(function(i){i.classList.remove('active');});
+  document.querySelectorAll('.pmsg-conv').forEach(function(el){
+    if(el.getAttribute('onclick')&&el.getAttribute('onclick').includes(cid)) el.classList.add('active');
+  });
+  openPageConv(cid, conv);
+}
+
+function filterConvs(type, btn){
+  document.querySelectorAll('.pmsg-filter').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  var convs = _pageConvs;
+  if(type==='unread') convs = convs.filter(function(c){return (c.unreadCount||0)>0;});
+  renderPageConvList(convs);
+}
+
+function openPageConv(convId, convData){
+  _pageConvId = convId;
+  var thread = document.getElementById('page-msg-thread');
+  if(!thread){
+    var _att=0, _wt=setInterval(function(){
+      thread=document.getElementById('page-msg-thread');
+      _att++;
+      if(thread){ clearInterval(_wt); openPageConv(convId, convData); }
+      else if(_att>20){ clearInterval(_wt); }
+    },100);
+    return;
+  }
+  var user = DB.user();
+  var conv = convData || {};
+  var isBuyer = !conv.buyerId || String(conv.buyerId)===(user&&String(user._id||user.id));
+  var otherName = isBuyer ? (conv.sellerName||'Vendeur') : (conv.buyerName||'Acheteur');
+  var adTitle = conv.adTitle||'';
+
+  thread.className = '';
+  thread.innerHTML =
+    '<div class="pmsg-thread-head">'+
+      '<div class="pmsg-thread-av">'+(otherName||'?').charAt(0).toUpperCase()+'</div>'+
+      '<div class="pmsg-thread-info">'+
+        '<div class="pmsg-thread-name">'+otherName+'</div>'+
+        (adTitle?'<div class="pmsg-thread-ad">📦 '+adTitle+'</div>':'')+
+      '</div>'+
+    '</div>'+
+    '<div class="pmsg-bubbles" id="page-msg-bubbles">'+
+      '<div class="pmsg-security">'+
+        '<strong>Soyez prudent dans vos échanges</strong>'+
+        'Restez sur la messagerie YouGouYou. Ne payez jamais en dehors de la plateforme.'+
+      '</div>'+
+      '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">⏳ Chargement...</div>'+
+    '</div>'+
+    '<div class="pmsg-input-wrap">'+
+      '<input class="pmsg-input" type="text" id="page-msg-input" placeholder="Écrivez votre message..." '+
+        'onkeydown="if(event.key===\'Enter\')sendPageMsg()">'+
+      '<button class="pmsg-send" onclick="sendPageMsg()">'+
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>'+
+      '</button>'+
+    '</div>';
+
+  var panel = document.getElementById('page-msg-panel');
+  if(panel){
+    panel.innerHTML =
+      '<div class="pmsg-vendor-head">'+
+        '<div class="pmsg-vendor-av">'+(otherName||'?').charAt(0).toUpperCase()+'</div>'+
+        '<div>'+
+          '<div class="pmsg-vendor-name">'+otherName+'</div>'+
+          '<div class="pmsg-vendor-meta">Membre YouGouYou</div>'+
+        '</div>'+
+      '</div>'+
+      (adTitle?'<div class="pmsg-ad-card"><div class="pmsg-ad-img">📦</div><div class="pmsg-ad-info"><div class="pmsg-ad-title">'+adTitle+'</div></div></div>':'')+
+      '<div style="font-size:12px;color:var(--muted);line-height:1.7;background:#f9f9f9;border-radius:8px;padding:10px 12px;margin-top:8px">'+
+        '<strong style="color:var(--ink);display:block;margin-bottom:4px">🛡️ Paiement sécurisé</strong>'+
+        'Ne payez jamais en dehors de la plateforme YouGouYou.'+
+      '</div>';
+  }
+
+  var token = localStorage.getItem('ygy_token');
+  if(token){
+    fetch('/api/conversations/'+convId,{headers:{'Authorization':'Bearer '+token}})
+    .then(function(r){return r.json();})
+    .then(function(data){
+      var msgs = data.messages||[];
+      var container = document.getElementById('page-msg-bubbles');
+      if(!container) return;
+      if(!msgs.length){
+        container.innerHTML =
+          '<div class="pmsg-security"><strong>🛡️ Conseils sécurité</strong> — Vérifiez avant paiement.</div>'+
+          '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Démarrez la conversation 👋</div>';
+        return;
+      }
+      var html = '<div class="pmsg-security"><strong>Restez sur la messagerie YouGouYou pour vos échanges.</strong></div>';
+      msgs.forEach(function(m){
+        if(m.isSystem){
+          html += '<div class="pmsg-system-msg">🛡️ '+m.text+'</div>';
+          return;
+        }
+        var isMine = String(m.senderId)===(user&&String(user._id||user.id));
+        var t = m.createdAt?new Date(m.createdAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
+        html += '<div class="pmsg-bubble-wrap '+(isMine?'mine':'theirs')+'">'+
+          '<div class="pmsg-bubble '+(isMine?'mine':'theirs')+'">'+m.text+'</div>'+
+          '<div class="pmsg-bubble-time">'+t+(isMine?' · ✓✓':'')+'</div>'+
+        '</div>';
+      });
+      container.innerHTML = html;
+      container.scrollTop = container.scrollHeight;
+    }).catch(function(){});
+    fetch('/api/conversations/'+convId+'/read',{method:'PATCH',headers:{'Authorization':'Bearer '+token}}).catch(function(){});
+  }
+}
+
+function sendPageMsg(){
+  if(!_pageConvId) return;
+  var inp = document.getElementById('page-msg-input');
+  var text = (inp&&inp.value.trim())||'';
+  if(!text) return;
+  var token = localStorage.getItem('ygy_token');
+  if(inp) inp.value = '';
+  fetch('/api/conversations/'+_pageConvId,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+    body:JSON.stringify({text:text})
+  }).then(function(r){return r.json();})
+  .then(function(){
+    var convData = _pageConvs.find(function(c){return (c._id||c.id)===_pageConvId;})||{_id:_pageConvId};
+    openPageConv(_pageConvId, convData);
+  }).catch(function(){ toast('❌ Erreur envoi','err'); });
+}
+
+
   var list = document.getElementById('page-msg-list');
   if(!list) return;
   var user = DB.user();
@@ -4507,197 +4706,6 @@ function renderPageConvList(convs){
   }
 }
 
-var _pageConvId = null;
-var _pageConvs  = [];
-function openPageConvById(cid){
-  var conv = _pageConvs.find(function(c){return (c._id||c.id)===cid;})||{_id:cid};
-  // Marquer actif
-  document.querySelectorAll('.pmsg-conv').forEach(function(i){i.classList.remove('active');});
-  document.querySelectorAll('.pmsg-conv').forEach(function(el){
-    if(el.getAttribute('onclick')&&el.getAttribute('onclick').includes(cid)) el.classList.add('active');
-  });
-  openPageConv(cid, conv);
-}
-function filterConvs(type, btn){
-  document.querySelectorAll('.pmsg-filter').forEach(function(b){b.classList.remove('active');});
-  btn.classList.add('active');
-  var convs = _pageConvs;
-  if(type==='unread') convs = convs.filter(function(c){return (c.unreadCount||0)>0;});
-  renderPageConvList(convs);
-}
-function openPageConv(convId, convData){
-  _pageConvId = convId;
-  var center = document.getElementById('pmsg-center');
-
-  // pmsg-center pas encore rendu → attendre jusqu'à 2s (20 × 100ms)
-  if(!center){
-    var _attempts = 0;
-    var _wait = setInterval(function(){
-      center = document.getElementById('pmsg-center');
-      _attempts++;
-      if(center){ clearInterval(_wait); openPageConv(convId, convData); }
-      else if(_attempts > 20){ clearInterval(_wait); console.warn('[YGY] pmsg-center introuvable'); }
-    }, 100);
-    return;
-  }
-
-  var panel  = document.getElementById('page-msg-panel');
-
-  var user      = DB.user();
-  var conv      = convData || {};
-  var isBuyer   = !conv.buyerId || String(conv.buyerId)===(user&&String(user._id||user.id));
-  var otherName = isBuyer ? (conv.sellerName||'Vendeur') : (conv.buyerName||'Acheteur');
-  var adTitle   = conv.adTitle || '';
-  var adPhoto   = conv.adPhoto || '';
-  var adPrice   = conv.adPrice ? Number(conv.adPrice).toLocaleString('fr-FR')+' GNF' : '';
-  var adId      = conv.adId || '';
-
-  // Marquer actif dans la liste gauche
-  document.querySelectorAll('.pmsg-conv').forEach(function(el){
-    el.classList.toggle('active',
-      (el.getAttribute('onclick')||'').includes(convId) ||
-      el.dataset.cid === convId);
-  });
-
-  // ── Construire le thread ──
-  var h = '';
-  h += '<div class="pmsg-thread-head">';
-  h +=   '<div class="pmsg-thread-av">'+otherName.charAt(0).toUpperCase()+'</div>';
-  h +=   '<div style="flex:1;min-width:0">';
-  h +=     '<div class="pmsg-thread-name">'+otherName+'</div>';
-  if(adTitle) h += '<div class="pmsg-thread-ad">\uD83D\uDCE6 '+adTitle+'</div>';
-  h +=   '</div>';
-  h += '</div>';
-  h += '<div class="pmsg-bubbles" id="page-msg-bubbles">';
-  h +=   '<div class="pmsg-security"><strong>YouGouYou</strong> - Restez prudents dans vos echanges.</div>';
-  h +=   '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">&#9203; Chargement...</div>';
-  h += '</div>';
-  h += '<div class="pmsg-input-wrap">';
-  h +=   '<input class="pmsg-input" type="text" id="page-msg-input" placeholder="Votre message...">';
-  h +=   '<button class="pmsg-send" id="page-msg-send-btn">';
-  h +=     '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">';
-  h +=       '<line x1="22" y1="2" x2="11" y2="13"/>';
-  h +=       '<polygon points="22 2 15 22 11 13 2 9 22 2"/>';
-  h +=     '</svg>';
-  h +=   '</button>';
-  h += '</div>';
-  center.innerHTML = h;
-
-  // Attacher les événements
-  var inp = document.getElementById('page-msg-input');
-  var sendBtn = document.getElementById('page-msg-send-btn');
-  if(inp){ inp.addEventListener('keydown', function(e){ if(e.key==='Enter') sendPageMsg(); }); }
-  if(sendBtn){ sendBtn.addEventListener('click', function(){ sendPageMsg(); }); }
-  setTimeout(function(){ if(inp) inp.focus(); }, 100);
-
-  // ── Panneau droit ──
-  if(panel){
-    var p = '';
-    p += '<div class="pmsg-ad-card" onclick="viewAd(\''+adId+'\') ">';
-    if(adPhoto){
-      p += '<img src="'+adPhoto+'" class="pmsg-ad-img" style="width:100%;height:140px;object-fit:cover">';
-    } else {
-      p += '<div class="pmsg-ad-img">\uD83D\uDCE6</div>';
-    }
-    p += '<div class="pmsg-ad-info">';
-    p +=   '<div class="pmsg-ad-title">'+(adTitle||'Annonce')+'</div>';
-    if(adPrice) p += '<div class="pmsg-ad-price">'+adPrice+'</div>';
-    p += '</div></div>';
-    p += '<div class="pmsg-vendor-head">';
-    p +=   '<div class="pmsg-vendor-av">'+otherName.charAt(0).toUpperCase()+'</div>';
-    p +=   '<div><div class="pmsg-vendor-name">'+otherName+'</div>';
-    p +=   '<div class="pmsg-vendor-meta">Membre YouGouYou</div></div>';
-    p += '</div>';
-    p += '<div style="padding:0 0 14px"><button onclick="viewAd(\''+adId+'\') " ';
-    p +=   'style="width:100%;padding:10px;border:1.5px solid var(--br);border-radius:8px;';
-    p +=   'background:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">';
-    p +=   '\uD83D\uDD0D Voir l\u0027annonce</button></div>';
-    p += '<div style="font-size:12px;color:var(--muted);line-height:1.6;background:#f9f9f9;border-radius:8px;padding:10px 12px">';
-    p +=   '<strong style="color:var(--ink);display:block;margin-bottom:4px">\uD83D\uDEE1\uFE0F Paiement securise</strong>';
-    p +=   'Verifiez avant de payer. N\u0027envoyez jamais d\u0027argent a l\u0027avance.</div>';
-    panel.innerHTML = p;
-  }
-
-  // ── Charger les messages ──
-  var token = localStorage.getItem('ygy_token');
-  if(token){
-    fetch('/api/conversations/'+convId,{headers:{'Authorization':'Bearer '+token}})
-    .then(function(r){return r.json();})
-    .then(function(data){
-      var msgs    = data.messages||[];
-      var bubbles = document.getElementById('page-msg-bubbles');
-      if(!bubbles) return;
-      if(!msgs.length){
-        bubbles.innerHTML =
-          '<div class="pmsg-security"><strong>YouGouYou</strong> - Echangez en toute securite.</div>'+
-          '<div style="text-align:center;color:var(--muted);font-size:13px;padding:24px">'+
-            '<div style="font-size:32px;margin-bottom:10px">\uD83D\uDC4B</div>Demarrez la conversation !</div>';
-        return;
-      }
-      var html = '<div class="pmsg-security"><strong>Echangez en toute securite.</strong></div>';
-      msgs.forEach(function(m){
-        // Message système (frais 3%) — détecté via flag isSystem
-        if(m.isSystem){
-          html += '<div class="pmsg-system-msg">🛡️ ' + m.text + '</div>';
-          return;
-        }
-        var isMine = String(m.senderId)===(user&&String(user._id||user.id));
-        var t = m.createdAt ? new Date(m.createdAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) : '';
-        html += '<div class="pmsg-bubble-wrap '+(isMine?'mine':'theirs')+'">';
-        html +=   '<div class="pmsg-bubble '+(isMine?'mine':'theirs')+'">'+m.text+'</div>';
-        html +=   '<div class="pmsg-bubble-time">'+t+(isMine?' \u00b7 \u2713\u2713':'')+'</div>';
-        html += '</div>';
-      });
-      bubbles.innerHTML = html;
-      bubbles.scrollTop = bubbles.scrollHeight;
-    }).catch(function(){});
-    fetch('/api/conversations/'+convId+'/read',{method:'PATCH',headers:{'Authorization':'Bearer '+token}}).catch(function(){});
-  }
-}
-
-function sendPageMsg(){
-  if(!_pageConvId) return;
-  var inp = document.getElementById('page-msg-input');
-  var text = (inp&&inp.value.trim())||'';
-  if(!text) return;
-  var token = localStorage.getItem('ygy_token');
-  var user = DB.user();
-
-  // Afficher le message localement immédiatement (UX optimiste)
-  var bubbles = document.getElementById('page-msg-bubbles');
-  if(bubbles){
-    var now = new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-    var bubble = document.createElement('div');
-    bubble.className = 'pmsg-bubble-wrap mine';
-    bubble.innerHTML = '<div class="pmsg-bubble mine">'+text+'</div>'+
-      '<div class="pmsg-bubble-time">'+now+' · ✓</div>';
-    bubbles.appendChild(bubble);
-    bubbles.scrollTop = bubbles.scrollHeight;
-  }
-  if(inp) inp.value = '';
-
-  fetch('/api/conversations/'+_pageConvId,{
-    method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-    body:JSON.stringify({text:text})
-  }).then(function(r){return r.json();})
-  .then(function(data){
-    // Mettre à jour le dernier message dans la liste gauche
-    var convIdx = (_pageConvs||[]).findIndex(function(c){return (c._id||c.id)===_pageConvId;});
-    if(convIdx>=0){
-      _pageConvs[convIdx].lastMessage = text.substring(0,100);
-      _pageConvs[convIdx].updatedAt = new Date().toISOString();
-      renderPageConvList(_pageConvs);
-    }
-    // Marquer ✓✓ sur la bulle (lu côté serveur)
-    if(bubbles){
-      var times = bubbles.querySelectorAll('.pmsg-bubble-time');
-      var last = times[times.length-1];
-      if(last && last.textContent.includes('✓') && !last.textContent.includes('✓✓'))
-        last.textContent = last.textContent.replace('✓','✓✓');
-    }
-  }).catch(function(){ toast('❌ Erreur envoi','err'); });
-}
 function updateNav(){
   var btn=document.getElementById('nav-auth-btn');if(!btn)return;
   var u=DB.user();
@@ -6993,46 +7001,40 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <!-- ══ PAGE MESSAGES ══ -->
 <div id="page-messages" class="page">
-  <div class="pmsg-wrap">
-    <!-- COL 1 : liste -->
-    <div class="pmsg-left">
-      <div class="pmsg-left-head">
-        <button class="pmsg-back" onclick="goTo('home')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg> Retour
-        </button>
-        <span style="font-size:15px;font-weight:800;flex:1">Messages</span>
-      </div>
-      <div class="pmsg-search-wrap">
-        <input class="pmsg-search" id="pmsg-q" type="text" placeholder="🔍 Rechercher..."
-          oninput="filterPageConvsBySearch(this.value)">
-      </div>
-      <div class="pmsg-filters">
-        <button class="pmsg-filter active" onclick="filterConvs('all',this)">Tous</button>
-        <button class="pmsg-filter" onclick="filterConvs('unread',this)">Non lus</button>
-      </div>
-      <div id="page-msg-list" class="pmsg-list">
-        <div style="padding:40px 20px;text-align:center;color:var(--muted)">
-          <div style="font-size:40px;margin-bottom:10px">💬</div>
-          <div style="font-size:13px">Chargement...</div>
-        </div>
-      </div>
+<div class="pmsg-wrap">
+  <!-- COL 1 : liste conversations -->
+  <div class="pmsg-left">
+    <div class="pmsg-left-head">
+      <button onclick="goTo('home')" class="pmsg-back">← Retour</button>
+      <span style="font-weight:800;font-size:15px">Messages</span>
     </div>
-    <!-- COL 2 : thread -->
-    <div class="pmsg-center" id="pmsg-center">
-      <div id="page-msg-thread" class="pmsg-thread-empty">
-        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        <div style="font-size:16px;font-weight:800;color:#999;margin-top:14px">Sélectionnez une conversation</div>
-        <div style="font-size:13px;margin-top:6px">Vos échanges apparaissent ici</div>
-      </div>
+    <div class="pmsg-filters">
+      <button class="pmsg-filter active" onclick="filterConvs('all',this)">Tout</button>
+      <button class="pmsg-filter" onclick="filterConvs('unread',this)">Non lus</button>
     </div>
-    <!-- COL 3 : infos vendeur -->
-    <div class="pmsg-right-panel" id="page-msg-panel">
-      <div style="padding:40px 16px;text-align:center;color:var(--muted)">
-        <div style="font-size:36px;margin-bottom:8px">ℹ️</div>
-        <div style="font-size:13px">Sélectionnez une conversation</div>
+    <div id="page-msg-list" class="pmsg-list">
+      <div style="padding:32px 16px;text-align:center;color:var(--muted)">
+        <div style="font-size:36px;margin-bottom:8px">💬</div>
+        <div style="font-size:13px">Aucune conversation</div>
       </div>
     </div>
   </div>
+  <!-- COL 2 : fil messages -->
+  <div class="pmsg-center">
+    <div id="page-msg-thread" class="pmsg-thread-empty">
+      <div style="font-size:48px;margin-bottom:12px">👈</div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:6px">Sélectionnez une conversation</div>
+      <div style="font-size:13px;color:var(--muted)">Vos échanges apparaissent ici</div>
+    </div>
+  </div>
+  <!-- COL 3 : infos vendeur -->
+  <div class="pmsg-right-panel" id="page-msg-panel">
+    <div style="padding:40px 16px;text-align:center;color:var(--muted)">
+      <div style="font-size:36px;margin-bottom:8px">ℹ️</div>
+      <div style="font-size:13px">Infos vendeur</div>
+    </div>
+  </div>
+</div>
 </div>
 
 <!-- ══ PAGE FAVORIS ══ -->
