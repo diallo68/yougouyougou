@@ -1222,15 +1222,14 @@ app.post('/api/conversations', auth, async (req, res) => {
 
     // ── Message système automatique (frais 3%) ──────────────────
     // Injecté uniquement à la création d'une nouvelle conversation via "Contacter le vendeur"
-    const SYSTEM_ID = new mongoose.Types.ObjectId('000000000000000000000000');
     if (isNew) {
       const sysText = 'Des frais de mise en relation de 3% s\'appliquent pour contacter ce vendeur via YouGouYou.';
       conv.messages.push({
-        senderId:  SYSTEM_ID,
+        senderId:  ad.seller,   // senderId = vendeur (ObjectId valide), isSystem=true pour le distinguer
         text:      sysText,
         isSystem:  true,
         createdAt: new Date(),
-        read:      true,   // jamais compté dans les non-lus
+        read:      true,        // jamais compté dans les non-lus
       });
       conv.lastMessage = sysText.substring(0, 100);
       conv.updatedAt   = new Date();
