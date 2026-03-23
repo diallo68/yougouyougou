@@ -283,15 +283,15 @@ footer{background:transparent;margin-top:0}
 .btn-post-submit{width:100%;padding:13px;border-radius:6px;background:var(--or);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:background .12s;display:flex;align-items:center;justify-content:center;gap:6px;font-family:var(--font)}
 .btn-post-submit:hover{background:var(--or2)}
 .btn-post-submit:disabled{opacity:.6;cursor:not-allowed}
-.dash-layout{display:grid;grid-template-columns:200px 1fr;min-height:calc(100vh - 62px)}
-.dash-side{background:#fff;border-right:1px solid var(--br);padding:14px 10px;position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto}
+.dash-layout{display:block;min-height:calc(100vh - 62px)}
+.dash-side{display:none!important}
 .dash-avatar{width:46px;height:46px;border-radius:50%;background:var(--or);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;margin-bottom:8px}
 .dash-user-info{padding:10px 6px 14px;border-bottom:1px solid var(--br);margin-bottom:10px;text-align:center}
 .dash-user-name{font-size:13px;font-weight:700;color:var(--ink)}
 .dash-user-phone{font-size:11px;color:var(--muted);margin-top:2px}
 .dash-nav a{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;font-size:13px;font-weight:400;color:var(--muted);cursor:pointer;transition:all .12s;text-decoration:none;margin-bottom:2px}
 .dash-nav a:hover,.dash-nav a.active{background:var(--orl);color:var(--or);font-weight:600}
-.dash-main{padding:20px 24px;background:var(--bg)}
+.dash-main{padding:28px 20px;background:var(--bg);max-width:900px;margin:0 auto}
 .dash-section{display:none}.dash-section.active{display:block}
 .dash-section-title{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:14px}
 .stat-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
@@ -1166,7 +1166,7 @@ footer{background:transparent;margin-top:0}
 <!-- ══ PAGE DASHBOARD ══ -->
 <div id="page-dashboard" class="page">
   <div class="dash-layout">
-    <div class="dash-side">
+    <div class="dash-side" style="display:none" aria-hidden="true">
       <div class="dash-user-info">
         <div class="dash-avatar" id="d-av">MD</div>
         <div class="dash-user-name" id="d-nm">Utilisateur</div>
