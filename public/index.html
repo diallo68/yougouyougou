@@ -36,9 +36,7 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 .page{display:none}.page.active{display:block}
-/* Pages spéciales qui nécessitent display:flex plutôt que block */
-#page-messages.active{display:none!important}
-#page-favs.active{display:none!important}
+/* Pages spéciales qui nécessitent display:flex plutôt que block — voir règle complète plus bas */
 #app-wrapper{background:#fff;max-width:1280px;margin:0 auto;min-height:100vh;box-shadow:0 2px 12px rgba(0,0,0,.08)}
 
 /* ── DÉSACTIVÉS ── */
@@ -4605,10 +4603,9 @@ function openPageConv(convId, convData){
       }
       var html = '<div class="pmsg-security"><strong>Echangez en toute securite.</strong></div>';
       msgs.forEach(function(m){
-        // Message système (frais 3%) — ID neutre 000000000000000000000000
-        var isSystem = String(m.senderId) === '000000000000000000000000';
-        if(isSystem){
-          html += '<div class="pmsg-system-msg">🛡️ ' + m.text.replace(/^🛡️\s*/,'') + '</div>';
+        // Message système (frais 3%) — détecté via flag isSystem
+        if(m.isSystem){
+          html += '<div class="pmsg-system-msg">🛡️ ' + m.text + '</div>';
           return;
         }
         var isMine = String(m.senderId)===(user&&String(user._id||user.id));
@@ -5095,26 +5092,37 @@ async function contacterVendeur3pct(){
 
     var convId = data.conversationId;
 
-    // Naviguer vers messages
-    goTo('messages', {skipConvLoad: true});
-
+    // Enrichir convData avec les données de l'annonce courante
     var convData = {
-      _id: convId, adTitle: titre, sellerName: vendeur,
-      buyerId: String((DB.user()||{})._id || (DB.user()||{}).id || '')
+      _id:        convId,
+      adTitle:    titre,
+      sellerName: vendeur,
+      adPhoto:    (curAd.photos && curAd.photos[0]) || (curAd.ph && curAd.ph[0]) || '',
+      adPrice:    curAd.p || curAd.price || 0,
+      adId:       adId,
+      buyerId:    String((DB.user()||{})._id || (DB.user()||{}).id || '')
     };
 
-    fetch('/api/conversations',{headers:{'Authorization':'Bearer '+tok}})
-    .then(function(r){return r.json();})
-    .then(function(d){
-      var convs = d.conversations||[];
-      _pageConvs = convs;
-      renderPageConvList(convs);
-      updateMsgBadge(convs);
-      openPageConv(convId, convData);
-    })
-    .catch(function(){
-      openPageConv(convId, convData);
-    });
+    // Naviguer vers messages (skipConvLoad=true : on gère nous-mêmes le chargement)
+    goTo('messages', {skipConvLoad: true});
+
+    // Attendre que le DOM de la page messages soit visible, puis charger liste + ouvrir conv
+    setTimeout(function(){
+      fetch('/api/conversations',{headers:{'Authorization':'Bearer '+tok}})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var convs = d.conversations||[];
+        _pageConvs = convs;
+        renderPageConvList(convs);
+        updateMsgBadge(convs);
+        // Ouvrir directement la conversation après que la liste est rendue
+        openPageConv(convId, convData);
+      })
+      .catch(function(){
+        // Fallback : ouvrir quand même sans liste
+        openPageConv(convId, convData);
+      });
+    }, 80);
 
   } catch(err) {
     toast('❌ Erreur réseau — vérifiez votre connexion','err');
