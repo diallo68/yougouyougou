@@ -2343,8 +2343,6 @@ function goTo(page, opts){
   // ── Page Messages ──────────────────────────────────────────────
   if(page==='messages'){
     startMsgPolling();
-    // opts.skipConvLoad=true quand appelé depuis submitEnvoyerMessage
-    // (qui ouvre directement la conv — on ne recharge pas la liste pour ne pas écraser)
     if(opts.skipConvLoad) return;
     var token=localStorage.getItem('ygy_token');
     var list=document.getElementById('page-msg-list');
@@ -2358,10 +2356,16 @@ function goTo(page, opts){
     .then(function(data){
       var convs=data.conversations||data||[];
       _pageConvs=convs;
-      renderPageConvList(convs);
+      renderPageConvList(convs);   // gère aussi window._pendingOpenConvId
       updateMsgBadge(convs);
     }).catch(function(){
       if(list) list.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">❌ Erreur de chargement</div>';
+      // Même en cas d'erreur, ouvrir la conv en attente si elle existe
+      if(window._pendingOpenConvId){
+        var pid=window._pendingOpenConvId, pdat=window._pendingOpenConvData||{_id:pid};
+        window._pendingOpenConvId=null; window._pendingOpenConvData=null;
+        setTimeout(function(){ openPageConv(pid,pdat); },100);
+      }
     });
   }
   // ── Page Favoris ───────────────────────────────────────────────
@@ -4461,6 +4465,14 @@ function renderPageConvList(convs){
       '<div style="font-size:36px;margin-bottom:8px">💬</div>'+
       '<div style="font-size:13px;font-weight:600">Aucune conversation</div>'+
     '</div>';
+    // Ouvrir quand même si en attente (ex: nouvelle conv venant d'être créée)
+    if(window._pendingOpenConvId){
+      var pid  = window._pendingOpenConvId;
+      var pdat = window._pendingOpenConvData || {_id: pid};
+      window._pendingOpenConvId   = null;
+      window._pendingOpenConvData = null;
+      setTimeout(function(){ openPageConv(pid, pdat); }, 50);
+    }
     return;
   }
   list.innerHTML = convs.map(function(conv){
@@ -4471,7 +4483,7 @@ function renderPageConvList(convs){
     var time     = conv.updatedAt ? timeAgo(conv.updatedAt) : '';
     var cid      = conv._id||conv.id||'';
     var adTitle  = conv.adTitle||'';
-    return '<div class="pmsg-conv" onclick="openPageConvById(\''+cid+'\')">'+
+    return '<div class="pmsg-conv'+(window._pendingOpenConvId===cid?' active':'')+'" data-cid="'+cid+'" onclick="openPageConvById(\''+cid+'\')">'+
       '<div class="pmsg-conv-thumb">'+name.charAt(0).toUpperCase()+'</div>'+
       '<div class="pmsg-conv-info">'+
         '<div class="pmsg-conv-title">'+(adTitle||name)+'</div>'+
@@ -4484,6 +4496,15 @@ function renderPageConvList(convs){
       (isUnread?'<div class="pmsg-conv-unread">'+conv.unreadCount+'</div>':'')+
     '</div>';
   }).join('');
+
+  // ── Ouvrir automatiquement la conv en attente après navigation ──
+  if(window._pendingOpenConvId){
+    var pid  = window._pendingOpenConvId;
+    var pdat = window._pendingOpenConvData || {_id: pid};
+    window._pendingOpenConvId   = null;
+    window._pendingOpenConvData = null;
+    setTimeout(function(){ openPageConv(pid, pdat); }, 50);
+  }
 }
 
 var _pageConvId = null;
@@ -4507,8 +4528,20 @@ function filterConvs(type, btn){
 function openPageConv(convId, convData){
   _pageConvId = convId;
   var center = document.getElementById('pmsg-center');
+
+  // pmsg-center pas encore rendu → attendre jusqu'à 2s (20 × 100ms)
+  if(!center){
+    var _attempts = 0;
+    var _wait = setInterval(function(){
+      center = document.getElementById('pmsg-center');
+      _attempts++;
+      if(center){ clearInterval(_wait); openPageConv(convId, convData); }
+      else if(_attempts > 20){ clearInterval(_wait); console.warn('[YGY] pmsg-center introuvable'); }
+    }, 100);
+    return;
+  }
+
   var panel  = document.getElementById('page-msg-panel');
-  if(!center) return;
 
   var user      = DB.user();
   var conv      = convData || {};
@@ -5058,19 +5091,17 @@ async function contacterVendeur3pct(){
 
   if(!adId){ toast('ID annonce manquant','err'); return; }
 
-  // Empêcher d'écrire à soi-même
   if(sellerId && String(sellerId) === String(user._id || user.id)){
     toast('Vous ne pouvez pas vous contacter vous-même','warn');
     return;
   }
 
-  // Désactiver le bouton pendant le traitement
   var btn = document.getElementById('btn-contacter-vendeur');
   if(btn){ btn.disabled = true; btn.innerHTML = '⏳ Connexion...'; }
 
   var tok = localStorage.getItem('ygy_token');
   try {
-    // Créer ou récupérer la conversation (le message système 3% est injecté côté serveur)
+    // 1) Créer/récupérer la conversation côté serveur
     var res = await fetch('/api/conversations', {
       method: 'POST',
       headers: {'Content-Type':'application/json','Authorization':'Bearer '+tok},
@@ -5090,9 +5121,9 @@ async function contacterVendeur3pct(){
       return;
     }
 
-    var convId = data.conversationId;
+    var convId = String(data.conversationId);
 
-    // Enrichir convData avec les données de l'annonce courante
+    // 2) Données enrichies de la conv pour affichage immédiat
     var convData = {
       _id:        convId,
       adTitle:    titre,
@@ -5100,29 +5131,14 @@ async function contacterVendeur3pct(){
       adPhoto:    (curAd.photos && curAd.photos[0]) || (curAd.ph && curAd.ph[0]) || '',
       adPrice:    curAd.p || curAd.price || 0,
       adId:       adId,
-      buyerId:    String((DB.user()||{})._id || (DB.user()||{}).id || '')
+      buyerId:    String(user._id || user.id || '')
     };
 
-    // Naviguer vers messages (skipConvLoad=true : on gère nous-mêmes le chargement)
-    goTo('messages', {skipConvLoad: true});
-
-    // Attendre que le DOM de la page messages soit visible, puis charger liste + ouvrir conv
-    setTimeout(function(){
-      fetch('/api/conversations',{headers:{'Authorization':'Bearer '+tok}})
-      .then(function(r){return r.json();})
-      .then(function(d){
-        var convs = d.conversations||[];
-        _pageConvs = convs;
-        renderPageConvList(convs);
-        updateMsgBadge(convs);
-        // Ouvrir directement la conversation après que la liste est rendue
-        openPageConv(convId, convData);
-      })
-      .catch(function(){
-        // Fallback : ouvrir quand même sans liste
-        openPageConv(convId, convData);
-      });
-    }, 80);
+    // 3) Naviguer vers la page messages — chargement NORMAL (pas skipConvLoad)
+    //    goTo va charger la liste, puis on accroche un callback pour ouvrir la conv
+    window._pendingOpenConvId   = convId;
+    window._pendingOpenConvData = convData;
+    goTo('messages');
 
   } catch(err) {
     toast('❌ Erreur réseau — vérifiez votre connexion','err');
@@ -5131,7 +5147,7 @@ async function contacterVendeur3pct(){
   }
 }
 
-// Alias pour compatibilité (ancienne fonction supprimée)
+// Alias pour compatibilité
 function contactVendeur(){ contacterVendeur3pct(); }
 
 
