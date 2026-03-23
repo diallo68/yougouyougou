@@ -653,9 +653,6 @@ footer{background:transparent;margin-top:0}
   .seller-body{grid-template-columns:1fr}
   .seller-hero-actions{flex-direction:row}
 }
-
-.om-pin{width:52px;height:52px;border:2px solid var(--br);border-radius:10px;text-align:center;font-size:22px;font-family:inherit;outline:none;transition:border-color .2s;background:#fff}
-.om-pin:focus{border-color:var(--or)}
 </style>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#FF5C00">
@@ -1431,102 +1428,57 @@ footer{background:transparent;margin-top:0}
 
 <!-- Commission -->
 <div class="overlay" id="overlay-commission" onclick="maybeClose(event,'commission')">
-  <div class="modal" style="max-width:440px">
+  <div class="modal">
     <div class="modal-head">
-      <div class="modal-title">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Orange_logo.svg/200px-Orange_logo.svg.png" style="height:20px;vertical-align:middle;margin-right:8px" onerror="this.style.display='none'">
-        Payer avec Orange Money
-      </div>
+      <div class="modal-title">📞 Contacter le vendeur</div>
       <button class="modal-close" onclick="closeModal('commission')">✕</button>
     </div>
     <div class="modal-body">
-
-      <!-- Formulaire paiement -->
-      <div id="com-form">
-        <!-- Résumé annonce -->
-        <div id="com-ad-summary" style="display:flex;align-items:center;gap:12px;background:#f9f9f9;border-radius:10px;padding:12px;margin-bottom:16px">
-          <div id="com-ad-thumb" style="width:56px;height:56px;border-radius:8px;background:var(--brl);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">📦</div>
-          <div style="flex:1;min-width:0">
-            <div id="com-ad-title" style="font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Annonce</div>
-            <div id="com-ad-price" style="font-size:15px;font-weight:900;color:var(--or);margin-top:2px">0 GNF</div>
-          </div>
+      <div class="m-body">
+        <div style="background:var(--brl);border-radius:10px;padding:14px;margin-bottom:14px;font-size:13px">
+          <div style="font-weight:800;margin-bottom:6px">💡 Comment ça marche ?</div>
+          Un petit frais de mise en relation vous permet de voir le numéro du vendeur. Paiement via Orange Money.
         </div>
-
-        <!-- Récapitulatif frais -->
-        <div style="border:1.5px solid var(--br);border-radius:10px;overflow:hidden;margin-bottom:16px">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--brl)">
-            <span style="font-size:13px;color:var(--muted)">Frais de mise en relation</span>
+        <div style="background:var(--brl);border-radius:10px;padding:14px;margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px">
+            <span style="color:var(--muted);font-weight:600">Prix de l'article</span>
+            <strong id="com-price">0 GNF</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px">
+            <span style="color:var(--muted);font-weight:600">Commission (5%)</span>
             <strong id="com-fee" style="color:var(--or)">0 GNF</strong>
           </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#FFF3EE">
-            <span style="font-size:14px;font-weight:800">Total à payer</span>
-            <strong id="com-total" style="font-size:16px;color:var(--or)">0 GNF</strong>
+          <div style="display:flex;justify-content:space-between;font-size:14px;padding-top:8px;border-top:1px solid var(--br);font-weight:800">
+            <span>Total à payer</span>
+            <strong id="com-total" style="color:var(--or)">0 GNF</strong>
           </div>
         </div>
-
-        <!-- Numéro Orange Money -->
-        <div class="fg" style="margin-bottom:12px">
-          <label style="font-size:13px;font-weight:700;margin-bottom:6px;display:block">
-            📱 Numéro Orange Money
-          </label>
-          <div style="display:flex;align-items:center;border:1.5px solid var(--br);border-radius:8px;overflow:hidden;transition:border-color .2s" id="com-phone-wrap">
-            <span style="padding:10px 12px;background:#f5f5f5;font-size:13px;font-weight:700;border-right:1px solid var(--br);color:var(--ink);white-space:nowrap">🇬🇳 +224</span>
-            <input type="tel" id="com-phone" placeholder="620 00 00 00" maxlength="9"
-              style="flex:1;border:none;padding:10px 12px;font-size:14px;font-family:inherit;outline:none;background:#fff"
-              oninput="this.value=this.value.replace(/[^0-9]/g,'');document.getElementById('com-phone-wrap').style.borderColor=this.value.length>=8?'var(--or)':'var(--br)'"
-            >
+        <div class="fg" style="margin-top:14px">
+          <label>Votre numéro Orange Money</label>
+          <div class="ph-row"><span class="ph-pfx">🇬🇳 +224</span><input type="tel" id="com-phone" placeholder="620 00 00 00" maxlength="9"></div>
+        </div>
+        <div class="fg">
+          <label>Code PIN</label>
+          <div class="pin-row">
+            <input class="pin-box" type="password" maxlength="1" id="cp1" oninput="movPin(this,'cp2')">
+            <input class="pin-box" type="password" maxlength="1" id="cp2" oninput="movPin(this,'cp3')">
+            <input class="pin-box" type="password" maxlength="1" id="cp3" oninput="movPin(this,'cp4')">
+            <input class="pin-box" type="password" maxlength="1" id="cp4">
           </div>
         </div>
-
-        <!-- Code PIN -->
-        <div class="fg" style="margin-bottom:20px">
-          <label style="font-size:13px;font-weight:700;margin-bottom:6px;display:block">
-            🔑 Code PIN Orange Money
-          </label>
-          <div style="display:flex;gap:10px;justify-content:center">
-            <input class="om-pin" type="password" maxlength="1" id="cp1" oninput="movPin(this,'cp2')" inputmode="numeric">
-            <input class="om-pin" type="password" maxlength="1" id="cp2" oninput="movPin(this,'cp3')" inputmode="numeric">
-            <input class="om-pin" type="password" maxlength="1" id="cp3" oninput="movPin(this,'cp4')" inputmode="numeric">
-            <input class="om-pin" type="password" maxlength="1" id="cp4" oninput="movPin(this,null)" inputmode="numeric">
-          </div>
-        </div>
-
-        <!-- Bouton payer -->
-        <button class="btn btn-or btn-full" id="com-pay-btn" onclick="payCommission()" style="border-radius:10px;font-size:15px;padding:14px">
-          🟠 Payer et voir le numéro
-        </button>
-
-        <!-- Sécurité -->
-        <div style="margin-top:12px;text-align:center;font-size:11px;color:var(--muted);line-height:1.6">
-          🔒 Paiement sécurisé · Votre PIN n'est jamais stocké<br>
-          En cas de problème : <strong>support.yougouyougou@gmail.com</strong>
-        </div>
+        <button class="btn btn-or btn-full" style="border-radius:10px" onclick="payCommission()">🟠 Payer et voir le numéro</button>
+        <button class="btn btn-ghost btn-full" style="border-radius:10px;margin-top:8px" onclick="closeModal('commission')">Annuler</button>
       </div>
-
-      <!-- Succès -->
-      <div id="com-success" style="display:none;text-align:center;padding:10px 0 20px">
-        <div style="width:64px;height:64px;background:#D1FAE5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px">✅</div>
-        <div style="font-size:18px;font-weight:900;color:var(--ink);margin-bottom:6px">Paiement réussi !</div>
-        <div style="font-size:13px;color:var(--muted);margin-bottom:20px">Le numéro du vendeur est révélé</div>
-        <div style="background:#FFF3EE;border:2px solid var(--or);border-radius:12px;padding:16px;margin-bottom:20px">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">Numéro du vendeur</div>
-          <div id="com-revealed-phone" style="font-size:26px;font-weight:900;color:var(--or);letter-spacing:2px">—</div>
-        </div>
-        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-          <button class="btn btn-or" style="border-radius:9px" onclick="copyPhone()">
-            📋 Copier le numéro
-          </button>
-          <button class="btn btn-ghost" style="border-radius:9px" onclick="openWhatsapp()">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" style="width:16px;height:16px;vertical-align:middle"> WhatsApp
-          </button>
-        </div>
-        <div style="margin-top:14px;font-size:12px;color:var(--muted)">
-          Réf: <span id="com-ref-display" style="font-family:monospace">—</span>
-        </div>
+      <div id="com-success" style="display:none;text-align:center;padding:20px">
+        <div style="font-size:40px;margin-bottom:10px">✅</div>
+        <div style="font-size:15px;font-weight:800;margin-bottom:6px">Numéro révélé !</div>
+        <div style="font-size:22px;font-weight:800;color:var(--or);letter-spacing:1px;margin:10px 0" id="com-revealed-phone">—</div>
+        <button class="btn btn-or" style="border-radius:9px" onclick="copyPhone()">📋 Copier le numéro</button>
+        <button class="btn btn-ghost" style="border-radius:9px;margin-top:8px" onclick="closeModal('commission')">Fermer</button>
       </div>
-
     </div>
   </div>
+</div>
 
 <!-- Éditer profil -->
 <div class="overlay" id="overlay-editprofile" onclick="maybeClose(event,'editprofile')">
@@ -3943,41 +3895,20 @@ function envoyerMessage(){
 function openCommission(){
   if(!curAd){return;}
   var price = curAd.p || curAd.price || 0;
-  var title = curAd.t || curAd.title || 'Annonce';
-  var photo = (curAd.photos&&curAd.photos[0]) || (curAd.ph&&curAd.ph[0]) || '';
-  var fee   = Math.max(1000, Math.round(price * 0.05));
-
-  // Remplir le résumé annonce
-  var thumb = document.getElementById('com-ad-thumb');
-  if(thumb){
-    if(photo) thumb.innerHTML = '<img src="'+photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:8px">';
-    else thumb.textContent = '📦';
-  }
-  var t = document.getElementById('com-ad-title');
-  if(t) t.textContent = title;
-  var p = document.getElementById('com-ad-price');
-  if(p) p.textContent = price.toLocaleString('fr-FR')+' GNF';
-
-  // Frais
-  var elFee = document.getElementById('com-fee');
-  if(elFee) elFee.textContent = fee.toLocaleString('fr-FR')+' GNF';
+  var fee = Math.max(1000, Math.round(price * 0.05)); // 5% min 1000 GNF
+  var elPrice = document.getElementById('com-price');
+  var elFee   = document.getElementById('com-fee');
   var elTotal = document.getElementById('com-total');
+  if(elPrice) elPrice.textContent = price.toLocaleString('fr-FR')+' GNF';
+  if(elFee)   elFee.textContent   = fee.toLocaleString('fr-FR')+' GNF';
   if(elTotal) elTotal.textContent = fee.toLocaleString('fr-FR')+' GNF';
-
+  // stocker pour payCommission
   window._commFee = fee;
-
-  // Reset formulaire
-  var formEl = document.getElementById('com-form');
-  var succEl = document.getElementById('com-success');
-  if(formEl) formEl.style.display = '';
-  if(succEl) succEl.style.display = 'none';
-  var phoneEl = document.getElementById('com-phone');
-  if(phoneEl) phoneEl.value = '';
-  ['cp1','cp2','cp3','cp4'].forEach(function(id){
-    var e = document.getElementById(id); if(e) e.value = '';
-  });
-  var btn = document.getElementById('com-pay-btn');
-  if(btn){ btn.disabled=false; btn.textContent='🟠 Payer et voir le numéro'; }
+  document.getElementById('com-success').style.display='none';
+  document.getElementById('com-phone').value='';
+  ['cp1','cp2','cp3','cp4'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+  // Reaffiche le formulaire
+  document.querySelector('#overlay-commission .m-body').style.display='';
   openModal('commission');
 }
 function payCommission(){
@@ -4007,17 +3938,13 @@ function payCommission(){
     if(btn){ btn.disabled=false; btn.textContent='🟠 Payer et voir le numéro'; }
     if(data.error){ toast('❌ '+data.error,'err'); return; }
     // Afficher le numéro révélé
-    var formEl = document.getElementById('com-form');
+    var mb = document.querySelector('#overlay-commission .m-body');
     var sc = document.getElementById('com-success');
-    if(formEl) formEl.style.display='none';
+    if(mb) mb.style.display='none';
     if(sc){
       sc.style.display='block';
       var ph = document.getElementById('com-revealed-phone');
-      var revPhone = data.sellerPhone || ('+224'+phone);
-      if(ph) ph.textContent = revPhone;
-      window._revealedPhone = revPhone;
-      var refEl = document.getElementById('com-ref-display');
-      if(refEl) refEl.textContent = data.reference || '—';
+      if(ph) ph.textContent = data.sellerPhone || ('+224 '+phone);
     }
     // Sauvegarder paiement local
     DB._d.payments = DB._d.payments || [];
@@ -4048,14 +3975,13 @@ function payCommission(){
   });
 }
 function copyPhone(){
-  var num = window._revealedPhone || document.getElementById('com-revealed-phone').textContent || '';
-  navigator.clipboard.writeText(num).then(function(){toast('📋 Numéro copié !','ok');}).catch(function(){toast('📋 '+num,'ok');});
-}
-function openWhatsapp(){
-  var num = (window._revealedPhone||'').replace(/[^0-9]/g,'');
-  if(num) window.open('https://wa.me/'+num,'_blank');
+  var txt=document.getElementById('com-revealed-phone').textContent;
+  navigator.clipboard.writeText(txt).then(function(){toast('📋 Numéro copié !','ok');}).catch(function(){toast('📋 '+txt);});
 }
 
+// ══════════════════════════════════════════
+//  APP MOBILE QR
+// ══════════════════════════════════════════
 function showAppQR(platform){
   var zone=document.getElementById('app-qr-zone');
   var label=document.getElementById('app-qr-label');
