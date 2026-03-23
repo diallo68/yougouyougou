@@ -4638,25 +4638,37 @@ function openPageConv(convId, convData){
       var msgs = data.messages||[];
       var container = document.getElementById('page-msg-bubbles');
       if(!container) return;
-      if(!msgs.length){
-        container.innerHTML =
-          '<div class="pmsg-security"><strong>🛡️ Conseils sécurité</strong> — Vérifiez avant paiement.</div>'+
-          '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Démarrez la conversation 👋</div>';
-        return;
-      }
+
       var html = '<div class="pmsg-security"><strong>Restez sur la messagerie YouGouYou.</strong></div>';
-      msgs.forEach(function(m){
-        if(m.isSystem){
-          html += '<div class="pmsg-system-msg">🛡️ '+m.text+'</div>';
-          return;
-        }
-        var isMine = String(m.senderId)===(user&&String(user._id||user.id));
-        var t = m.createdAt?new Date(m.createdAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
-        html += '<div class="pmsg-bubble-wrap '+(isMine?'mine':'theirs')+'">'+
-          '<div class="pmsg-bubble '+(isMine?'mine':'theirs')+'">'+m.text+'</div>'+
-          '<div class="pmsg-bubble-time">'+t+(isMine?' · ✓✓':'')+'</div>'+
-        '</div>';
+
+      // A : Afficher les messages système (isSystem=true) comme notification
+      var systemMsgs  = msgs.filter(function(m){ return m.isSystem; });
+      var userMsgs    = msgs.filter(function(m){ return !m.isSystem; });
+
+      // Afficher d'abord les messages système (ex: frais 3%)
+      systemMsgs.forEach(function(m){
+        html += '<div class="pmsg-system-msg">🛡️ '+m.text+'</div>';
       });
+
+      // C : Si aucun message utilisateur → placeholder engageant
+      if(!userMsgs.length){
+        html += '<div style="text-align:center;color:var(--muted);font-size:13px;padding:24px 16px;line-height:1.7">'+
+          '<div style="font-size:32px;margin-bottom:8px">👋</div>'+
+          '<div style="font-weight:700;color:var(--ink);margin-bottom:4px">Commencez la discussion !</div>'+
+          '<div>Envoyez un message au vendeur pour en savoir plus sur cette annonce.</div>'+
+        '</div>';
+      } else {
+        // Afficher les messages utilisateur normaux
+        userMsgs.forEach(function(m){
+          var isMine = String(m.senderId)===(user&&String(user._id||user.id));
+          var t = m.createdAt?new Date(m.createdAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
+          html += '<div class="pmsg-bubble-wrap '+(isMine?'mine':'theirs')+'">'+
+            '<div class="pmsg-bubble '+(isMine?'mine':'theirs')+'">'+m.text+'</div>'+
+            '<div class="pmsg-bubble-time">'+t+(isMine?' · ✓✓':'')+'</div>'+
+          '</div>';
+        });
+      }
+
       container.innerHTML = html;
       container.scrollTop = container.scrollHeight;
     }).catch(function(){});
@@ -5108,7 +5120,7 @@ async function contacterVendeur3pct(){
 
     var convId = String(data.conversationId);
 
-    // 2) Données enrichies de la conv pour affichage immédiat
+    // Données enrichies pour affichage immédiat
     var convData = {
       _id:        convId,
       adTitle:    titre,
@@ -5119,11 +5131,29 @@ async function contacterVendeur3pct(){
       buyerId:    String(user._id || user.id || '')
     };
 
-    // 3) Naviguer vers la page messages — chargement NORMAL (pas skipConvLoad)
-    //    goTo va charger la liste, puis on accroche un callback pour ouvrir la conv
-    window._pendingOpenConvId   = convId;
-    window._pendingOpenConvData = convData;
+    // Naviguer vers la page messages
     goTo('messages');
+
+    // B+D : Attendre que la liste soit chargée (goTo lance le fetch),
+    // puis ouvrir la conv — on poll page-msg-thread pour s'assurer que le DOM est prêt
+    var _maxWait = 30; // 3 secondes max (30 × 100ms)
+    var _tries   = 0;
+    var _poll = setInterval(function(){
+      _tries++;
+      var thread = document.getElementById('page-msg-thread');
+      // Attendre que page-msg-thread existe ET que le fetch conversations soit terminé
+      // (on détecte ça par la présence de page-msg-list avec du contenu autre que "chargement")
+      var list = document.getElementById('page-msg-list');
+      var listReady = list && !list.innerHTML.includes('⏳');
+      if(thread && listReady){
+        clearInterval(_poll);
+        openPageConv(convId, convData);
+      } else if(_tries >= _maxWait){
+        clearInterval(_poll);
+        // Fallback : ouvrir quand même
+        if(thread) openPageConv(convId, convData);
+      }
+    }, 100);
 
   } catch(err) {
     toast('❌ Erreur réseau — vérifiez votre connexion','err');
