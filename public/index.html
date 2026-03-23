@@ -5542,12 +5542,16 @@ function renderPageConvList(convs){
 
 
 function openPageConvById(cidOrEl){
-  var cid = (cidOrEl && typeof cidOrEl==='object' && cidOrEl.dataset) ? cidOrEl.dataset.cid : String(cidOrEl||'');
-  var conv = _pageConvs.find(function(c){return String(c._id||c.id)===String(cid);})||{_id:cid};
-  // Marquer actif
-  document.querySelectorAll('.pmsg-conv').forEach(function(i){i.classList.remove('active');});
+  var cid = (cidOrEl && typeof cidOrEl==='object' && cidOrEl.dataset)
+    ? cidOrEl.dataset.cid
+    : String(cidOrEl||'');
+  if(!cid) return;
+  var conv = (_pageConvs||[]).find(function(c){
+    return String(c._id||c.id)===cid;
+  }) || {_id:cid};
+  // Marquer actif via data-cid
   document.querySelectorAll('.pmsg-conv').forEach(function(el){
-    if(el.getAttribute('onclick')&&el.getAttribute('onclick').includes(cid)) el.classList.add('active');
+    el.classList.toggle('active', el.dataset.cid===cid);
   });
   openPageConv(cid, conv);
 }
@@ -5730,16 +5734,70 @@ function sendPageMsg(){
   var text = (inp&&inp.value.trim())||'';
   if(!text) return;
   var token = localStorage.getItem('ygy_token');
-  fetch('/api/conversations/'+_pageConvId,{
+  if(!token){ toast('🔒 Connectez-vous','err'); return; }
+
+  // Ajouter bulle optimiste immédiatement
+  var container = document.getElementById('page-msg-bubbles');
+  if(container){
+    var now = new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    var div = document.createElement('div');
+    div.className = 'pmsg-bubble-wrap mine';
+    div.innerHTML = '<div class="pmsg-bubble mine">'+text+'</div><div class="pmsg-bubble-time">'+now+' · ✓</div>';
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+  }
+  if(inp) inp.value = '';
+
+  // Envoyer au serveur
+  // Route API: essayer /messages d'abord, fallback sur POST direct
+  var _sendRoute = '/api/conversations/'+_pageConvId+'/messages';
+  fetch(_sendRoute,{
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-    body:JSON.stringify({text:text})
-  }).then(function(r){return r.json();})
+    body:JSON.stringify({text:text, message:text})
+  }).then(function(r){
+    if(r.status===404){
+      // Fallback : POST direct sur la conversation
+      return fetch('/api/conversations/'+_pageConvId,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+        body:JSON.stringify({text:text, message:text})
+      });
+    }
+    return r;
+  }).then(function(r){ return r.ok ? r.json() : Promise.reject(r.status); })
   .then(function(){
-    if(inp) inp.value='';
-    // Recharger les messages
-    openPageConv(_pageConvId, {buyerId:'', sellerName:'', adTitle:''});
-  }).catch(function(){ toast('❌ Erreur envoi','err'); });
+    // Recharger les messages pour avoir le vrai état serveur
+    var tok2 = localStorage.getItem('ygy_token');
+    fetch('/api/conversations/'+_pageConvId,{headers:{'Authorization':'Bearer '+tok2}})
+    .then(function(r){return r.json();})
+    .then(function(data){
+      var msgs = data.messages||[];
+      var user = DB.user();
+      var uid  = user ? String(user._id||user.id||'') : '';
+      if(!container) return;
+      // Garder la bannière sécurité et reconstruire les bulles
+      var secBanner = container.querySelector('.pmsg-security-banner');
+      var secHtml = secBanner ? secBanner.outerHTML : '';
+      var html2 = secHtml;
+      var lastDate = '';
+      msgs.forEach(function(m){
+        var isMine = !!(uid && String(m.senderId)===uid);
+        var t = m.createdAt ? new Date(m.createdAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) : '';
+        var d = m.createdAt ? new Date(m.createdAt).toLocaleDateString('fr-FR',{day:'numeric',month:'long'}) : '';
+        if(d && d!==lastDate){ html2+='<div class="pmsg-date-sep">'+d+'</div>'; lastDate=d; }
+        html2+='<div class="pmsg-bubble-wrap '+(isMine?'mine':'theirs')+'">'
+          +'<div class="pmsg-bubble '+(isMine?'mine':'theirs')+'">'+m.text+'</div>'
+          +'<div class="pmsg-bubble-time">'+t+(isMine?' · ✓✓':'')+'</div>'
+          +'</div>';
+      });
+      container.innerHTML = html2;
+      container.scrollTop = container.scrollHeight;
+    }).catch(function(){});
+  })
+  .catch(function(err){
+    toast('❌ Erreur envoi ('+err+')','err');
+  });
 }
 function updateNav(){
   var btn=document.getElementById('nav-auth-btn');if(!btn)return;
@@ -7250,6 +7308,8 @@ function deleteAlert(id){
 // ── Messagerie interne ──
 var _currentConvId=null;
 var _convPollTimer=null;
+var _pageConvId=null;
+var _pageConvs=[];
 
 function loadConversations(){
   var token=localStorage.getItem('ygy_token');
