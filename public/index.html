@@ -470,12 +470,13 @@ footer{background:transparent;margin-top:0}
   top: 104px;
   left: 50%;
   transform: translateX(-50%);
-  width: 100%;
-  max-width: 1200px;
+  width: min(100%, 1100px);
+  max-width: 1100px;
   height: calc(100vh - 104px);
   background: var(--msg-bg);
   z-index: 200;
   overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,.08);
 }
 
 .pmsg-wrap {
