@@ -2357,16 +2357,18 @@ function goTo(page, opts){
       return;
     }
     if(list) list.innerHTML='<div style="padding:40px 20px;text-align:center;color:var(--muted)"><div style="font-size:40px;margin-bottom:10px">💬</div><div style="font-size:13px">Chargement...</div></div>';
+    window._convListLoaded = false;
     fetch('/api/conversations',{headers:{'Authorization':'Bearer '+token}})
     .then(function(r){return r.json();})
     .then(function(data){
       var convs=data.conversations||data||[];
       _pageConvs=convs;
-      renderPageConvList(convs);   // gère aussi window._pendingOpenConvId
+      renderPageConvList(convs);
       updateMsgBadge(convs);
+      window._convListLoaded = true;
     }).catch(function(){
+      window._convListLoaded = true;
       if(list) list.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">❌ Erreur de chargement</div>';
-      // Même en cas d'erreur, ouvrir la conv en attente si elle existe
       if(window._pendingOpenConvId){
         var pid=window._pendingOpenConvId, pdat=window._pendingOpenConvData||{_id:pid};
         window._pendingOpenConvId=null; window._pendingOpenConvData=null;
@@ -4465,6 +4467,7 @@ function navGoMessages(){
   var token = localStorage.getItem('ygy_token');
   var list = document.getElementById('page-msg-list');
   if(list) list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">⏳ Chargement...</div>';
+  window._convListLoaded = false;
   goTo('messages');
   if(token){
     fetch('/api/conversations',{headers:{'Authorization':'Bearer '+token}})
@@ -4474,7 +4477,9 @@ function navGoMessages(){
       _pageConvs = convs;
       renderPageConvList(convs);
       updateMsgBadge(convs);
+      window._convListLoaded = true;
     }).catch(function(){
+      window._convListLoaded = true;
       if(list) list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">❌ Erreur de chargement</div>';
     });
   }
@@ -5132,26 +5137,22 @@ async function contacterVendeur3pct(){
     };
 
     // Naviguer vers la page messages
+    window._convListLoaded = false;
     goTo('messages');
 
-    // B+D : Attendre que la liste soit chargée (goTo lance le fetch),
-    // puis ouvrir la conv — on poll page-msg-thread pour s'assurer que le DOM est prêt
-    var _maxWait = 30; // 3 secondes max (30 × 100ms)
+    // Attendre que le fetch de la liste soit terminé (_convListLoaded=true),
+    // puis ouvrir la conversation directement
+    var _maxWait = 50; // 5 secondes max
     var _tries   = 0;
     var _poll = setInterval(function(){
       _tries++;
-      var thread = document.getElementById('page-msg-thread');
-      // Attendre que page-msg-thread existe ET que le fetch conversations soit terminé
-      // (on détecte ça par la présence de page-msg-list avec du contenu autre que "chargement")
-      var list = document.getElementById('page-msg-list');
-      var listReady = list && !list.innerHTML.includes('⏳');
-      if(thread && listReady){
+      if(window._convListLoaded){
         clearInterval(_poll);
         openPageConv(convId, convData);
       } else if(_tries >= _maxWait){
         clearInterval(_poll);
-        // Fallback : ouvrir quand même
-        if(thread) openPageConv(convId, convData);
+        // Fallback : ouvrir quand même après timeout
+        openPageConv(convId, convData);
       }
     }, 100);
 
