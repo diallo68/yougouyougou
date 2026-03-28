@@ -85,7 +85,7 @@ nav{background:#fff;border-bottom:1px solid var(--br);position:sticky;top:0;z-in
 .nav-sc-btn:hover{background:var(--or2)}
 .nav-right{margin-left:auto;display:flex;align-items:center;gap:2px;flex-shrink:0}
 .nav-cats{background:#fff;border-top:1px solid var(--br);position:relative;z-index:300;overflow:visible}
-.nav-cats-in{max-width:1100px;margin:0 auto;padding:0 16px;display:flex;align-items:stretch;overflow-x:visible;}
+.nav-cats-in{max-width:1100px;margin:0 auto;padding:0 16px;display:flex;align-items:stretch;overflow-x:auto;overflow-y:visible;scrollbar-width:none;-ms-overflow-style:none;}
 .nav-cats-in::-webkit-scrollbar{display:none}
 .ncat{position:relative;display:inline-flex;align-items:center;gap:4px;padding:7px 9px;cursor:pointer;border-bottom:2px solid transparent;font-size:12px;font-weight:500;color:var(--muted);white-space:nowrap;flex-shrink:0;transition:color .12s,border-color .12s}
 .ncat:hover,.ncat.active{color:var(--or);border-bottom-color:var(--or)}
@@ -1239,7 +1239,7 @@ footer{background:transparent;margin-top:0}
 
 /* ── Page Pro ── */
 #page-pro.active{display:block!important}
-.pro-page-wrap{max-width:900px;margin:0 auto;padding:32px 20px 60px}
+.pro-page-wrap{max-width:1100px;margin:0 auto;padding:28px 20px 60px}
 .pro-hero{
   text-align:center;padding:48px 20px 40px;
   background:linear-gradient(135deg,#1A1A2E,#2D1B0E);
@@ -1257,14 +1257,51 @@ footer{background:transparent;margin-top:0}
 }
 .pro-hero-title{font-size:32px;font-weight:900;color:#fff;margin-bottom:8px;letter-spacing:-.5px}
 .pro-hero-title span{color:var(--or)}
-.pro-hero-sub{font-size:15px;color:rgba(255,255,255,.6);max-width:480px;margin:0 auto 28px;line-height:1.6}
-.pro-hero-price{
-  display:inline-block;
-  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
-  border-radius:14px;padding:14px 28px;
+.pro-hero-sub{font-size:15px;color:rgba(255,255,255,.6);max-width:480px;margin:0 auto;line-height:1.6}
+
+/* Plans tarifaires */
+.pro-plans-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:16px;margin-bottom:32px;
 }
-.pro-hero-price-amt{font-size:36px;font-weight:900;color:#fff}
-.pro-hero-price-unit{font-size:13px;color:rgba(255,255,255,.5)}
+@media(max-width:768px){ .pro-plans-grid{grid-template-columns:1fr} }
+
+.pro-plan-card{
+  background:#fff;border:2px solid #EAECF0;border-radius:16px;
+  padding:24px 20px;position:relative;
+  transition:box-shadow .2s,transform .2s;
+  display:flex;flex-direction:column;
+}
+.pro-plan-card:hover{box-shadow:0 8px 24px rgba(0,0,0,.10);transform:translateY(-3px)}
+.pro-plan-popular{border-color:var(--or);box-shadow:0 4px 16px rgba(255,92,0,.20)}
+.pro-plan-popular-badge{
+  position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+  background:var(--or);color:#fff;font-size:11px;font-weight:800;
+  padding:4px 14px;border-radius:20px;white-space:nowrap;
+}
+.pro-plan-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.pro-plan-name{font-size:18px;font-weight:900;color:var(--ink)}
+.pro-plan-badge{
+  background:rgba(255,92,0,.1);color:var(--or);
+  font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;
+}
+.pro-plan-price{font-size:28px;font-weight:900;color:var(--ink);letter-spacing:-.5px}
+.pro-plan-currency{font-size:16px;font-weight:700}
+.pro-plan-period{font-size:12px;color:var(--muted);margin-bottom:20px;margin-top:2px}
+.pro-plan-features{
+  list-style:none;padding:0;margin:0 0 20px;
+  display:flex;flex-direction:column;gap:8px;flex:1;
+}
+.pro-plan-features li{font-size:12.5px;color:var(--ink);line-height:1.4}
+.pro-plan-features li.muted{color:var(--muted)}
+.pro-plan-btn{
+  width:100%;background:var(--or);color:#fff;border:none;
+  border-radius:10px;padding:12px;font-size:13px;font-weight:800;
+  cursor:pointer;font-family:inherit;transition:all .15s;
+  box-shadow:0 3px 10px rgba(255,92,0,.25);
+}
+.pro-plan-btn:hover{background:var(--or2);transform:translateY(-1px)}
+.pro-plan-note{font-size:11px;color:var(--muted);text-align:center;margin-top:8px}
 
 .pro-features-grid{
   display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
@@ -1279,22 +1316,6 @@ footer{background:transparent;margin-top:0}
 .pro-feature-title{font-size:14px;font-weight:800;color:var(--ink);margin-bottom:4px}
 .pro-feature-desc{font-size:12px;color:var(--muted);line-height:1.6}
 
-.pro-cta-box{
-  background:linear-gradient(135deg,#FFF3EE,#FFE4D0);
-  border:1.5px solid var(--orm);border-radius:16px;
-  padding:32px;text-align:center;
-}
-.pro-cta-title{font-size:22px;font-weight:900;color:var(--ink);margin-bottom:8px}
-.pro-cta-sub{font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.6}
-.pro-cta-btn{
-  background:var(--or);color:#fff;border:none;
-  border-radius:12px;padding:16px 40px;
-  font-size:16px;font-weight:800;cursor:pointer;
-  font-family:inherit;box-shadow:0 4px 18px rgba(255,92,0,.35);
-  transition:all .15s;
-}
-.pro-cta-btn:hover{background:var(--or2);transform:translateY(-2px)}
-
 .pro-compare-table{
   width:100%;border-collapse:collapse;margin-bottom:32px;
   border-radius:14px;overflow:hidden;
@@ -1302,16 +1323,15 @@ footer{background:transparent;margin-top:0}
 }
 .pro-compare-table th{
   background:var(--ink);color:#fff;
-  padding:14px 18px;font-size:13px;font-weight:700;text-align:left;
+  padding:12px 14px;font-size:12px;font-weight:700;text-align:left;
 }
-.pro-compare-table th:first-child{width:50%}
 .pro-compare-table td{
-  padding:12px 18px;font-size:13px;border-bottom:1px solid var(--brl);
+  padding:10px 14px;font-size:12px;border-bottom:1px solid var(--brl);
   background:#fff;
 }
 .pro-compare-table tr:last-child td{border-bottom:none}
-.pro-check{color:#22C55E;font-weight:800;font-size:15px}
-.pro-cross{color:#E5E7EB;font-size:15px}
+.pro-check{color:#22C55E;font-weight:800;font-size:13px}
+.pro-cross{color:#E5E7EB;font-size:13px}
 
 /* ── Profil Vendeur ── */
 .seller-back{background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:13px;font-family:inherit;padding:0;display:inline-flex;align-items:center;gap:5px;margin-bottom:20px}
@@ -1470,7 +1490,42 @@ footer{background:transparent;margin-top:0}
     </div>
   </section>
 
-  <!-- cats now in nav -->
+  <!-- BANDEAU PRO — juste après le hero -->
+  <div class="main-wrap" style="padding-top:18px;padding-bottom:0">
+    <div class="promo-pro-banner" id="promo-pro-banner">
+      <div class="promo-pro-left">
+        <div class="promo-pro-icon">🏪</div>
+        <div>
+          <div class="promo-pro-title">Vous êtes commerçant ? Cette offre est faite pour vous !</div>
+          <div class="promo-pro-sub">Passez à <strong>YouGouYou Pro</strong> à seulement <strong>50 000 GNF/mois</strong> et boostez vos ventes.</div>
+          <div class="promo-pro-chips">
+            <span class="promo-chip">⭐ Badge PRO visible</span>
+            <span class="promo-chip">📈 Priorité dans les résultats</span>
+            <span class="promo-chip">📊 Statistiques avancées</span>
+            <span class="promo-chip">📋 Jusqu'à 18 annonces</span>
+          </div>
+        </div>
+      </div>
+      <div class="promo-pro-actions">
+        <button class="promo-pro-btn" onclick="goTo('pro')">Découvrir Pro →</button>
+        <button class="promo-pro-close" onclick="document.getElementById('promo-pro-banner').style.display='none'" title="Fermer">✕</button>
+      </div>
+    </div>
+
+    <!-- CTA Boutiques -->
+    <div style="display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#FFF3EE,#FFE8D6);border:1.5px solid var(--orm);border-radius:14px;padding:14px 20px;margin-top:12px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-size:28px">🏬</span>
+        <div>
+          <div style="font-size:14px;font-weight:800;color:var(--ink)">Découvrez nos Boutiques Pro</div>
+          <div style="font-size:12px;color:var(--muted)">Des commerçants vérifiés avec catalogues complets</div>
+        </div>
+      </div>
+      <button onclick="goToBoutiques()" style="background:var(--or);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 2px 8px rgba(255,92,0,.25)">
+        🏪 Visitez nos Boutiques →
+      </button>
+    </div>
+  </div>
 
   <!-- ANNONCES -->
   <div class="main-wrap" id="main-two-col">
@@ -1514,27 +1569,7 @@ footer{background:transparent;margin-top:0}
         <div class="ads-grid" id="recent-grid"></div>
       </section>
 
-      <!-- BANDEAU PRO -->
-      <div class="promo-pro-banner" id="promo-pro-banner">
-        <div class="promo-pro-left">
-          <div class="promo-pro-icon">🏪</div>
-          <div>
-            <div class="promo-pro-title">Vous êtes commerçant ? Cette offre est faite pour vous !</div>
-            <div class="promo-pro-sub">Passez à <strong>YouGouYou Pro</strong> à seulement <strong>50 000 GNF/mois</strong> et boostez vos ventes.</div>
-            <div class="promo-pro-chips">
-              <span class="promo-chip">⭐ Badge PRO visible</span>
-              <span class="promo-chip">📈 Priorité dans les résultats</span>
-              <span class="promo-chip">📊 Statistiques avancées</span>
-              <span class="promo-chip">📋 Jusqu'à 12 annonces</span>
-            </div>
-          </div>
-        </div>
-        <div class="promo-pro-actions">
-          <button class="promo-pro-btn" onclick="goTo('pro')">Découvrir Pro →</button>
-          <button class="promo-pro-close" onclick="document.getElementById('promo-pro-banner').style.display='none'" title="Fermer">✕</button>
-        </div>
-      </div>
-
+      <!-- FIN ANNONCES -->
     </div>
   </div><!-- /main-two-col -->
 
@@ -2454,20 +2489,24 @@ function goTo(page){
   }
 }
 
-function activerPro(){
+function activerPro(plan, amount){
+  plan = plan || 'starter';
+  amount = amount || 50000;
   var user = DB.user();
   if(!user){
     toast('🔒 Connectez-vous pour activer Pro','err');
     setTimeout(function(){ openModal('auth'); }, 400);
     return;
   }
-  // Ouvrir le modal de paiement Pro (Orange Money)
-  openProPaymentModal();
+  openProPaymentModal(plan, amount);
 }
 
-function openProPaymentModal(){
+var _proPlanLabels = { starter:'Starter — 50 000 GNF/mois', business:'Business — 120 000 GNF/3 mois', premium:'Premium — 360 000 GNF/an' };
+
+function openProPaymentModal(plan, amount){
   var existing = document.getElementById('overlay-pro-payment');
-  if(existing) { existing.classList.add('open'); document.body.style.overflow='hidden'; return; }
+  if(existing) existing.remove();
+  var label = _proPlanLabels[plan] || (amount.toLocaleString('fr-FR')+' GNF');
   var overlay = document.createElement('div');
   overlay.id = 'overlay-pro-payment';
   overlay.className = 'overlay';
@@ -2479,8 +2518,8 @@ function openProPaymentModal(){
       '</div>'+
       '<div class="modal-body">'+
         '<div style="background:linear-gradient(135deg,#FFF3EE,#FFE4D0);border-radius:10px;padding:14px 16px;margin-bottom:16px;text-align:center">'+
-          '<div style="font-size:28px;font-weight:900;color:var(--or)">50 000 GNF</div>'+
-          '<div style="font-size:12px;color:var(--muted)">par mois · sans engagement</div>'+
+          '<div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">Formule sélectionnée</div>'+
+          '<div style="font-size:16px;font-weight:800;color:var(--or)">'+label+'</div>'+
         '</div>'+
         '<div class="fg">'+
           '<label>📱 Votre numéro Orange Money</label>'+
@@ -2495,7 +2534,7 @@ function openProPaymentModal(){
             '<input type="password" id="pro-pin4" maxlength="1" inputmode="numeric" style="width:48px;height:48px;text-align:center;font-size:20px;font-weight:800;border:1.5px solid var(--br);border-radius:8px;outline:none;font-family:inherit">'+
           '</div>'+
         '</div>'+
-        '<button id="pro-pay-btn" style="width:100%;background:var(--or);color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:16px;box-shadow:0 4px 14px rgba(255,92,0,.3)" onclick="submitProPayment()">'+
+        '<button id="pro-pay-btn" style="width:100%;background:var(--or);color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:16px;box-shadow:0 4px 14px rgba(255,92,0,.3)" onclick="submitProPayment(\''+plan+'\','+amount+')">'+
           '🟠 Payer et activer Pro'+
         '</button>'+
         '<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px">🔒 Paiement sécurisé Orange Money · Activation immédiate</div>'+
@@ -2507,7 +2546,8 @@ function openProPaymentModal(){
   overlay.addEventListener('click', function(e){ if(e.target===overlay) closeModal('pro-payment'); });
 }
 
-async function submitProPayment(){
+async function submitProPayment(plan, amount){
+  plan = plan || 'starter'; amount = amount || 50000;
   var phone = (document.getElementById('pro-om-phone')||{}).value||'';
   var pin = ['pro-pin1','pro-pin2','pro-pin3','pro-pin4'].map(function(id){
     return (document.getElementById(id)||{}).value||'';
@@ -2630,23 +2670,54 @@ function onCatClick(el){ filterCat(el, el.getAttribute('data-cat')); }
 function onCatSub(e,el){ e.stopPropagation(); filterSubCat(e, el.getAttribute('data-cat'), el.getAttribute('data-sub')); }
 function onCatItem(el){
   var cat=el.getAttribute('data-cat'), sub=el.getAttribute('data-sub'), item=el.getAttribute('data-item');
+
+  // Mettre à jour les variables de filtre globales
+  _currentCat     = cat;
+  _currentSubCat  = sub;
+  _currentItem    = item;
+
   document.querySelectorAll('.ncat').forEach(function(n){
     n.classList.toggle('active', n.getAttribute('data-cat')===cat);
   });
-  var ads=DB.ads().filter(function(a){ return a.cat===cat; });
-  var fg=document.getElementById('featured-grid');
-  var rg=document.getElementById('recent-grid');
-  var sb=document.getElementById('sb-ads');
-  if(sb) sb.textContent=ads.length;
-  var empty='<div style="grid-column:1/-1;text-align:center;padding:36px;color:var(--muted)">'+
+
+  // Filtrer les annonces par catégorie ET sous-catégorie ET item
+  var all = DB.ads();
+  var filtered = all.filter(function(a){
+    // Filtre catégorie principale
+    if((a.cat||a.category||'') !== cat) return false;
+    // Filtre sous-catégorie si l'annonce la renseigne
+    if(a.subcat && a.subcat !== sub) return false;
+    // Filtre item (titre/tags/description contient l'item)
+    if(a.subitem && a.subitem !== item) return false;
+    return true;
+  });
+
+  // Si aucun résultat avec filtres stricts → afficher toutes les annonces de la catégorie
+  if(!filtered.length){
+    filtered = all.filter(function(a){ return (a.cat||a.category||'') === cat; });
+  }
+
+  var fg = document.getElementById('featured-grid');
+  var rg = document.getElementById('recent-grid');
+  var sb = document.getElementById('sb-ads');
+  if(sb) sb.textContent = filtered.length;
+
+  var empty = '<div style="grid-column:1/-1;text-align:center;padding:36px;color:var(--muted)">'+
     '<div style="font-size:36px;margin-bottom:8px">🔍</div>'+
     '<div style="font-weight:700;margin-bottom:4px">Aucune annonce pour l\'instant</div>'+
     '<div style="font-size:12px">Soyez le premier dans <strong>'+cat+' › '+sub+' › '+item+'</strong></div>'+
   '</div>';
-  if(fg) fg.innerHTML = ads.filter(function(a){return a.feat||a.featured;}).slice(0,4).map(function(a){return adCard(a,true);}).join('') || empty;
-  if(rg) rg.innerHTML = ads.filter(function(a){return !a.feat&&!a.featured;}).slice(0,12).map(function(a){return adCard(a,false);}).join('') || '';
-  var banner=document.getElementById('search-banner');
-  if(banner){ banner.style.display='flex'; banner.innerHTML='<span style="font-size:13px;font-weight:700">📂 <strong style="color:var(--or)">'+cat+'</strong> › '+sub+' › '+item+'</span><button onclick="clearSearch()" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--muted);font-family:inherit;font-weight:700;margin-left:auto">✕</button>'; }
+
+  if(fg) fg.innerHTML = filtered.filter(function(a){return a.feat||a.featured;}).slice(0,4).map(function(a){return adCard(a,true);}).join('') || empty;
+  if(rg) rg.innerHTML = filtered.filter(function(a){return !a.feat&&!a.featured;}).slice(0,12).map(function(a){return adCard(a,false);}).join('');
+
+  // Breadcrumb
+  var banner = document.getElementById('search-banner');
+  if(banner){
+    banner.style.display = 'flex';
+    banner.innerHTML = '<span style="font-size:13px;font-weight:700">📂 <strong style="color:var(--or)">'+cat+'</strong> › '+sub+' › <strong>'+item+'</strong> — '+filtered.length+' annonce'+(filtered.length>1?'s':'')+'</span>'+
+      '<button onclick="clearSearch()" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--muted);font-family:inherit;font-weight:700;margin-left:auto">✕ Tout voir</button>';
+  }
   goTo('home');
   setTimeout(function(){ var s=document.getElementById('ads-section'); if(s) s.scrollIntoView({behavior:'smooth'}); },100);
 }
@@ -5418,6 +5489,7 @@ var _currentView = 'grid';
 var _currentCat = '';
 var _currentEtat = '';
 var _currentSubCat = '';
+var _currentItem = '';
 var _adsOffset = 0;
 var _adsPerPage = 24;
 var _allFilteredAds = [];
@@ -5557,6 +5629,7 @@ function resetFilters(){
   _currentCat = '';
   _currentEtat = '';
   _currentSubCat = '';
+  _currentItem = '';
   _adsOffset = 0;
   var pmin = document.getElementById('f-pmin');
   var pmax = document.getElementById('f-pmax');
@@ -6994,80 +7067,120 @@ document.addEventListener('DOMContentLoaded',function(){
       <div class="pro-hero-badge">⭐ Offre commerçants</div>
       <div class="pro-hero-title"><span>YouGouYou</span> Pro</div>
       <div class="pro-hero-sub">Boostez votre visibilité et vendez plus vite avec notre abonnement Pro dédié aux commerçants guinéens.</div>
-      <div class="pro-hero-price">
-        <div class="pro-hero-price-amt">50 000 GNF</div>
-        <div class="pro-hero-price-unit">/ mois · Sans engagement</div>
-      </div>
     </div>
 
-    <!-- Avantages -->
-    <h2 style="font-size:20px;font-weight:800;margin-bottom:16px;color:var(--ink)">Tout ce que vous obtenez</h2>
-    <div class="pro-features-grid">
-      <div class="pro-feature-card">
-        <div class="pro-feature-icon">⭐</div>
-        <div class="pro-feature-title">Badge PRO visible</div>
-        <div class="pro-feature-desc">Votre profil et vos annonces affichent un badge Pro qui inspire confiance aux acheteurs.</div>
+    <!-- 3 Formules tarifaires -->
+    <h2 style="font-size:20px;font-weight:800;margin:28px 0 16px;color:var(--ink)">Choisissez votre formule</h2>
+    <div class="pro-plans-grid">
+
+      <!-- Formule 1 : Mensuel -->
+      <div class="pro-plan-card">
+        <div class="pro-plan-header">
+          <div class="pro-plan-name">Starter</div>
+          <div class="pro-plan-badge" style="background:rgba(255,255,255,.15)">Sans engagement</div>
+        </div>
+        <div class="pro-plan-price">50 000 <span class="pro-plan-currency">GNF</span></div>
+        <div class="pro-plan-period">par mois</div>
+        <ul class="pro-plan-features">
+          <li>✓ <strong>9 annonces</strong> simultanées</li>
+          <li>✓ Badge PRO visible</li>
+          <li>✓ Priorité dans les résultats</li>
+          <li>✓ Statistiques de base</li>
+          <li>✓ Boutique personnalisée</li>
+          <li class="muted">— 2 annonces vedette/mois</li>
+          <li class="muted">— Support standard</li>
+        </ul>
+        <button class="pro-plan-btn" onclick="activerPro('starter',50000)">Commencer →</button>
+        <div class="pro-plan-note">Résiliable à tout moment</div>
       </div>
-      <div class="pro-feature-card">
-        <div class="pro-feature-icon">📈</div>
-        <div class="pro-feature-title">Priorité dans les résultats</div>
-        <div class="pro-feature-desc">Vos annonces apparaissent en tête des résultats de recherche pour plus de visibilité.</div>
+
+      <!-- Formule 2 : Trimestriel POPULAIRE -->
+      <div class="pro-plan-card pro-plan-popular">
+        <div class="pro-plan-popular-badge">🔥 Le plus populaire</div>
+        <div class="pro-plan-header">
+          <div class="pro-plan-name">Business</div>
+          <div class="pro-plan-badge">3 mois</div>
+        </div>
+        <div class="pro-plan-price">120 000 <span class="pro-plan-currency">GNF</span></div>
+        <div class="pro-plan-period">pour 3 mois <span style="font-size:11px;opacity:.7">(40 000/mois)</span></div>
+        <ul class="pro-plan-features">
+          <li>✓ <strong>12 annonces</strong> simultanées</li>
+          <li>✓ Badge PRO visible</li>
+          <li>✓ Priorité renforcée</li>
+          <li>✓ Statistiques avancées</li>
+          <li>✓ Boutique premium</li>
+          <li>✓ <strong>5 annonces vedette/mois</strong></li>
+          <li>✓ Support prioritaire</li>
+        </ul>
+        <button class="pro-plan-btn" onclick="activerPro('business',120000)">Choisir Business →</button>
+        <div class="pro-plan-note">Économisez 30 000 GNF vs mensuel</div>
       </div>
-      <div class="pro-feature-card">
-        <div class="pro-feature-icon">📋</div>
-        <div class="pro-feature-title">Jusqu'à 12 annonces</div>
-        <div class="pro-feature-desc">Publiez jusqu'à 12 annonces simultanément (contre 3 en version gratuite).</div>
+
+      <!-- Formule 3 : Annuel PREMIUM -->
+      <div class="pro-plan-card">
+        <div class="pro-plan-header">
+          <div class="pro-plan-name">Premium</div>
+          <div class="pro-plan-badge" style="background:linear-gradient(135deg,#FFD700,#FFA500);color:#1A1A2E">1 an · Engagement</div>
+        </div>
+        <div class="pro-plan-price">360 000 <span class="pro-plan-currency">GNF</span></div>
+        <div class="pro-plan-period">pour 12 mois <span style="font-size:11px;opacity:.7">(30 000/mois)</span></div>
+        <ul class="pro-plan-features">
+          <li>✓ <strong>18 annonces</strong> simultanées</li>
+          <li>✓ Badge PRO Gold visible</li>
+          <li>✓ Priorité maximale (top 3)</li>
+          <li>✓ Statistiques complètes + export</li>
+          <li>✓ Boutique premium + catalogue</li>
+          <li>✓ <strong>Vedette illimitée</strong></li>
+          <li>✓ Support dédié 7j/7</li>
+        </ul>
+        <button class="pro-plan-btn" style="background:linear-gradient(135deg,#FFD700,#FFA500);color:#1A1A2E" onclick="activerPro('premium',360000)">Passer Premium →</button>
+        <div class="pro-plan-note">Économisez 240 000 GNF vs mensuel</div>
       </div>
-      <div class="pro-feature-card">
-        <div class="pro-feature-icon">📊</div>
-        <div class="pro-feature-title">Statistiques avancées</div>
-        <div class="pro-feature-desc">Accédez aux statistiques de vos annonces : vues, contacts reçus, taux de conversion.</div>
-      </div>
-      <div class="pro-feature-card">
-        <div class="pro-feature-icon">🏪</div>
-        <div class="pro-feature-title">Boutique personnalisée</div>
-        <div class="pro-feature-desc">Une page boutique dédiée avec votre logo, description et catalogue de produits.</div>
-      </div>
-      <div class="pro-feature-card">
-        <div class="pro-feature-icon">🔔</div>
-        <div class="pro-feature-title">Notifications prioritaires</div>
-        <div class="pro-feature-desc">Recevez des alertes instantanées dès qu'un acheteur vous contacte.</div>
-      </div>
+
     </div>
 
     <!-- Tableau comparatif -->
-    <h2 style="font-size:20px;font-weight:800;margin-bottom:16px;color:var(--ink)">Gratuit vs Pro</h2>
+    <h2 style="font-size:20px;font-weight:800;margin:32px 0 16px;color:var(--ink)">Gratuit vs Pro</h2>
     <table class="pro-compare-table">
       <thead>
         <tr>
           <th>Fonctionnalité</th>
           <th style="text-align:center">Gratuit</th>
-          <th style="text-align:center;background:var(--or)">⭐ Pro</th>
+          <th style="text-align:center;background:#FF5C00">⭐ Starter</th>
+          <th style="text-align:center;background:#D94F00">🔥 Business</th>
+          <th style="text-align:center;background:linear-gradient(135deg,#FFD700,#FFA500);color:#1A1A2E">👑 Premium</th>
         </tr>
       </thead>
       <tbody>
-        <tr><td>Nombre d'annonces</td><td style="text-align:center;color:var(--muted)">3</td><td style="text-align:center;font-weight:800;color:var(--or)">12</td></tr>
-        <tr><td>Badge Pro visible</td><td style="text-align:center"><span class="pro-cross">—</span></td><td style="text-align:center"><span class="pro-check">✓</span></td></tr>
-        <tr><td>Priorité dans les résultats</td><td style="text-align:center"><span class="pro-cross">—</span></td><td style="text-align:center"><span class="pro-check">✓</span></td></tr>
-        <tr><td>Statistiques avancées</td><td style="text-align:center"><span class="pro-cross">—</span></td><td style="text-align:center"><span class="pro-check">✓</span></td></tr>
-        <tr><td>Boutique personnalisée</td><td style="text-align:center"><span class="pro-cross">—</span></td><td style="text-align:center"><span class="pro-check">✓</span></td></tr>
-        <tr><td>Support prioritaire</td><td style="text-align:center"><span class="pro-cross">—</span></td><td style="text-align:center"><span class="pro-check">✓</span></td></tr>
-        <tr><td>Annonces à la une (vedette)</td><td style="text-align:center;color:var(--muted)">Payant</td><td style="text-align:center;color:var(--or);font-weight:700">Inclus ×2/mois</td></tr>
+        <tr><td>Annonces simultanées</td><td style="text-align:center;color:var(--muted)">3</td><td style="text-align:center;font-weight:800;color:var(--or)">9</td><td style="text-align:center;font-weight:800;color:var(--or)">12</td><td style="text-align:center;font-weight:800;color:var(--or)">18</td></tr>
+        <tr><td>Badge PRO</td><td style="text-align:center">—</td><td style="text-align:center"><span class="pro-check">✓</span></td><td style="text-align:center"><span class="pro-check">✓</span></td><td style="text-align:center"><span class="pro-check">✓ Gold</span></td></tr>
+        <tr><td>Priorité résultats</td><td style="text-align:center">—</td><td style="text-align:center"><span class="pro-check">✓</span></td><td style="text-align:center"><span class="pro-check">✓ Renforcée</span></td><td style="text-align:center"><span class="pro-check">✓ Top 3</span></td></tr>
+        <tr><td>Statistiques</td><td style="text-align:center">—</td><td style="text-align:center">Basiques</td><td style="text-align:center">Avancées</td><td style="text-align:center">Complètes</td></tr>
+        <tr><td>Annonces vedette/mois</td><td style="text-align:center">—</td><td style="text-align:center">2</td><td style="text-align:center">5</td><td style="text-align:center">Illimitées</td></tr>
+        <tr><td>Boutique personnalisée</td><td style="text-align:center">—</td><td style="text-align:center"><span class="pro-check">✓</span></td><td style="text-align:center"><span class="pro-check">✓ Premium</span></td><td style="text-align:center"><span class="pro-check">✓ + Catalogue</span></td></tr>
+        <tr><td>Support</td><td style="text-align:center">Standard</td><td style="text-align:center">Standard</td><td style="text-align:center">Prioritaire</td><td style="text-align:center">Dédié 7j/7</td></tr>
+        <tr><td style="font-weight:800">Prix</td><td style="text-align:center;font-weight:700">Gratuit</td><td style="text-align:center;font-weight:800;color:var(--or)">50 000/mois</td><td style="text-align:center;font-weight:800;color:var(--or)">40 000/mois</td><td style="text-align:center;font-weight:800;color:#D97706">30 000/mois</td></tr>
       </tbody>
     </table>
 
-    <!-- CTA -->
-    <div class="pro-cta-box">
-      <div class="pro-cta-title">Prêt à booster vos ventes ? 🚀</div>
-      <div class="pro-cta-sub">
-        Rejoignez les commerçants qui font confiance à YouGouYou Pro.<br>
-        Paiement simple par <strong>Orange Money</strong> — Activation immédiate.
-      </div>
-      <button class="pro-cta-btn" onclick="activerPro()">
-        Passer à Pro — 50 000 GNF/mois
-      </button>
-      <div style="font-size:12px;color:var(--muted);margin-top:12px">
-        Sans engagement · Résiliable à tout moment · Support 7j/7
+    <!-- Avantages clés -->
+    <h2 style="font-size:20px;font-weight:800;margin:32px 0 16px;color:var(--ink)">Tout ce que vous obtenez</h2>
+    <div class="pro-features-grid">
+      <div class="pro-feature-card"><div class="pro-feature-icon">⭐</div><div class="pro-feature-title">Badge PRO visible</div><div class="pro-feature-desc">Votre profil et vos annonces affichent un badge Pro qui inspire confiance aux acheteurs.</div></div>
+      <div class="pro-feature-card"><div class="pro-feature-icon">📈</div><div class="pro-feature-title">Priorité dans les résultats</div><div class="pro-feature-desc">Vos annonces apparaissent en tête des résultats pour plus de visibilité.</div></div>
+      <div class="pro-feature-card"><div class="pro-feature-icon">📋</div><div class="pro-feature-title">Plus d'annonces</div><div class="pro-feature-desc">Publiez jusqu'à 18 annonces simultanément selon votre formule (vs 3 en gratuit).</div></div>
+      <div class="pro-feature-card"><div class="pro-feature-icon">📊</div><div class="pro-feature-title">Statistiques avancées</div><div class="pro-feature-desc">Vues, contacts reçus, taux de conversion et performance de chaque annonce.</div></div>
+      <div class="pro-feature-card"><div class="pro-feature-icon">🏪</div><div class="pro-feature-title">Boutique personnalisée</div><div class="pro-feature-desc">Une page boutique dédiée avec logo, description et catalogue de produits.</div></div>
+      <div class="pro-feature-card"><div class="pro-feature-icon">🔔</div><div class="pro-feature-title">Notifications prioritaires</div><div class="pro-feature-desc">Alertes instantanées dès qu'un acheteur vous contacte.</div></div>
+    </div>
+
+    <!-- FAQ rapide -->
+    <div style="background:#F8F9FA;border-radius:14px;padding:24px;margin-top:24px">
+      <div style="font-size:16px;font-weight:800;margin-bottom:16px;color:var(--ink)">❓ Questions fréquentes</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div><div style="font-weight:700;font-size:13px;margin-bottom:3px">Comment payer ?</div><div style="font-size:12px;color:var(--muted)">Uniquement par Orange Money. Simple, rapide, sécurisé.</div></div>
+        <div><div style="font-weight:700;font-size:13px;margin-bottom:3px">L'activation est-elle immédiate ?</div><div style="font-size:12px;color:var(--muted)">Oui, votre compte Pro est activé instantanément après paiement confirmé.</div></div>
+        <div><div style="font-weight:700;font-size:13px;margin-bottom:3px">Puis-je changer de formule ?</div><div style="font-size:12px;color:var(--muted)">Oui, vous pouvez upgrader à tout moment depuis votre tableau de bord.</div></div>
       </div>
     </div>
 
