@@ -2357,18 +2357,38 @@ function goTo(page, opts){
       return;
     }
     if(list) list.innerHTML='<div style="padding:40px 20px;text-align:center;color:var(--muted)"><div style="font-size:40px;margin-bottom:10px">💬</div><div style="font-size:13px">Chargement...</div></div>';
+    // Si le serveur est lent (cold start), afficher un message après 4s
+    var _slowTimer = setTimeout(function(){
+      if(list && list.innerHTML.includes('Chargement')){
+        list.innerHTML='<div style="padding:30px 16px;text-align:center;color:var(--muted)">'+
+          '<div style="font-size:32px;margin-bottom:10px">⏳</div>'+
+          '<div style="font-size:13px;font-weight:600;margin-bottom:6px">Connexion en cours...</div>'+
+          '<div style="font-size:12px">Le serveur se réveille, encore quelques secondes...</div>'+
+        '</div>';
+      }
+    }, 4000);
     window._convListLoaded = false;
     fetch('/api/conversations',{headers:{'Authorization':'Bearer '+token}})
     .then(function(r){return r.json();})
     .then(function(data){
+      clearTimeout(_slowTimer);
       var convs=data.conversations||data||[];
       _pageConvs=convs;
       renderPageConvList(convs);
       updateMsgBadge(convs);
       window._convListLoaded = true;
+      // Ouvrir la conv en attente (depuis "Contacter le vendeur")
+      if(window._pendingOpenConvId){
+        var pid  = window._pendingOpenConvId;
+        var pdat = window._pendingOpenConvData || {_id:pid};
+        window._pendingOpenConvId   = null;
+        window._pendingOpenConvData = null;
+        setTimeout(function(){ openPageConv(pid, pdat); }, 50);
+      }
     }).catch(function(){
       window._convListLoaded = true;
       if(list) list.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">❌ Erreur de chargement</div>';
+      // Même en cas d'erreur réseau, ouvrir la conv en attente
       if(window._pendingOpenConvId){
         var pid=window._pendingOpenConvId, pdat=window._pendingOpenConvData||{_id:pid};
         window._pendingOpenConvId=null; window._pendingOpenConvData=null;
@@ -5136,25 +5156,12 @@ async function contacterVendeur3pct(){
       buyerId:    String(user._id || user.id || '')
     };
 
-    // Naviguer vers la page messages
-    window._convListLoaded = false;
-    goTo('messages');
+    // Stocker la conv à ouvrir — sera appelée par goTo('messages') quand la liste est prête
+    window._pendingOpenConvId   = convId;
+    window._pendingOpenConvData = convData;
 
-    // Attendre que le fetch de la liste soit terminé (_convListLoaded=true),
-    // puis ouvrir la conversation directement
-    var _maxWait = 50; // 5 secondes max
-    var _tries   = 0;
-    var _poll = setInterval(function(){
-      _tries++;
-      if(window._convListLoaded){
-        clearInterval(_poll);
-        openPageConv(convId, convData);
-      } else if(_tries >= _maxWait){
-        clearInterval(_poll);
-        // Fallback : ouvrir quand même après timeout
-        openPageConv(convId, convData);
-      }
-    }, 100);
+    // Naviguer vers la page messages — le fetch interne ouvrira la conv via renderPageConvList
+    goTo('messages');
 
   } catch(err) {
     toast('❌ Erreur réseau — vérifiez votre connexion','err');
@@ -6798,12 +6805,15 @@ document.addEventListener('DOMContentLoaded',function(){
   initBanner();
   renderPostCats();
   updateNav();
-  // Charger les annonces depuis l'API MongoDB
+
+  // Afficher le cache local immédiatement (évite la page blanche pendant le cold start Render)
+  renderAds();
+
+  // Puis charger les annonces fraîches depuis l'API en arrière-plan
   fetchAdsFromAPI(function(){ 
     renderAds();
     setTimeout(initInfiniteScroll, 500);
     setTimeout(markSeenAds, 800);
-    // startMsgPolling désactivé temporairement
   });
   startInactivityWatch();
   // Init PWA
