@@ -96,7 +96,41 @@ nav{background:#fff;border-bottom:1px solid var(--br);position:sticky;top:0;z-in
 .cat-dropdown{visibility:hidden;opacity:0;pointer-events:none;position:absolute;top:calc(100% + 1px);left:0;min-width:195px;background:#fff;border:1px solid var(--br);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.11);padding:4px 0;z-index:99999;transition:opacity .12s,transform .12s,visibility 0s linear .12s;transform:translateY(-4px)}
 .ncat.has-sub:hover>.cat-dropdown{visibility:visible;opacity:1;pointer-events:auto;transform:translateY(0);transition:opacity .12s,transform .12s,visibility 0s}
 .cat-sub-item{display:block;padding:9px 16px;font-size:13px;font-weight:400;color:var(--ink);cursor:pointer;white-space:nowrap;transition:background .1s}
-.cat-sub-item:hover{background:var(--orl);color:var(--or)}
+/* ── MENU 3 NIVEAUX ── */
+.cat-sub-grp{position:relative;border-bottom:1px solid var(--brl)}
+.cat-sub-grp:last-child{border-bottom:none}
+.cat-sub-grp-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 16px;font-size:12px;font-weight:600;color:var(--ink);
+  cursor:pointer;transition:background .1s,color .1s;
+}
+.cat-sub-grp-hd:hover{background:var(--orl);color:var(--or)}
+.sub-arr{font-size:9px;color:var(--muted);margin-left:6px;transition:transform .15s}
+.cat-sub-grp:hover>.cat-sub-grp-hd .sub-arr{transform:rotate(90deg);color:var(--or)}
+.cat-items-pnl{
+  visibility:hidden;opacity:0;pointer-events:none;
+  position:absolute;top:0;left:100%;
+  min-width:200px;max-height:320px;overflow-y:auto;
+  background:#fff;border:1px solid var(--br);border-radius:8px;
+  box-shadow:0 8px 24px rgba(0,0,0,.13);
+  padding:4px 0;z-index:100000;
+  transition:opacity .12s,visibility 0s linear .12s;
+}
+.cat-sub-grp:hover>.cat-items-pnl{
+  visibility:visible;opacity:1;pointer-events:auto;
+  transition:opacity .12s,visibility 0s;
+}
+.cat-item{
+  display:block;padding:8px 16px;font-size:12px;
+  color:var(--ink);cursor:pointer;white-space:nowrap;
+  transition:background .1s;
+}
+.cat-item:hover{background:var(--orl);color:var(--or)}
+.ncat:nth-last-child(-n+3)>.cat-dropdown .cat-items-pnl{left:auto;right:100%}
+@media(max-width:600px){
+  .cat-items-pnl{left:0;right:auto;top:100%;max-height:200px}
+}
+
 
 /* ── BOUTONS ── */
 .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:6px;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:background .12s;text-decoration:none;white-space:nowrap}
@@ -1158,6 +1192,127 @@ footer{background:transparent;margin-top:0}
   .pmsg-left.show { display: flex; position: absolute; width: 100%; z-index: 10; height: 100%; }
 }
 
+/* ── Bandeau Pro Home ── */
+.promo-pro-banner{
+  background:linear-gradient(135deg,#1A1A2E 0%,#2D1B0E 100%);
+  border-radius:16px;padding:24px 28px;margin:24px 0;
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+  flex-wrap:wrap;position:relative;overflow:hidden;
+}
+.promo-pro-banner::before{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:200px;height:200px;border-radius:50%;
+  background:rgba(255,92,0,.08);pointer-events:none;
+}
+.promo-pro-left{display:flex;align-items:flex-start;gap:16px;flex:1;min-width:0}
+.promo-pro-icon{
+  width:52px;height:52px;border-radius:12px;
+  background:rgba(255,92,0,.15);border:1px solid rgba(255,92,0,.3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;flex-shrink:0;
+}
+.promo-pro-title{font-size:16px;font-weight:800;color:#fff;margin-bottom:5px}
+.promo-pro-sub{font-size:13px;color:rgba(255,255,255,.65);line-height:1.5;margin-bottom:10px}
+.promo-pro-sub strong{color:var(--or)}
+.promo-pro-chips{display:flex;flex-wrap:wrap;gap:6px}
+.promo-chip{
+  background:rgba(255,255,255,.08);color:rgba(255,255,255,.75);
+  font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;
+  border:1px solid rgba(255,255,255,.12);
+}
+.promo-pro-actions{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.promo-pro-btn{
+  background:var(--or);color:#fff;border:none;
+  border-radius:10px;padding:12px 22px;
+  font-size:14px;font-weight:800;cursor:pointer;
+  font-family:inherit;transition:all .15s;white-space:nowrap;
+  box-shadow:0 4px 14px rgba(255,92,0,.35);
+}
+.promo-pro-btn:hover{background:var(--or2);transform:translateY(-1px)}
+.promo-pro-close{
+  background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);
+  border:none;border-radius:8px;width:32px;height:32px;
+  cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;
+  transition:all .15s;flex-shrink:0;
+}
+.promo-pro-close:hover{background:rgba(255,255,255,.15);color:#fff}
+
+/* ── Page Pro ── */
+#page-pro.active{display:block!important}
+.pro-page-wrap{max-width:900px;margin:0 auto;padding:32px 20px 60px}
+.pro-hero{
+  text-align:center;padding:48px 20px 40px;
+  background:linear-gradient(135deg,#1A1A2E,#2D1B0E);
+  border-radius:20px;margin-bottom:32px;position:relative;overflow:hidden;
+}
+.pro-hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 70% 50%,rgba(255,92,0,.15),transparent 60%);
+}
+.pro-hero-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(255,92,0,.15);border:1px solid rgba(255,92,0,.3);
+  color:var(--or);font-size:12px;font-weight:700;
+  padding:5px 14px;border-radius:20px;margin-bottom:16px;
+}
+.pro-hero-title{font-size:32px;font-weight:900;color:#fff;margin-bottom:8px;letter-spacing:-.5px}
+.pro-hero-title span{color:var(--or)}
+.pro-hero-sub{font-size:15px;color:rgba(255,255,255,.6);max-width:480px;margin:0 auto 28px;line-height:1.6}
+.pro-hero-price{
+  display:inline-block;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:14px;padding:14px 28px;
+}
+.pro-hero-price-amt{font-size:36px;font-weight:900;color:#fff}
+.pro-hero-price-unit{font-size:13px;color:rgba(255,255,255,.5)}
+
+.pro-features-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+  gap:16px;margin-bottom:32px;
+}
+.pro-feature-card{
+  background:#fff;border:1px solid var(--br);border-radius:14px;
+  padding:20px;transition:box-shadow .2s,transform .2s;
+}
+.pro-feature-card:hover{box-shadow:0 6px 20px rgba(0,0,0,.08);transform:translateY(-2px)}
+.pro-feature-icon{font-size:28px;margin-bottom:10px}
+.pro-feature-title{font-size:14px;font-weight:800;color:var(--ink);margin-bottom:4px}
+.pro-feature-desc{font-size:12px;color:var(--muted);line-height:1.6}
+
+.pro-cta-box{
+  background:linear-gradient(135deg,#FFF3EE,#FFE4D0);
+  border:1.5px solid var(--orm);border-radius:16px;
+  padding:32px;text-align:center;
+}
+.pro-cta-title{font-size:22px;font-weight:900;color:var(--ink);margin-bottom:8px}
+.pro-cta-sub{font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.6}
+.pro-cta-btn{
+  background:var(--or);color:#fff;border:none;
+  border-radius:12px;padding:16px 40px;
+  font-size:16px;font-weight:800;cursor:pointer;
+  font-family:inherit;box-shadow:0 4px 18px rgba(255,92,0,.35);
+  transition:all .15s;
+}
+.pro-cta-btn:hover{background:var(--or2);transform:translateY(-2px)}
+
+.pro-compare-table{
+  width:100%;border-collapse:collapse;margin-bottom:32px;
+  border-radius:14px;overflow:hidden;
+  box-shadow:0 2px 12px rgba(0,0,0,.06);
+}
+.pro-compare-table th{
+  background:var(--ink);color:#fff;
+  padding:14px 18px;font-size:13px;font-weight:700;text-align:left;
+}
+.pro-compare-table th:first-child{width:50%}
+.pro-compare-table td{
+  padding:12px 18px;font-size:13px;border-bottom:1px solid var(--brl);
+  background:#fff;
+}
+.pro-compare-table tr:last-child td{border-bottom:none}
+.pro-check{color:#22C55E;font-weight:800;font-size:15px}
+.pro-cross{color:#E5E7EB;font-size:15px}
+
 /* ── Profil Vendeur ── */
 .seller-back{background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:13px;font-family:inherit;padding:0;display:inline-flex;align-items:center;gap:5px;margin-bottom:20px}
 .seller-back:hover{text-decoration:underline}
@@ -1358,6 +1513,27 @@ footer{background:transparent;margin-top:0}
         </div>
         <div class="ads-grid" id="recent-grid"></div>
       </section>
+
+      <!-- BANDEAU PRO -->
+      <div class="promo-pro-banner" id="promo-pro-banner">
+        <div class="promo-pro-left">
+          <div class="promo-pro-icon">🏪</div>
+          <div>
+            <div class="promo-pro-title">Vous êtes commerçant ? Cette offre est faite pour vous !</div>
+            <div class="promo-pro-sub">Passez à <strong>YouGouYou Pro</strong> à seulement <strong>50 000 GNF/mois</strong> et boostez vos ventes.</div>
+            <div class="promo-pro-chips">
+              <span class="promo-chip">⭐ Badge PRO visible</span>
+              <span class="promo-chip">📈 Priorité dans les résultats</span>
+              <span class="promo-chip">📊 Statistiques avancées</span>
+              <span class="promo-chip">📋 Jusqu'à 12 annonces</span>
+            </div>
+          </div>
+        </div>
+        <div class="promo-pro-actions">
+          <button class="promo-pro-btn" onclick="goTo('pro')">Découvrir Pro →</button>
+          <button class="promo-pro-close" onclick="document.getElementById('promo-pro-banner').style.display='none'" title="Fermer">✕</button>
+        </div>
+      </div>
 
     </div>
   </div><!-- /main-two-col -->
@@ -2105,17 +2281,88 @@ var PREFS=[
 ];
 
 var CATS=[
-  {n:'Véhicules',e:'🚗',c:234,sub:['Voitures','Motos & Scooters','Camions & Utilitaires','Bus & Minibus','Pièces & Accessoires','Engins agricoles','Autres véhicules']},
-  {n:'Immobilier',e:'🏠',c:189,sub:['Appartement','Maison','Terrain','Immeuble','Villa','Bureau & Commerce','Location saisonnière','Colocation','Autres']},
-  {n:'Taxi',e:'🚕',c:78,sub:['Taxi Moto','Taxi Voiture','Taxi communal','Location avec chauffeur','Covoiturage']},
-  {n:'Électronique',e:'📱',c:312,sub:['Téléphones','Ordinateurs portables','Télévisions','Enceintes & Audio','Casques & Écouteurs','Jeux vidéo','Tablettes','Climatiseurs','Accessoires','Autres']},
-  {n:'Ouvriers',e:'🔨',c:156,sub:['Maçon','Plombier','Carreleur','Mécanicien','Menuisier','Électricien','Peintre','Soudeur','Forgeron','Couvreur','Autres']},
-  {n:'Mode',e:'👗',c:278,sub:['Vêtements Homme','Vêtements Femme','Vêtements Enfant','Chaussures Homme','Chaussures Femme','Bijoux & Montres','Sacs','Pagnes & Tissus','Autres']},
-  {n:'Maison',e:'🛋️',c:145,sub:['Armoires','Canapés & Divans','Fauteuils','Chaises','Lits & Matelas','Congélateurs','Fours','Micro-ondes','Aspirateurs','Tables','Autres']},
-  {n:'Tourisme',e:'✈️',c:43,sub:['Conakry','Kindia','Labé','Mamou','Kankan','Faranah','N’Zérékoré','Boké','Siguiri','Guéckédou','Dalaba','Pita','Fria','Kamsar','Autres']},
-  {n:'Loisirs',e:'🎮',c:167,sub:['Livres & BD','Collections','Vélos','Sports & Fitness','Instruments','Films & Séries','Art & Artisanat','Jouets','Autres']},
-  {n:'Cuisine',e:'🍽️',c:89,sub:['Traiteur & Repas','Gâteaux & Pâtisseries','Boissons','Ustensiles','Épices','Fruits & Légumes','Autres']},
-  {n:'Services',e:'🤝',c:120,sub:['Femme de ménage','Garde enfants','Cuisinière','Chauffeur','Gardien','Livraison','Coiffure & Beauté','Couture','Informatique','Autres']}
+  {n:'Véhicules',e:'🚗',c:234,sub:[
+    {n:'Voitures',items:['Berlines','SUV & 4x4','Pick-up','Minivans','Sportives','Citadines','Autres']},
+    {n:'Motos & Scooters',items:['Motos 50cc','Motos 125cc','Motos 250cc+','Scooters','Électriques','Autres']},
+    {n:'Camions & Utilitaires',items:['Camions légers','Camions lourds','Bennes','Fourgonnettes','Autres']},
+    {n:'Bus & Minibus',items:['Bus scolaires','Minibus 15 places','Minibus 30 places','Cars de voyage','Autres']},
+    {n:'Pièces & Accessoires',items:['Moteurs','Pneus & Jantes','Carrosserie','Électronique auto','Autres']},
+    {n:'Engins agricoles',items:['Tracteurs','Motoculteurs','Moissonneuses','Autres']},
+    {n:'Autres véhicules',items:['Bateaux','Vélos électriques','Trottinettes','Autres']}
+  ]},
+  {n:'Immobilier',e:'🏠',c:189,sub:[
+    {n:'Appartements',items:['Studio','F2','F3','F4','F5 et plus','Duplex','Autres']},
+    {n:'Maisons',items:['Villa','Maison simple','Maison R+1','Maison R+2+','Ferme','Autres']},
+    {n:'Terrains',items:['Constructible','Agricole','Commercial','Autres']},
+    {n:'Bureau & Commerce',items:['Bureau','Boutique','Entrepôt','Local commercial','Autres']},
+    {n:'Location',items:['Longue durée','Saisonnière','Colocation','Chambre meublée','Autres']}
+  ]},
+  {n:'Taxi et Transports',e:'🚕',c:78,sub:[
+    {n:'Taxi Moto',items:['Jakarta','Clando moto','Courte distance','Autres']},
+    {n:'Taxi Voiture',items:['Taxi ville','Interurbain','Taxi VIP','Autres']},
+    {n:'Location',items:['Avec chauffeur','Sans chauffeur','Covoiturage','Navette aéroport','Autres']}
+  ]},
+  {n:'Électronique',e:'📱',c:312,sub:[
+    {n:'Téléphones',items:['iPhone','Samsung','Tecno','Itel','Infinix','Autres Android','Basiques']},
+    {n:'Ordinateurs',items:['PC Portables','PC Bureau','MacBook','Tablettes','Chromebook','Autres']},
+    {n:'TV & Audio',items:['Télévisions','Home cinéma','Enceintes','Casques','Barres de son','Autres']},
+    {n:'Jeux vidéo',items:['PlayStation','Xbox','Nintendo','Jeux PC','Accessoires gaming','Autres']},
+    {n:'Électroménager',items:['Climatiseurs','Réfrigérateurs','Lave-linge','Cuisinières','Autres']},
+    {n:'Accessoires',items:['Chargeurs','Coques','Câbles','Batteries','Autres']}
+  ]},
+  {n:'Ouvriers',e:'🔨',c:156,sub:[
+    {n:'Construction',items:['Maçon','Carreleur','Couvreur','Coffreur','Ferrailleur','Autres']},
+    {n:'Plomberie & Élec.',items:['Plombier','Électricien','Climatiseur','Soudeur','Autres']},
+    {n:'Menuiserie',items:['Menuisier bois','Menuisier alu','Forgeron','Serrurier','Autres']},
+    {n:'Peinture & Déco',items:['Peintre','Décorateur','Poseur parquet','Tapissier','Autres']},
+    {n:'Mécanique',items:['Mécanicien auto','Mécanicien moto','Tôlier','Autres']}
+  ]},
+  {n:'Mode',e:'👗',c:278,sub:[
+    {n:'Vêtements Homme',items:['Pantalons','Chemises','T-shirts','Vestes','Costumes','Boubous','Djellabas','Shorts','Autres']},
+    {n:'Vêtements Femme',items:['Robes','Jupes','Pantalons femme','Blouses','Tailleurs','Robes soirée','Robes traditionnelles','Autres']},
+    {n:'Vêtements Enfant',items:['0-2 ans','3-6 ans','7-12 ans','Ado garçon','Ado fille','Uniformes','Autres']},
+    {n:'Chaussures Homme',items:['Habillées','Baskets','Sandales','Mocassins','Bottes','Autres']},
+    {n:'Chaussures Femme',items:['Escarpins','Ballerines','Sandales','Baskets','Bottes','Autres']},
+    {n:'Bijoux & Montres',items:['Colliers','Bracelets','Bagues','Boucles oreilles','Montres homme','Montres femme','Autres']},
+    {n:'Sacs',items:['Sacs à main','Sacs à dos','Valises','Portefeuilles','Ceintures','Autres']},
+    {n:'Pagnes & Tissus',items:['Wax','Bazin','Kente','Soie','Tissu traditionnel','Broderies','Autres']}
+  ]},
+  {n:'Maison',e:'🛋️',c:145,sub:[
+    {n:'Meubles',items:['Armoires','Canapés','Fauteuils','Chaises','Lits','Tables','Bureaux','Étagères','Autres']},
+    {n:'Électroménager',items:['Réfrigérateurs','Congélateurs','Cuisinières','Fours','Micro-ondes','Lave-linge','Autres']},
+    {n:'Décoration',items:['Rideaux','Tapis','Tableaux','Luminaires','Coussins','Vases','Miroirs','Autres']},
+    {n:'Literie',items:['Matelas','Oreillers','Draps','Couvertures','Autres']},
+    {n:'Cuisine & Vaisselle',items:['Casseroles','Ustensiles','Vaisselle','Verres','Couverts','Autres']},
+    {n:'Jardin',items:['Mobilier jardin','Outils','Plantes','Barbecue','Autres']}
+  ]},
+  {n:'Tourisme',e:'✈️',c:43,sub:[
+    {n:'Hébergement',items:['Hôtels','Auberges','Chambres hôtes','Résidences','Campements','Autres']},
+    {n:'Excursions',items:['Visite Conakry','Fouta Djallon','Guinée Forestière','Chutes Kinkon','Îles de Los','Autres']},
+    {n:'Services',items:['Guides','Location voiture','Agences voyage','Transport','Autres']}
+  ]},
+  {n:'Loisirs',e:'🎮',c:167,sub:[
+    {n:'Sports',items:['Football','Basket','Musculation','Natation','Arts martiaux','Cyclisme','Autres']},
+    {n:'Culture',items:['Livres','Films & Séries','Musique','Instruments','Jeux de société','Autres']},
+    {n:'Art & Artisanat',items:['Peintures','Sculptures','Bijoux artisanaux','Vannerie','Poterie','Autres']},
+    {n:'Jouets',items:['0-3 ans','4-8 ans','9-12 ans','Éducatifs','Vélos enfant','Autres']},
+    {n:'Collections',items:['Timbres','Monnaies','Cartes','Antiquités','Autres']}
+  ]},
+  {n:'Cuisine',e:'🍽️',c:89,sub:[
+    {n:'Plats & Repas',items:['Riz sauce','Poulet braisé','Attiéké','Sauces','Grillades','Autres']},
+    {n:'Pâtisserie',items:['Gâteaux','Croissants & Pains','Beignets','Donuts','Autres']},
+    {n:'Boissons',items:['Jus naturels','Bissap','Gingembre','Thé & Café','Autres']},
+    {n:'Épicerie',items:['Épices','Fruits & Légumes','Viandes & Poissons','Céréales','Huiles','Autres']},
+    {n:'Ustensiles',items:['Marmites','Mortiers','Couvercles','Passoires','Autres']}
+  ]},
+  {n:'Services',e:'🤝',c:120,sub:[
+    {n:'Aide à domicile',items:['Femme de ménage','Garde enfants','Cuisinière','Repassage','Aide âgées','Autres']},
+    {n:'Transport & Livraison',items:['Livraison express','Déménagement','Transport marchandises','Coursiers','Autres']},
+    {n:'Beauté',items:['Coiffure femme','Coiffure homme','Manucure','Massage','Maquillage','Autres']},
+    {n:'Couture & Mode',items:['Couturière','Tailleur','Broderie','Retouches','Création tenue','Autres']},
+    {n:'Informatique',items:['Réparation téléphone','Réparation PC','Développement web','Graphisme','Autres']},
+    {n:'Événements',items:['Animation fête','DJ','Photographe','Vidéaste','Location salle','Traiteur','Autres']},
+    {n:'Ouvriers',items:['Maçon','Menuisier','Mécanicien','Plombier','Tailleur','Carreleur','Soudeur','Peintre','Autres']}
+  ]}
 ];
 
 var DEMO_ADS=[
@@ -2177,10 +2424,146 @@ function goTo(page){
   // Changer de page
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   var el=document.getElementById('page-'+page);
-  if(el){el.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
-  if(page==='dashboard')loadDash();
-  if(page==='home')renderAds();
-  if(page==='seller'&&typeof _curSellerId!=='undefined'&&_curSellerId)loadSellerProfile(_curSellerId);
+  if(el){
+    el.classList.add('active');
+    if(page!=='messages') window.scrollTo({top:0,behavior:'smooth'});
+  }
+  if(page==='dashboard') loadDash();
+  if(page==='home') renderAds();
+  if(page==='seller'&&typeof _curSellerId!=='undefined'&&_curSellerId) loadSellerProfile(_curSellerId);
+  if(page==='messages'){
+    var token=localStorage.getItem('ygy_token');
+    var list=document.getElementById('page-msg-list');
+    if(!token){ if(list) list.innerHTML='<div style="padding:40px;text-align:center;color:var(--muted)">🔒 Connectez-vous</div>'; return; }
+    if(list) list.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">⏳ Chargement...</div>';
+    fetch('/api/conversations',{headers:{'Authorization':'Bearer '+token}})
+    .then(function(r){return r.json();})
+    .then(function(data){
+      var convs=data.conversations||data||[];
+      _pageConvs=convs;
+      renderPageConvList(convs);
+      updateMsgBadge(convs);
+      if(window._pendingOpenConvId){
+        var pid=window._pendingOpenConvId, pdat=window._pendingOpenConvData||{_id:pid};
+        window._pendingOpenConvId=null; window._pendingOpenConvData=null;
+        setTimeout(function(){ openPageConv(pid,pdat); },80);
+      }
+    }).catch(function(){
+      if(list) list.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">❌ Erreur</div>';
+    });
+  }
+}
+
+function activerPro(){
+  var user = DB.user();
+  if(!user){
+    toast('🔒 Connectez-vous pour activer Pro','err');
+    setTimeout(function(){ openModal('auth'); }, 400);
+    return;
+  }
+  // Ouvrir le modal de paiement Pro (Orange Money)
+  openProPaymentModal();
+}
+
+function openProPaymentModal(){
+  var existing = document.getElementById('overlay-pro-payment');
+  if(existing) { existing.classList.add('open'); document.body.style.overflow='hidden'; return; }
+  var overlay = document.createElement('div');
+  overlay.id = 'overlay-pro-payment';
+  overlay.className = 'overlay';
+  overlay.innerHTML =
+    '<div class="modal" style="max-width:440px">'+
+      '<div class="modal-head" style="background:linear-gradient(135deg,#1A1A2E,#2D1B0E);border-radius:12px 12px 0 0">'+
+        '<div class="modal-title" style="color:#fff">⭐ Activer YouGouYou Pro</div>'+
+        '<button class="modal-close" style="color:rgba(255,255,255,.6)" onclick="closeModal(\'pro-payment\')">✕</button>'+
+      '</div>'+
+      '<div class="modal-body">'+
+        '<div style="background:linear-gradient(135deg,#FFF3EE,#FFE4D0);border-radius:10px;padding:14px 16px;margin-bottom:16px;text-align:center">'+
+          '<div style="font-size:28px;font-weight:900;color:var(--or)">50 000 GNF</div>'+
+          '<div style="font-size:12px;color:var(--muted)">par mois · sans engagement</div>'+
+        '</div>'+
+        '<div class="fg">'+
+          '<label>📱 Votre numéro Orange Money</label>'+
+          '<input type="tel" id="pro-om-phone" placeholder="Ex: 620 00 00 00" style="width:100%;padding:10px 12px;border:1.5px solid var(--br);border-radius:8px;font-size:14px;font-family:inherit;outline:none">'+
+        '</div>'+
+        '<div class="fg" style="margin-top:10px">'+
+          '<label>🔑 Code PIN Orange Money (4 chiffres)</label>'+
+          '<div style="display:flex;gap:8px;justify-content:center;margin-top:6px">'+
+            '<input type="password" id="pro-pin1" maxlength="1" inputmode="numeric" style="width:48px;height:48px;text-align:center;font-size:20px;font-weight:800;border:1.5px solid var(--br);border-radius:8px;outline:none;font-family:inherit" oninput="this.value=this.value.replace(/\\D/,\'\');if(this.value)document.getElementById(\'pro-pin2\').focus()">'+
+            '<input type="password" id="pro-pin2" maxlength="1" inputmode="numeric" style="width:48px;height:48px;text-align:center;font-size:20px;font-weight:800;border:1.5px solid var(--br);border-radius:8px;outline:none;font-family:inherit" oninput="this.value=this.value.replace(/\\D/,\'\');if(this.value)document.getElementById(\'pro-pin3\').focus()">'+
+            '<input type="password" id="pro-pin3" maxlength="1" inputmode="numeric" style="width:48px;height:48px;text-align:center;font-size:20px;font-weight:800;border:1.5px solid var(--br);border-radius:8px;outline:none;font-family:inherit" oninput="this.value=this.value.replace(/\\D/,\'\');if(this.value)document.getElementById(\'pro-pin4\').focus()">'+
+            '<input type="password" id="pro-pin4" maxlength="1" inputmode="numeric" style="width:48px;height:48px;text-align:center;font-size:20px;font-weight:800;border:1.5px solid var(--br);border-radius:8px;outline:none;font-family:inherit">'+
+          '</div>'+
+        '</div>'+
+        '<button id="pro-pay-btn" style="width:100%;background:var(--or);color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:16px;box-shadow:0 4px 14px rgba(255,92,0,.3)" onclick="submitProPayment()">'+
+          '🟠 Payer et activer Pro'+
+        '</button>'+
+        '<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px">🔒 Paiement sécurisé Orange Money · Activation immédiate</div>'+
+      '</div>'+
+    '</div>';
+  document.body.appendChild(overlay);
+  overlay.classList.add('open');
+  document.body.style.overflow='hidden';
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) closeModal('pro-payment'); });
+}
+
+async function submitProPayment(){
+  var phone = (document.getElementById('pro-om-phone')||{}).value||'';
+  var pin = ['pro-pin1','pro-pin2','pro-pin3','pro-pin4'].map(function(id){
+    return (document.getElementById(id)||{}).value||'';
+  }).join('');
+  if(!phone||phone.length<8){ toast('📱 Entrez votre numéro Orange Money','err'); return; }
+  if(pin.length<4){ toast('🔑 Entrez votre code PIN (4 chiffres)','err'); return; }
+  var btn = document.getElementById('pro-pay-btn');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Traitement...'; }
+  var token = localStorage.getItem('ygy_token');
+  try {
+    var res = await fetch('/api/payment/pro', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},
+      body: JSON.stringify({ phone:'224'+phone.replace(/\s/g,''), pin:pin, amount:50000 })
+    });
+    var data = await res.json();
+    if(data.success){
+      closeModal('pro-payment');
+      // Mettre à jour le statut local
+      var u = DB.user()||{};
+      u.isPro = true;
+      u.proUntil = new Date(Date.now()+30*24*3600*1000).toISOString();
+      DB.login(u);
+      updateNav();
+      // Afficher succès
+      showProSuccess();
+    } else {
+      toast('❌ '+(data.error||'Paiement échoué'),'err');
+      if(btn){ btn.disabled=false; btn.textContent='🟠 Payer et activer Pro'; }
+    }
+  } catch(err){
+    toast('❌ Erreur réseau','err');
+    if(btn){ btn.disabled=false; btn.textContent='🟠 Payer et activer Pro'; }
+  }
+}
+
+function showProSuccess(){
+  var overlay = document.createElement('div');
+  overlay.className = 'overlay open';
+  overlay.innerHTML =
+    '<div class="modal" style="max-width:380px;text-align:center">'+
+      '<div class="modal-body" style="padding:40px 32px">'+
+        '<div style="font-size:56px;margin-bottom:12px">⭐</div>'+
+        '<div style="font-size:22px;font-weight:900;color:var(--ink);margin-bottom:8px">Félicitations !</div>'+
+        '<div style="font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:24px">'+
+          'Votre compte <strong style="color:var(--or)">YouGouYou Pro</strong> est maintenant actif.<br>'+
+          'Profitez de tous vos avantages dès maintenant !'+
+        '</div>'+
+        '<button style="background:var(--or);color:#fff;border:none;border-radius:10px;padding:12px 28px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit" '+
+          'onclick="this.closest(\'.overlay\').remove();document.body.style.overflow=\'\';goTo(\'dashboard\')">'+
+          'Voir mon tableau de bord →'+
+        '</button>'+
+      '</div>'+
+    '</div>';
+  document.body.appendChild(overlay);
+  document.body.style.overflow='hidden';
 }
 function scrollToAds(){document.getElementById('ads-section').scrollIntoView({behavior:'smooth'});}
 
@@ -2198,18 +2581,74 @@ function populateCities(){
 }
 
 function renderNavCats(){
-  var el=document.getElementById('nav-cats-bar');if(!el)return;
-  var allItems=CATS;
-  el.innerHTML=allItems.map(function(cat,i){
-    var subs=cat.sub?cat.sub.map(function(s){
-      return '<div class="cat-sub-item" onclick="filterSubCat(event,\''+cat.n+'\',\''+s+'\')">'+s+'</div>';
-    }).join(''):'';
-    var arrow=cat.sub?' <span class="cat-arrow">▾</span>':'';
-    return '<div class="ncat'+(i===0?' active':'')+(cat.sub?' has-sub':'')+'" onclick="filterCat(this,\''+cat.n+'\')">'
-      +'<span class="em">'+cat.e+'</span><span class="cat-label">'+cat.n+'</span>'+arrow
-      +(subs?'<div class="cat-dropdown">'+subs+'</div>':'')
-      +'</div>';
+  var el=document.getElementById('nav-cats-bar');
+  if(!el) return;
+  el.innerHTML = CATS.map(function(cat,i){
+    var dropHtml = '';
+    if(cat.sub && cat.sub.length){
+      if(typeof cat.sub[0]==='object'){
+        // 3 niveaux : sub = [{n, items:[...]}]
+        dropHtml = cat.sub.map(function(sub){
+          var itemsHtml = (sub.items||[]).map(function(item){
+            return '<div class="cat-item"'+
+              ' data-cat="'+cat.n.replace(/"/g,'&quot;')+'"'+
+              ' data-sub="'+sub.n.replace(/"/g,'&quot;')+'"'+
+              ' data-item="'+item.replace(/"/g,'&quot;')+'"'+
+              ' onclick="onCatItem(this)">'+item+'</div>';
+          }).join('');
+          return '<div class="cat-sub-grp">'+
+            '<div class="cat-sub-grp-hd"'+
+              ' data-cat="'+cat.n.replace(/"/g,'&quot;')+'"'+
+              ' data-sub="'+sub.n.replace(/"/g,'&quot;')+'"'+
+              ' onclick="onCatSub(event,this)">'+
+              sub.n+'<span class="sub-arr">&#x25B8;</span>'+
+            '</div>'+
+            (itemsHtml?'<div class="cat-items-pnl">'+itemsHtml+'</div>':'')+
+          '</div>';
+        }).join('');
+      } else {
+        // 2 niveaux (strings)
+        dropHtml = cat.sub.map(function(s){
+          return '<div class="cat-sub-item"'+
+            ' data-cat="'+cat.n.replace(/"/g,'&quot;')+'"'+
+            ' data-sub="'+s.replace(/"/g,'&quot;')+'"'+
+            ' onclick="onCatSub(event,this)">'+s+'</div>';
+        }).join('');
+      }
+    }
+    var arrow = cat.sub ? '<span class="cat-arrow">&#x25BE;</span>' : '';
+    return '<div class="ncat'+(i===0?' active':'')+(cat.sub?' has-sub':'')+'"'+
+      ' data-cat="'+cat.n.replace(/"/g,'&quot;')+'"'+
+      ' onclick="onCatClick(this)">'+
+      '<span class="em">'+cat.e+'</span>'+
+      '<span class="cat-label">'+cat.n+'</span>'+arrow+
+      (dropHtml?'<div class="cat-dropdown">'+dropHtml+'</div>':'')+
+    '</div>';
   }).join('');
+}
+function onCatClick(el){ filterCat(el, el.getAttribute('data-cat')); }
+function onCatSub(e,el){ e.stopPropagation(); filterSubCat(e, el.getAttribute('data-cat'), el.getAttribute('data-sub')); }
+function onCatItem(el){
+  var cat=el.getAttribute('data-cat'), sub=el.getAttribute('data-sub'), item=el.getAttribute('data-item');
+  document.querySelectorAll('.ncat').forEach(function(n){
+    n.classList.toggle('active', n.getAttribute('data-cat')===cat);
+  });
+  var ads=DB.ads().filter(function(a){ return a.cat===cat; });
+  var fg=document.getElementById('featured-grid');
+  var rg=document.getElementById('recent-grid');
+  var sb=document.getElementById('sb-ads');
+  if(sb) sb.textContent=ads.length;
+  var empty='<div style="grid-column:1/-1;text-align:center;padding:36px;color:var(--muted)">'+
+    '<div style="font-size:36px;margin-bottom:8px">🔍</div>'+
+    '<div style="font-weight:700;margin-bottom:4px">Aucune annonce pour l\'instant</div>'+
+    '<div style="font-size:12px">Soyez le premier dans <strong>'+cat+' › '+sub+' › '+item+'</strong></div>'+
+  '</div>';
+  if(fg) fg.innerHTML = ads.filter(function(a){return a.feat||a.featured;}).slice(0,4).map(function(a){return adCard(a,true);}).join('') || empty;
+  if(rg) rg.innerHTML = ads.filter(function(a){return !a.feat&&!a.featured;}).slice(0,12).map(function(a){return adCard(a,false);}).join('') || '';
+  var banner=document.getElementById('search-banner');
+  if(banner){ banner.style.display='flex'; banner.innerHTML='<span style="font-size:13px;font-weight:700">📂 <strong style="color:var(--or)">'+cat+'</strong> › '+sub+' › '+item+'</span><button onclick="clearSearch()" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--muted);font-family:inherit;font-weight:700;margin-left:auto">✕</button>'; }
+  goTo('home');
+  setTimeout(function(){ var s=document.getElementById('ads-section'); if(s) s.scrollIntoView({behavior:'smooth'}); },100);
 }
 function filterSubCat(e,catName,subName){
   e.stopPropagation();
@@ -2263,41 +2702,58 @@ function filterCat(el,name){
 }
 
 function fetchAdsFromAPI(callback){
-  fetch('/api/ads?limit=100')
+  fetch('/api/ads?limit=200')
   .then(function(r){return r.json();})
   .then(function(data){
     if(data.ads && data.ads.length){
-      // Normaliser le format pour DB local
       var normalized = data.ads.map(function(a){
         return {
-          id: a._id,
-          _id: a._id,
-          t: a.title||'',
-          p: a.price||0,
-          e: a.emoji||'📦',
-          cat: a.category||'',
-          city: a.city||'',
-          desc: a.description||'',
-          seller: a.sellerName||'',
-          sellerName: a.sellerName||'',
+          id: a._id, _id: a._id,
+          t: a.title||'', p: a.price||0,
+          e: a.emoji||'📦', cat: a.category||'',
+          subcat: a.subCategory||'', subitem: a.subItem||'',
+          city: a.city||'', desc: a.description||'',
+          seller: a.sellerName||'', sellerName: a.sellerName||'',
           sellerId: String(a.seller||''),
           date: a.createdAt ? new Date(a.createdAt).toLocaleDateString('fr-FR') : 'Récent',
-          views: a.views||0,
-          feat: a.featured||false,
+          views: a.views||0, feat: a.featured||false,
           photos: a.photos||[],
+          nego: a.nego||false,
           bg: 'linear-gradient(135deg,#FFF3EE,#FFB899)',
           tags: [a.category||'']
         };
       });
       DB._d.ads = normalized;
       DB.save();
+      // Mettre à jour les compteurs catégories dynamiquement
+      syncCatCounts(normalized);
     }
     if(callback) callback();
   })
-  .catch(function(){
-    // API indisponible → utiliser le cache local
-    if(callback) callback();
+  .catch(function(){ if(callback) callback(); });
+}
+
+// Synchronise les compteurs de catégories avec les annonces réelles
+function syncCatCounts(ads){
+  CATS.forEach(function(cat){
+    var count = ads.filter(function(a){ return a.cat === cat.n; }).length;
+    cat.c = count;
   });
+  // Mettre à jour l'affichage si les éléments nav sont visibles
+  document.querySelectorAll('.ncat').forEach(function(el){
+    var catName = el.getAttribute('data-cat');
+    var cat = CATS.find(function(c){ return c.n === catName; });
+    // (optionnel : afficher le badge count)
+  });
+}
+
+// Auto-refresh des annonces toutes les 60s (synchro automatique)
+var _adsRefreshTimer = null;
+function startAdsAutoRefresh(){
+  if(_adsRefreshTimer) clearInterval(_adsRefreshTimer);
+  _adsRefreshTimer = setInterval(function(){
+    fetchAdsFromAPI(function(){ renderAds(); });
+  }, 60000);
 }
 
 function renderAds(){
@@ -6303,6 +6759,7 @@ document.addEventListener('DOMContentLoaded',function(){
     setTimeout(initInfiniteScroll, 500);
     setTimeout(markSeenAds, 800);
     setTimeout(startMsgPolling, 2000);
+    startAdsAutoRefresh(); // Synchro auto toutes les 60s
   });
   startInactivityWatch();
   // Init PWA
@@ -6521,6 +6978,100 @@ document.addEventListener('DOMContentLoaded',function(){
   </div>
   <button class="pwa-install-btn" onclick="installPWA()">Installer</button>
   <button class="pwa-dismiss" onclick="dismissPWA()">✕</button>
+</div>
+
+<!-- ══ PAGE PRO ══ -->
+<div id="page-pro" class="page">
+  <div class="pro-page-wrap">
+
+    <!-- Bouton retour -->
+    <button onclick="goTo('home')" style="display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:13px;font-family:inherit;padding:0;margin-bottom:24px">
+      ← Retour à l'accueil
+    </button>
+
+    <!-- Hero -->
+    <div class="pro-hero">
+      <div class="pro-hero-badge">⭐ Offre commerçants</div>
+      <div class="pro-hero-title"><span>YouGouYou</span> Pro</div>
+      <div class="pro-hero-sub">Boostez votre visibilité et vendez plus vite avec notre abonnement Pro dédié aux commerçants guinéens.</div>
+      <div class="pro-hero-price">
+        <div class="pro-hero-price-amt">50 000 GNF</div>
+        <div class="pro-hero-price-unit">/ mois · Sans engagement</div>
+      </div>
+    </div>
+
+    <!-- Avantages -->
+    <h2 style="font-size:20px;font-weight:800;margin-bottom:16px;color:var(--ink)">Tout ce que vous obtenez</h2>
+    <div class="pro-features-grid">
+      <div class="pro-feature-card">
+        <div class="pro-feature-icon">⭐</div>
+        <div class="pro-feature-title">Badge PRO visible</div>
+        <div class="pro-feature-desc">Votre profil et vos annonces affichent un badge Pro qui inspire confiance aux acheteurs.</div>
+      </div>
+      <div class="pro-feature-card">
+        <div class="pro-feature-icon">📈</div>
+        <div class="pro-feature-title">Priorité dans les résultats</div>
+        <div class="pro-feature-desc">Vos annonces apparaissent en tête des résultats de recherche pour plus de visibilité.</div>
+      </div>
+      <div class="pro-feature-card">
+        <div class="pro-feature-icon">📋</div>
+        <div class="pro-feature-title">Jusqu'à 12 annonces</div>
+        <div class="pro-feature-desc">Publiez jusqu'à 12 annonces simultanément (contre 3 en version gratuite).</div>
+      </div>
+      <div class="pro-feature-card">
+        <div class="pro-feature-icon">📊</div>
+        <div class="pro-feature-title">Statistiques avancées</div>
+        <div class="pro-feature-desc">Accédez aux statistiques de vos annonces : vues, contacts reçus, taux de conversion.</div>
+      </div>
+      <div class="pro-feature-card">
+        <div class="pro-feature-icon">🏪</div>
+        <div class="pro-feature-title">Boutique personnalisée</div>
+        <div class="pro-feature-desc">Une page boutique dédiée avec votre logo, description et catalogue de produits.</div>
+      </div>
+      <div class="pro-feature-card">
+        <div class="pro-feature-icon">🔔</div>
+        <div class="pro-feature-title">Notifications prioritaires</div>
+        <div class="pro-feature-desc">Recevez des alertes instantanées dès qu'un acheteur vous contacte.</div>
+      </div>
+    </div>
+
+    <!-- Tableau comparatif -->
+    <h2 style="font-size:20px;font-weight:800;margin-bottom:16px;color:var(--ink)">Gratuit vs Pro</h2>
+    <table class="pro-compare-table">
+      <thead>
+        <tr>
+          <th>Fonctionnalité</th>
+          <th style="text-align:center">Gratuit</th>
+          <th style="text-align:center;background:var(--or)">⭐ Pro</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Nombre d'annonces</td><td style="text-align:center;color:var(--muted)">3</td><td style="text-align:center;font-weight:800;color:var(--or)">12</td></tr>
+        <tr><td>Badge Pro visible</td><td style="text-align:center"><span class="pro-cross">—</span></td><td style="text-align:center"><span class="pro-check">✓</span></td></tr>
+        <tr><td>Priorité dans les résultats</td><td style="text-align:center"><span class="pro-cross">—</span></td><td style="text-align:center"><span class="pro-check">✓</span></td></tr>
+        <tr><td>Statistiques avancées</td><td style="text-align:center"><span class="pro-cross">—</span></td><td style="text-align:center"><span class="pro-check">✓</span></td></tr>
+        <tr><td>Boutique personnalisée</td><td style="text-align:center"><span class="pro-cross">—</span></td><td style="text-align:center"><span class="pro-check">✓</span></td></tr>
+        <tr><td>Support prioritaire</td><td style="text-align:center"><span class="pro-cross">—</span></td><td style="text-align:center"><span class="pro-check">✓</span></td></tr>
+        <tr><td>Annonces à la une (vedette)</td><td style="text-align:center;color:var(--muted)">Payant</td><td style="text-align:center;color:var(--or);font-weight:700">Inclus ×2/mois</td></tr>
+      </tbody>
+    </table>
+
+    <!-- CTA -->
+    <div class="pro-cta-box">
+      <div class="pro-cta-title">Prêt à booster vos ventes ? 🚀</div>
+      <div class="pro-cta-sub">
+        Rejoignez les commerçants qui font confiance à YouGouYou Pro.<br>
+        Paiement simple par <strong>Orange Money</strong> — Activation immédiate.
+      </div>
+      <button class="pro-cta-btn" onclick="activerPro()">
+        Passer à Pro — 50 000 GNF/mois
+      </button>
+      <div style="font-size:12px;color:var(--muted);margin-top:12px">
+        Sans engagement · Résiliable à tout moment · Support 7j/7
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <!-- ══ PAGE MESSAGES ══ -->
