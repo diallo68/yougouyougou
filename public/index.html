@@ -2869,6 +2869,67 @@ function goTo(page){
   }
 }
 
+// ══ Config visuelle par plan ══
+var PRO_MODAL_CFG = {
+  starter: {
+    icon: '⭐',
+    label: 'Starter',
+    priceLine: '50 000 GNF/mois',
+    annonces: 9,
+    badge: 'PRO',
+    stats: 'Basiques',
+    vedette: '2/mois',
+    priorite: 'Standard',
+    // Couleurs Jaune/Ambre
+    headerBg:  'linear-gradient(135deg,#78350F,#92400E)',
+    accentBg:  'linear-gradient(135deg,#FEF3C7,#FDE68A)',
+    accentTxt: '#92400E',
+    btnBg:     'linear-gradient(135deg,#D97706,#B45309)',
+    ringColor: '#FDE68A',
+    tagBg:     'rgba(217,119,6,.12)',
+    tagColor:  '#92400E',
+    perks: ['9 annonces simultanées', 'Badge PRO visible', 'Priorité résultats', 'Stats de base', '2 vedettes/mois']
+  },
+  business: {
+    icon: '🔷',
+    label: 'Business',
+    priceLine: '120 000 GNF / 3 mois',
+    annonces: 12,
+    badge: 'PRO Renforcé',
+    stats: 'Avancées',
+    vedette: '5/mois',
+    priorite: 'Renforcée',
+    // Couleurs Bleu
+    headerBg:  'linear-gradient(135deg,#1E3A5F,#1D4ED8)',
+    accentBg:  'linear-gradient(135deg,#EFF6FF,#DBEAFE)',
+    accentTxt: '#1D4ED8',
+    btnBg:     'linear-gradient(135deg,#1D4ED8,#1E40AF)',
+    ringColor: '#BFDBFE',
+    tagBg:     'rgba(29,78,216,.12)',
+    tagColor:  '#1D4ED8',
+    perks: ['12 annonces simultanées', 'Badge PRO Renforcé', 'Priorité renforcée', 'Stats avancées', '5 vedettes/mois']
+  },
+  premium: {
+    icon: '👑',
+    label: 'Premium',
+    priceLine: '360 000 GNF / an',
+    annonces: 18,
+    badge: 'PRO Gold',
+    stats: 'Complètes + export',
+    vedette: 'Illimitées',
+    priorite: 'Maximale (Top 3)',
+    // Couleurs Orange/Or
+    headerBg:  'linear-gradient(135deg,#7C2D12,#C2410C)',
+    accentBg:  'linear-gradient(135deg,#FFF7ED,#FFEDD5)',
+    accentTxt: '#C2410C',
+    btnBg:     'linear-gradient(135deg,#FF5C00,#D94E00)',
+    ringColor: '#FFEDD5',
+    tagBg:     'rgba(255,92,0,.12)',
+    tagColor:  '#C2410C',
+    perks: ['18 annonces simultanées', 'Badge PRO Gold', 'Priorité maximale (Top 3)', 'Stats complètes + export', 'Vedette illimitée']
+  }
+};
+
 function activerPro(plan, amount){
   plan = plan || 'starter';
   amount = amount || 50000;
@@ -2878,7 +2939,275 @@ function activerPro(plan, amount){
     setTimeout(function(){ openModal('auth'); }, 400);
     return;
   }
+
+  // ── Si l'utilisateur a DÉJÀ un abonnement Pro actif ──
+  var proActive = user.isPro && user.proUntil && new Date(user.proUntil) > new Date();
+  if(proActive){
+    // Ouvrir le modal Boutique coloré selon SON plan actif
+    openBoutiqueProModal(user.proPlan || 'starter');
+    return;
+  }
+
+  // Sinon : modal de paiement
   openProPaymentModal(plan, amount);
+}
+
+// Modal "Créer Votre Boutique" — coloré selon le plan actif de l'utilisateur
+function openBoutiqueProModal(plan){
+  plan = plan || 'starter';
+  var cfg = PRO_MODAL_CFG[plan] || PRO_MODAL_CFG.starter;
+  var u = DB.user()||{};
+  var b = u.boutique || {};
+
+  var existing = document.getElementById('overlay-boutique-pro-modal');
+  if(existing) existing.remove();
+
+  var perksHtml = [
+    cfg.icon+' Badge '+cfg.badge,
+    '📋 '+cfg.annonces+' annonces simultanées',
+    '📊 Statistiques '+cfg.stats,
+    '⭐ Vedette '+cfg.vedette,
+    '🎯 Priorité '+cfg.priorite
+  ].map(function(p){
+    return '<span style="background:'+cfg.tagBg+';color:'+cfg.tagColor+';font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px">'+p+'</span>';
+  }).join('');
+
+  var overlay = document.createElement('div');
+  overlay.id = 'overlay-boutique-pro-modal';
+  overlay.className = 'overlay';
+  overlay.style.zIndex = '3000';
+
+  overlay.innerHTML =
+    '<div class="modal" style="max-width:520px;border-radius:16px;overflow:hidden">'+
+      // ── En-tête coloré ──
+      '<div style="background:'+cfg.headerBg+';padding:22px 24px;position:relative">'+
+        '<button onclick="closeBoutiqueProModal()" style="position:absolute;top:14px;right:16px;background:rgba(255,255,255,.12);border:none;color:#fff;width:28px;height:28px;border-radius:50%;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit">✕</button>'+
+        '<div style="display:flex;align-items:center;gap:12px">'+
+          '<div style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">'+cfg.icon+'</div>'+
+          '<div>'+
+            '<div style="font-size:11px;color:rgba(255,255,255,.6);font-weight:700;text-transform:uppercase;letter-spacing:.5px">Abonnement actif</div>'+
+            '<div style="font-size:20px;font-weight:900;color:#fff">Pro '+cfg.label+'</div>'+
+            '<div style="font-size:12px;color:rgba(255,255,255,.65);margin-top:1px">'+cfg.priceLine+'</div>'+
+          '</div>'+
+        '</div>'+
+        // Avantages
+        '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:14px">'+perksHtml+'</div>'+
+      '</div>'+
+      // ── Corps : formulaire boutique ──
+      '<div style="padding:22px 24px;max-height:65vh;overflow-y:auto">'+
+        '<div style="font-size:15px;font-weight:800;color:#1A1A2E;margin-bottom:16px">🏪 '+(b.name ? 'Ma Boutique — '+b.name : 'Créer Votre Boutique')+'</div>'+
+        // Nom boutique
+        '<div style="margin-bottom:12px">'+
+          '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Nom de la boutique *</div>'+
+          '<input id="bpm-name" type="text" value="'+(b.name||'')+'" placeholder="Ex: Boutique Mode Conakry" style="width:100%;border:1.5px solid var(--br);border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none" onfocus="this.style.borderColor=\''+cfg.accentTxt+'\'" onblur="this.style.borderColor=\'var(--br)\'">'+
+        '</div>'+
+        // Catégorie
+        '<div style="margin-bottom:12px">'+
+          '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Catégorie principale *</div>'+
+          '<select id="bpm-cat" onchange="onBpmCatChange(this.value)" style="width:100%;border:1.5px solid var(--br);border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none;background:#fff">'+
+            '<option value="">Choisir une catégorie...</option>'+
+            (typeof CATS!=='undefined' ? CATS.map(function(c){ return '<option value="'+c.n+'"'+(b.category===c.n?' selected':'')+'>'+c.e+' '+c.n+'</option>'; }).join('') : '')+
+          '</select>'+
+        '</div>'+
+        // Sous-catégorie (niveau 2)
+        '<div id="bpm-subcat-block" style="display:none;margin-bottom:12px">'+
+          '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Sous-catégorie</div>'+
+          '<div id="bpm-subcat-list" style="display:flex;flex-wrap:wrap;gap:6px"></div>'+
+          '<input type="hidden" id="bpm-subcat-val" value="'+(b.subcat||'')+'">'+
+        '</div>'+
+        // Sous-sous-catégorie (niveau 3)
+        '<div id="bpm-subsubcat-block" style="display:none;margin-bottom:12px">'+
+          '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Spécialité</div>'+
+          '<div id="bpm-subsubcat-list" style="display:flex;flex-wrap:wrap;gap:6px"></div>'+
+          '<input type="hidden" id="bpm-subsubcat-val" value="'+(b.subsubcat||'')+'">'+
+        '</div>'+
+        // Description
+        '<div style="margin-bottom:12px">'+
+          '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Description</div>'+
+          '<textarea id="bpm-desc" rows="2" placeholder="Décrivez votre boutique..." style="width:100%;border:1.5px solid var(--br);border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none;resize:none" onfocus="this.style.borderColor=\''+cfg.accentTxt+'\'" onblur="this.style.borderColor=\'var(--br)\'">'+(b.description||b.desc||'')+'</textarea>'+
+        '</div>'+
+        // Ligne WhatsApp + Adresse
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px">'+
+          '<div>'+
+            '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">WhatsApp</div>'+
+            '<input id="bpm-wa" type="tel" value="'+(b.whatsapp||u.phone||'')+'" placeholder="620 00 00 00" style="width:100%;border:1.5px solid var(--br);border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none">'+
+          '</div>'+
+          '<div>'+
+            '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Adresse / Quartier</div>'+
+            '<input id="bpm-addr" type="text" value="'+(b.address||'')+'" placeholder="Ex: Matam, Conakry" style="width:100%;border:1.5px solid var(--br);border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none">'+
+          '</div>'+
+        '</div>'+
+        // Bouton Sauvegarder
+        '<button id="bpm-save-btn" onclick="saveBoutiqueFromModal(\''+plan+'\')" style="width:100%;background:'+cfg.btnBg+';color:#fff;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(0,0,0,.2)">'+
+          '🏪 '+(b.name ? 'Mettre à jour ma boutique' : 'Créer ma boutique')+'  →'+
+        '</button>'+
+        '<div style="text-align:center;margin-top:10px">'+
+          '<span style="font-size:12px;color:var(--muted);cursor:pointer;font-weight:600" onclick="closeBoutiqueProModal();showDashTab(\'boutique\')">Accéder à la gestion complète →</span>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+
+  document.body.appendChild(overlay);
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) closeBoutiqueProModal(); });
+
+  // Déclencher les sous-cats si catégorie pré-existante
+  if(b.category){
+    setTimeout(function(){ onBpmCatChange(b.category, b.subcat, b.subsubcat); }, 80);
+  }
+}
+
+function closeBoutiqueProModal(){
+  var ov = document.getElementById('overlay-boutique-pro-modal');
+  if(ov){ ov.classList.remove('open'); setTimeout(function(){ if(ov.parentNode) ov.parentNode.removeChild(ov); }, 250); }
+  document.body.style.overflow = '';
+}
+
+// Gestion hiérarchie catégories dans le modal boutique
+function onBpmCatChange(catName, preselSubcat, preselSubsubcat){
+  var cat = (typeof CATS!=='undefined') ? CATS.find(function(c){ return c.n===catName; }) : null;
+  var sub2Block = document.getElementById('bpm-subcat-block');
+  var sub3Block = document.getElementById('bpm-subsubcat-block');
+  var sub2List  = document.getElementById('bpm-subcat-list');
+  var sub3List  = document.getElementById('bpm-subsubcat-list');
+  var sub2Val   = document.getElementById('bpm-subcat-val');
+  var sub3Val   = document.getElementById('bpm-subsubcat-val');
+  var u = DB.user()||{};
+  var plan = u.proPlan||'starter';
+  var cfg = PRO_MODAL_CFG[plan]||PRO_MODAL_CFG.starter;
+
+  if(!cat || !cat.sub || !cat.sub.length){
+    if(sub2Block) sub2Block.style.display='none';
+    if(sub3Block) sub3Block.style.display='none';
+    return;
+  }
+
+  var is3 = typeof cat.sub[0]==='object';
+  if(sub2Block) sub2Block.style.display='block';
+  if(sub3Block) sub3Block.style.display='none';
+
+  if(sub2List){
+    var subs = is3 ? cat.sub : cat.sub.map(function(s){ return {n:s, items:[]}; });
+    sub2List.innerHTML = subs.map(function(sub){
+      var sn = is3 ? sub.n : sub;
+      var isSel = preselSubcat && preselSubcat===sn;
+      return '<div class="bpm-sub2-chip" data-sub="'+sn+'" onclick="onBpmSub2Click(this,\''+sn+'\','+JSON.stringify(is3?cat.sub:[])+',\''+cfg.accentTxt+'\')" '
+        +'style="background:'+(isSel?cfg.tagBg:'#F1F5F9')+';border:1.5px solid '+(isSel?cfg.accentTxt:'#E2E8F0')+';color:'+(isSel?cfg.accentTxt:'var(--ink)')+';border-radius:8px;padding:6px 13px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s">'
+        +sn+'</div>';
+    }).join('');
+    if(sub2Val && preselSubcat) sub2Val.value = preselSubcat;
+  }
+
+  // Niveau 3 si sous-cat pré-sélectionnée
+  if(preselSubcat && is3 && sub3Block && sub3List){
+    var sub = cat.sub.find(function(s){ return s.n===preselSubcat; });
+    if(sub && sub.items && sub.items.length){
+      var u2 = DB.user()||{};
+      var cfg2 = PRO_MODAL_CFG[u2.proPlan||'starter']||PRO_MODAL_CFG.starter;
+      sub3List.innerHTML = sub.items.map(function(item){
+        var isSel = preselSubsubcat && preselSubsubcat===item;
+        return '<div class="bpm-sub3-chip" data-item="'+item+'" onclick="onBpmSub3Click(this,\''+item+'\',\''+cfg2.accentTxt+'\')" '
+          +'style="background:'+(isSel?cfg2.tagBg:'#F8FAFC')+';border:1.5px solid '+(isSel?cfg2.accentTxt:'#E2E8F0')+';color:'+(isSel?cfg2.accentTxt:'var(--ink)')+';border-radius:8px;padding:5px 11px;font-size:11.5px;font-weight:600;cursor:pointer;transition:all .15s">'
+          +item+'</div>';
+      }).join('');
+      if(sub3Val && preselSubsubcat) sub3Val.value = preselSubsubcat;
+      sub3Block.style.display='block';
+    }
+  }
+}
+
+function onBpmSub2Click(el, subName, subsArr, accentColor){
+  document.querySelectorAll('.bpm-sub2-chip').forEach(function(c){
+    c.style.background='#F1F5F9'; c.style.borderColor='#E2E8F0'; c.style.color='var(--ink)';
+  });
+  el.style.background='rgba(0,0,0,.05)'; el.style.borderColor=accentColor; el.style.color=accentColor;
+  var val = document.getElementById('bpm-subcat-val');
+  if(val) val.value = subName;
+
+  // Niveau 3
+  var sub3Block = document.getElementById('bpm-subsubcat-block');
+  var sub3List  = document.getElementById('bpm-subsubcat-list');
+  var sub3Val   = document.getElementById('bpm-subsubcat-val');
+  if(!subsArr || !subsArr.length || !sub3Block){ if(sub3Block) sub3Block.style.display='none'; return; }
+  var sub = subsArr.find ? subsArr.find(function(s){ return (s.n||s)===subName; }) : null;
+  if(sub && sub.items && sub.items.length){
+    sub3List.innerHTML = sub.items.map(function(item){
+      return '<div class="bpm-sub3-chip" data-item="'+item+'" onclick="onBpmSub3Click(this,\''+item+'\',\''+accentColor+'\')" '
+        +'style="background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:8px;padding:5px 11px;font-size:11.5px;font-weight:600;cursor:pointer;transition:all .15s">'
+        +item+'</div>';
+    }).join('');
+    if(sub3Val) sub3Val.value='';
+    sub3Block.style.display='block';
+  } else {
+    if(sub3Val) sub3Val.value='';
+    if(sub3Block) sub3Block.style.display='none';
+  }
+}
+
+function onBpmSub3Click(el, itemName, accentColor){
+  document.querySelectorAll('.bpm-sub3-chip').forEach(function(c){
+    c.style.background='#F8FAFC'; c.style.borderColor='#E2E8F0'; c.style.color='var(--ink)';
+  });
+  el.style.background='rgba(0,0,0,.05)'; el.style.borderColor=accentColor; el.style.color=accentColor;
+  var val = document.getElementById('bpm-subsubcat-val');
+  if(val) val.value = itemName;
+}
+
+function saveBoutiqueFromModal(plan){
+  var nm   = (document.getElementById('bpm-name')||{}).value||'';
+  var cat  = (document.getElementById('bpm-cat')||{}).value||'';
+  var sub  = (document.getElementById('bpm-subcat-val')||{}).value||'';
+  var sub2 = (document.getElementById('bpm-subsubcat-val')||{}).value||'';
+  var desc = (document.getElementById('bpm-desc')||{}).value||'';
+  var wa   = (document.getElementById('bpm-wa')||{}).value||'';
+  var addr = (document.getElementById('bpm-addr')||{}).value||'';
+
+  if(!nm.trim()){ toast('📝 Le nom de la boutique est obligatoire','err'); return; }
+  if(!cat){ toast('📂 Choisissez une catégorie principale','err'); return; }
+
+  var cfg = PRO_MODAL_CFG[plan]||PRO_MODAL_CFG.starter;
+  var btn = document.getElementById('bpm-save-btn');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Sauvegarde...'; }
+
+  var payload = { name:nm, category:cat, description:desc, whatsapp:wa, address:addr };
+  if(sub)  payload.subcat    = sub;
+  if(sub2) payload.subsubcat = sub2;
+
+  var token = localStorage.getItem('ygy_token');
+  fetch('/api/me/boutique', {
+    method:'PUT',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},
+    body: JSON.stringify(payload)
+  })
+  .then(function(r){ return r.ok ? r.json() : Promise.reject(r.status); })
+  .then(function(){
+    _boutiqueData = Object.assign(_boutiqueData||{}, payload);
+    afterBoutiqueSave(nm, payload, cfg);
+  })
+  .catch(function(){
+    // Fallback local
+    _boutiqueData = Object.assign(_boutiqueData||{}, payload);
+    afterBoutiqueSave(nm, payload, cfg);
+  });
+}
+
+function afterBoutiqueSave(nm, payload, cfg){
+  // Mettre à jour le user local
+  var u = DB.user()||{};
+  u.boutique = Object.assign(u.boutique||{}, payload);
+  DB.login(u);
+
+  // Fermer le modal
+  closeBoutiqueProModal();
+
+  // Toast succès + redirection vers boutique
+  toast('✅ Boutique « '+nm+' » sauvegardée !','ok');
+  setTimeout(function(){
+    loadDash();
+    goTo('dashboard');
+    setTimeout(function(){ showDashTab('boutique'); }, 300);
+  }, 600);
 }
 
 var _proPlanLabels = { starter:'Starter — 50 000 GNF/mois', business:'Business — 120 000 GNF/3 mois', premium:'Premium — 360 000 GNF/an' };
@@ -2886,20 +3215,21 @@ var _proPlanLabels = { starter:'Starter — 50 000 GNF/mois', business:'Business
 function openProPaymentModal(plan, amount){
   var existing = document.getElementById('overlay-pro-payment');
   if(existing) existing.remove();
+  var cfg = PRO_MODAL_CFG[plan]||PRO_MODAL_CFG.starter;
   var label = _proPlanLabels[plan] || (amount.toLocaleString('fr-FR')+' GNF');
   var overlay = document.createElement('div');
   overlay.id = 'overlay-pro-payment';
   overlay.className = 'overlay';
   overlay.innerHTML =
-    '<div class="modal" style="max-width:440px">'+
-      '<div class="modal-head" style="background:linear-gradient(135deg,#1A1A2E,#2D1B0E);border-radius:12px 12px 0 0">'+
-        '<div class="modal-title" style="color:#fff">⭐ Activer YouGouYou Pro</div>'+
+    '<div class="modal" style="max-width:440px;border-radius:16px;overflow:hidden">'+
+      '<div class="modal-head" style="background:'+cfg.headerBg+';border-radius:12px 12px 0 0">'+
+        '<div class="modal-title" style="color:#fff">'+cfg.icon+' Activer YouGouYou Pro</div>'+
         '<button class="modal-close" style="color:rgba(255,255,255,.6)" onclick="closeModal(\'pro-payment\')">✕</button>'+
       '</div>'+
       '<div class="modal-body">'+
-        '<div style="background:linear-gradient(135deg,#FFF3EE,#FFE4D0);border-radius:10px;padding:14px 16px;margin-bottom:16px;text-align:center">'+
-          '<div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">Formule sélectionnée</div>'+
-          '<div style="font-size:16px;font-weight:800;color:var(--or)">'+label+'</div>'+
+        '<div style="background:'+cfg.accentBg+';border-radius:10px;padding:14px 16px;margin-bottom:16px;text-align:center">'+
+          '<div style="font-size:11px;color:'+cfg.accentTxt+';font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">Formule sélectionnée</div>'+
+          '<div style="font-size:16px;font-weight:800;color:'+cfg.accentTxt+'">'+label+'</div>'+
         '</div>'+
         '<div class="fg">'+
           '<label>📱 Votre numéro Orange Money</label>'+
@@ -2914,7 +3244,7 @@ function openProPaymentModal(plan, amount){
             '<input type="password" id="pro-pin4" maxlength="1" inputmode="numeric" style="width:48px;height:48px;text-align:center;font-size:20px;font-weight:800;border:1.5px solid var(--br);border-radius:8px;outline:none;font-family:inherit">'+
           '</div>'+
         '</div>'+
-        '<button id="pro-pay-btn" style="width:100%;background:var(--or);color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:16px;box-shadow:0 4px 14px rgba(255,92,0,.3)" onclick="submitProPayment(\''+plan+'\','+amount+')">'+
+        '<button id="pro-pay-btn" style="width:100%;background:'+cfg.btnBg+';color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:16px;box-shadow:0 4px 14px rgba(0,0,0,.2)" onclick="submitProPayment(\''+plan+'\','+amount+')">'+
           '🟠 Payer et activer Pro'+
         '</button>'+
         '<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px">🔒 Paiement sécurisé Orange Money · Activation immédiate</div>'+
@@ -2941,44 +3271,69 @@ async function submitProPayment(plan, amount){
     var res = await fetch('/api/payment/pro', {
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},
-      body: JSON.stringify({ phone:'224'+phone.replace(/\s/g,''), pin:pin, amount:50000 })
+      body: JSON.stringify({ phone:'224'+phone.replace(/\s/g,''), pin:pin, amount:amount, plan:plan })
     });
     var data = await res.json();
     if(data.success){
       closeModal('pro-payment');
-      // Mettre à jour le statut local
+      // Mettre à jour le statut local avec le plan correct
       var u = DB.user()||{};
       u.isPro = true;
-      u.proUntil = new Date(Date.now()+30*24*3600*1000).toISOString();
+      u.proPlan = plan;
+      // Durée selon plan : starter=30j, business=90j, premium=365j
+      var durees = { starter:30, business:90, premium:365 };
+      var jours = durees[plan]||30;
+      u.proUntil = new Date(Date.now()+jours*24*3600*1000).toISOString();
       DB.login(u);
       updateNav();
-      // Afficher succès
-      showProSuccess();
+      // Afficher succès avec couleur du plan
+      showProSuccess(plan);
     } else {
       toast('❌ '+(data.error||'Paiement échoué'),'err');
       if(btn){ btn.disabled=false; btn.textContent='🟠 Payer et activer Pro'; }
     }
   } catch(err){
-    toast('❌ Erreur réseau','err');
-    if(btn){ btn.disabled=false; btn.textContent='🟠 Payer et activer Pro'; }
+    // Mode démo : activation locale
+    var u2 = DB.user()||{};
+    u2.isPro = true;
+    u2.proPlan = plan;
+    var durees2 = { starter:30, business:90, premium:365 };
+    u2.proUntil = new Date(Date.now()+(durees2[plan]||30)*24*3600*1000).toISOString();
+    DB.login(u2);
+    updateNav();
+    closeModal('pro-payment');
+    showProSuccess(plan);
   }
 }
 
-function showProSuccess(){
+function showProSuccess(plan){
+  plan = plan || 'starter';
+  var cfg = PRO_MODAL_CFG[plan]||PRO_MODAL_CFG.starter;
   var overlay = document.createElement('div');
   overlay.className = 'overlay open';
   overlay.innerHTML =
-    '<div class="modal" style="max-width:380px;text-align:center">'+
-      '<div class="modal-body" style="padding:40px 32px">'+
-        '<div style="font-size:56px;margin-bottom:12px">⭐</div>'+
-        '<div style="font-size:22px;font-weight:900;color:var(--ink);margin-bottom:8px">Félicitations !</div>'+
-        '<div style="font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:24px">'+
-          'Votre compte <strong style="color:var(--or)">YouGouYou Pro</strong> est maintenant actif.<br>'+
-          'Profitez de tous vos avantages dès maintenant !'+
+    '<div class="modal" style="max-width:400px;text-align:center;border-radius:16px;overflow:hidden">'+
+      '<div style="background:'+cfg.headerBg+';padding:32px 24px 24px">'+
+        '<div style="font-size:56px;margin-bottom:10px">'+cfg.icon+'</div>'+
+        '<div style="font-size:22px;font-weight:900;color:#fff;margin-bottom:6px">Félicitations !</div>'+
+        '<div style="font-size:13px;color:rgba(255,255,255,.7);line-height:1.6">'+
+          'Votre abonnement <strong style="color:#fff">YouGouYou Pro '+cfg.label+'</strong><br>est maintenant actif !'+
         '</div>'+
-        '<button style="background:var(--or);color:#fff;border:none;border-radius:10px;padding:12px 28px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit" '+
-          'onclick="this.closest(\'.overlay\').remove();document.body.style.overflow=\'\';goTo(\'dashboard\')">'+
-          'Voir mon tableau de bord →'+
+      '</div>'+
+      '<div style="padding:24px 28px">'+
+        '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">'+
+          cfg.perks.map(function(p){
+            return '<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink)">'+
+              '<span style="color:'+cfg.accentTxt+';font-weight:800">✓</span>'+p+'</div>';
+          }).join('')+
+        '</div>'+
+        '<button style="width:100%;background:'+cfg.btnBg+';color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:10px" '+
+          'onclick="this.closest(\'.overlay\').remove();document.body.style.overflow=\'\';openBoutiqueProModal(\''+plan+'\')">'+
+          '🏪 Créer ma boutique maintenant →'+
+        '</button>'+
+        '<button style="width:100%;background:none;border:1.5px solid var(--br);border-radius:10px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--muted)" '+
+          'onclick="this.closest(\'.overlay\').remove();document.body.style.overflow=\'\';loadDash();goTo(\'dashboard\')">'+
+          'Voir mon tableau de bord'+
         '</button>'+
       '</div>'+
     '</div>';
