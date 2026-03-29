@@ -1238,7 +1238,23 @@ footer{background:transparent;margin-top:0}
 .promo-pro-close:hover{background:rgba(255,255,255,.15);color:#fff}
 
 /* ── Page Pro ── */
-#page-pro.active{display:block!important}
+#page-pro.active{
+  display:block !important;
+  position:fixed;
+  top:104px; /* nav-top 62px + nav-cats 42px */
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:1100px;
+  height:calc(100vh - 104px);
+  overflow-y:auto;
+  overflow-x:hidden;
+  background:#F6F6F6;
+  z-index:200;
+  box-shadow:0 2px 12px rgba(0,0,0,.08);
+}
+#page-pro.active::-webkit-scrollbar{width:6px}
+#page-pro.active::-webkit-scrollbar-thumb{background:#ddd;border-radius:4px}
 .pro-page-wrap{max-width:1100px;margin:0 auto;padding:20px 20px 60px}
 .pro-hero{
   text-align:center;padding:40px 20px 36px;
@@ -2465,6 +2481,11 @@ function goTo(page){
   }
   if(page==='dashboard') loadDash();
   if(page==='home') renderAds();
+  if(page==='pro'){
+    // Reset scroll interne de la page Pro
+    var proEl = document.getElementById('page-pro');
+    if(proEl) proEl.scrollTop = 0;
+  }
   if(page==='seller'&&typeof _curSellerId!=='undefined'&&_curSellerId) loadSellerProfile(_curSellerId);
   if(page==='messages'){
     var token=localStorage.getItem('ygy_token');
@@ -7075,13 +7096,11 @@ document.addEventListener('DOMContentLoaded',function(){
 <div id="page-pro" class="page">
   <div class="pro-page-wrap">
 
-    <!-- Bouton retour -->
-    <button onclick="goTo('home')" style="display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:13px;font-family:inherit;padding:0;margin-bottom:24px">
-      ← Retour à l'accueil
-    </button>
-
-    <!-- Hero -->
+    <!-- Hero avec bouton retour intégré -->
     <div class="pro-hero">
+      <button onclick="goTo('home')" style="position:absolute;top:14px;left:16px;display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);font-weight:600;cursor:pointer;font-size:12px;font-family:inherit;padding:5px 12px;border-radius:20px;transition:all .15s;z-index:2">
+        ← Retour
+      </button>
       <div class="pro-hero-badge">⭐ Offre commerçants</div>
       <div class="pro-hero-title"><span>YouGouYou</span> Pro</div>
       <div class="pro-hero-sub">Boostez votre visibilité et vendez plus vite avec notre abonnement Pro dédié aux commerçants guinéens.</div>
