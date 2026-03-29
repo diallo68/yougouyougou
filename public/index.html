@@ -2233,11 +2233,49 @@ footer{background:transparent;margin-top:0}
             🔒 Paiement sécurisé Orange Money · Activation immédiate · Support 7j/7
           </div>
         </div>
+
+        <!-- CTA Boutique (visible uniquement si Pro actif) -->
+        <div id="dash-pro-boutique-cta" style="display:none;margin-top:20px;background:linear-gradient(135deg,#0F172A,#1E3A5F);border-radius:16px;padding:22px 24px;position:relative;overflow:hidden">
+          <div style="position:absolute;inset:0;background:radial-gradient(circle at 90% 50%,rgba(255,92,0,.18),transparent 60%);pointer-events:none"></div>
+          <div style="position:relative;display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+            <div style="flex:1;min-width:200px">
+              <div style="font-size:18px;font-weight:900;color:#fff;margin-bottom:6px" id="boutique-cta-title">🏪 Créez votre boutique Pro</div>
+              <div style="font-size:13px;color:rgba(255,255,255,.65);line-height:1.6" id="boutique-cta-desc">Votre abonnement Pro inclut une boutique personnalisée avec votre catalogue, logo et lien public.</div>
+              <div id="boutique-cta-perks" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px"></div>
+            </div>
+            <button onclick="showDashTab('boutique')" style="background:var(--or);color:#fff;border:none;border-radius:12px;padding:12px 24px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;box-shadow:0 4px 16px rgba(255,92,0,.4);transition:all .15s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+              🏪 Créer ma boutique →
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- ═══ TAB MA BOUTIQUE (Pro uniquement) ═══ -->
       <div class="dash-section" id="dsec-boutique">
         <div class="dash-section-title" id="boutique-section-title">🏪 Créer votre boutique</div>
+
+        <!-- Bandeau plan Pro actif -->
+        <div id="boutique-plan-banner" style="display:none;border-radius:14px;padding:16px 20px;margin-bottom:18px;position:relative;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:14px;position:relative">
+            <div id="boutique-plan-icon" style="font-size:32px;flex-shrink:0">⭐</div>
+            <div style="flex:1">
+              <div id="boutique-plan-name" style="font-size:15px;font-weight:800;margin-bottom:4px">Abonnement Pro Starter</div>
+              <div id="boutique-plan-perks" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+            </div>
+            <button onclick="showDashTab('pro')" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.85);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">⬆️ Changer</button>
+          </div>
+        </div>
+
+        <!-- Blocage si pas Pro -->
+        <div id="boutique-nopro-block" style="display:none;background:linear-gradient(135deg,#1A1A2E,#2D2B0E);border-radius:16px;padding:40px 32px;text-align:center;margin-bottom:18px">
+          <div style="font-size:48px;margin-bottom:12px">🔒</div>
+          <div style="font-size:18px;font-weight:800;color:#fff;margin-bottom:8px">Fonctionnalité réservée aux Pro</div>
+          <div style="font-size:14px;color:rgba(255,255,255,.6);margin-bottom:20px">Activez votre abonnement Pro pour créer votre boutique et développer votre commerce en Guinée.</div>
+          <button onclick="showDashTab('pro')" style="background:var(--or);color:#fff;border:none;border-radius:12px;padding:12px 28px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(255,92,0,.4)">⭐ Activer le Pro →</button>
+        </div>
+
+        <!-- Formulaire boutique (visible si Pro) -->
+        <div id="boutique-form-block">
 
         <!-- En-tête boutique -->
         <div id="boutique-header" style="background:linear-gradient(135deg,#1A1A2E,#2D2B0E);border-radius:16px;padding:24px;margin-bottom:16px;position:relative;overflow:hidden">
@@ -2259,12 +2297,29 @@ footer{background:transparent;margin-top:0}
             <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Nom de la boutique</div>
             <input id="boutique-name-input" type="text" placeholder="Ex: Boutique Mode Conakry" style="width:100%;border:1.5px solid var(--br);border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;outline:none" onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'">
           </div>
+
+          <!-- Catégorie principale avec 3 niveaux -->
           <div style="background:#fff;border-radius:12px;padding:16px;border:1px solid var(--br)">
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Catégorie principale</div>
-            <select id="boutique-cat-input" style="width:100%;border:1.5px solid var(--br);border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;outline:none;background:#fff">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Catégorie principale *</div>
+            <select id="boutique-cat-input" onchange="onBoutiqueCatChange(this.value)" style="width:100%;border:1.5px solid var(--br);border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;outline:none;background:#fff">
               <option value="">Choisir une catégorie...</option>
             </select>
           </div>
+
+          <!-- Sous-catégorie (niveau 2) — apparaît après sélection catégorie -->
+          <div id="boutique-subcat-block" style="display:none;background:#fff;border-radius:12px;padding:16px;border:1px solid var(--br)">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Sous-catégorie</div>
+            <div id="boutique-subcat-list" style="display:flex;flex-wrap:wrap;gap:7px"></div>
+            <input type="hidden" id="boutique-subcat-val">
+          </div>
+
+          <!-- Sous-sous-catégorie (niveau 3) — apparaît après sélection sous-cat -->
+          <div id="boutique-subsubcat-block" style="display:none;background:#fff;border-radius:12px;padding:16px;border:1px solid var(--br)">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Spécialité</div>
+            <div id="boutique-subsubcat-list" style="display:flex;flex-wrap:wrap;gap:7px"></div>
+            <input type="hidden" id="boutique-subsubcat-val">
+          </div>
+
           <div style="background:#fff;border-radius:12px;padding:16px;border:1px solid var(--br);grid-column:1/-1">
             <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Description de la boutique</div>
             <textarea id="boutique-desc-input" rows="3" placeholder="Décrivez votre boutique, vos produits, votre localisation..." style="width:100%;border:1.5px solid var(--br);border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;outline:none;resize:none" onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'"></textarea>
@@ -2314,6 +2369,7 @@ footer{background:transparent;margin-top:0}
           </div>
           <button onclick="copyBoutiqueLink()" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">📋 Copier</button>
         </div>
+        </div><!-- /boutique-form-block -->
       </div>
 
       <!-- ═══ TAB ALERTES ═══ -->
@@ -5615,6 +5671,257 @@ function showTab(tab){
 }
 
 // ══════════════════════════════════════════
+//  BOUTIQUE PRO — LOGIQUE DYNAMIQUE
+// ══════════════════════════════════════════
+
+// Config des plans Pro
+var PRO_PLAN_CONFIG = {
+  starter: {
+    icon: '⭐',
+    label: 'Pro Starter',
+    badge: 'PRO',
+    badgeBg: 'linear-gradient(135deg,#EAB308,#CA8A04)',
+    bannerBg: 'linear-gradient(135deg,#713F12,#92400E)',
+    annonces: 9,
+    priorite: 'Standard',
+    stats: 'Basiques',
+    vedette: '2/mois',
+    perks: ['9 annonces', 'Badge PRO', 'Stats de base', '2 vedettes/mois']
+  },
+  business: {
+    icon: '🔷',
+    label: 'Pro Business',
+    badge: 'PRO Renforcé',
+    badgeBg: 'linear-gradient(135deg,#1D4ED8,#1E40AF)',
+    bannerBg: 'linear-gradient(135deg,#1E3A5F,#1D4ED8)',
+    annonces: 12,
+    priorite: 'Renforcée',
+    stats: 'Avancées',
+    vedette: '5/mois',
+    perks: ['12 annonces', 'Badge PRO Renforcé', 'Stats avancées', '5 vedettes/mois']
+  },
+  premium: {
+    icon: '👑',
+    label: 'Pro Premium',
+    badge: 'PRO Gold',
+    badgeBg: 'linear-gradient(135deg,#D97706,#B45309)',
+    bannerBg: 'linear-gradient(135deg,#7C2D12,#C2410C)',
+    annonces: 18,
+    priorite: 'Maximale (Top 3)',
+    stats: 'Complètes + export',
+    vedette: 'Illimitées',
+    perks: ['18 annonces', 'Badge PRO Gold', 'Stats complètes', 'Vedette illimitée']
+  }
+};
+
+function renderBoutiqueSection(){
+  var u = DB.user();
+  var proActive = u && u.isPro && u.proUntil && new Date(u.proUntil) > new Date();
+  var plan = proActive ? (u.proPlan || 'starter') : null;
+  var cfg = plan ? (PRO_PLAN_CONFIG[plan] || PRO_PLAN_CONFIG.starter) : null;
+
+  var noproBlock = document.getElementById('boutique-nopro-block');
+  var formBlock  = document.getElementById('boutique-form-block');
+  var planBanner = document.getElementById('boutique-plan-banner');
+  var sectionTitle = document.getElementById('boutique-section-title');
+
+  if(!proActive){
+    // Non Pro : bloquer
+    if(noproBlock) noproBlock.style.display = 'block';
+    if(formBlock)  formBlock.style.display  = 'none';
+    if(planBanner) planBanner.style.display  = 'none';
+    if(sectionTitle) sectionTitle.textContent = '🏪 Créer votre boutique';
+    return;
+  }
+
+  // Pro actif : afficher le formulaire
+  if(noproBlock) noproBlock.style.display = 'none';
+  if(formBlock)  formBlock.style.display  = 'block';
+
+  // Bandeau plan
+  if(planBanner && cfg){
+    planBanner.style.cssText = 'display:block;border-radius:14px;padding:16px 20px;margin-bottom:18px;position:relative;overflow:hidden;background:' + cfg.bannerBg;
+    var iconEl = document.getElementById('boutique-plan-icon');
+    var nameEl = document.getElementById('boutique-plan-name');
+    var perksEl = document.getElementById('boutique-plan-perks');
+    if(iconEl) iconEl.textContent = cfg.icon;
+    if(nameEl){ nameEl.textContent = 'Abonnement ' + cfg.label; nameEl.style.color = '#fff'; }
+    if(perksEl) perksEl.innerHTML = cfg.perks.map(function(p){
+      return '<span style="background:rgba(255,255,255,.15);color:rgba(255,255,255,.9);font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px">✓ '+p+'</span>';
+    }).join('');
+  }
+
+  // Titre dynamique
+  if(sectionTitle){
+    var boutiqueCreee = u.boutique && u.boutique.name;
+    sectionTitle.textContent = boutiqueCreee ? (cfg.icon + ' Ma boutique') : '🏪 Créer votre boutique';
+  }
+
+  // Badge dans l'en-tête boutique
+  var badgeEl = document.getElementById('boutique-plan-badge');
+  if(badgeEl && cfg){
+    badgeEl.style.background = cfg.badgeBg;
+    badgeEl.style.border = 'none';
+    badgeEl.style.color = '#fff';
+    badgeEl.textContent = cfg.icon + ' ' + cfg.badge;
+  }
+
+  // Pré-remplir les champs si la boutique existe déjà
+  var b = u.boutique || {};
+  var nameInput = document.getElementById('boutique-name-input');
+  var catInput  = document.getElementById('boutique-cat-input');
+  var descInput = document.getElementById('boutique-desc-input');
+  var waInput   = document.getElementById('boutique-wa-input');
+  var addrInput = document.getElementById('boutique-addr-input');
+  var nameDisplay = document.getElementById('boutique-name-display');
+  if(nameInput && b.name)  nameInput.value = b.name;
+  if(descInput && b.desc)  descInput.value = b.desc;
+  if(waInput   && b.whatsapp) waInput.value = b.whatsapp;
+  if(addrInput && b.address)  addrInput.value = b.address;
+  if(nameDisplay) nameDisplay.textContent = b.name || 'Ma Boutique';
+
+  // Peuplement du select catégorie
+  populateBoutiqueCats(b.category);
+
+  // Si catégorie existante : déclencher les sous-cats
+  if(b.category){
+    setTimeout(function(){
+      onBoutiqueCatChange(b.category, b.subcat, b.subsubcat);
+    }, 100);
+  }
+
+  // Stats boutique
+  loadBoutiqueStats();
+}
+
+function populateBoutiqueCats(selectedCat){
+  var sel = document.getElementById('boutique-cat-input');
+  if(!sel) return;
+  var opts = '<option value="">Choisir une catégorie...</option>';
+  CATS.forEach(function(cat){
+    opts += '<option value="'+cat.n+'"'+(selectedCat===cat.n?' selected':'')+'>'+cat.e+' '+cat.n+'</option>';
+  });
+  sel.innerHTML = opts;
+}
+
+function onBoutiqueCatChange(catName, preselSubcat, preselSubsubcat){
+  var cat = CATS.find(function(c){ return c.n === catName; });
+  var subcatBlock    = document.getElementById('boutique-subcat-block');
+  var subsubcatBlock = document.getElementById('boutique-subsubcat-block');
+  var subcatList     = document.getElementById('boutique-subcat-list');
+  var subsubcatList  = document.getElementById('boutique-subsubcat-list');
+  var subcatVal      = document.getElementById('boutique-subcat-val');
+  var subsubcatVal   = document.getElementById('boutique-subsubcat-val');
+
+  // Masquer si pas de catégorie ou pas de sous-catégories
+  if(!cat || !cat.sub || !cat.sub.length){
+    if(subcatBlock)    subcatBlock.style.display = 'none';
+    if(subsubcatBlock) subsubcatBlock.style.display = 'none';
+    return;
+  }
+
+  var is3levels = typeof cat.sub[0] === 'object';
+
+  // Afficher sous-catégories (niveau 2)
+  if(subcatBlock) subcatBlock.style.display = 'block';
+  if(subsubcatBlock) subsubcatBlock.style.display = 'none';
+
+  if(subcatList){
+    if(is3levels){
+      subcatList.innerHTML = cat.sub.map(function(sub){
+        var isSelected = preselSubcat && preselSubcat === sub.n;
+        return '<div class="boutique-subcat-chip'+(isSelected?' sel':'')+'" data-sub="'+sub.n+'" '
+          +'onclick="onBoutiqueSubcatClick(this,\''+sub.n+'\','+JSON.stringify(cat.sub)+')" '
+          +'style="background:'+(isSelected?'var(--orl)':'#F1F5F9')+';border:1.5px solid '+(isSelected?'var(--or)':'#E2E8F0')+';color:'+(isSelected?'var(--or)':'var(--ink)')+';border-radius:8px;padding:6px 13px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s">'
+          +sub.n+'</div>';
+      }).join('');
+    } else {
+      subcatList.innerHTML = cat.sub.map(function(s){
+        var isSelected = preselSubcat && preselSubcat === s;
+        return '<div class="boutique-subcat-chip'+(isSelected?' sel':'')+'" data-sub="'+s+'" '
+          +'onclick="onBoutiqueSubcatClick(this,\''+s+'\',null)" '
+          +'style="background:'+(isSelected?'var(--orl)':'#F1F5F9')+';border:1.5px solid '+(isSelected?'var(--or)':'#E2E8F0')+';color:'+(isSelected?'var(--or)':'var(--ink)')+';border-radius:8px;padding:6px 13px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s">'
+          +s+'</div>';
+      }).join('');
+    }
+    if(subcatVal && preselSubcat) subcatVal.value = preselSubcat;
+  }
+
+  // Si sous-cat présélectionnée, afficher sous-sous-cats
+  if(preselSubcat && is3levels){
+    var sub = cat.sub.find(function(s){ return s.n === preselSubcat; });
+    if(sub && sub.items && sub.items.length && subsubcatBlock && subsubcatList){
+      subsubcatList.innerHTML = sub.items.map(function(item){
+        var isSel = preselSubsubcat && preselSubsubcat === item;
+        return '<div class="boutique-subsubcat-chip" data-item="'+item+'" '
+          +'onclick="onBoutiqueSubsubcatClick(this,\''+item+'\')" '
+          +'style="background:'+(isSel?'var(--orl)':'#F8FAFC')+';border:1.5px solid '+(isSel?'var(--or)':'#E2E8F0')+';color:'+(isSel?'var(--or)':'var(--ink)')+';border-radius:8px;padding:5px 11px;font-size:11.5px;font-weight:600;cursor:pointer;transition:all .15s">'
+          +item+'</div>';
+      }).join('');
+      if(subsubcatVal && preselSubsubcat) subsubcatVal.value = preselSubsubcat;
+      subsubcatBlock.style.display = 'block';
+    }
+  }
+}
+
+function onBoutiqueSubcatClick(el, subName, subsArr){
+  // Highlight
+  document.querySelectorAll('.boutique-subcat-chip').forEach(function(c){
+    c.style.background='#F1F5F9'; c.style.borderColor='#E2E8F0'; c.style.color='var(--ink)';
+  });
+  el.style.background='var(--orl)'; el.style.borderColor='var(--or)'; el.style.color='var(--or)';
+  var val = document.getElementById('boutique-subcat-val');
+  if(val) val.value = subName;
+
+  // Niveau 3 : sous-sous-catégories
+  var subsubcatBlock = document.getElementById('boutique-subsubcat-block');
+  var subsubcatList  = document.getElementById('boutique-subsubcat-list');
+  var subsubcatVal   = document.getElementById('boutique-subsubcat-val');
+  if(!subsArr || !subsubcatBlock || !subsubcatList){ if(subsubcatBlock) subsubcatBlock.style.display='none'; return; }
+  var sub = subsArr.find ? subsArr.find(function(s){ return s.n === subName; }) : null;
+  if(sub && sub.items && sub.items.length){
+    subsubcatList.innerHTML = sub.items.map(function(item){
+      return '<div class="boutique-subsubcat-chip" data-item="'+item+'" '
+        +'onclick="onBoutiqueSubsubcatClick(this,\''+item+'\')" '
+        +'style="background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:8px;padding:5px 11px;font-size:11.5px;font-weight:600;cursor:pointer;transition:all .15s">'
+        +item+'</div>';
+    }).join('');
+    if(subsubcatVal) subsubcatVal.value = '';
+    subsubcatBlock.style.display = 'block';
+  } else {
+    if(subsubcatVal) subsubcatVal.value = '';
+    subsubcatBlock.style.display = 'none';
+  }
+}
+
+function onBoutiqueSubsubcatClick(el, itemName){
+  document.querySelectorAll('.boutique-subsubcat-chip').forEach(function(c){
+    c.style.background='#F8FAFC'; c.style.borderColor='#E2E8F0'; c.style.color='var(--ink)';
+  });
+  el.style.background='var(--orl)'; el.style.borderColor='var(--or)'; el.style.color='var(--or)';
+  var val = document.getElementById('boutique-subsubcat-val');
+  if(val) val.value = itemName;
+}
+
+function loadBoutiqueStats(){
+  var tok = localStorage.getItem('ygy_token');
+  if(!tok) return;
+  fetch('/api/my-ads', { headers:{'Authorization':'Bearer '+tok} })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    var ads = Array.isArray(data) ? data : (data.ads||[]);
+    var views = ads.reduce(function(s,a){ return s+(a.views||0); }, 0);
+    var contacts = ads.reduce(function(s,a){ return s+(a.contacts||0); }, 0);
+    var sa = document.getElementById('boutique-stat-ads');
+    var sv = document.getElementById('boutique-stat-views');
+    var sc = document.getElementById('boutique-stat-contacts');
+    if(sa) sa.textContent = ads.length;
+    if(sv) sv.textContent = views;
+    if(sc) sc.textContent = contacts;
+  }).catch(function(){});
+}
+
+// ══════════════════════════════════════════
 //  ORANGE MONEY
 // ══════════════════════════════════════════
 function openOM(){
@@ -6233,7 +6540,7 @@ var _boutiqueData = {};
 
 function loadBoutiqueTab(){
   var u = DB.user();
-  if(!u || !u.isPro){ toast('⭐ Fonctionnalité réservée aux membres Pro','err'); return; }
+  if(!u){ toast('🔒 Connectez-vous','err'); return; }
 
   // Afficher/masquer menu boutique selon statut Pro
   var btab = document.getElementById('dtab-boutique');
@@ -6245,39 +6552,22 @@ function loadBoutiqueTab(){
     .then(function(r){ return r.ok ? r.json() : {}; })
     .then(function(d){
       _boutiqueData = d.boutique || {};
-      renderBoutiqueTab();
-    }).catch(function(){ renderBoutiqueTab(); });
+      // Mettre à jour le user local avec les données fraîches
+      var uu = DB.user()||{};
+      if(_boutiqueData && _boutiqueData.name) uu.boutique = _boutiqueData;
+      DB.login(uu);
+      renderBoutiqueSection();
+      renderBoutiqueTabExtras();
+    }).catch(function(){
+      renderBoutiqueSection();
+      renderBoutiqueTabExtras();
+    });
 }
 
-function renderBoutiqueTab(){
+function renderBoutiqueTabExtras(){
   var u = DB.user()||{};
-  var b = _boutiqueData;
-  var boutiqueCreee = b && b.name;
-  var plan = u.proPlan||'starter';
-
-  // Titre section + menu sidebar selon état
-  var planIcons = { starter:'⭐', business:'🔷', premium:'👑' };
-  var titreEl = document.getElementById('boutique-section-title');
-  var btab = document.getElementById('dtab-boutique');
-  if(titreEl) titreEl.textContent = boutiqueCreee ? (planIcons[plan]+' Ma Boutique') : (planIcons[plan]+' Créer votre boutique');
-  if(btab) btab.textContent = boutiqueCreee ? (planIcons[plan]+' Ma Boutique') : (planIcons[plan]+' Créer votre boutique');
-
-  // Plan info badge
-  var planLabels = { starter:'⭐ Starter', business:'🔷 Business', premium:'👑 Premium' };
-  var badgeEl = document.getElementById('boutique-plan-badge');
-  if(badgeEl) badgeEl.textContent = planLabels[plan]||'⭐ Pro';
-
-  // Remplir les champs
-  var nm = document.getElementById('boutique-name-input');
-  var dc = document.getElementById('boutique-desc-input');
-  var wa = document.getElementById('boutique-wa-input');
-  var ad = document.getElementById('boutique-addr-input');
-  var nd = document.getElementById('boutique-name-display');
-  if(nm) nm.value = b.name||'';
-  if(dc) dc.value = b.description||'';
-  if(wa) wa.value = b.whatsapp||u.phone||'';
-  if(ad) ad.value = b.address||'';
-  if(nd) nd.textContent = b.name || (u.prenom||u.name||'Ma') + ' Boutique';
+  var b = _boutiqueData || (u.boutique||{});
+  var sellerId = u._id || u.id || '';
 
   // Logo preview
   if(b.logo){
@@ -6285,25 +6575,11 @@ function renderBoutiqueTab(){
     if(lp) lp.innerHTML = '<img src="'+b.logo+'" style="width:100%;height:100%;object-fit:cover;border-radius:12px">';
   }
 
-  // Catégorie select
-  var catSel = document.getElementById('boutique-cat-input');
-  if(catSel && catSel.options.length <= 1){
-    CATS.forEach(function(c){
-      var opt = document.createElement('option');
-      opt.value = c.n; opt.textContent = c.e+' '+c.n;
-      if(b.category===c.n) opt.selected = true;
-      catSel.appendChild(opt);
-    });
-  } else if(catSel && b.category){
-    catSel.value = b.category;
-  }
-
   // Lien public
   var linkEl = document.getElementById('boutique-public-link');
-  var sellerId = u._id || u.id || '';
   if(linkEl) linkEl.textContent = 'yougouyougou.net/boutique/' + sellerId;
 
-  // Stats boutique depuis les annonces
+  // Stats boutique depuis les annonces locales
   var ads = DB.ads().filter(function(a){ return String(a.sellerId||a.seller_id||'') === String(sellerId) || (a.seller===u.prenom||a.sellerName===u.prenom); });
   var totalViews = ads.reduce(function(s,a){ return s+(a.views||0); },0);
   var statAds = document.getElementById('boutique-stat-ads');
@@ -6339,10 +6615,14 @@ function saveBoutiqueInfo(){
   var wa = (document.getElementById('boutique-wa-input')||{}).value||'';
   var ad = (document.getElementById('boutique-addr-input')||{}).value||'';
   var cat = (document.getElementById('boutique-cat-input')||{}).value||'';
+  var subcat    = (document.getElementById('boutique-subcat-val')||{}).value||'';
+  var subsubcat = (document.getElementById('boutique-subsubcat-val')||{}).value||'';
   if(!nm.trim()){ toast('📝 Entrez un nom pour votre boutique','err'); return; }
 
   var token = localStorage.getItem('ygy_token');
   var payload = { name:nm, description:dc, whatsapp:wa, address:ad, category:cat };
+  if(subcat)    payload.subcat    = subcat;
+  if(subsubcat) payload.subsubcat = subsubcat;
   if(_boutiqueData._logoBase64) payload.logo = _boutiqueData._logoBase64;
 
   fetch('/api/me/boutique', {
@@ -6354,14 +6634,22 @@ function saveBoutiqueInfo(){
       _boutiqueData = Object.assign(_boutiqueData, payload);
       var nd = document.getElementById('boutique-name-display');
       if(nd) nd.textContent = nm;
+      // Mettre à jour le user local
+      var u = DB.user()||{};
+      u.boutique = Object.assign(u.boutique||{}, payload);
+      DB.login(u);
+      // Rafraîchir le menu latéral
+      if(typeof renderDash === 'function') renderDash();
       toast('✅ Boutique sauvegardée !','ok');
     })
     .catch(function(err){
       // Sauvegarder localement si API pas encore dispo
       _boutiqueData = Object.assign(_boutiqueData, payload);
       var u = DB.user()||{};
-      u.boutique = _boutiqueData;
+      u.boutique = Object.assign(u.boutique||{}, payload);
       DB.login(u);
+      // Rafraîchir le titre de section
+      if(typeof renderBoutiqueSection === 'function') renderBoutiqueSection();
       toast('✅ Boutique sauvegardée (local)','ok');
     });
 }
@@ -6718,14 +7006,8 @@ function showDashTab(tab){
   if(navEl) navEl.classList.add('active');
   if(tab === 'pro') updateDashProStatus();
   if(tab === 'boutique'){
-    var u = DB.user();
-    if(!u || !u.isPro || !u.proUntil || new Date(u.proUntil) <= new Date()){
-      // Pas Pro — rediriger vers onglet Pro
-      showDashTab('pro');
-      setTimeout(function(){ toast('⭐ Activez un abonnement Pro pour accéder à votre boutique','err'); }, 200);
-      return;
-    }
-    loadBoutiqueTab();
+    // renderBoutiqueSection gère l'affichage selon le statut Pro
+    // (appelé par le wrapper étendu showDashTab ci-dessous)
   }
 }
 
@@ -6765,6 +7047,8 @@ function updateDashProStatus(){
     if(expiry)    expiry.style.display  = 'none';
     if(chooseTitle) chooseTitle.textContent = 'Choisissez votre formule';
   }
+  // Afficher/masquer le CTA boutique selon le statut Pro
+  if(typeof updateProBoutiqueCTA === 'function') updateProBoutiqueCTA();
 }
 
 function toggleFav(id){
@@ -7749,7 +8033,39 @@ showDashTab = function(tab){
   if(tab==='messages'){ loadConversations(); }
   if(tab==='alerts'){ loadAlerts(); }
   if(tab==='profil'){ loadVendorStats(); }
+  if(tab==='boutique'){ renderBoutiqueSection(); }
+  if(tab==='pro'){ updateProBoutiqueCTA(); }
 };
+
+// Met à jour le CTA "Créer votre boutique" dans l'onglet Pro
+function updateProBoutiqueCTA(){
+  var u = DB.user();
+  var proActive = u && u.isPro && u.proUntil && new Date(u.proUntil) > new Date();
+  var cta = document.getElementById('dash-pro-boutique-cta');
+  if(!cta) return;
+  if(!proActive){ cta.style.display='none'; return; }
+
+  var plan = u.proPlan || 'starter';
+  var cfg = PRO_PLAN_CONFIG[plan] || PRO_PLAN_CONFIG.starter;
+  cta.style.display = 'block';
+
+  var titleEl = document.getElementById('boutique-cta-title');
+  var descEl  = document.getElementById('boutique-cta-desc');
+  var perksEl = document.getElementById('boutique-cta-perks');
+  var boutiqueCreee = u.boutique && u.boutique.name;
+
+  if(titleEl) titleEl.textContent = boutiqueCreee
+    ? (cfg.icon + ' Gérer ma boutique ' + cfg.label)
+    : (cfg.icon + ' Créer votre boutique ' + cfg.label);
+
+  if(descEl) descEl.textContent = boutiqueCreee
+    ? 'Votre boutique « ' + u.boutique.name + ' » est en ligne. Gérez votre catalogue et vos informations.'
+    : 'Votre abonnement ' + cfg.label + ' inclut une boutique avec ' + cfg.annonces + ' annonces, badge ' + cfg.badge + ' et statistiques ' + cfg.stats + '.';
+
+  if(perksEl) perksEl.innerHTML = cfg.perks.map(function(p){
+    return '<span style="background:rgba(255,255,255,.12);color:rgba(255,255,255,.85);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px">✓ '+p+'</span>';
+  }).join('');
+}
 
 // ── Open modal message enrichi (depuis btn "Envoyer un message") ──
 // Remplacer envoyerMessage est déjà fait plus haut
