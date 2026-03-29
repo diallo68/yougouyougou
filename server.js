@@ -212,6 +212,26 @@ const UserSchema = new mongoose.Schema({
   codeExpiry:   { type: Date },
   isPro:        { type: Boolean, default: false },        // compte pro payant
   proUntil:     { type: Date },                           // expiration abonnement pro
+  proPlan:      { type: String, enum: ['starter','business','premium'], default: 'starter' },
+
+  // ── Boutique Pro (objet unifié — compatible frontend v31) ──
+  boutique: {
+    name:        { type: String, maxlength: 100 },
+    description: { type: String, maxlength: 1000 },
+    desc:        { type: String, maxlength: 1000 },      // alias description
+    logo:        { type: String },                        // base64 ou URL
+    category:    { type: String },                        // catégorie principale
+    subcat:      { type: String },                        // sous-catégorie (niveau 2)
+    subsubcat:   { type: String },                        // sous-sous-catégorie (niveau 3)
+    whatsapp:    { type: String },
+    address:     { type: String },
+    videoUrl:    { type: String },                        // lien YouTube ou MP4
+    videoTitle:  { type: String },
+    createdAt:   { type: Date, default: Date.now },
+    updatedAt:   { type: Date, default: Date.now },
+  },
+
+  // Champs boutique legacy (compatibilité ascendante)
   boutiqueName:    { type: String, maxlength: 100 },
   boutiqueDesc:    { type: String, maxlength: 1000 },
   boutiqueSlogan:  { type: String, maxlength: 200 },
@@ -380,6 +400,26 @@ const ResetTokenSchema = new mongoose.Schema({
   used:      { type: Boolean, default: false },
 });
 const ResetToken = mongoose.model('ResetToken', ResetTokenSchema);
+
+// ── ★ NOUVEAU : Demandes de résiliation Pro ───────────────────
+const ResiliationSchema = new mongoose.Schema({
+  userId:      { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  email:       { type: String },
+  phone:       { type: String },
+  plan:        { type: String },
+  type:        { type: String, enum: ['suspension','resiliation'], default: 'suspension' },
+  reason:      { type: String },
+  details:     { type: String, maxlength: 2000 },
+  status:      { type: String, enum: ['pending','treated','refused'], default: 'pending' },
+  requestDate: { type: Date, default: Date.now },
+  treatedAt:   { type: Date },
+  treatedBy:   { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  note:        { type: String },
+  createdAt:   { type: Date, default: Date.now },
+});
+ResiliationSchema.index({ userId: 1, createdAt: -1 });
+ResiliationSchema.index({ status: 1, createdAt: -1 });
+const Resiliation = mongoose.model('Resiliation', ResiliationSchema);
 
 // ═══════════════════════════════════════════════════════════
 //  UTILITAIRES
@@ -784,14 +824,18 @@ app.get('/api/me', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password -verifyCode -codeExpiry');
     if (!user) return res.status(404).json({ error: 'Introuvable' });
+    const proActive = user.isPro && user.proUntil && user.proUntil > new Date();
     res.json({ user: {
-      id: user._id, name: `${user.prenom} ${user.nom||''}`.trim(),
+      id: user._id, _id: user._id,
+      name: `${user.prenom} ${user.nom||''}`.trim(),
       prenom: user.prenom, nom: user.nom, phone: user.phone,
       email: user.email, city: user.city,
-      role: user.role,        // toujours depuis MongoDB (source de vérité)
+      role: user.role,
       verified: user.verified,
-      isPro: user.isPro && user.proUntil && user.proUntil > new Date() ? true : false,
+      isPro:    proActive ? true : false,
+      proPlan:  proActive ? (user.proPlan || 'starter') : null,
       proUntil: user.proUntil || null,
+      boutique: user.boutique || null,
       avgRating: user.avgRating, ratingCount: user.ratingCount,
     }});
   } catch(err) { res.status(500).json({ error: err.message }); }
@@ -1913,9 +1957,17 @@ app.get('/api/admin/payments', auth, adminOnly, async (req, res) => {
 // Activer/désactiver un compte pro (admin)
 app.patch('/api/admin/users/:id/pro', auth, adminOnly, async (req, res) => {
   try {
-    const { isPro, months = 1 } = req.body;
+    const { isPro, months = 1, plan = 'starter' } = req.body;
+    const planMonths = { starter:1, business:3, premium:12 };
+    const actualMonths = planMonths[plan] || Number(months) || 1;
     const update = { isPro };
-    if (isPro) update.proUntil = new Date(Date.now() + months * 30 * 24 * 3600 * 1000);
+    if (isPro) {
+      update.proUntil = new Date(Date.now() + actualMonths * 30 * 24 * 3600 * 1000);
+      update.proPlan  = plan;
+    } else {
+      update.proPlan  = null;
+      update.proUntil = null;
+    }
     const user = await User.findByIdAndUpdate(req.params.id, update, { new: true }).select('-password');
     res.json({ success: true, user });
   } catch(err) { res.status(500).json({ error: err.message }); }
@@ -2087,7 +2139,80 @@ app.post('/api/subscribe-pro', auth, async (req, res) => {
   }
 });
 
-// ★ Boutique Pro — sauvegarder description
+// ★ Boutique Pro — GET profil boutique de l'utilisateur connecté
+app.get('/api/me/boutique', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id)
+      .select('boutique boutiqueName boutiqueDesc boutiqueSector boutiqueSocial boutiquePinned proPlan isPro proUntil');
+    if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
+
+    // Construire l'objet boutique en fusionnant ancien et nouveau schéma
+    const b = {
+      name:        user.boutique?.name       || user.boutiqueName   || '',
+      description: user.boutique?.description|| user.boutiqueDesc   || '',
+      desc:        user.boutique?.desc        || user.boutiqueDesc   || '',
+      logo:        user.boutique?.logo        || '',
+      category:    user.boutique?.category    || user.boutiqueSector || '',
+      subcat:      user.boutique?.subcat      || '',
+      subsubcat:   user.boutique?.subsubcat   || '',
+      whatsapp:    user.boutique?.whatsapp    || user.boutiqueSocial?.whatsapp || '',
+      address:     user.boutique?.address     || '',
+      videoUrl:    user.boutique?.videoUrl    || '',
+      videoTitle:  user.boutique?.videoTitle  || '',
+    };
+    res.json({ boutique: b, proPlan: user.proPlan, isPro: user.isPro, proUntil: user.proUntil });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// ★ Boutique Pro — PUT (créer/mettre à jour — compatible frontend v31)
+app.put('/api/me/boutique', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('isPro proUntil role boutique');
+    const isAdmin = user?.role === 'admin';
+    const isProActive = user?.isPro && user.proUntil && user.proUntil > new Date();
+    if (!isAdmin && !isProActive)
+      return res.status(403).json({ error: 'Réservé aux membres Pro' });
+
+    const { name, description, desc, logo, category, subcat, subsubcat,
+            whatsapp, address, videoUrl, videoTitle } = req.body;
+
+    // Construire l'update boutique (merge avec l'existant)
+    const boutiqueUpdate = { ...(user.boutique?.toObject?.() || user.boutique || {}) };
+    if (name        !== undefined) boutiqueUpdate.name        = name;
+    if (description !== undefined) boutiqueUpdate.description = description;
+    if (desc        !== undefined) boutiqueUpdate.desc        = desc || description;
+    if (logo        !== undefined) boutiqueUpdate.logo        = logo;
+    if (category    !== undefined) boutiqueUpdate.category    = category;
+    if (subcat      !== undefined) boutiqueUpdate.subcat      = subcat;
+    if (subsubcat   !== undefined) boutiqueUpdate.subsubcat   = subsubcat;
+    if (whatsapp    !== undefined) boutiqueUpdate.whatsapp    = whatsapp;
+    if (address     !== undefined) boutiqueUpdate.address     = address;
+    if (videoUrl    !== undefined) boutiqueUpdate.videoUrl    = videoUrl;
+    if (videoTitle  !== undefined) boutiqueUpdate.videoTitle  = videoTitle;
+    boutiqueUpdate.updatedAt = new Date();
+
+    // Mise à jour aussi des champs legacy pour la compatibilité
+    const legacyUpdate = {};
+    if (name)        legacyUpdate.boutiqueName = name;
+    if (description) legacyUpdate.boutiqueDesc = description;
+    if (whatsapp)    legacyUpdate['boutiqueSocial.whatsapp'] = whatsapp;
+    if (category)    legacyUpdate.boutiqueSector = category;
+
+    const updated = await User.findByIdAndUpdate(
+      req.user.id,
+      { $set: { boutique: boutiqueUpdate, ...legacyUpdate } },
+      { new: true }
+    ).select('boutique proPlan isPro proUntil');
+
+    console.log(`[BOUTIQUE] ✅ Mis à jour pour user ${req.user.id} — boutique="${boutiqueUpdate.name||'—'}"`);
+    res.json({ success: true, boutique: updated?.boutique || boutiqueUpdate });
+  } catch(err) {
+    console.error('[BOUTIQUE PUT]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ★ Boutique Pro — PATCH (compatibilité ascendante avec ancien endpoint)
 app.patch('/api/me/boutique', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('isPro proUntil role');
@@ -2101,10 +2226,416 @@ app.patch('/api/me/boutique', auth, async (req, res) => {
     const update = {};
     allowed.forEach(k => { if (req.body[k] !== undefined) update[k] = req.body[k]; });
 
-    const updated = await User.findByIdAndUpdate(req.user.id, update, { new: true })
-      .select(allowed.join(' '));
+    // Aussi mettre à jour l'objet boutique unifié
+    const boutiqueFields = {};
+    if (req.body.boutiqueName) boutiqueFields['boutique.name'] = req.body.boutiqueName;
+    if (req.body.boutiqueDesc) boutiqueFields['boutique.description'] = req.body.boutiqueDesc;
+    if (req.body.boutiqueSector) boutiqueFields['boutique.category'] = req.body.boutiqueSector;
+    if (req.body.boutiqueSocial?.whatsapp) boutiqueFields['boutique.whatsapp'] = req.body.boutiqueSocial.whatsapp;
+
+    const updated = await User.findByIdAndUpdate(req.user.id,
+      { $set: { ...update, ...boutiqueFields } },
+      { new: true }
+    ).select(allowed.join(' ') + ' boutique');
     res.json({ success: true, boutique: updated });
   } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// ★ Boutiques publiques — liste de toutes les boutiques Pro actives
+app.get('/api/boutiques', authOptional, async (req, res) => {
+  try {
+    const { category, search, limit = 50 } = req.query;
+    const now = new Date();
+
+    // Chercher tous les utilisateurs Pro actifs avec une boutique configurée
+    const filter = {
+      isPro: true,
+      proUntil: { $gt: now },
+      'boutique.name': { $exists: true, $ne: '' },
+    };
+    if (category) filter['boutique.category'] = category;
+
+    let users = await User.find(filter)
+      .select('prenom nom boutique proPlan isPro proUntil totalViews totalContacts avgRating ratingCount createdAt')
+      .sort({ 'boutique.updatedAt': -1, createdAt: -1 })
+      .limit(Number(limit))
+      .lean();
+
+    // Filtre de recherche textuelle
+    if (search) {
+      const q = search.toLowerCase();
+      users = users.filter(u =>
+        (u.boutique?.name||'').toLowerCase().includes(q) ||
+        (u.boutique?.description||'').toLowerCase().includes(q) ||
+        (`${u.prenom||''} ${u.nom||''}`).toLowerCase().includes(q)
+      );
+    }
+
+    // Compter les annonces de chaque vendeur
+    const sellerIds = users.map(u => u._id);
+    const adCounts  = await Ad.aggregate([
+      { $match: { seller: { $in: sellerIds }, active: true } },
+      { $group: { _id: '$seller', count: { $sum: 1 }, totalViews: { $sum: '$views' } } }
+    ]);
+    const countMap = {};
+    adCounts.forEach(a => { countMap[String(a._id)] = { count: a.count, views: a.totalViews }; });
+
+    const boutiques = users.map(u => ({
+      _id:         u._id,
+      name:        u.boutique?.name        || '',
+      description: u.boutique?.description || u.boutique?.desc || '',
+      logo:        u.boutique?.logo        || '',
+      category:    u.boutique?.category    || '',
+      subcat:      u.boutique?.subcat      || '',
+      address:     u.boutique?.address     || '',
+      whatsapp:    u.boutique?.whatsapp    || '',
+      videoUrl:    u.boutique?.videoUrl    || '',
+      videoTitle:  u.boutique?.videoTitle  || '',
+      sellerName:  `${u.prenom||''} ${u.nom||''}`.trim(),
+      sellerId:    u._id,
+      isPro:       u.isPro,
+      proPlan:     u.proPlan || 'starter',
+      avgRating:   u.avgRating  || 0,
+      ratingCount: u.ratingCount|| 0,
+      adCount:     countMap[String(u._id)]?.count || 0,
+      totalViews:  countMap[String(u._id)]?.views || 0,
+    }));
+
+    res.json({ boutiques, total: boutiques.length });
+  } catch(err) {
+    console.error('[BOUTIQUES]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ★ Boutique publique d'un vendeur (par sellerId)
+app.get('/api/boutiques/:sellerId', authOptional, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.sellerId)
+      .select('prenom nom boutique proPlan isPro proUntil avgRating ratingCount totalViews createdAt')
+      .lean();
+    if (!user) return res.status(404).json({ error: 'Boutique introuvable' });
+
+    // Annonces du vendeur
+    const ads = await Ad.find({ seller: user._id, active: true })
+      .sort({ createdAt: -1 })
+      .select('title price category subCategory city photos views createdAt featured')
+      .lean();
+
+    const boutique = {
+      _id:         user._id,
+      name:        user.boutique?.name        || `${user.prenom||''} ${user.nom||''}`.trim()+' Shop',
+      description: user.boutique?.description || user.boutique?.desc || '',
+      logo:        user.boutique?.logo        || '',
+      category:    user.boutique?.category    || '',
+      subcat:      user.boutique?.subcat      || '',
+      address:     user.boutique?.address     || '',
+      whatsapp:    user.boutique?.whatsapp    || '',
+      videoUrl:    user.boutique?.videoUrl    || '',
+      videoTitle:  user.boutique?.videoTitle  || '',
+      sellerName:  `${user.prenom||''} ${user.nom||''}`.trim(),
+      sellerId:    user._id,
+      isPro:       user.isPro,
+      proPlan:     user.proPlan || 'starter',
+      avgRating:   user.avgRating  || 0,
+      ratingCount: user.ratingCount|| 0,
+      totalViews:  user.totalViews || 0,
+      ads,
+    };
+    res.json({ boutique });
+  } catch(err) {
+    console.error('[BOUTIQUE GET]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ★ Paiement Pro — souscrire via le frontend v31 (POST /api/payment/pro)
+app.post('/api/payment/pro', auth, async (req, res) => {
+  try {
+    const { phone, pin, amount, plan = 'starter' } = req.body;
+    if (!phone) return res.status(400).json({ error: 'Numéro Orange Money requis' });
+    if (!pin || pin.length < 4) return res.status(400).json({ error: 'Code PIN requis (4 chiffres)' });
+
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
+
+    // Vérifier abonnement actif unique
+    if (user.isPro && user.proUntil && user.proUntil > new Date()) {
+      return res.status(409).json({
+        error: 'Vous avez déjà un abonnement Pro actif',
+        currentPlan: user.proPlan,
+        proUntil: user.proUntil,
+      });
+    }
+
+    // Calculer durée selon plan
+    const planConfig = {
+      starter:  { months: 1,  amount: 50000  },
+      business: { months: 3,  amount: 120000 },
+      premium:  { months: 12, amount: 360000 },
+    };
+    const cfg = planConfig[plan] || planConfig.starter;
+
+    const now = new Date();
+    const proUntil = new Date(now);
+    proUntil.setMonth(proUntil.getMonth() + cfg.months);
+
+    // Activer le Pro
+    await User.findByIdAndUpdate(req.user.id, {
+      isPro:    true,
+      proPlan:  plan,
+      proUntil: proUntil,
+    });
+
+    // Enregistrer le paiement
+    const ref = genRef();
+    await Payment.create({
+      type:       'boost',
+      buyer:      req.user.id,
+      buyerPhone: phone,
+      adTitle:    `Abonnement Pro ${plan} (${cfg.months} mois)`,
+      amount:     amount || cfg.amount,
+      boostType:  'pro_' + plan,
+      reference:  ref,
+      status:     'success',
+    });
+
+    // Email de confirmation
+    if (user.email && user.email.includes('@')) {
+      const planLabel = { starter:'Starter', business:'Business', premium:'Premium' }[plan] || plan;
+      const expiryStr = proUntil.toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
+      const annonces  = { starter:9, business:12, premium:18 }[plan] || 9;
+      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+      <body style="font-family:Arial,sans-serif;background:#f5f5f5;padding:20px">
+        <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden">
+          <div style="background:linear-gradient(135deg,#FF5C00,#FF9500);padding:28px;text-align:center">
+            <div style="font-size:40px">⭐</div>
+            <div style="font-size:22px;font-weight:900;color:#fff;margin-top:8px">Bienvenue dans Pro ${planLabel} !</div>
+          </div>
+          <div style="padding:28px">
+            <p>Bonjour <strong>${user.prenom||'Commerçant'}</strong>,</p>
+            <p>Votre abonnement <strong>YouGouYou Pro ${planLabel}</strong> est activé.</p>
+            <div style="background:#FFF0E8;border:1px solid #FFCBB0;border-radius:10px;padding:16px;margin:16px 0">
+              <ul style="margin:0;padding-left:16px;font-size:13px;line-height:2.2">
+                <li>⭐ Badge PRO visible sur vos annonces</li>
+                <li>📋 Jusqu'à <strong>${annonces} annonces</strong> simultanées</li>
+                <li>📈 Priorité dans les résultats</li>
+                <li>🏪 Boutique personnalisée</li>
+                <li>📊 Statistiques avancées</li>
+              </ul>
+            </div>
+            <p style="font-size:13px;color:#666">Expire le : <strong>${expiryStr}</strong></p>
+            <p style="font-size:12px;color:#999">Référence : ${ref}</p>
+            <div style="text-align:center;margin-top:20px">
+              <a href="https://yougouyougou.net" style="background:#FF5C00;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:800;font-size:14px">Créer ma boutique →</a>
+            </div>
+          </div>
+        </div>
+      </body></html>`;
+      sendEmail(user.email, `⭐ YouGouYou Pro ${planLabel} activé !`, html,
+        `Bonjour ${user.prenom||''}, votre Pro ${planLabel} est actif jusqu'au ${expiryStr}. Réf: ${ref}`)
+        .catch(e => console.error('[PRO EMAIL]', e.message));
+    }
+
+    console.log(`[PAYMENT PRO] ✅ user=${req.user.id} plan=${plan} expires=${proUntil.toISOString()} ref=${ref}`);
+    res.json({ success: true, reference: ref, proUntil: proUntil.toISOString(), plan, months: cfg.months });
+
+  } catch(err) {
+    console.error('[PAYMENT PRO]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ★ Résiliation/Suspension abonnement Pro
+app.post('/api/pro/resiliation', auth, async (req, res) => {
+  try {
+    const { type, reason, details, phone, plan, requestDate } = req.body;
+
+    if (!reason)  return res.status(400).json({ error: 'Motif requis' });
+    if (!details || details.trim().length < 10)
+      return res.status(400).json({ error: 'Veuillez détailler votre demande' });
+
+    const user = await User.findById(req.user.id).select('email prenom nom isPro proPlan proUntil');
+    if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
+
+    // Enregistrer la demande
+    const resil = await Resiliation.create({
+      userId:      req.user.id,
+      email:       user.email || '',
+      phone:       phone || '',
+      plan:        plan || user.proPlan || 'starter',
+      type:        type || 'suspension',
+      reason,
+      details,
+      requestDate: requestDate ? new Date(requestDate) : new Date(),
+      status:      'pending',
+    });
+
+    // Email à l'équipe support
+    const typeLabel = type === 'suspension' ? 'SUSPENSION' : 'RÉSILIATION';
+    const reasonLabels = {
+      prix: 'Prix trop élevé',
+      fonctionnalites: 'Fonctionnalités insuffisantes',
+      activite: "Pause d'activité",
+      changement: 'Changement de formule',
+      autre: 'Autre raison',
+    };
+    const planLabel = { starter:'Starter', business:'Business', premium:'Premium' }[plan||user.proPlan||'starter'];
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+    <body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
+      <div style="background:#EF4444;padding:20px;border-radius:10px 10px 0 0;text-align:center">
+        <h2 style="color:#fff;margin:0">⏸ Demande de ${typeLabel}</h2>
+        <p style="color:rgba(255,255,255,.8);margin:4px 0 0">Abonnement Pro ${planLabel}</p>
+      </div>
+      <div style="background:#fff;border:1px solid #eee;border-top:none;padding:24px;border-radius:0 0 10px 10px">
+        <table style="width:100%;border-collapse:collapse">
+          <tr><td style="padding:6px 0;font-weight:700;width:130px;color:#555">Utilisateur</td><td>${user.prenom||''} ${user.nom||''}</td></tr>
+          <tr><td style="padding:6px 0;font-weight:700;color:#555">Email</td><td>${user.email||'—'}</td></tr>
+          <tr><td style="padding:6px 0;font-weight:700;color:#555">Téléphone</td><td>${phone||'—'}</td></tr>
+          <tr><td style="padding:6px 0;font-weight:700;color:#555">Formule</td><td>Pro ${planLabel}</td></tr>
+          <tr><td style="padding:6px 0;font-weight:700;color:#555">Type</td><td><strong style="color:#EF4444">${typeLabel}</strong></td></tr>
+          <tr><td style="padding:6px 0;font-weight:700;color:#555">Motif</td><td>${reasonLabels[reason]||reason}</td></tr>
+        </table>
+        <hr style="border:none;border-top:1px solid #eee;margin:14px 0">
+        <div style="font-weight:700;margin-bottom:6px">Justificatif :</div>
+        <div style="background:#FFF5F5;border:1px solid #FECACA;border-radius:8px;padding:14px;font-size:13px;line-height:1.7;color:#333">${details.replace(/\n/g,'<br>')}</div>
+        <div style="margin-top:14px;font-size:11px;color:#aaa">ID demande : ${resil._id} — ${new Date().toLocaleString('fr-FR')}</div>
+      </div>
+    </body></html>`;
+
+    sendEmail(process.env.EMAIL_SUPPORT || 'support.yougouyougou@gmail.com',
+      `[YouGouYou] ${typeLabel} Pro ${planLabel} — ${user.prenom||''} ${user.nom||''}`,
+      html, `Demande ${typeLabel} Pro ${planLabel} de ${user.prenom||''} ${user.nom||''}\nMotif: ${reasonLabels[reason]||reason}\n\n${details}`)
+      .catch(e => console.error('[RESIL EMAIL SUPPORT]', e.message));
+
+    // Email de confirmation à l'utilisateur
+    if (user.email && user.email.includes('@')) {
+      const confirmHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+      <body style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:20px">
+        <div style="background:linear-gradient(135deg,#1E3A5F,#1D4ED8);padding:24px;border-radius:10px 10px 0 0;text-align:center">
+          <div style="font-size:36px">📨</div>
+          <div style="font-size:18px;font-weight:900;color:#fff;margin-top:6px">Demande reçue !</div>
+        </div>
+        <div style="background:#fff;border:1px solid #eee;border-top:none;padding:24px;border-radius:0 0 10px 10px">
+          <p>Bonjour <strong>${user.prenom||'Commerçant'}</strong>,</p>
+          <p>Votre demande de <strong>${typeLabel.toLowerCase()}</strong> de l'abonnement Pro ${planLabel} a bien été enregistrée.</p>
+          <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:14px;margin:16px 0;font-size:13px;line-height:1.7">
+            ⏰ Délai de traitement : <strong>48h ouvrées</strong><br>
+            📧 Vous recevrez une réponse sur cet email<br>
+            ✅ Vos avantages Pro restent actifs jusqu'au traitement
+          </div>
+          <p style="font-size:12px;color:#999">Référence : ${resil._id}</p>
+          <p style="font-size:12px;color:#666">Pour toute urgence : <a href="mailto:support.yougouyougou@gmail.com" style="color:#1D4ED8">support.yougouyougou@gmail.com</a></p>
+        </div>
+      </body></html>`;
+      sendEmail(user.email, `✅ Demande de ${typeLabel.toLowerCase()} Pro reçue — YouGouYou`, confirmHtml,
+        `Bonjour ${user.prenom||''}, votre demande de ${typeLabel.toLowerCase()} Pro a été reçue. Traitement sous 48h.`)
+        .catch(e => console.error('[RESIL EMAIL USER]', e.message));
+    }
+
+    console.log(`[RESILIATION] ✅ user=${req.user.id} type=${type} reason=${reason}`);
+    res.json({ success: true, id: resil._id, message: 'Demande enregistrée — traitement sous 48h ouvrées' });
+
+  } catch(err) {
+    console.error('[RESILIATION]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ★ Admin — liste des demandes de résiliation
+app.get('/api/admin/resiliations', auth, adminOnly, async (req, res) => {
+  try {
+    const { status, limit = 100 } = req.query;
+    const filter = status ? { status } : {};
+    const resils = await Resiliation.find(filter)
+      .populate('userId', 'prenom nom email')
+      .sort({ createdAt: -1 })
+      .limit(Number(limit))
+      .lean();
+    res.json({ resiliations: resils, total: resils.length });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// ★ Admin — traiter une demande de résiliation
+app.patch('/api/admin/resiliations/:id', auth, adminOnly, async (req, res) => {
+  try {
+    const { status, note } = req.body;
+    if (!['treated','refused'].includes(status))
+      return res.status(400).json({ error: 'Status invalide (treated|refused)' });
+
+    const resil = await Resiliation.findByIdAndUpdate(req.params.id,
+      { status, note, treatedAt: new Date(), treatedBy: req.user.id },
+      { new: true }
+    ).populate('userId', 'prenom nom email isPro proUntil');
+
+    if (!resil) return res.status(404).json({ error: 'Demande introuvable' });
+
+    // Si accordée : désactiver le Pro
+    if (status === 'treated' && resil.type === 'resiliation') {
+      await User.findByIdAndUpdate(resil.userId._id, { isPro: false, proUntil: new Date() });
+    }
+
+    console.log(`[RESIL ADMIN] id=${req.params.id} status=${status} by=${req.user.id}`);
+    res.json({ success: true, resiliation: resil });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// ★ Annonces boutique — enregistrer plusieurs articles en une seule requête (panier boutique)
+app.post('/api/ads/batch', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('isPro proUntil proPlan role prenom nom');
+    const isAdmin = user?.role === 'admin';
+    const isProActive = user?.isPro && user.proUntil && user.proUntil > new Date();
+    if (!isAdmin && !isProActive)
+      return res.status(403).json({ error: 'Réservé aux membres Pro' });
+
+    const { ads } = req.body;
+    if (!Array.isArray(ads) || !ads.length)
+      return res.status(400).json({ error: 'Tableau ads[] requis' });
+
+    // Limite selon plan
+    const planLimits = { starter:9, business:12, premium:18 };
+    const limit = planLimits[user.proPlan||'starter'] || 9;
+
+    // Compter les annonces actives actuelles
+    const currentCount = await Ad.countDocuments({ seller: req.user.id, active: true });
+    const available = Math.max(0, limit - currentCount);
+    const toInsert  = ads.slice(0, available);
+
+    if (!toInsert.length)
+      return res.status(409).json({ error: `Limite de ${limit} annonces atteinte`, limit, currentCount });
+
+    const sellerName = `${user.prenom||''} ${user.nom||''}`.trim();
+    const docs = toInsert.map(ad => ({
+      title:       ad.title,
+      description: ad.description || '',
+      price:       Number(ad.price) || 0,
+      category:    ad.category || '',
+      subCategory: ad.subCategory || '',
+      subItem:     ad.subItem || '',
+      city:        ad.city || '',
+      quartier:    ad.quartier || '',
+      etat:        ad.etat || '',
+      photos:      Array.isArray(ad.photos) ? ad.photos.slice(0,8) : [],
+      seller:      req.user.id,
+      sellerName,
+      active:      true,
+      createdAt:   new Date(),
+    }));
+
+    const inserted = await Ad.insertMany(docs);
+    console.log(`[ADS BATCH] ✅ user=${req.user.id} inserted=${inserted.length}/${ads.length}`);
+
+    res.json({
+      success:  true,
+      inserted: inserted.length,
+      skipped:  ads.length - inserted.length,
+      ids:      inserted.map(a => a._id),
+    });
+  } catch(err) {
+    console.error('[ADS BATCH]', err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Épingler / désépingler une annonce dans la boutique
