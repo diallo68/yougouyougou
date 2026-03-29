@@ -292,6 +292,9 @@ footer{background:transparent;margin-top:0}
 .similar-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px}
 .similar-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px}
 #page-post{background:var(--bg)}
+/* Sous-catégories boutique dans le formulaire post */
+.post-subcat-opt:hover{background:var(--orl)!important;border-color:var(--or)!important;color:var(--or)!important}
+.post-subsubcat-opt:hover{background:var(--orl)!important;border-color:var(--or)!important;color:var(--or)!important}
 .post-layout{max-width:680px;margin:0 auto;padding:24px 20px}
 .post-title{font-size:20px;font-weight:700;color:var(--ink);margin-bottom:3px}
 .post-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
@@ -2296,7 +2299,7 @@ footer{background:transparent;margin-top:0}
         <div style="background:#fff;border-radius:12px;border:1px solid var(--br);overflow:hidden">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--br)">
             <div style="font-size:14px;font-weight:800;color:var(--ink)">📦 Catalogue de ma boutique</div>
-            <button onclick="requireLoginThenPost()" style="background:var(--or);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">➕ Ajouter</button>
+            <button onclick="addAnnonceFromBoutique()" style="background:var(--or);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">➕ Ajouter</button>
           </div>
           <div id="boutique-ads-grid" class="ads-grid" style="padding:14px">
             <div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--muted);font-size:13px">Publiez vos premières annonces pour les voir ici</div>
@@ -2771,6 +2774,13 @@ function goTo(page){
   }
   if(page==='dashboard') loadDash();
   if(page==='home') renderAds();
+  if(page!=='post'){
+    // Quitter le formulaire post : réinitialiser le mode boutique
+    window._postBoutiqueMode = false;
+    window._postBoutiqueCat = '';
+    window._postSelSubCat = '';
+    window._postSelSubItem = '';
+  }
   if(page==='pro'){
     var proEl = document.getElementById('page-pro');
     if(proEl) proEl.scrollTop = 0;
@@ -3380,9 +3390,184 @@ function clearSearch(){
 
 function renderPostCats(){
   var el=document.getElementById('post-cats');if(!el)return;
+  // Mode boutique : afficher seulement la catégorie de la boutique
+  if(window._postBoutiqueMode && window._postBoutiqueCat){
+    var cat = CATS.find(function(c){ return c.n === window._postBoutiqueCat; });
+    if(cat){
+      el.innerHTML = '<div class="cat-opt sel" onclick="pickCat(this,\''+cat.n+'\')" style="pointer-events:none;opacity:.85"><span class="em">'+cat.e+'</span>'+cat.n+'</div>';
+      // Présélectionner automatiquement
+      selCat = cat.n;
+      // Rendre les sous-catégories disponibles (dyn-fields)
+      setTimeout(function(){
+        if(typeof loadDynFields==='function') loadDynFields(cat.n);
+        renderPostSubCats(cat);
+      }, 50);
+      return;
+    }
+  }
+  // Mode normal : toutes les catégories
   el.innerHTML=CATS.map(function(c){
     return '<div class="cat-opt" onclick="pickCat(this,\''+c.n+'\')"><span class="em">'+c.e+'</span>'+c.n+'</div>';
   }).join('');
+}
+
+// Afficher sous-catégories et sous-sous-catégories filtrées pour la boutique
+function renderPostSubCats(cat){
+  var container = document.getElementById('post-subcats-boutique');
+  if(!container){
+    // Créer le conteneur après post-cats
+    var postCatsEl = document.getElementById('post-cats');
+    if(!postCatsEl) return;
+    container = document.createElement('div');
+    container.id = 'post-subcats-boutique';
+    container.style.cssText = 'margin-top:14px';
+    postCatsEl.parentNode.insertBefore(container, postCatsEl.nextSibling);
+  }
+  if(!cat || !cat.sub || !cat.sub.length){ container.innerHTML=''; return; }
+
+  var is3levels = typeof cat.sub[0] === 'object';
+  var html = '<div style="margin-bottom:8px">';
+
+  if(is3levels){
+    // Niveau 2 (sous-catégories) + niveau 3 (sous-sous-catégories)
+    html += '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Sous-catégorie</div>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">';
+    cat.sub.forEach(function(sub){
+      html += '<div class="post-subcat-opt" data-sub="'+sub.n+'" onclick="pickPostSub(this,\''+cat.n+'\',\''+sub.n+'\')" '
+        +'style="background:#F1F5F9;border:1.5px solid #E2E8F0;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s">'
+        +sub.n+'</div>';
+    });
+    html += '</div>';
+
+    // Zone sous-sous-catégories (apparaît après sélection sous-cat)
+    html += '<div id="post-subsubcats-boutique" style="display:none">';
+    html += '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Spécialité</div>';
+    html += '<div id="post-subsubcats-list" style="display:flex;flex-wrap:wrap;gap:6px"></div>';
+    html += '</div>';
+  } else {
+    // Niveau 2 seulement (strings)
+    html += '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Sous-catégorie</div>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
+    cat.sub.forEach(function(s){
+      html += '<div class="post-subcat-opt" data-sub="'+s+'" onclick="pickPostSub(this,\''+cat.n+'\',\''+s+'\')" '
+        +'style="background:#F1F5F9;border:1.5px solid #E2E8F0;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s">'
+        +s+'</div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+  container.innerHTML = html;
+  // Stocker la ref pour les sous-sous-cats
+  window._postBoutiqueCatObj = cat;
+}
+
+function pickPostSub(el, catName, subName){
+  // Highlight
+  document.querySelectorAll('.post-subcat-opt').forEach(function(o){
+    o.style.background='#F1F5F9'; o.style.borderColor='#E2E8F0'; o.style.color='';
+  });
+  el.style.background='var(--orl)'; el.style.borderColor='var(--or)'; el.style.color='var(--or)';
+  // Stocker la sous-catégorie sélectionnée
+  window._postSelSubCat = subName;
+
+  // Afficher les sous-sous-catégories si elles existent
+  var cat = window._postBoutiqueCatObj;
+  if(!cat) return;
+  var is3levels = typeof cat.sub[0] === 'object';
+  if(!is3levels) return;
+  var sub = cat.sub.find(function(s){ return s.n === subName; });
+  var zone = document.getElementById('post-subsubcats-boutique');
+  var list = document.getElementById('post-subsubcats-list');
+  if(!zone || !list) return;
+  if(sub && sub.items && sub.items.length){
+    list.innerHTML = sub.items.map(function(item){
+      return '<div class="post-subsubcat-opt" data-item="'+item+'" onclick="pickPostSubSub(this,\''+item+'\')" '
+        +'style="background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:8px;padding:5px 11px;font-size:11.5px;font-weight:600;cursor:pointer;transition:all .15s">'
+        +item+'</div>';
+    }).join('');
+    zone.style.display='block';
+    // Stocker dans le formulaire hidden
+    var subInput = document.getElementById('post-subcat-hidden');
+    if(subInput) subInput.value = subName;
+  } else {
+    zone.style.display='none';
+  }
+}
+
+function pickPostSubSub(el, itemName){
+  document.querySelectorAll('.post-subsubcat-opt').forEach(function(o){
+    o.style.background='#F8FAFC'; o.style.borderColor='#E2E8F0'; o.style.color='';
+  });
+  el.style.background='var(--orl)'; el.style.borderColor='var(--or)'; el.style.color='var(--or)';
+  window._postSelSubItem = itemName;
+  var itemInput = document.getElementById('post-subitem-hidden');
+  if(itemInput) itemInput.value = itemName;
+}
+
+// Ouvrir le formulaire post depuis la boutique, filtré sur sa catégorie
+function addAnnonceFromBoutique(){
+  if(!DB.user()){ toast('👤 Connectez-vous','err'); return; }
+  var u = DB.user();
+  var boutiqueCat = (document.getElementById('boutique-cat-input')||{}).value
+    || (_boutiqueData && _boutiqueData.category)
+    || (u.boutique && u.boutique.category)
+    || '';
+
+  if(!boutiqueCat){
+    toast('⚠️ Choisissez d\'abord une catégorie principale pour votre boutique','err');
+    var catInp = document.getElementById('boutique-cat-input');
+    if(catInp){ catInp.style.borderColor='var(--or)'; catInp.scrollIntoView({behavior:'smooth'}); }
+    return;
+  }
+
+  // Activer le mode boutique
+  window._postBoutiqueMode = true;
+  window._postBoutiqueCat = boutiqueCat;
+  window._postSelSubCat = '';
+  window._postSelSubItem = '';
+
+  goTo('post');
+
+  // Après navigation : présélectionner catégorie + masquer les autres
+  setTimeout(function(){
+    // Modifier le titre pour indiquer le contexte boutique
+    var titleEl = document.querySelector('#page-post .post-title');
+    if(titleEl) titleEl.textContent = '➕ Ajouter au catalogue boutique';
+    var subEl = document.querySelector('#page-post .post-sub');
+    if(subEl) subEl.textContent = 'Catégorie fixée : ' + boutiqueCat;
+
+    // Masquer le sélecteur de catégorie et le remplacer par un badge fixe
+    var postCatSection = document.querySelector('#page-post .post-section');
+    if(postCatSection){
+      var cat = CATS.find(function(c){ return c.n === boutiqueCat; });
+      postCatSection.innerHTML =
+        '<div class="post-section-title">📂 Catégorie</div>'
+        +'<div style="display:flex;align-items:center;gap:8px;background:var(--orl);border:1.5px solid var(--orm);border-radius:10px;padding:10px 14px">'
+          +(cat?'<span style="font-size:18px">'+cat.e+'</span>':'')
+          +'<div>'
+            +'<div style="font-size:13px;font-weight:800;color:var(--ink)">'+boutiqueCat+'</div>'
+            +'<div style="font-size:11px;color:var(--muted)">Catégorie de votre boutique — non modifiable</div>'
+          +'</div>'
+        +'</div>'
+        +'<div id="post-subcats-boutique" style="margin-top:14px"></div>'
+        +'<input type="hidden" id="post-subcat-hidden" value="">'
+        +'<input type="hidden" id="post-subitem-hidden" value="">';
+      selCat = boutiqueCat;
+      if(cat) renderPostSubCats(cat);
+    }
+  }, 80);
+}
+
+// Intercepter submitAd pour inclure subcat/subitem si mode boutique
+var _origSubmitAd = null;
+function patchSubmitAdForBoutique(){
+  if(_origSubmitAd) return;
+  _origSubmitAd = true;
+  // Les champs hidden sont lus automatiquement dans submitAd
+  var subInput = document.getElementById('post-subcat-hidden');
+  var itemInput = document.getElementById('post-subitem-hidden');
+  if(subInput && window._postSelSubCat) subInput.value = window._postSelSubCat;
+  if(itemInput && window._postSelSubItem) itemInput.value = window._postSelSubItem;
 }
 
 // ══════════════════════════════════════════
@@ -3799,10 +3984,15 @@ function submitAd(){
   if(!city){toast('⚠️ Choisissez une ville','err');return;}
 
   var cat=CATS.find(function(ct){return ct.n===selCat;});
+  var subCatVal = (document.getElementById('post-subcat-hidden')||{}).value || window._postSelSubCat || '';
+  var subItemVal = (document.getElementById('post-subitem-hidden')||{}).value || window._postSelSubItem || '';
   var adData={
     title:title, price:parseInt(price)||0,
     city:city, quartier:quartier,
-    category:selCat, description:desc,
+    category:selCat,
+    subCategory: subCatVal,
+    subItem: subItemVal,
+    description:desc,
     phone:phone?'+224'+phone:'',
     etat:etat, seller:user.name||user.prenom||'',
     sellerId:user._id||user.id||'',
