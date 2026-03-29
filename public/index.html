@@ -1297,6 +1297,25 @@ footer{background:transparent;margin-top:0}
 }
 .promo-pro-close:hover{background:rgba(255,255,255,.15);color:#fff}
 
+/* ── Page Boutiques publiques ── */
+#page-boutiques.active{
+  display:block !important;
+  position:fixed;
+  top:104px;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:1100px;
+  height:calc(100vh - 104px);
+  overflow-y:auto;
+  overflow-x:hidden;
+  background:#F8FAFC;
+  z-index:200;
+  box-shadow:0 2px 12px rgba(0,0,0,.08);
+}
+#page-boutiques.active::-webkit-scrollbar{width:6px}
+#page-boutiques.active::-webkit-scrollbar-thumb{background:#ddd;border-radius:4px}
+
 /* ── Page Pro ── */
 #page-pro.active{
   display:block !important;
@@ -2018,6 +2037,8 @@ footer{background:transparent;margin-top:0}
         <a onclick="showDashTab('history')" id="dtab-history">🕐 Historique</a>
         <a onclick="showDashTab('payments')" id="dtab-payments">💳 Paiements</a>
         <a onclick="showDashTab('pro')" id="dtab-pro" style="background:linear-gradient(135deg,#1A1A2E,#2D1B0E);color:var(--or)!important;border-radius:8px;margin-top:8px;font-weight:700">⭐ Mon abonnement Pro</a>
+        <!-- Menu Boutique — visible uniquement si Pro actif -->
+        <a onclick="showDashTab('boutique')" id="dtab-boutique" style="display:none;background:linear-gradient(135deg,#065F46,#047857);color:#6EE7B7!important;border-radius:8px;margin-top:4px;font-weight:700">🏪 Ma Boutique</a>
         <a onclick="showDashTab('alerts')" id="dtab-alerts">🔔 Alertes</a>
         <a id="nav-admin-link" hidden onclick="goAdmin()">👑 Admin</a>
         <a onclick="logout()" style="color:var(--re)!important;margin-top:20px">🚪 Déconnexion</a>
@@ -2198,6 +2219,87 @@ footer{background:transparent;margin-top:0}
           <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--brl);font-size:11px;color:var(--muted);text-align:center">
             🔒 Paiement sécurisé Orange Money · Activation immédiate · Support 7j/7
           </div>
+        </div>
+      </div>
+
+      <!-- ═══ TAB MA BOUTIQUE (Pro uniquement) ═══ -->
+      <div class="dash-section" id="dsec-boutique">
+        <div class="dash-section-title">🏪 Ma Boutique Pro</div>
+
+        <!-- En-tête boutique -->
+        <div id="boutique-header" style="background:linear-gradient(135deg,#1A1A2E,#2D2B0E);border-radius:16px;padding:24px;margin-bottom:16px;position:relative;overflow:hidden">
+          <div style="position:absolute;inset:0;background:radial-gradient(circle at 80% 50%,rgba(255,92,0,.15),transparent 60%)"></div>
+          <div style="display:flex;align-items:center;gap:16px;position:relative">
+            <div id="boutique-logo-preview" style="width:64px;height:64px;border-radius:14px;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;cursor:pointer" onclick="document.getElementById('boutique-logo-input').click()" title="Changer le logo">🏪</div>
+            <input type="file" id="boutique-logo-input" accept="image/*" style="display:none" onchange="previewBoutiqueLogo(this)">
+            <div style="flex:1">
+              <div id="boutique-name-display" style="font-size:20px;font-weight:900;color:#fff;margin-bottom:4px">Ma Boutique</div>
+              <div id="boutique-plan-badge" style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,92,0,.2);border:1px solid rgba(255,92,0,.3);color:#FFB84D;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px">⭐ Pro</div>
+            </div>
+            <button onclick="saveBoutiqueInfo()" style="background:var(--or);color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;flex-shrink:0">💾 Sauvegarder</button>
+          </div>
+        </div>
+
+        <!-- Infos boutique -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+          <div style="background:#fff;border-radius:12px;padding:16px;border:1px solid var(--br)">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Nom de la boutique</div>
+            <input id="boutique-name-input" type="text" placeholder="Ex: Boutique Mode Conakry" style="width:100%;border:1.5px solid var(--br);border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;outline:none" onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'">
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:16px;border:1px solid var(--br)">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Catégorie principale</div>
+            <select id="boutique-cat-input" style="width:100%;border:1.5px solid var(--br);border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;outline:none;background:#fff">
+              <option value="">Choisir une catégorie...</option>
+            </select>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:16px;border:1px solid var(--br);grid-column:1/-1">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Description de la boutique</div>
+            <textarea id="boutique-desc-input" rows="3" placeholder="Décrivez votre boutique, vos produits, votre localisation..." style="width:100%;border:1.5px solid var(--br);border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;outline:none;resize:none" onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'"></textarea>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:16px;border:1px solid var(--br)">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Téléphone WhatsApp</div>
+            <input id="boutique-wa-input" type="tel" placeholder="Ex: 620 00 00 00" style="width:100%;border:1.5px solid var(--br);border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;outline:none" onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'">
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:16px;border:1px solid var(--br)">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Adresse / Quartier</div>
+            <input id="boutique-addr-input" type="text" placeholder="Ex: Matam, Conakry" style="width:100%;border:1.5px solid var(--br);border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;outline:none" onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'">
+          </div>
+        </div>
+
+        <!-- Stats boutique -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+          <div style="background:#fff;border-radius:12px;padding:16px;border:1px solid var(--br);text-align:center">
+            <div style="font-size:24px;font-weight:900;color:var(--or)" id="boutique-stat-ads">0</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px">Annonces actives</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:16px;border:1px solid var(--br);text-align:center">
+            <div style="font-size:24px;font-weight:900;color:#7C3AED" id="boutique-stat-views">0</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px">Vues totales</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:16px;border:1px solid var(--br);text-align:center">
+            <div style="font-size:24px;font-weight:900;color:#059669" id="boutique-stat-contacts">0</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px">Contacts reçus</div>
+          </div>
+        </div>
+
+        <!-- Mes annonces de la boutique -->
+        <div style="background:#fff;border-radius:12px;border:1px solid var(--br);overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--br)">
+            <div style="font-size:14px;font-weight:800;color:var(--ink)">📦 Catalogue de ma boutique</div>
+            <button onclick="requireLoginThenPost()" style="background:var(--or);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">➕ Ajouter</button>
+          </div>
+          <div id="boutique-ads-grid" class="ads-grid" style="padding:14px">
+            <div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--muted);font-size:13px">Publiez vos premières annonces pour les voir ici</div>
+          </div>
+        </div>
+
+        <!-- Lien public -->
+        <div style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:1px solid #BBF7D0;border-radius:12px;padding:14px 18px;margin-top:14px;display:flex;align-items:center;gap:12px">
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:700;color:#065F46;margin-bottom:2px">🔗 Lien public de votre boutique</div>
+            <div id="boutique-public-link" style="font-size:12px;color:#059669;font-family:monospace">yougouyougou.net/boutique/...</div>
+          </div>
+          <button onclick="copyBoutiqueLink()" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">📋 Copier</button>
         </div>
       </div>
 
@@ -2662,9 +2764,12 @@ function goTo(page){
   if(page==='dashboard') loadDash();
   if(page==='home') renderAds();
   if(page==='pro'){
-    // Reset scroll interne de la page Pro
     var proEl = document.getElementById('page-pro');
     if(proEl) proEl.scrollTop = 0;
+  }
+  if(page==='boutiques'){
+    var boutEl = document.getElementById('page-boutiques');
+    if(boutEl) boutEl.scrollTop = 0;
   }
   if(page==='seller'&&typeof _curSellerId!=='undefined'&&_curSellerId) loadSellerProfile(_curSellerId);
   if(page==='messages'){
@@ -5055,6 +5160,13 @@ function renderDash(){
   var ftAdminBtn=document.getElementById('ft-admin-btn');
   if(ftAdminBtn) ftAdminBtn.style.display=(u&&u.role==='admin')?'block':'none';
 
+  // Menu Boutique — visible seulement si Pro actif
+  var btab = document.getElementById('dtab-boutique');
+  if(btab){
+    var proActive = u.isPro && u.proUntil && new Date(u.proUntil) > new Date();
+    btab.style.display = proActive ? 'flex' : 'none';
+  }
+
   // Onglet Profil — infos personnelles
   var av=document.getElementById('p-avatar');
   if(av) av.textContent=initials||'U';
@@ -5422,12 +5534,25 @@ function adminApiGet(path, cb){
 }
 
 function goAdmin(){
-  var u=DB.user();
-  if(!u){openModal('auth');return;}
-  if(u.role!=='admin'){toast('🚫 Accès refusé','err');return;}
-  goTo('admin');
-  adminTab('stats');
-  loadAdmin();
+  var token = localStorage.getItem('ygy_token');
+  if(!token){ openModal('auth'); return; }
+  // Vérification côté serveur — source de vérité MongoDB
+  fetch('/api/me', { headers:{'Authorization':'Bearer '+token} })
+    .then(function(r){ return r.ok ? r.json() : Promise.reject('non-auth'); })
+    .then(function(data){
+      if(data && data.user && data.user.role === 'admin'){
+        // Mettre à jour le rôle localement
+        var u = DB.user()||{};
+        u.role = 'admin';
+        DB.login(u);
+        goTo('admin');
+        adminTab('stats');
+        loadAdmin();
+      } else {
+        toast('🚫 Accès réservé aux administrateurs','err');
+      }
+    })
+    .catch(function(){ toast('🚫 Accès refusé','err'); });
 }
 
 function adminTab(name){
@@ -5817,6 +5942,259 @@ function adminRemoveMyPro(){
   renderAdminPro();
 }
 
+// ══════════════════════════════════════════
+//  BOUTIQUE PRO — Fonctions dashboard
+// ══════════════════════════════════════════
+
+var _boutiqueData = {};
+
+function loadBoutiqueTab(){
+  var u = DB.user();
+  if(!u || !u.isPro){ toast('⭐ Fonctionnalité réservée aux membres Pro','err'); return; }
+
+  // Afficher/masquer menu boutique selon statut Pro
+  var btab = document.getElementById('dtab-boutique');
+  if(btab) btab.style.display = (u.isPro && u.proUntil && new Date(u.proUntil)>new Date()) ? 'flex' : 'none';
+
+  // Charger les données boutique depuis le serveur
+  var token = localStorage.getItem('ygy_token');
+  fetch('/api/me/boutique', { headers:{'Authorization':'Bearer '+(token||'')} })
+    .then(function(r){ return r.ok ? r.json() : {}; })
+    .then(function(d){
+      _boutiqueData = d.boutique || {};
+      renderBoutiqueTab();
+    }).catch(function(){ renderBoutiqueTab(); });
+}
+
+function renderBoutiqueTab(){
+  var u = DB.user()||{};
+  var b = _boutiqueData;
+
+  // Plan info
+  var planLabels = { starter:'⭐ Starter', business:'🔥 Business', premium:'👑 Premium' };
+  var badgeEl = document.getElementById('boutique-plan-badge');
+  if(badgeEl) badgeEl.textContent = planLabels[u.proPlan||'starter']||'⭐ Pro';
+
+  // Remplir les champs
+  var nm = document.getElementById('boutique-name-input');
+  var dc = document.getElementById('boutique-desc-input');
+  var wa = document.getElementById('boutique-wa-input');
+  var ad = document.getElementById('boutique-addr-input');
+  var nd = document.getElementById('boutique-name-display');
+  if(nm) nm.value = b.name||'';
+  if(dc) dc.value = b.description||'';
+  if(wa) wa.value = b.whatsapp||u.phone||'';
+  if(ad) ad.value = b.address||'';
+  if(nd) nd.textContent = b.name || (u.prenom||u.name||'Ma') + ' Boutique';
+
+  // Logo preview
+  if(b.logo){
+    var lp = document.getElementById('boutique-logo-preview');
+    if(lp) lp.innerHTML = '<img src="'+b.logo+'" style="width:100%;height:100%;object-fit:cover;border-radius:12px">';
+  }
+
+  // Catégorie select
+  var catSel = document.getElementById('boutique-cat-input');
+  if(catSel && catSel.options.length <= 1){
+    CATS.forEach(function(c){
+      var opt = document.createElement('option');
+      opt.value = c.n; opt.textContent = c.e+' '+c.n;
+      if(b.category===c.n) opt.selected = true;
+      catSel.appendChild(opt);
+    });
+  } else if(catSel && b.category){
+    catSel.value = b.category;
+  }
+
+  // Lien public
+  var linkEl = document.getElementById('boutique-public-link');
+  var sellerId = u._id || u.id || '';
+  if(linkEl) linkEl.textContent = 'yougouyougou.net/boutique/' + sellerId;
+
+  // Stats boutique depuis les annonces
+  var ads = DB.ads().filter(function(a){ return String(a.sellerId||a.seller_id||'') === String(sellerId) || (a.seller===u.prenom||a.sellerName===u.prenom); });
+  var totalViews = ads.reduce(function(s,a){ return s+(a.views||0); },0);
+  var statAds = document.getElementById('boutique-stat-ads');
+  var statViews = document.getElementById('boutique-stat-views');
+  if(statAds) statAds.textContent = ads.length;
+  if(statViews) statViews.textContent = totalViews.toLocaleString('fr-FR');
+
+  // Grille annonces boutique
+  var grid = document.getElementById('boutique-ads-grid');
+  if(grid){
+    if(ads.length){
+      grid.innerHTML = ads.slice(0,12).map(function(a){ return adCard(a,false); }).join('');
+    } else {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--muted);font-size:13px">Publiez vos premières annonces pour les voir ici</div>';
+    }
+  }
+}
+
+function previewBoutiqueLogo(input){
+  if(!input.files||!input.files[0]) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var lp = document.getElementById('boutique-logo-preview');
+    if(lp) lp.innerHTML = '<img src="'+e.target.result+'" style="width:100%;height:100%;object-fit:cover;border-radius:12px">';
+    _boutiqueData._logoBase64 = e.target.result;
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function saveBoutiqueInfo(){
+  var nm = (document.getElementById('boutique-name-input')||{}).value||'';
+  var dc = (document.getElementById('boutique-desc-input')||{}).value||'';
+  var wa = (document.getElementById('boutique-wa-input')||{}).value||'';
+  var ad = (document.getElementById('boutique-addr-input')||{}).value||'';
+  var cat = (document.getElementById('boutique-cat-input')||{}).value||'';
+  if(!nm.trim()){ toast('📝 Entrez un nom pour votre boutique','err'); return; }
+
+  var token = localStorage.getItem('ygy_token');
+  var payload = { name:nm, description:dc, whatsapp:wa, address:ad, category:cat };
+  if(_boutiqueData._logoBase64) payload.logo = _boutiqueData._logoBase64;
+
+  fetch('/api/me/boutique', {
+    method:'PUT',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},
+    body: JSON.stringify(payload)
+  }).then(function(r){ return r.ok ? r.json() : Promise.reject(r.status); })
+    .then(function(d){
+      _boutiqueData = Object.assign(_boutiqueData, payload);
+      var nd = document.getElementById('boutique-name-display');
+      if(nd) nd.textContent = nm;
+      toast('✅ Boutique sauvegardée !','ok');
+    })
+    .catch(function(err){
+      // Sauvegarder localement si API pas encore dispo
+      _boutiqueData = Object.assign(_boutiqueData, payload);
+      var u = DB.user()||{};
+      u.boutique = _boutiqueData;
+      DB.login(u);
+      toast('✅ Boutique sauvegardée (local)','ok');
+    });
+}
+
+function copyBoutiqueLink(){
+  var u = DB.user()||{};
+  var link = 'https://yougouyougou.net/boutique/'+(u._id||u.id||'');
+  if(navigator.clipboard){ navigator.clipboard.writeText(link); }
+  toast('📋 Lien copié !','ok');
+}
+
+// ══════════════════════════════════════════
+//  PAGE BOUTIQUES PUBLIQUES
+// ══════════════════════════════════════════
+
+var _allBoutiques = [];
+
+function goToBoutiques(){
+  goTo('boutiques');
+  loadBoutiquesPage();
+  // Peupler le filtre catégorie
+  var sel = document.getElementById('boutiques-cat-filter');
+  if(sel && sel.options.length <= 1){
+    CATS.forEach(function(c){
+      var opt = document.createElement('option');
+      opt.value = c.n; opt.textContent = c.e+' '+c.n;
+      sel.appendChild(opt);
+    });
+  }
+}
+
+function loadBoutiquesPage(){
+  var token = localStorage.getItem('ygy_token');
+  var headers = token ? {'Authorization':'Bearer '+token} : {};
+  fetch('/api/boutiques', { headers:headers })
+    .then(function(r){ return r.ok ? r.json() : []; })
+    .then(function(data){
+      _allBoutiques = data.boutiques || data || [];
+      renderBoutiquesGrid(_allBoutiques);
+    })
+    .catch(function(){
+      // Fallback : construire depuis les vendeurs Pro locaux
+      var proUsers = (_adminData&&_adminData.users||[]).filter(function(u){ return u.isPro; });
+      _allBoutiques = proUsers.map(function(u){
+        return {
+          _id: u._id, name:(u.boutique&&u.boutique.name)||(u.prenom||u.name||'Boutique')+' Shop',
+          description:(u.boutique&&u.boutique.description)||'Commerçant YouGouYou Pro',
+          category:(u.boutique&&u.boutique.category)||'', logo:(u.boutique&&u.boutique.logo)||'',
+          address:(u.boutique&&u.boutique.address)||(u.city||'Guinée'),
+          sellerName:(u.prenom||u.name||'')+(u.nom?' '+u.nom:''),
+          sellerId: u._id, isPro:true, proPlan:u.proPlan||'starter'
+        };
+      });
+      renderBoutiquesGrid(_allBoutiques);
+    });
+}
+
+function renderBoutiquesGrid(boutiques){
+  var grid = document.getElementById('boutiques-grid');
+  if(!grid) return;
+  if(!boutiques.length){
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted)">'
+      +'<div style="font-size:56px;margin-bottom:14px">🏪</div>'
+      +'<div style="font-size:18px;font-weight:800;color:var(--ink);margin-bottom:8px">Aucune boutique pour l\'instant</div>'
+      +'<div style="font-size:13px;margin-bottom:20px">Les commerçants Pro apparaîtront ici</div>'
+      +'<button onclick="goTo(\'pro\')" style="background:var(--or);color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit">Devenir Pro →</button>'
+      +'</div>';
+    return;
+  }
+  var planColors = { starter:'#FF5C00', business:'#7C3AED', premium:'#D97706' };
+  var planLabels = { starter:'⭐ Starter', business:'🔥 Business', premium:'👑 Premium' };
+  grid.innerHTML = boutiques.map(function(b){
+    var logo = b.logo
+      ? '<img src="'+b.logo+'" style="width:100%;height:100%;object-fit:cover;border-radius:12px">'
+      : '<span style="font-size:32px">🏪</span>';
+    var planColor = planColors[b.proPlan||'starter'];
+    var planLabel = planLabels[b.proPlan||'starter'];
+    var ads = DB.ads().filter(function(a){ return String(a.sellerId||'')===String(b.sellerId||b._id||''); });
+    return '<div style="background:#fff;border-radius:16px;border:1px solid #F1F5F9;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.05);transition:all .2s;cursor:pointer" onclick="viewBoutique(\''+b._id+'\')" onmouseover="this.style.transform=\'translateY(-3px)\';this.style.boxShadow=\'0 8px 24px rgba(0,0,0,.10)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 1px 4px rgba(0,0,0,.05)\'">'
+      // Header
+      +'<div style="background:linear-gradient(135deg,#1A1A2E,#2D1B0E);padding:20px;display:flex;align-items:center;gap:12px;position:relative">'
+        +'<div style="width:56px;height:56px;border-radius:12px;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden">'+logo+'</div>'
+        +'<div style="flex:1;min-width:0">'
+          +'<div style="font-size:15px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(b.name||'Boutique')+'</div>'
+          +'<div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:2px">'+(b.sellerName||'Vendeur Pro')+'</div>'
+        +'</div>'
+        +'<div style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:'+planColor+';font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;flex-shrink:0">'+planLabel+'</div>'
+      +'</div>'
+      // Body
+      +'<div style="padding:14px 16px">'
+        +(b.description ? '<div style="font-size:12px;color:#64748B;line-height:1.5;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">'+b.description+'</div>' : '')
+        +'<div style="display:flex;align-items:center;justify-content:space-between">'
+          +(b.category ? '<span style="background:#F1F5F9;color:#475569;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px">'+b.category+'</span>' : '<span></span>')
+          +'<span style="font-size:12px;color:var(--muted)">'+ads.length+' annonce'+(ads.length>1?'s':'')+'</span>'
+        +'</div>'
+        +(b.address ? '<div style="margin-top:8px;font-size:11px;color:#94A3B8;display:flex;align-items:center;gap:4px">📍 '+b.address+'</div>' : '')
+      +'</div>'
+      +'<div style="padding:0 16px 14px">'
+        +'<button style="width:100%;background:var(--or);color:#fff;border:none;border-radius:10px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit" onclick="event.stopPropagation();viewBoutique(\''+b._id+'\')">Voir la boutique →</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function filterBoutiques(){
+  var q = (document.getElementById('boutiques-search')||{}).value||'';
+  var cat = (document.getElementById('boutiques-cat-filter')||{}).value||'';
+  var filtered = _allBoutiques.filter(function(b){
+    if(cat && b.category !== cat) return false;
+    if(q){
+      var txt = ((b.name||'')+' '+(b.description||'')+' '+(b.sellerName||'')).toLowerCase();
+      if(!txt.includes(q.toLowerCase())) return false;
+    }
+    return true;
+  });
+  renderBoutiquesGrid(filtered);
+}
+
+function viewBoutique(id){
+  // Ouvrir le profil vendeur
+  var b = _allBoutiques.find(function(x){ return String(x._id)===String(id); });
+  if(b && b.sellerId){ loadSellerProfile(b.sellerId); }
+  else { toast('Boutique non trouvée','err'); }
+}
+
 function promoteAdmin(idx){
   var id = (window._adminUserIds||[])[idx];
   var token = localStorage.getItem('ygy_token');
@@ -6046,8 +6424,17 @@ function showDashTab(tab){
   var navEl = document.getElementById('dtab-'+tab);
   if(sec) sec.classList.add('active');
   if(navEl) navEl.classList.add('active');
-  // Charger le statut Pro quand on ouvre l'onglet
   if(tab === 'pro') updateDashProStatus();
+  if(tab === 'boutique'){
+    var u = DB.user();
+    if(!u || !u.isPro || !u.proUntil || new Date(u.proUntil) <= new Date()){
+      // Pas Pro — rediriger vers onglet Pro
+      showDashTab('pro');
+      setTimeout(function(){ toast('⭐ Activez un abonnement Pro pour accéder à votre boutique','err'); }, 200);
+      return;
+    }
+    loadBoutiqueTab();
+  }
 }
 
 function updateDashProStatus(){
@@ -7448,6 +7835,35 @@ document.addEventListener('DOMContentLoaded',function(){
   </div>
   <button class="pwa-install-btn" onclick="installPWA()">Installer</button>
   <button class="pwa-dismiss" onclick="dismissPWA()">✕</button>
+</div>
+
+<!-- ══ PAGE BOUTIQUES PUBLIQUES ══ -->
+<div id="page-boutiques" class="page">
+  <div style="max-width:1100px;margin:0 auto;padding:28px 20px 60px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+      <button onclick="goTo('home')" style="display:inline-flex;align-items:center;gap:5px;background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:13px;font-family:inherit;padding:0">← Retour</button>
+      <div>
+        <h1 style="font-size:22px;font-weight:900;color:#0F172A;letter-spacing:-.4px">🏪 Boutiques YouGouYou Pro</h1>
+        <div style="font-size:13px;color:var(--muted);margin-top:2px">Commerçants vérifiés avec catalogues complets</div>
+      </div>
+    </div>
+
+    <!-- Filtres boutiques -->
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px">
+      <input id="boutiques-search" type="text" placeholder="🔍 Rechercher une boutique..." oninput="filterBoutiques()" style="flex:1;min-width:200px;border:1.5px solid var(--br);border-radius:10px;padding:10px 14px;font-size:13px;font-family:inherit;outline:none">
+      <select id="boutiques-cat-filter" onchange="filterBoutiques()" style="border:1.5px solid var(--br);border-radius:10px;padding:10px 14px;font-size:13px;font-family:inherit;outline:none;background:#fff">
+        <option value="">Toutes catégories</option>
+      </select>
+    </div>
+
+    <!-- Grille boutiques -->
+    <div id="boutiques-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">
+      <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted)">
+        <div style="font-size:48px;margin-bottom:12px">🏪</div>
+        <div style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:6px">Chargement des boutiques...</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ══ PAGE PRO ══ -->
