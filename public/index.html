@@ -1680,18 +1680,31 @@ footer{background:transparent;margin-top:0}
       </div>
     </div>
 
-    <!-- CTA Boutiques -->
-    <div style="display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#FFF3EE,#FFE8D6);border:1.5px solid var(--orm);border-radius:14px;padding:14px 20px;margin-top:12px">
-      <div style="display:flex;align-items:center;gap:12px">
-        <span style="font-size:28px">🏬</span>
-        <div>
-          <div style="font-size:14px;font-weight:800;color:var(--ink)">Découvrez nos Boutiques Pro</div>
-          <div style="font-size:12px;color:var(--muted)">Des commerçants vérifiés avec catalogues complets</div>
+    <!-- CTA Boutiques — Aperçu dynamique -->
+    <div id="boutiques-cta-block" style="background:linear-gradient(135deg,#FFF3EE,#FFE8D6);border:1.5px solid var(--orm);border-radius:14px;padding:14px 20px;margin-top:12px">
+      <!-- Ligne titre + bouton -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="font-size:28px">🏬</span>
+          <div>
+            <div style="font-size:14px;font-weight:800;color:var(--ink)">Découvrez nos Boutiques Pro</div>
+            <div style="font-size:12px;color:var(--muted)">Des commerçants vérifiés avec catalogues complets · <span id="cta-boutiques-count" style="font-weight:700;color:var(--or)">...</span></div>
+          </div>
+        </div>
+        <button onclick="goToBoutiques()" style="background:var(--or);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 2px 8px rgba(255,92,0,.25)">
+          🏪 Visitez nos Boutiques →
+        </button>
+      </div>
+      <!-- Aperçu horizontal des boutiques -->
+      <div id="cta-boutiques-preview" style="display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:2px">
+        <!-- Chargement initial -->
+        <div id="cta-boutiques-loading" style="display:flex;align-items:center;gap:8px;padding:10px 0;color:var(--muted);font-size:12px">
+          <div style="width:40px;height:40px;border-radius:10px;background:rgba(0,0,0,.07);animation:shimmer 1.5s infinite"></div>
+          <div style="width:40px;height:40px;border-radius:10px;background:rgba(0,0,0,.07);animation:shimmer 1.5s infinite"></div>
+          <div style="width:40px;height:40px;border-radius:10px;background:rgba(0,0,0,.07);animation:shimmer 1.5s infinite"></div>
+          <span style="margin-left:4px">Chargement des boutiques...</span>
         </div>
       </div>
-      <button onclick="goToBoutiques()" style="background:var(--or);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 2px 8px rgba(255,92,0,.25)">
-        🏪 Visitez nos Boutiques →
-      </button>
     </div>
   </div>
 
@@ -8265,27 +8278,142 @@ function goToBoutiques(){
 function loadBoutiquesPage(){
   var token = localStorage.getItem('ygy_token');
   var headers = token ? {'Authorization':'Bearer '+token} : {};
+
+  // Afficher spinner dans la grille
+  var grid = document.getElementById('boutiques-grid');
+  if(grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)"><div style="font-size:36px;margin-bottom:10px">⏳</div><div style="font-size:13px;font-weight:600">Chargement des boutiques...</div></div>';
+
+  function buildFromLocalData(){
+    // Construire depuis : API /api/admin/users (si admin) OU données locales
+    var localBoutiques = [];
+
+    // Source 1 : utilisateur courant s'il a une boutique
+    var u = DB.user();
+    if(u && u.isPro && u.boutique && u.boutique.name){
+      localBoutiques.push({
+        _id: u._id||u.id||'local_'+Date.now(),
+        name: u.boutique.name,
+        description: u.boutique.description||u.boutique.desc||'',
+        category: u.boutique.category||'',
+        subcat: u.boutique.subcat||'',
+        logo: u.boutique.logo||'',
+        address: u.boutique.address||'',
+        whatsapp: u.boutique.whatsapp||'',
+        videoUrl: u.boutique.videoUrl||'',
+        videoTitle: u.boutique.videoTitle||'',
+        sellerName: (u.prenom||u.name||'')+(u.nom?' '+u.nom:''),
+        sellerId: u._id||u.id||'',
+        isPro: true,
+        proPlan: u.proPlan||'starter'
+      });
+    }
+
+    // Source 2 : données admin si disponibles
+    var adminUsers = (_adminData&&_adminData.users)||[];
+    adminUsers.forEach(function(au){
+      if(!au.isPro) return;
+      if(!au.boutique||!au.boutique.name) return;
+      // Éviter doublon avec l'utilisateur courant
+      if(u && (String(au._id)===String(u._id||u.id))) return;
+      localBoutiques.push({
+        _id: au._id,
+        name: au.boutique.name,
+        description: au.boutique.description||au.boutique.desc||'',
+        category: au.boutique.category||'',
+        subcat: au.boutique.subcat||'',
+        logo: au.boutique.logo||'',
+        address: au.boutique.address||(au.city||'Guinée'),
+        whatsapp: au.boutique.whatsapp||'',
+        videoUrl: au.boutique.videoUrl||'',
+        videoTitle: au.boutique.videoTitle||'',
+        sellerName: (au.prenom||au.name||'')+(au.nom?' '+au.nom:''),
+        sellerId: au._id,
+        isPro: true,
+        proPlan: au.proPlan||'starter'
+      });
+    });
+
+    return localBoutiques;
+  }
+
+  // Essayer l'API /api/boutiques d'abord, puis fallback intelligent
   fetch('/api/boutiques', { headers:headers })
-    .then(function(r){ return r.ok ? r.json() : []; })
+    .then(function(r){ return r.ok ? r.json() : Promise.reject(r.status); })
     .then(function(data){
-      _allBoutiques = data.boutiques || data || [];
+      var apiBoutiques = data.boutiques || data || [];
+
+      // Si l'API retourne des données, les enrichir avec les données locales manquantes
+      if(apiBoutiques.length > 0){
+        _allBoutiques = apiBoutiques;
+      } else {
+        // API vide → construire depuis local
+        _allBoutiques = buildFromLocalData();
+      }
       renderBoutiquesGrid(_allBoutiques);
+      renderCtaBoutiquesPreview(_allBoutiques);
     })
     .catch(function(){
-      // Fallback : construire depuis les vendeurs Pro locaux
-      var proUsers = (_adminData&&_adminData.users||[]).filter(function(u){ return u.isPro; });
-      _allBoutiques = proUsers.map(function(u){
-        return {
-          _id: u._id, name:(u.boutique&&u.boutique.name)||(u.prenom||u.name||'Boutique')+' Shop',
-          description:(u.boutique&&u.boutique.description)||'Commerçant YouGouYou Pro',
-          category:(u.boutique&&u.boutique.category)||'', logo:(u.boutique&&u.boutique.logo)||'',
-          address:(u.boutique&&u.boutique.address)||(u.city||'Guinée'),
-          sellerName:(u.prenom||u.name||'')+(u.nom?' '+u.nom:''),
-          sellerId: u._id, isPro:true, proPlan:u.proPlan||'starter'
-        };
-      });
+      // API indispo → construire depuis local
+      _allBoutiques = buildFromLocalData();
       renderBoutiquesGrid(_allBoutiques);
+      renderCtaBoutiquesPreview(_allBoutiques);
     });
+}
+
+// ── Aperçu horizontal dans la barre CTA de l'accueil ──
+function renderCtaBoutiquesPreview(boutiques){
+  var container = document.getElementById('cta-boutiques-preview');
+  var countEl   = document.getElementById('cta-boutiques-count');
+  var loadEl    = document.getElementById('cta-boutiques-loading');
+
+  if(loadEl) loadEl.style.display = 'none';
+  if(countEl) countEl.textContent = boutiques.length + ' boutique' + (boutiques.length>1?'s':'') + ' active' + (boutiques.length>1?'s':'');
+
+  if(!container) return;
+
+  if(!boutiques.length){
+    container.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 0;font-style:italic">Aucune boutique enregistrée pour le moment — <span onclick="goTo(\'pro\')" style="color:var(--or);cursor:pointer;font-weight:700">Devenir Pro →</span></div>';
+    return;
+  }
+
+  var planColors = { starter:'#D97706', business:'#1D4ED8', premium:'#FF5C00' };
+  var planIcons  = { starter:'⭐', business:'🔷', premium:'👑' };
+
+  container.innerHTML = boutiques.slice(0, 8).map(function(b){
+    var planColor = planColors[b.proPlan||'starter'];
+    var planIcon  = planIcons[b.proPlan||'starter'];
+    var logoHtml = b.logo
+      ? '<img src="'+b.logo+'" style="width:100%;height:100%;object-fit:cover;border-radius:10px" onerror="this.parentNode.innerHTML=\'🏪\'">'
+      : '<span style="font-size:20px">🏪</span>';
+
+    return '<div onclick="goToBoutiques()" title="'+b.name+'" '
+      +'style="flex-shrink:0;width:130px;background:#fff;border-radius:12px;border:1.5px solid #F1F5F9;overflow:hidden;cursor:pointer;transition:all .18s;box-shadow:0 1px 4px rgba(0,0,0,.06)" '
+      +'onmouseover="this.style.transform=\'translateY(-3px)\';this.style.boxShadow=\'0 6px 18px rgba(0,0,0,.10)\';this.style.borderColor=\'var(--orm)\'" '
+      +'onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 1px 4px rgba(0,0,0,.06)\';this.style.borderColor=\'#F1F5F9\'">'
+        // Header coloré compact
+        +'<div style="background:linear-gradient(135deg,#1A1A2E,#2D1B0E);padding:10px;display:flex;align-items:center;gap:8px;position:relative">'
+          +'<div style="width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden">'+logoHtml+'</div>'
+          +'<div style="min-width:0;flex:1">'
+            +'<div style="font-size:11px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(b.name||'Boutique')+'</div>'
+            +'<div style="font-size:9px;color:'+planColor+';font-weight:700;margin-top:1px">'+planIcon+' Pro</div>'
+          +'</div>'
+        +'</div>'
+        // Corps
+        +'<div style="padding:8px 10px">'
+          +(b.category ? '<div style="font-size:10px;font-weight:600;color:#64748B;background:#F8FAFC;padding:2px 7px;border-radius:10px;display:inline-block;margin-bottom:5px">'+b.category+'</div>' : '')
+          +(b.description ? '<div style="font-size:10px;color:#94A3B8;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">'+b.description+'</div>' : '<div style="font-size:10px;color:#94A3B8">Commerçant Pro</div>')
+          +(b.address ? '<div style="font-size:9px;color:#CBD5E1;margin-top:5px;display:flex;align-items:center;gap:3px">📍 <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+b.address+'</span></div>' : '')
+        +'</div>'
+      +'</div>';
+  }).join('');
+
+  // Bouton "Voir tout" si plus de 8
+  if(boutiques.length > 8){
+    container.innerHTML += '<div onclick="goToBoutiques()" style="flex-shrink:0;width:100px;background:var(--orl);border-radius:12px;border:1.5px dashed var(--orm);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;cursor:pointer;padding:12px;text-align:center" onmouseover="this.style.background=\'var(--orm)\'" onmouseout="this.style.background=\'var(--orl)\'">'
+      +'<div style="font-size:22px">🏪</div>'
+      +'<div style="font-size:11px;font-weight:800;color:var(--or)">+'+(boutiques.length-8)+' autres</div>'
+      +'</div>';
+  }
 }
 
 function renderBoutiquesGrid(boutiques){
@@ -9835,6 +9963,10 @@ document.addEventListener('DOMContentLoaded',function(){
     if(mapObj) mapObj.invalidateSize();
     else initMap();
   }, 2500);
+  // Charger l'aperçu boutiques dans la barre CTA de l'accueil
+  setTimeout(function(){
+    loadBoutiquesPage();
+  }, 1500);
 });
 
 </script>
