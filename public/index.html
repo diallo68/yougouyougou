@@ -2423,14 +2423,73 @@ footer{background:transparent;margin-top:0}
           </div>
         </div>
 
-        <!-- Lien public -->
-        <div style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:1px solid #BBF7D0;border-radius:12px;padding:14px 18px;margin-top:14px;display:flex;align-items:center;gap:12px">
-          <div style="flex:1">
-            <div style="font-size:13px;font-weight:700;color:#065F46;margin-bottom:2px">🔗 Lien public de votre boutique</div>
-            <div id="boutique-public-link" style="font-size:12px;color:#059669;font-family:monospace">yougouyougou.net/boutique/...</div>
+        <!-- Lien public + Bouton Visiter -->
+        <div style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:1px solid #BBF7D0;border-radius:12px;padding:14px 18px;margin-top:14px">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <div style="flex:1;min-width:180px">
+              <div style="font-size:13px;font-weight:700;color:#065F46;margin-bottom:2px">🔗 Lien public de votre boutique</div>
+              <div id="boutique-public-link" style="font-size:12px;color:#059669;font-family:monospace">yougouyougou.net/boutique/...</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap">
+              <button onclick="copyBoutiqueLink()" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📋 Copier</button>
+              <button onclick="ouvrirMaBoutique()" style="background:linear-gradient(135deg,#FF5C00,#D94E00);color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;box-shadow:0 3px 10px rgba(255,92,0,.3)">
+                🏪 Visiter ma boutique →
+              </button>
+            </div>
           </div>
-          <button onclick="copyBoutiqueLink()" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">📋 Copier</button>
         </div>
+
+        <!-- Vidéo de présentation -->
+        <div style="background:#fff;border-radius:12px;border:1px solid var(--br);overflow:hidden;margin-top:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--br)">
+            <div>
+              <div style="font-size:14px;font-weight:800;color:var(--ink)">🎬 Vidéo de présentation</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px">Ajoutez une vidéo YouTube ou un lien direct pour présenter votre boutique</div>
+            </div>
+            <button onclick="toggleBoutiqueVideoForm()" id="btn-toggle-video" style="background:var(--orl);color:var(--or);border:1.5px solid var(--orm);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">➕ Ajouter une vidéo</button>
+          </div>
+
+          <!-- Aperçu vidéo existante -->
+          <div id="boutique-video-preview" style="display:none;padding:14px 18px">
+            <div id="boutique-video-embed" style="width:100%;border-radius:10px;overflow:hidden;background:#000;aspect-ratio:16/9"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px">
+              <div id="boutique-video-title" style="font-size:12px;color:var(--muted);font-weight:600"></div>
+              <button onclick="supprimerBoutiqueVideo()" style="background:#FEE2E2;color:#DC2626;border:1px solid #FECACA;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">🗑️ Supprimer</button>
+            </div>
+          </div>
+
+          <!-- Formulaire ajout vidéo -->
+          <div id="boutique-video-form" style="display:none;padding:16px 18px">
+            <div style="margin-bottom:12px">
+              <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Lien de la vidéo *</div>
+              <input type="url" id="boutique-video-url" placeholder="Ex: https://youtube.com/watch?v=... ou https://youtu.be/..."
+                style="width:100%;border:1.5px solid var(--br);border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none"
+                onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'"
+                oninput="previewBoutiqueVideoUrl(this.value)">
+              <div style="font-size:11px;color:var(--muted);margin-top:4px">Accepte : YouTube, lien direct MP4</div>
+            </div>
+            <!-- Aperçu temps réel -->
+            <div id="boutique-video-preview-small" style="display:none;margin-bottom:12px;border-radius:10px;overflow:hidden;border:1px solid var(--br);aspect-ratio:16/9;background:#000"></div>
+            <div style="margin-bottom:12px">
+              <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Titre de la vidéo (optionnel)</div>
+              <input type="text" id="boutique-video-title-input" placeholder="Ex: Présentation de ma boutique Mode Conakry"
+                style="width:100%;border:1.5px solid var(--br);border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none"
+                onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'">
+            </div>
+            <div style="display:flex;gap:8px">
+              <button onclick="saveBoutiqueVideo()" style="flex:1;background:var(--or);color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit">💾 Enregistrer la vidéo</button>
+              <button onclick="toggleBoutiqueVideoForm()" style="background:#F1F5F9;color:var(--muted);border:1.5px solid var(--br);border-radius:8px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Annuler</button>
+            </div>
+          </div>
+
+          <!-- État vide -->
+          <div id="boutique-video-empty" style="padding:28px;text-align:center;color:var(--muted)">
+            <div style="font-size:36px;margin-bottom:8px">🎬</div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:3px">Aucune vidéo de présentation</div>
+            <div style="font-size:12px">Ajoutez une vidéo YouTube pour attirer plus de clients</div>
+          </div>
+        </div>
+
         </div><!-- /boutique-form-block -->
       </div>
 
@@ -7805,6 +7864,9 @@ function renderBoutiqueTabExtras(){
       grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--muted);font-size:13px">Publiez vos premières annonces pour les voir ici</div>';
     }
   }
+
+  // Initialiser la section vidéo
+  if(typeof initBoutiqueVideoSection === 'function') initBoutiqueVideoSection();
 }
 
 function previewBoutiqueLogo(input){
@@ -7868,6 +7930,316 @@ function copyBoutiqueLink(){
   var link = 'https://yougouyougou.net/boutique/'+(u._id||u.id||'');
   if(navigator.clipboard){ navigator.clipboard.writeText(link); }
   toast('📋 Lien copié !','ok');
+}
+
+function copyBoutiqueLink(){
+  var u = DB.user()||{};
+  var link = 'https://yougouyougou.net/boutique/'+(u._id||u.id||'');
+  if(navigator.clipboard){ navigator.clipboard.writeText(link); }
+  toast('📋 Lien copié !','ok');
+}
+
+// ══════════════════════════════════════════
+//  VISITER MA BOUTIQUE — PAGE PUBLIQUE
+// ══════════════════════════════════════════
+
+function ouvrirMaBoutique(){
+  var u = DB.user();
+  if(!u){ toast('🔒 Connectez-vous','err'); return; }
+  var b = u.boutique || {};
+  var plan = u.proPlan || 'starter';
+  var cfg  = (typeof PRO_MODAL_CFG !== 'undefined') ? (PRO_MODAL_CFG[plan] || PRO_MODAL_CFG.starter) : { icon:'⭐', badge:'PRO', btnBg:'var(--or)', headerBg:'linear-gradient(135deg,#1A1A2E,#2D2B0E)' };
+
+  // ── Hero ──
+  var heroEl = document.getElementById('mab-hero');
+  if(heroEl) heroEl.style.background = cfg.headerBg;
+
+  var logoEl = document.getElementById('mab-logo');
+  if(logoEl){
+    if(b.logo) logoEl.innerHTML = '<img src="'+b.logo+'" style="width:100%;height:100%;object-fit:cover;border-radius:14px">';
+    else logoEl.textContent = cfg.icon;
+  }
+  var nameEl = document.getElementById('mab-name');
+  if(nameEl) nameEl.textContent = b.name || 'Ma Boutique';
+
+  var badgeEl = document.getElementById('mab-badge');
+  if(badgeEl){ badgeEl.textContent = cfg.icon + ' ' + cfg.badge; badgeEl.style.background = cfg.btnBg.replace('linear-gradient','').replace('135deg,','').split(',')[0]+'20)'; }
+
+  var descEl = document.getElementById('mab-desc');
+  if(descEl) descEl.textContent = b.description || b.desc || '';
+
+  // Adresse
+  var addrWrap = document.getElementById('mab-location');
+  var addrSpan = document.getElementById('mab-addr');
+  if(b.address && addrSpan){ addrSpan.textContent = b.address; if(addrWrap) addrWrap.style.display='flex'; }
+  else if(addrWrap){ addrWrap.style.display='none'; }
+
+  // WhatsApp
+  var waWrap = document.getElementById('mab-wa-wrap');
+  var waLink  = document.getElementById('mab-wa-link');
+  if(b.whatsapp && waWrap && waLink){
+    var waNum = (b.whatsapp || '').replace(/\D/g,'');
+    waLink.href = 'https://wa.me/224'+waNum+'?text=Bonjour, j\'ai vu votre boutique sur YouGouYou !';
+    waWrap.style.display = 'block';
+  } else if(waWrap){ waWrap.style.display='none'; }
+
+  // ── Vidéo ──
+  _renderMaBoutiqueVideo(b);
+
+  // ── Stats ──
+  var sellerId = u._id || u.id || '';
+  var token = localStorage.getItem('ygy_token');
+  if(token){
+    fetch('/api/my-ads',{headers:{'Authorization':'Bearer '+token}})
+    .then(function(r){return r.json();})
+    .then(function(data){
+      var ads = Array.isArray(data) ? data : (data.ads||[]);
+      var totalViews = ads.reduce(function(s,a){return s+(a.views||0);},0);
+      var mabStatAds = document.getElementById('mab-stat-ads');
+      var mabStatViews = document.getElementById('mab-stat-views');
+      if(mabStatAds) mabStatAds.textContent = ads.length;
+      if(mabStatViews) mabStatViews.textContent = totalViews;
+      // Afficher les articles
+      _renderMaBoutiqueGrid(ads, b);
+    }).catch(function(){
+      _renderMaBoutiqueGrid([], b);
+    });
+  } else {
+    _renderMaBoutiqueGrid([], b);
+  }
+
+  goTo('ma-boutique');
+}
+
+function _renderMaBoutiqueGrid(ads, b){
+  var grid = document.getElementById('mab-ads-grid');
+  var filtersEl = document.getElementById('mab-subcat-filters');
+  var mabStatAds = document.getElementById('mab-stat-ads');
+  if(mabStatAds && ads.length) mabStatAds.textContent = ads.length;
+  if(!grid) return;
+
+  if(!ads.length){
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">'
+      +'<div style="font-size:36px;margin-bottom:8px">📦</div>'
+      +'<div style="font-size:14px;font-weight:700">Aucun article pour l\'instant</div>'
+      +'<div style="font-size:12px;margin-top:4px">Ajoutez des articles depuis le formulaire de dépôt</div>'
+      +'</div>';
+    if(filtersEl) filtersEl.innerHTML = '';
+    return;
+  }
+
+  // Filtres par sous-catégorie
+  if(filtersEl){
+    var subcats = {};
+    ads.forEach(function(a){ var sc = a.subCategory||a.category||''; if(sc) subcats[sc]=(subcats[sc]||0)+1; });
+    var filterHtml = '<button onclick="filterMaBoutiqueGrid(null,this)" class="mab-filter-btn mab-filter-active" style="background:var(--or);color:#fff;border:none;border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Tout ('+ads.length+')</button>';
+    Object.keys(subcats).forEach(function(sc){
+      filterHtml += '<button onclick="filterMaBoutiqueGrid(\''+sc+'\',this)" class="mab-filter-btn" style="background:#F1F5F9;color:var(--ink);border:1px solid var(--br);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">'+sc+' ('+subcats[sc]+')</button>';
+    });
+    filtersEl.innerHTML = filterHtml;
+    window._mabAllAds = ads;
+  }
+
+  grid.innerHTML = ads.map(function(a){ return adCard(a, false); }).join('');
+}
+
+window._mabAllAds = [];
+function filterMaBoutiqueGrid(subcat, btn){
+  // Update active button style
+  document.querySelectorAll('.mab-filter-btn').forEach(function(b){
+    b.classList.remove('mab-filter-active');
+    b.style.background='#F1F5F9'; b.style.color='var(--ink)'; b.style.border='1px solid var(--br)';
+  });
+  if(btn){ btn.style.background='var(--or)'; btn.style.color='#fff'; btn.style.border='none'; }
+
+  var ads = window._mabAllAds || [];
+  var filtered = subcat ? ads.filter(function(a){ return (a.subCategory||a.category||'')===subcat; }) : ads;
+  var grid = document.getElementById('mab-ads-grid');
+  if(grid) grid.innerHTML = filtered.length ? filtered.map(function(a){return adCard(a,false);}).join('') : '<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted)">Aucun article dans cette catégorie</div>';
+}
+
+// ── Vidéo de présentation ──
+function _renderMaBoutiqueVideo(b){
+  var section = document.getElementById('mab-video-section');
+  var embedEl = document.getElementById('mab-video-embed');
+  var titleEl = document.getElementById('mab-video-title-display');
+  if(!section || !embedEl) return;
+
+  var videoUrl = b && (b.videoUrl || b.video_url || '');
+  if(!videoUrl){ section.style.display='none'; return; }
+
+  section.style.display = 'block';
+  var embedHtml = _buildVideoEmbed(videoUrl, 'width:100%;height:100%;border:none');
+  embedEl.innerHTML = embedHtml || '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;font-size:13px">Vidéo non disponible</div>';
+  if(titleEl) titleEl.textContent = b.videoTitle || '';
+}
+
+function _buildVideoEmbed(url, extraStyle){
+  if(!url) return '';
+  // YouTube
+  var ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  if(ytMatch){
+    return '<iframe src="https://www.youtube.com/embed/'+ytMatch[1]+'?rel=0" style="'+extraStyle+'" allowfullscreen></iframe>';
+  }
+  // Lien direct vidéo
+  if(url.match(/\.(mp4|webm|ogg)(\?.*)?$/i)){
+    return '<video src="'+url+'" controls style="'+extraStyle+'"></video>';
+  }
+  return '';
+}
+
+function _getYouTubeThumbnail(url){
+  var ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  if(ytMatch) return 'https://img.youtube.com/vi/'+ytMatch[1]+'/hqdefault.jpg';
+  return '';
+}
+
+// ── Formulaire vidéo (dashboard boutique) ──
+function toggleBoutiqueVideoForm(){
+  var form  = document.getElementById('boutique-video-form');
+  var empty = document.getElementById('boutique-video-empty');
+  var btn   = document.getElementById('btn-toggle-video');
+  var preview = document.getElementById('boutique-video-preview');
+  if(!form) return;
+
+  var open = form.style.display === 'none' || form.style.display === '';
+  form.style.display  = open ? 'block' : 'none';
+  if(empty) empty.style.display = open ? 'none' : (preview && preview.style.display==='block' ? 'none' : 'block');
+  if(btn) btn.textContent = open ? '✕ Annuler' : '➕ Ajouter une vidéo';
+
+  if(open){
+    // Pré-remplir si vidéo existante
+    var u = DB.user()||{};
+    var b = u.boutique||{};
+    var urlInput = document.getElementById('boutique-video-url');
+    var titleInput = document.getElementById('boutique-video-title-input');
+    if(urlInput && b.videoUrl) urlInput.value = b.videoUrl;
+    if(titleInput && b.videoTitle) titleInput.value = b.videoTitle;
+    if(b.videoUrl) previewBoutiqueVideoUrl(b.videoUrl);
+  }
+}
+
+function previewBoutiqueVideoUrl(url){
+  var previewEl = document.getElementById('boutique-video-preview-small');
+  if(!previewEl) return;
+  var embedHtml = _buildVideoEmbed(url, 'width:100%;height:100%;border:none');
+  if(embedHtml){
+    previewEl.style.display = 'block';
+    previewEl.innerHTML = embedHtml;
+  } else {
+    previewEl.style.display = 'none';
+    previewEl.innerHTML = '';
+  }
+}
+
+function saveBoutiqueVideo(){
+  var urlInput   = document.getElementById('boutique-video-url');
+  var titleInput = document.getElementById('boutique-video-title-input');
+  var url   = (urlInput   ? urlInput.value.trim()   : '');
+  var title = (titleInput ? titleInput.value.trim() : '');
+
+  if(!url){ toast('⚠️ Entrez un lien de vidéo','err'); return; }
+  var embedTest = _buildVideoEmbed(url, '');
+  if(!embedTest){ toast('⚠️ Lien non reconnu — utilisez YouTube ou un lien MP4','err'); return; }
+
+  var token = localStorage.getItem('ygy_token');
+  var payload = { videoUrl: url, videoTitle: title };
+
+  // Sauvegarder via API boutique
+  fetch('/api/me/boutique', {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},
+    body: JSON.stringify(payload)
+  })
+  .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+  .then(function(){ _afterVideoSave(url, title); })
+  .catch(function(){
+    // Fallback local
+    _afterVideoSave(url, title);
+  });
+}
+
+function _afterVideoSave(url, title){
+  // Mettre à jour le user local
+  var u = DB.user()||{};
+  u.boutique = Object.assign(u.boutique||{}, { videoUrl: url, videoTitle: title });
+  DB.login(u);
+
+  // Afficher l'aperçu dans la section dashboard
+  var previewSection = document.getElementById('boutique-video-preview');
+  var embedEl = document.getElementById('boutique-video-embed');
+  var titleEl = document.getElementById('boutique-video-title');
+  var emptyEl = document.getElementById('boutique-video-empty');
+  var form    = document.getElementById('boutique-video-form');
+  var btn     = document.getElementById('btn-toggle-video');
+
+  if(embedEl) embedEl.innerHTML = _buildVideoEmbed(url, 'width:100%;height:100%;border:none');
+  if(titleEl) titleEl.textContent = title;
+  if(previewSection) previewSection.style.display = 'block';
+  if(emptyEl) emptyEl.style.display = 'none';
+  if(form) form.style.display = 'none';
+  if(btn) btn.textContent = '✏️ Modifier la vidéo';
+
+  toast('🎬 Vidéo enregistrée !','ok');
+}
+
+function supprimerBoutiqueVideo(){
+  if(!confirm('Supprimer la vidéo de présentation ?')) return;
+  var token = localStorage.getItem('ygy_token');
+  fetch('/api/me/boutique', {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},
+    body: JSON.stringify({ videoUrl:'', videoTitle:'' })
+  })
+  .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+  .then(function(){ _afterVideoDelete(); })
+  .catch(function(){ _afterVideoDelete(); });
+}
+
+function _afterVideoDelete(){
+  var u = DB.user()||{};
+  if(u.boutique){ u.boutique.videoUrl=''; u.boutique.videoTitle=''; }
+  DB.login(u);
+
+  var previewSection = document.getElementById('boutique-video-preview');
+  var embedEl = document.getElementById('boutique-video-embed');
+  var emptyEl = document.getElementById('boutique-video-empty');
+  var btn     = document.getElementById('btn-toggle-video');
+  var urlInput = document.getElementById('boutique-video-url');
+  var psmall  = document.getElementById('boutique-video-preview-small');
+
+  if(previewSection) previewSection.style.display = 'none';
+  if(embedEl) embedEl.innerHTML = '';
+  if(emptyEl) emptyEl.style.display = 'block';
+  if(btn) btn.textContent = '➕ Ajouter une vidéo';
+  if(urlInput) urlInput.value = '';
+  if(psmall){ psmall.style.display='none'; psmall.innerHTML=''; }
+
+  toast('🗑️ Vidéo supprimée','ok');
+}
+
+// Initialiser la section vidéo au chargement de l'onglet boutique
+// (appelé par renderBoutiqueSection existant via renderBoutiqueTabExtras)
+function initBoutiqueVideoSection(){
+  var u = DB.user()||{};
+  var b = u.boutique||{};
+  var previewSection = document.getElementById('boutique-video-preview');
+  var embedEl = document.getElementById('boutique-video-embed');
+  var titleEl = document.getElementById('boutique-video-title');
+  var emptyEl = document.getElementById('boutique-video-empty');
+  var btn     = document.getElementById('btn-toggle-video');
+
+  if(b.videoUrl && _buildVideoEmbed(b.videoUrl,'')){
+    if(embedEl) embedEl.innerHTML = _buildVideoEmbed(b.videoUrl,'width:100%;height:100%;border:none');
+    if(titleEl) titleEl.textContent = b.videoTitle||'';
+    if(previewSection) previewSection.style.display = 'block';
+    if(emptyEl) emptyEl.style.display = 'none';
+    if(btn) btn.textContent = '✏️ Modifier la vidéo';
+  } else {
+    if(previewSection) previewSection.style.display = 'none';
+    if(emptyEl) emptyEl.style.display = 'block';
+    if(btn) btn.textContent = '➕ Ajouter une vidéo';
+  }
 }
 
 // ══════════════════════════════════════════
@@ -9859,6 +10231,84 @@ document.addEventListener('DOMContentLoaded',function(){
         <div><div style="font-weight:700;font-size:13px;margin-bottom:3px">L'activation est-elle immédiate ?</div><div style="font-size:12px;color:var(--muted)">Oui, votre compte Pro est activé instantanément après paiement confirmé.</div></div>
         <div><div style="font-weight:700;font-size:13px;margin-bottom:3px">Puis-je changer de formule ?</div><div style="font-size:12px;color:var(--muted)">Vous devez d'abord résilier votre abonnement actif avant d'en souscrire un nouveau.</div></div>
         <div><div style="font-weight:700;font-size:13px;margin-bottom:3px">Comment résilier ?</div><div style="font-size:12px;color:var(--muted)">Cliquez sur "Suspendre / Résilier" et envoyez une demande avec justificatif. Traitement sous 48h.</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ PAGE MA BOUTIQUE PUBLIQUE ══ -->
+<div id="page-ma-boutique" class="page">
+  <div style="max-width:900px;margin:0 auto;padding:0 0 60px">
+
+    <!-- Hero boutique -->
+    <div id="mab-hero" style="background:linear-gradient(135deg,#1A1A2E,#2D2B0E);padding:32px 28px 24px;position:relative;overflow:hidden">
+      <div style="position:absolute;inset:0;background:radial-gradient(circle at 80% 40%,rgba(255,92,0,.18),transparent 60%);pointer-events:none"></div>
+      <button onclick="goTo('dashboard');showDashTab('boutique')" style="position:absolute;top:14px;left:16px;display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);font-size:12px;font-weight:600;cursor:pointer;padding:5px 12px;border-radius:20px;font-family:inherit">
+        ← Retour
+      </button>
+      <div style="position:relative;display:flex;align-items:center;gap:20px;padding-top:10px">
+        <div id="mab-logo" style="width:80px;height:80px;border-radius:16px;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0">🏪</div>
+        <div style="flex:1">
+          <div id="mab-name" style="font-size:24px;font-weight:900;color:#fff;margin-bottom:4px">Ma Boutique</div>
+          <div id="mab-badge" style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,92,0,.25);border:1px solid rgba(255,92,0,.4);color:#FFB84D;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:8px">⭐ PRO</div>
+          <div id="mab-desc" style="font-size:13px;color:rgba(255,255,255,.65);line-height:1.6;max-width:520px"></div>
+        </div>
+      </div>
+      <!-- Infos contact -->
+      <div id="mab-contact-row" style="position:relative;display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.1)">
+        <div id="mab-location" style="display:none;font-size:12px;color:rgba(255,255,255,.65);display:flex;align-items:center;gap:5px">📍 <span id="mab-addr"></span></div>
+        <div id="mab-wa-wrap" style="display:none">
+          <a id="mab-wa-link" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:rgba(37,211,102,.2);border:1px solid rgba(37,211,102,.35);color:#4ADE80;font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;text-decoration:none">
+            📲 Contacter sur WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vidéo de présentation (si disponible) -->
+    <div id="mab-video-section" style="display:none;padding:20px 20px 0">
+      <div style="font-size:14px;font-weight:800;color:var(--ink);margin-bottom:10px">🎬 Présentation vidéo</div>
+      <div id="mab-video-embed" style="width:100%;border-radius:12px;overflow:hidden;background:#000;aspect-ratio:16/9;box-shadow:0 4px 20px rgba(0,0,0,.12)"></div>
+      <div id="mab-video-title-display" style="font-size:12px;color:var(--muted);margin-top:6px;font-weight:600;padding-left:2px"></div>
+    </div>
+
+    <!-- Stats rapides -->
+    <div id="mab-stats-row" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:20px 20px 0">
+      <div style="background:#fff;border-radius:12px;padding:14px;border:1px solid var(--br);text-align:center">
+        <div style="font-size:22px;font-weight:900;color:var(--or)" id="mab-stat-ads">0</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Articles</div>
+      </div>
+      <div style="background:#fff;border-radius:12px;padding:14px;border:1px solid var(--br);text-align:center">
+        <div style="font-size:22px;font-weight:900;color:#7C3AED" id="mab-stat-views">0</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Vues</div>
+      </div>
+      <div style="background:#fff;border-radius:12px;padding:14px;border:1px solid var(--br);text-align:center">
+        <div style="font-size:22px;font-weight:900;color:#059669" id="mab-stat-contacts">0</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Contacts</div>
+      </div>
+    </div>
+
+    <!-- Catalogue articles -->
+    <div style="padding:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+        <div style="font-size:16px;font-weight:800;color:var(--ink)">📦 Catalogue</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button onclick="addAnnonceFromBoutique();goTo('post')" style="background:var(--or);color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">➕ Ajouter un article</button>
+          <button onclick="goTo('dashboard');showDashTab('boutique')" style="background:var(--orl);color:var(--or);border:1.5px solid var(--orm);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">⚙️ Gérer la boutique</button>
+        </div>
+      </div>
+
+      <!-- Filtre par sous-catégorie -->
+      <div id="mab-subcat-filters" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"></div>
+
+      <!-- Grille articles -->
+      <div id="mab-ads-grid" class="ads-grid" style="min-height:200px">
+        <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">
+          <div style="font-size:36px;margin-bottom:8px">📦</div>
+          <div style="font-size:14px;font-weight:700">Aucun article pour l'instant</div>
+          <div style="font-size:12px;margin-top:4px">Ajoutez des articles depuis le formulaire de dépôt</div>
+        </div>
       </div>
     </div>
 
