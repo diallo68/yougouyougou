@@ -517,6 +517,23 @@ footer{background:transparent;margin-top:0}
 .nav-lbc-btn svg{flex-shrink:0}
 .nav-lbc-btn span{margin-top:1px}
 .nav-lbc-auth{font-weight:700}
+/* Badge Pro sur l'icône profil nav */
+.nav-lbc-auth.pro-starter{color:#EAB308 !important}
+.nav-lbc-auth.pro-starter svg{stroke:#EAB308}
+.nav-lbc-auth.pro-business{color:#3B82F6 !important}
+.nav-lbc-auth.pro-business svg{stroke:#3B82F6}
+.nav-lbc-auth.pro-premium{color:var(--or) !important}
+.nav-lbc-auth.pro-premium svg{stroke:var(--or)}
+.nav-pro-badge{
+  position:absolute;top:2px;right:2px;
+  width:14px;height:14px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:8px;font-weight:900;line-height:1;
+  border:1.5px solid #fff;
+}
+.nav-pro-badge.starter{background:#EAB308;color:#fff}
+.nav-pro-badge.business{background:#3B82F6;color:#fff}
+.nav-pro-badge.premium{background:var(--or);color:#fff}
 @media(max-width:900px){.nav-lbc-btn span{display:none}.nav-lbc-btn{min-width:36px;padding:6px 8px}}
 
 .msg-list-header{padding:14px 16px;font-size:13px;font-weight:700;color:var(--ink);border-bottom:1px solid var(--br);background:#fafafa}
@@ -2037,8 +2054,8 @@ footer{background:transparent;margin-top:0}
         <a onclick="showDashTab('history')" id="dtab-history">🕐 Historique</a>
         <a onclick="showDashTab('payments')" id="dtab-payments">💳 Paiements</a>
         <a onclick="showDashTab('pro')" id="dtab-pro" style="background:linear-gradient(135deg,#1A1A2E,#2D1B0E);color:var(--or)!important;border-radius:8px;margin-top:8px;font-weight:700">⭐ Mon abonnement Pro</a>
-        <!-- Menu Boutique — visible uniquement si Pro actif -->
-        <a onclick="showDashTab('boutique')" id="dtab-boutique" style="display:none;background:linear-gradient(135deg,#065F46,#047857);color:#6EE7B7!important;border-radius:8px;margin-top:4px;font-weight:700">🏪 Ma Boutique</a>
+        <!-- Menu Boutique — visible + stylé selon plan Pro (géré par renderDash) -->
+        <a onclick="showDashTab('boutique')" id="dtab-boutique" style="display:none;border-radius:8px;margin-top:4px;font-weight:700">⭐ Créer votre boutique</a>
         <a onclick="showDashTab('alerts')" id="dtab-alerts">🔔 Alertes</a>
         <a id="nav-admin-link" hidden onclick="goAdmin()">👑 Admin</a>
         <a onclick="logout()" style="color:var(--re)!important;margin-top:20px">🚪 Déconnexion</a>
@@ -2217,7 +2234,7 @@ footer{background:transparent;margin-top:0}
 
       <!-- ═══ TAB MA BOUTIQUE (Pro uniquement) ═══ -->
       <div class="dash-section" id="dsec-boutique">
-        <div class="dash-section-title">🏪 Ma Boutique Pro</div>
+        <div class="dash-section-title" id="boutique-section-title">🏪 Créer votre boutique</div>
 
         <!-- En-tête boutique -->
         <div id="boutique-header" style="background:linear-gradient(135deg,#1A1A2E,#2D2B0E);border-radius:16px;padding:24px;margin-bottom:16px;position:relative;overflow:hidden">
@@ -5062,29 +5079,83 @@ function envoyerMessage(){ contacterVendeur3pct(); }
 function updateNav(){
   var btn=document.getElementById('nav-auth-btn');if(!btn)return;
   var u=DB.user();
-  var favsBtn=document.getElementById('nav-favs-btn');
-  var msgsBtn=document.getElementById('nav-msgs-btn');
   if(u){
     var firstName = (u.name||u.prenom||'Moi').split(' ')[0];
-    btn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>'+firstName+'</span>';
-    btn.onclick=function(){loadDash();goTo('dashboard');};
+    var proActive = u.isPro && u.proUntil && new Date(u.proUntil) > new Date();
+    var plan = proActive ? (u.proPlan||'starter') : '';
+
+    // Icône SVG profil
+    var svgIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+
+    // Badge Pro selon plan
+    var badge = '';
+    var planEmoji = '';
+    if(proActive){
+      if(plan==='starter'){
+        badge = '<span class="nav-pro-badge starter">★</span>';
+        planEmoji = '';
+      } else if(plan==='business'){
+        badge = '<span class="nav-pro-badge business">★</span>';
+        planEmoji = '';
+      } else if(plan==='premium'){
+        badge = '<span class="nav-pro-badge premium">★</span>';
+        planEmoji = '';
+      }
+    }
+
+    btn.innerHTML = svgIcon + badge + '<span>'+firstName+'</span>';
+    btn.onclick = function(){loadDash();goTo('dashboard');};
+
+    // Appliquer classe couleur Pro
+    btn.classList.remove('pro-starter','pro-business','pro-premium');
+    if(proActive) btn.classList.add('pro-'+plan);
+
   } else {
-    btn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span id="nav-user-label">Se connecter</span>';
+    btn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Se connecter</span>';
     btn.onclick=function(){openModal('auth');};
+    btn.classList.remove('pro-starter','pro-business','pro-premium');
   }
-  // Masquer le lien Admin — toujours masqué ici, affiché uniquement par syncRole
+
+  // Admin link — masqué par défaut
   var adminLink=document.getElementById('nav-admin-link');
-  if(adminLink) adminLink.setAttribute('hidden','');
-  // Si connecté, vérifier le rôle depuis le serveur
+  if(adminLink){ adminLink.setAttribute('hidden',''); adminLink.style.display='none'; }
+  var ftAdminBtn=document.getElementById('ft-admin-btn');
+  if(ftAdminBtn) ftAdminBtn.style.display='none';
+
   if(u){
     var _t=localStorage.getItem('ygy_token');
     if(_t){
       fetch('/api/me',{headers:{'Authorization':'Bearer '+_t}})
       .then(function(r){return r.ok?r.json():null;})
       .then(function(d){
-        if(d&&d.user&&d.user.role==='admin'){
-          var al=document.getElementById('nav-admin-link');
-          if(al) al.removeAttribute('hidden');
+        if(d&&d.user){
+          // Synchroniser statut Pro depuis serveur
+          var usr = DB.user()||{};
+          if(d.user.isPro !== undefined){ usr.isPro = d.user.isPro; }
+          if(d.user.proPlan) usr.proPlan = d.user.proPlan;
+          if(d.user.proUntil) usr.proUntil = d.user.proUntil;
+          DB.login(usr);
+          // Re-appliquer couleur Pro si données fraîches
+          var pa = usr.isPro && usr.proUntil && new Date(usr.proUntil)>new Date();
+          btn.classList.remove('pro-starter','pro-business','pro-premium');
+          if(pa) btn.classList.add('pro-'+(usr.proPlan||'starter'));
+          if(!pa) btn.style.color='';
+          // Badge Pro
+          var bdg = btn.querySelector('.nav-pro-badge');
+          if(pa && !bdg){
+            var s = document.createElement('span');
+            s.className = 'nav-pro-badge '+(usr.proPlan||'starter');
+            s.textContent = '★';
+            btn.insertBefore(s, btn.firstChild.nextSibling);
+          } else if(!pa && bdg){
+            bdg.remove();
+          }
+          // Admin
+          if(d.user.role==='admin'){
+            var al=document.getElementById('nav-admin-link');
+            if(al){ al.removeAttribute('hidden'); al.style.display=''; }
+            if(ftAdminBtn) ftAdminBtn.style.display='block';
+          }
         }
       }).catch(function(){});
     }
@@ -5151,11 +5222,42 @@ function renderDash(){
   var ftAdminBtn=document.getElementById('ft-admin-btn');
   if(ftAdminBtn) ftAdminBtn.style.display=(u&&u.role==='admin')?'block':'none';
 
-  // Menu Boutique — visible seulement si Pro actif
+  // Menu Boutique — visible + stylé selon plan Pro
   var btab = document.getElementById('dtab-boutique');
   if(btab){
     var proActive = u.isPro && u.proUntil && new Date(u.proUntil) > new Date();
-    btab.style.display = proActive ? 'flex' : 'none';
+    if(proActive){
+      var plan = u.proPlan||'starter';
+      // Couleurs par plan
+      var planStyles = {
+        starter: 'background:linear-gradient(135deg,#854D0E,#A16207);color:#FDE68A!important',
+        business: 'background:linear-gradient(135deg,#1E3A5F,#1D4ED8);color:#BFDBFE!important',
+        premium:  'background:linear-gradient(135deg,#7C2D12,#C2410C);color:#FFEDD5!important'
+      };
+      var planIcons = { starter:'⭐', business:'🔷', premium:'👑' };
+      var boutiqueCreee = u.boutique && u.boutique.name;
+      var label = boutiqueCreee
+        ? (planIcons[plan]+' Ma Boutique')
+        : (planIcons[plan]+' Créer votre boutique');
+      btab.setAttribute('style', (planStyles[plan]||'') + ';border-radius:8px;margin-top:4px;font-weight:700;display:flex');
+      btab.textContent = label;
+    } else {
+      btab.style.display = 'none';
+    }
+  }
+
+  // Avatar dashboard avec couleur Pro
+  var dav = document.getElementById('d-av');
+  if(dav){
+    var proActive2 = u.isPro && u.proUntil && new Date(u.proUntil) > new Date();
+    var planBg = { starter:'#EAB308', business:'#3B82F6', premium:'#FF5C00' };
+    dav.style.background = proActive2 ? (planBg[u.proPlan||'starter']||'var(--or)') : 'var(--or)';
+    if(proActive2){
+      var planRing = { starter:'0 0 0 3px #FEF08A', business:'0 0 0 3px #BFDBFE', premium:'0 0 0 3px #FFEDD5' };
+      dav.style.boxShadow = planRing[u.proPlan||'starter']||'';
+    } else {
+      dav.style.boxShadow = '';
+    }
   }
 
   // Onglet Profil — infos personnelles
@@ -5960,11 +6062,20 @@ function loadBoutiqueTab(){
 function renderBoutiqueTab(){
   var u = DB.user()||{};
   var b = _boutiqueData;
+  var boutiqueCreee = b && b.name;
+  var plan = u.proPlan||'starter';
 
-  // Plan info
-  var planLabels = { starter:'⭐ Starter', business:'🔥 Business', premium:'👑 Premium' };
+  // Titre section + menu sidebar selon état
+  var planIcons = { starter:'⭐', business:'🔷', premium:'👑' };
+  var titreEl = document.getElementById('boutique-section-title');
+  var btab = document.getElementById('dtab-boutique');
+  if(titreEl) titreEl.textContent = boutiqueCreee ? (planIcons[plan]+' Ma Boutique') : (planIcons[plan]+' Créer votre boutique');
+  if(btab) btab.textContent = boutiqueCreee ? (planIcons[plan]+' Ma Boutique') : (planIcons[plan]+' Créer votre boutique');
+
+  // Plan info badge
+  var planLabels = { starter:'⭐ Starter', business:'🔷 Business', premium:'👑 Premium' };
   var badgeEl = document.getElementById('boutique-plan-badge');
-  if(badgeEl) badgeEl.textContent = planLabels[u.proPlan||'starter']||'⭐ Pro';
+  if(badgeEl) badgeEl.textContent = planLabels[plan]||'⭐ Pro';
 
   // Remplir les champs
   var nm = document.getElementById('boutique-name-input');
