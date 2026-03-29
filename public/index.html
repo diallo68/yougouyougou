@@ -1418,6 +1418,59 @@ footer{background:transparent;margin-top:0}
 .pro-plan-btn:hover{background:var(--or2);transform:translateY(-1px)}
 .pro-plan-note{font-size:11px;color:var(--muted);text-align:center;margin-top:8px}
 
+/* ── États actif / grisé pour les cartes Pro ── */
+.pro-plan-card.is-active-plan{
+  transform:translateY(-4px);
+}
+.pro-plan-card.is-active-plan.plan-starter{
+  border-color:#D97706 !important;
+  box-shadow:0 0 0 3px #FDE68A,0 8px 32px rgba(217,119,6,.2) !important;
+}
+.pro-plan-card.is-active-plan.plan-business{
+  border-color:#1D4ED8 !important;
+  box-shadow:0 0 0 3px #BFDBFE,0 8px 32px rgba(29,78,216,.2) !important;
+}
+.pro-plan-card.is-active-plan.plan-premium{
+  border-color:#FF5C00 !important;
+  box-shadow:0 0 0 3px #FFEDD5,0 8px 32px rgba(255,92,0,.25) !important;
+}
+.pro-plan-card.is-locked{
+  opacity:.42;
+  filter:grayscale(.55);
+  pointer-events:none;
+}
+.pro-plan-card.is-locked:hover{ transform:none !important; box-shadow:none !important; }
+.pro-active-ribbon{
+  position:absolute;top:14px;right:-1px;
+  font-size:10px;font-weight:800;
+  padding:4px 12px 4px 10px;
+  border-radius:4px 0 0 4px;
+  text-transform:uppercase;letter-spacing:.5px;
+  z-index:5;white-space:nowrap;
+}
+.pro-plan-btn.is-current-plan{
+  background:linear-gradient(135deg,#065F46,#059669) !important;
+  color:#fff !important;
+  cursor:default !important;
+  box-shadow:0 3px 10px rgba(5,150,105,.3) !important;
+}
+.pro-plan-btn.is-locked-btn{
+  background:#D1D5DB !important;
+  color:#9CA3AF !important;
+  cursor:not-allowed !important;
+  box-shadow:none !important;
+}
+
+/* ── Modal résiliation ── */
+.resil-reason-opt{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:10px 14px;border:1.5px solid var(--br);border-radius:10px;
+  cursor:pointer;font-size:13px;transition:all .15s;margin-bottom:6px;
+}
+.resil-reason-opt:hover{ border-color:#EF4444;background:#FFF5F5; }
+.resil-reason-opt.sel{ border-color:#EF4444;background:#FFF5F5; }
+.resil-reason-opt input[type=radio]{ flex-shrink:0;margin-top:2px;accent-color:#EF4444; }
+
 .pro-features-grid{
   display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
   gap:16px;margin-bottom:32px;
@@ -1609,11 +1662,11 @@ footer{background:transparent;margin-top:0}
   <div class="main-wrap" style="padding-top:18px;padding-bottom:0">
     <div class="promo-pro-banner" id="promo-pro-banner">
       <div class="promo-pro-left">
-        <div class="promo-pro-icon">🏪</div>
+        <div class="promo-pro-icon" id="promo-pro-icon">🏪</div>
         <div>
-          <div class="promo-pro-title">Vous êtes commerçant ? Cette offre est faite pour vous !</div>
-          <div class="promo-pro-sub">Passez à <strong>YouGouYou Pro</strong> à seulement <strong>50 000 GNF/mois</strong> et boostez vos ventes.</div>
-          <div class="promo-pro-chips">
+          <div class="promo-pro-title" id="promo-pro-title">Vous êtes commerçant ? Cette offre est faite pour vous !</div>
+          <div class="promo-pro-sub" id="promo-pro-sub">Passez à <strong>YouGouYou Pro</strong> à seulement <strong>50 000 GNF/mois</strong> et boostez vos ventes.</div>
+          <div class="promo-pro-chips" id="promo-pro-chips">
             <span class="promo-chip">⭐ Badge PRO visible</span>
             <span class="promo-chip">📈 Priorité dans les résultats</span>
             <span class="promo-chip">📊 Statistiques avancées</span>
@@ -1622,7 +1675,7 @@ footer{background:transparent;margin-top:0}
         </div>
       </div>
       <div class="promo-pro-actions">
-        <button class="promo-pro-btn" onclick="goTo('pro')">Découvrir Pro →</button>
+        <button class="promo-pro-btn" id="promo-pro-btn" onclick="goTo('pro')">Découvrir Pro →</button>
         <button class="promo-pro-close" onclick="document.getElementById('promo-pro-banner').style.display='none'" title="Fermer">✕</button>
       </div>
     </div>
@@ -2869,7 +2922,11 @@ function goTo(page){
   }
 }
 
-// ══ Config visuelle par plan ══
+// ══════════════════════════════════════════
+//  PAGE PRO — RENDU DYNAMIQUE
+// ══════════════════════════════════════════
+
+// Configuration visuelle par plan (doit être déclaré avant toute utilisation)
 var PRO_MODAL_CFG = {
   starter: {
     icon: '⭐',
@@ -2880,7 +2937,6 @@ var PRO_MODAL_CFG = {
     stats: 'Basiques',
     vedette: '2/mois',
     priorite: 'Standard',
-    // Couleurs Jaune/Ambre
     headerBg:  'linear-gradient(135deg,#78350F,#92400E)',
     accentBg:  'linear-gradient(135deg,#FEF3C7,#FDE68A)',
     accentTxt: '#92400E',
@@ -2899,7 +2955,6 @@ var PRO_MODAL_CFG = {
     stats: 'Avancées',
     vedette: '5/mois',
     priorite: 'Renforcée',
-    // Couleurs Bleu
     headerBg:  'linear-gradient(135deg,#1E3A5F,#1D4ED8)',
     accentBg:  'linear-gradient(135deg,#EFF6FF,#DBEAFE)',
     accentTxt: '#1D4ED8',
@@ -2918,7 +2973,6 @@ var PRO_MODAL_CFG = {
     stats: 'Complètes + export',
     vedette: 'Illimitées',
     priorite: 'Maximale (Top 3)',
-    // Couleurs Orange/Or
     headerBg:  'linear-gradient(135deg,#7C2D12,#C2410C)',
     accentBg:  'linear-gradient(135deg,#FFF7ED,#FFEDD5)',
     accentTxt: '#C2410C',
@@ -2930,6 +2984,338 @@ var PRO_MODAL_CFG = {
   }
 };
 
+function renderProPage(){
+  var u = DB.user();
+  var proActive = u && u.isPro && u.proUntil && new Date(u.proUntil) > new Date();
+  var plan = proActive ? (u.proPlan || 'starter') : null;
+  var cfg = plan ? (PRO_MODAL_CFG[plan] || PRO_MODAL_CFG.starter) : null;
+  var plans = ['starter','business','premium'];
+
+
+  // ── Mise à jour du bandeau promo (accueil) ──
+  updatePromoBanner(proActive, plan, cfg);
+
+  // ── Hero ──
+  var heroTitle = document.getElementById('pro-hero-title');
+  var heroSub   = document.getElementById('pro-hero-sub');
+  var heroBadge = document.getElementById('pro-hero-badge');
+  var heroBlock = document.getElementById('pro-hero-block');
+  if(proActive && cfg){
+    if(heroTitle) heroTitle.innerHTML = '<span>YouGouYou</span> Pro <span style="font-size:16px;font-weight:700;opacity:.8">— Monde Pro</span>';
+    if(heroSub)   heroSub.textContent  = 'Bienvenue dans le Monde Pro YouGouYou. Gérez votre abonnement ' + cfg.label + ' et votre boutique.';
+    if(heroBadge){
+      heroBadge.textContent = cfg.icon + ' Abonnement ' + cfg.label + ' actif';
+      heroBadge.style.background = cfg.btnBg;
+    }
+    if(heroBlock) heroBlock.style.background = cfg.headerBg;
+  } else {
+    if(heroTitle) heroTitle.innerHTML = '<span>YouGouYou</span> Pro';
+    if(heroSub)   heroSub.textContent  = 'Boostez votre visibilité et vendez plus vite avec notre abonnement Pro dédié aux commerçants guinéens.';
+    if(heroBadge){ heroBadge.textContent = '⭐ Offre commerçants'; heroBadge.style.background = ''; }
+    if(heroBlock) heroBlock.style.background = '';
+  }
+
+  // ── Bandeau abonnement actif ──
+  var activeBanner = document.getElementById('pro-active-banner');
+  if(proActive && cfg && activeBanner){
+    activeBanner.style.display = 'block';
+    activeBanner.style.background = cfg.headerBg;
+    var el = document.getElementById('pro-active-icon');
+    if(el) el.textContent = cfg.icon;
+    var tEl = document.getElementById('pro-active-title');
+    if(tEl) tEl.textContent = 'Abonnement Pro ' + cfg.label + ' actif';
+    var exEl = document.getElementById('pro-active-expiry');
+    if(exEl && u.proUntil){
+      var dt = new Date(u.proUntil);
+      var jours = Math.ceil((dt - new Date()) / (1000*60*60*24));
+      exEl.textContent = 'Expire le ' + dt.toLocaleDateString('fr-FR') + ' (dans ' + jours + ' jour' + (jours>1?'s':'') + ')';
+    }
+    var pEl = document.getElementById('pro-active-perks');
+    if(pEl) pEl.innerHTML = cfg.perks.map(function(p){
+      return '<span style="background:rgba(255,255,255,.15);color:rgba(255,255,255,.9);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px">✓ '+p+'</span>';
+    }).join('');
+  } else if(activeBanner){
+    activeBanner.style.display = 'none';
+  }
+
+  // ── Titre section ──
+  var plansTitle = document.getElementById('pro-plans-title');
+  if(plansTitle) plansTitle.textContent = proActive ? 'Votre abonnement' : 'Choisissez votre formule';
+
+  // ── Cartes : actif, grisé, normal ──
+  plans.forEach(function(p){
+    var card = document.getElementById('pro-card-' + p);
+    var btn  = document.getElementById('pro-btn-' + p);
+    var note = document.getElementById('pro-note-' + p);
+    var lock = document.getElementById('pro-lock-' + p);
+    if(!card) return;
+
+    // Supprimer les ruban précédents
+    var oldRibbon = card.querySelector('.pro-active-ribbon');
+    if(oldRibbon) oldRibbon.remove();
+
+    // Reset classes
+    card.classList.remove('is-active-plan','is-locked','plan-starter','plan-business','plan-premium');
+    if(btn){
+      btn.classList.remove('is-current-plan','is-locked-btn');
+      btn.disabled = false;
+    }
+    if(lock) lock.style.display = 'none';
+
+    if(!proActive){
+      // Pas d'abonnement : tous les boutons normaux
+      if(btn){
+        var labels = { starter:'Commencer →', business:'Choisir Business →', premium:'Passer Premium →' };
+        btn.textContent = labels[p];
+        if(p==='premium') btn.style.background = 'linear-gradient(135deg,#FFD700,#FFA500)';
+      }
+      return;
+    }
+
+    if(p === plan){
+      // ── Carte ACTIVE ──
+      card.classList.add('is-active-plan','plan-'+plan);
+      var ribbon = document.createElement('div');
+      ribbon.className = 'pro-active-ribbon';
+      ribbon.style.cssText = 'background:' + cfg.btnBg + ';color:#fff;';
+      ribbon.textContent = '✅ Votre plan';
+      card.appendChild(ribbon);
+      if(btn){
+        btn.textContent = '🏪 Gérer ma boutique';
+        btn.className = 'pro-plan-btn is-current-plan';
+        btn.onclick = function(){ openBoutiqueProModal(plan); };
+        btn.disabled = false;
+      }
+      if(note) note.textContent = 'Cliquez pour créer ou gérer votre boutique';
+    } else {
+      // ── Carte GRISÉE (autre plan) ──
+      card.classList.add('is-locked');
+      if(btn){
+        btn.textContent = '🔒 Non disponible';
+        btn.classList.add('is-locked-btn');
+        btn.disabled = true;
+      }
+      if(lock){ lock.style.display = 'flex'; }
+      if(note) note.textContent = 'Résiliez votre abonnement actuel pour changer de formule';
+    }
+  });
+}
+
+// Mise à jour du bouton "Découvrir Pro" sur la page d'accueil
+function updatePromoBanner(proActive, plan, cfg){
+  var btn   = document.getElementById('promo-pro-btn');
+  var title = document.getElementById('promo-pro-title');
+  var sub   = document.getElementById('promo-pro-sub');
+  var chips = document.getElementById('promo-pro-chips');
+  var icon  = document.getElementById('promo-pro-icon');
+  var banner = document.getElementById('promo-pro-banner');
+  if(!btn) return;
+
+  if(proActive && cfg){
+    // Utilisateur Pro : changer le bouton et le contenu
+    btn.textContent = cfg.icon + ' Découvrir le Monde Pro →';
+    btn.style.background = cfg.btnBg;
+    if(title) title.textContent = 'Bienvenue dans votre espace Pro ' + cfg.label + ' !';
+    if(sub) sub.innerHTML = 'Votre abonnement <strong>YouGouYou Pro '+cfg.label+'</strong> est actif. Gérez votre boutique et vos avantages.';
+    if(icon) icon.textContent = cfg.icon;
+    if(chips) chips.innerHTML = cfg.perks.map(function(p){
+      return '<span class="promo-chip">✓ '+p+'</span>';
+    }).join('');
+    if(banner) banner.style.background = cfg.headerBg.replace('linear-gradient','linear-gradient');
+  } else {
+    // Non Pro : version standard
+    if(btn){ btn.textContent = 'Découvrir Pro →'; btn.style.background = ''; }
+    if(title) title.textContent = 'Vous êtes commerçant ? Cette offre est faite pour vous !';
+    if(sub) sub.innerHTML = 'Passez à <strong>YouGouYou Pro</strong> à seulement <strong>50 000 GNF/mois</strong> et boostez vos ventes.';
+    if(icon) icon.textContent = '🏪';
+    if(chips) chips.innerHTML =
+      '<span class="promo-chip">⭐ Badge PRO visible</span>'+
+      '<span class="promo-chip">📈 Priorité dans les résultats</span>'+
+      '<span class="promo-chip">📊 Statistiques avancées</span>'+
+      '<span class="promo-chip">📋 Jusqu\'à 18 annonces</span>';
+    if(banner) banner.style.background = '';
+  }
+}
+
+// ══════════════════════════════════════════
+//  MODAL RÉSILIATION / SUSPENSION
+// ══════════════════════════════════════════
+function openResiliationModal(){
+  var u = DB.user();
+  if(!u || !u.isPro){ toast('Aucun abonnement actif','err'); return; }
+  var plan = u.proPlan || 'starter';
+  var cfg  = PRO_MODAL_CFG[plan] || PRO_MODAL_CFG.starter;
+
+  var existing = document.getElementById('overlay-resiliation');
+  if(existing) existing.remove();
+
+  var overlay = document.createElement('div');
+  overlay.id  = 'overlay-resiliation';
+  overlay.className = 'overlay';
+  overlay.style.zIndex = '3500';
+
+  var proUntil = u.proUntil ? new Date(u.proUntil).toLocaleDateString('fr-FR') : '—';
+
+  overlay.innerHTML =
+    '<div class="modal resil-modal" style="border-radius:16px;overflow:hidden;max-width:500px">'+
+      // En-tête
+      '<div style="background:'+cfg.headerBg+';padding:20px 24px">'+
+        '<div style="display:flex;align-items:center;justify-content:space-between">'+
+          '<div>'+
+            '<div style="font-size:13px;color:rgba(255,255,255,.6);font-weight:600;margin-bottom:2px">Abonnement actif : Pro '+cfg.label+'</div>'+
+            '<div style="font-size:17px;font-weight:900;color:#fff">⏸ Demande de résiliation</div>'+
+          '</div>'+
+          '<button onclick="closeResiliationModal()" style="background:rgba(255,255,255,.12);border:none;color:#fff;width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>'+
+        '</div>'+
+      '</div>'+
+      // Corps
+      '<div class="modal-body" style="max-height:70vh;overflow-y:auto">'+
+        // Avertissement
+        '<div style="background:#FFF5F5;border:1.5px solid #FECACA;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#991B1B;line-height:1.6">'+
+          '⚠️ <strong>Votre abonnement expire le '+proUntil+'.</strong> La résiliation met fin à tous vos avantages Pro (boutique, badge, priorité) à la fin de la période en cours.'+
+        '</div>'+
+        // Motif
+        '<div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:10px">Motif de votre demande *</div>'+
+        '<label class="resil-reason-opt" onclick="selectResil(this)"><input type="radio" name="resil-reason" value="prix"> <div><div style="font-weight:700">💰 Prix trop élevé</div><div style="font-size:11px;color:var(--muted)">Le tarif ne correspond pas à mon budget actuel</div></div></label>'+
+        '<label class="resil-reason-opt" onclick="selectResil(this)"><input type="radio" name="resil-reason" value="fonctionnalites"> <div><div style="font-weight:700">🔧 Fonctionnalités insuffisantes</div><div style="font-size:11px;color:var(--muted)">Les fonctionnalités Pro ne répondent pas à mes besoins</div></div></label>'+
+        '<label class="resil-reason-opt" onclick="selectResil(this)"><input type="radio" name="resil-reason" value="activite"> <div><div style="font-weight:700">🏪 Pause d\'activité</div><div style="font-size:11px;color:var(--muted)">Je suspends temporairement mon activité commerciale</div></div></label>'+
+        '<label class="resil-reason-opt" onclick="selectResil(this)"><input type="radio" name="resil-reason" value="changement"> <div><div style="font-weight:700">🔄 Changement de formule</div><div style="font-size:11px;color:var(--muted)">Je souhaite souscrire à une autre formule Pro</div></div></label>'+
+        '<label class="resil-reason-opt" onclick="selectResil(this)"><input type="radio" name="resil-reason" value="autre"> <div><div style="font-weight:700">❓ Autre raison</div><div style="font-size:11px;color:var(--muted)">Motif non listé ci-dessus</div></div></label>'+
+        // Justificatif
+        '<div style="margin-top:14px">'+
+          '<div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px">Précisions / Justificatifs *</div>'+
+          '<textarea id="resil-details" rows="4" placeholder="Décrivez votre situation en détail. Vous pouvez mentionner toute contrainte particulière (financière, technique, personnelle...)..." style="width:100%;border:1.5px solid var(--br);border-radius:10px;padding:10px 12px;font-size:13px;font-family:inherit;outline:none;resize:vertical" onfocus="this.style.borderColor=\'#EF4444\'" onblur="this.style.borderColor=\'var(--br)\'"></textarea>'+
+        '</div>'+
+        // Type de demande
+        '<div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+          '<label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:10px 12px;border:1.5px solid var(--br);border-radius:10px" id="resil-type-suspend">'+
+            '<input type="radio" name="resil-type" value="suspension" checked onchange="updateResilType()"> <div><div style="font-weight:700">⏸ Suspension temporaire</div><div style="color:var(--muted);font-size:11px">Reprise possible à tout moment</div></div>'+
+          '</label>'+
+          '<label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:10px 12px;border:1.5px solid var(--br);border-radius:10px" id="resil-type-resil">'+
+            '<input type="radio" name="resil-type" value="resiliation" onchange="updateResilType()"> <div><div style="font-weight:700">🚫 Résiliation définitive</div><div style="color:var(--muted);font-size:11px">Suppression de la boutique</div></div>'+
+          '</label>'+
+        '</div>'+
+        // Numéro contact
+        '<div style="margin-top:12px">'+
+          '<div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Numéro de contact *</div>'+
+          '<input type="tel" id="resil-phone" placeholder="Ex: 620 00 00 00" value="'+(u.phone||'').replace('+224','')+'" style="width:100%;border:1.5px solid var(--br);border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none">'+
+        '</div>'+
+        // Bouton envoi
+        '<button id="resil-send-btn" onclick="submitResiliation()" style="width:100%;background:#EF4444;color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:16px;box-shadow:0 3px 12px rgba(239,68,68,.3)">'+
+          '📨 Envoyer ma demande de résiliation'+
+        '</button>'+
+        '<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px;line-height:1.6">'+
+          'Votre demande sera traitée sous <strong>48h ouvrées</strong>.<br>'+
+          'Vous resterez Pro jusqu\'à la fin de votre période en cours.'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+
+  document.body.appendChild(overlay);
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) closeResiliationModal(); });
+}
+
+function selectResil(label){
+  document.querySelectorAll('.resil-reason-opt').forEach(function(l){ l.classList.remove('sel'); });
+  label.classList.add('sel');
+  var radio = label.querySelector('input[type=radio]');
+  if(radio) radio.checked = true;
+}
+
+function updateResilType(){
+  var suspension = document.getElementById('resil-type-suspend');
+  var resil      = document.getElementById('resil-type-resil');
+  var btn        = document.getElementById('resil-send-btn');
+  var isSuspend  = document.querySelector('input[name="resil-type"]:checked')&&document.querySelector('input[name="resil-type"]:checked').value==='suspension';
+  if(suspension){ suspension.style.borderColor = isSuspend ? '#3B82F6' : 'var(--br)'; suspension.style.background = isSuspend ? '#EFF6FF' : ''; }
+  if(resil){ resil.style.borderColor = !isSuspend ? '#EF4444' : 'var(--br)'; resil.style.background = !isSuspend ? '#FFF5F5' : ''; }
+  if(btn){ btn.textContent = isSuspend ? '📨 Envoyer ma demande de suspension' : '📨 Envoyer ma demande de résiliation'; }
+}
+
+function closeResiliationModal(){
+  var ov = document.getElementById('overlay-resiliation');
+  if(ov){ ov.classList.remove('open'); setTimeout(function(){ if(ov.parentNode) ov.parentNode.removeChild(ov); }, 250); }
+  document.body.style.overflow = '';
+}
+
+function submitResiliation(){
+  var reason  = document.querySelector('input[name="resil-reason"]:checked');
+  var details = (document.getElementById('resil-details')||{}).value||'';
+  var type    = document.querySelector('input[name="resil-type"]:checked');
+  var phone   = (document.getElementById('resil-phone')||{}).value||'';
+  var u = DB.user();
+
+  if(!reason){ toast('⚠️ Choisissez un motif','err'); return; }
+  if(details.trim().length < 20){ toast('⚠️ Veuillez détailler votre demande (20 caractères minimum)','err'); return; }
+  if(!phone || phone.length < 8){ toast('⚠️ Entrez votre numéro de contact','err'); return; }
+
+  var btn = document.getElementById('resil-send-btn');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Envoi en cours...'; }
+
+  var payload = {
+    type:       type ? type.value : 'suspension',
+    reason:     reason.value,
+    details:    details,
+    phone:      phone,
+    plan:       u ? (u.proPlan||'starter') : 'starter',
+    userId:     u ? (u._id||u.id) : '',
+    email:      u ? u.email : '',
+    requestDate: new Date().toISOString()
+  };
+
+  var token = localStorage.getItem('ygy_token');
+  fetch('/api/pro/resiliation', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},
+    body: JSON.stringify(payload)
+  })
+  .then(function(r){ return r.ok ? r.json() : Promise.reject(r.status); })
+  .then(function(){ showResiliationSuccess(payload.type); })
+  .catch(function(){
+    // Fallback local : enregistrer la demande
+    var demandes = JSON.parse(localStorage.getItem('ygy_resil_demandes')||'[]');
+    demandes.push(payload);
+    localStorage.setItem('ygy_resil_demandes', JSON.stringify(demandes));
+    showResiliationSuccess(payload.type);
+  });
+}
+
+function showResiliationSuccess(type){
+  closeResiliationModal();
+  var overlay = document.createElement('div');
+  overlay.className = 'overlay open';
+  overlay.style.zIndex = '3600';
+  var isSusp = type === 'suspension';
+  overlay.innerHTML =
+    '<div class="modal" style="max-width:420px;border-radius:16px;overflow:hidden;text-align:center">'+
+      '<div style="background:linear-gradient(135deg,#065F46,#059669);padding:32px 24px 20px">'+
+        '<div style="font-size:48px;margin-bottom:8px">📨</div>'+
+        '<div style="font-size:19px;font-weight:900;color:#fff;margin-bottom:4px">Demande envoyée !</div>'+
+        '<div style="font-size:13px;color:rgba(255,255,255,.75)">Merci pour votre message</div>'+
+      '</div>'+
+      '<div style="padding:24px 28px">'+
+        '<p style="font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:20px">'+
+          'Votre demande de <strong>'+(isSusp?'suspension':'résiliation')+'</strong> a bien été reçue.<br>'+
+          'Notre équipe la traitera dans un délai de <strong>48h ouvrées</strong>.<br>'+
+          'Vous conservez tous vos avantages Pro jusqu\'à traitement.'+
+        '</p>'+
+        '<div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:12px 14px;font-size:12px;color:#065F46;margin-bottom:16px;text-align:left">'+
+          '📞 <strong>Besoin urgent ?</strong> Contactez-nous sur WhatsApp au <strong>+224 620 000 000</strong>'+
+        '</div>'+
+        '<button style="width:100%;background:var(--or);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit" '+
+          'onclick="this.closest(\'.overlay\').remove();document.body.style.overflow=\'\'">'+
+          '✅ Compris, merci'+
+        '</button>'+
+      '</div>'+
+    '</div>';
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+  overlay.addEventListener('click', function(e){
+    if(e.target===overlay){ overlay.remove(); document.body.style.overflow=''; }
+  });
+}
 function activerPro(plan, amount){
   plan = plan || 'starter';
   amount = amount || 50000;
@@ -5757,10 +6143,24 @@ function updateNav(){
             if(al){ al.removeAttribute('hidden'); al.style.display=''; }
             if(ftAdminBtn) ftAdminBtn.style.display='block';
           }
+          // Mettre à jour le bandeau promo avec les données fraîches
+          if(typeof updatePromoBanner === 'function'){
+            updatePromoBanner(pa, usr.proPlan||'starter', PRO_MODAL_CFG&&PRO_MODAL_CFG[usr.proPlan||'starter']);
+          }
         }
       }).catch(function(){});
     }
   }
+  // Mettre à jour immédiatement le bandeau promo avec les données locales
+  setTimeout(function(){
+    if(typeof updatePromoBanner === 'function'){
+      var uu = DB.user();
+      var pa2 = uu && uu.isPro && uu.proUntil && new Date(uu.proUntil) > new Date();
+      var pl2 = pa2 ? (uu.proPlan||'starter') : null;
+      var cf2 = pl2 && PRO_MODAL_CFG ? (PRO_MODAL_CFG[pl2]||PRO_MODAL_CFG.starter) : null;
+      updatePromoBanner(pa2, pl2, cf2);
+    }
+  }, 50);
 }
 
 // ══════════════════════════════════════════
@@ -8481,6 +8881,19 @@ goTo=function(page){
       if(curAd) injectOGMeta(curAd);
     },100);
   }
+  if(page==='pro'){
+    setTimeout(function(){ renderProPage(); }, 80);
+  }
+  if(page==='home'){
+    // Mettre à jour le bandeau promo selon le statut Pro
+    setTimeout(function(){
+      var u = DB.user();
+      var proActive = u && u.isPro && u.proUntil && new Date(u.proUntil) > new Date();
+      var plan = proActive ? (u.proPlan||'starter') : null;
+      var cfg  = plan ? (PRO_MODAL_CFG[plan]||PRO_MODAL_CFG.starter) : null;
+      updatePromoBanner(proActive, plan, cfg);
+    }, 100);
+  }
 };
 
 document.addEventListener('DOMContentLoaded',function(){
@@ -8834,21 +9247,49 @@ document.addEventListener('DOMContentLoaded',function(){
   <div class="pro-page-wrap">
 
     <!-- Hero avec bouton retour intégré -->
-    <div class="pro-hero">
+    <div class="pro-hero" id="pro-hero-block">
       <button onclick="goTo('home')" style="position:absolute;top:14px;left:16px;display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);font-weight:600;cursor:pointer;font-size:12px;font-family:inherit;padding:5px 12px;border-radius:20px;transition:all .15s;z-index:2">
         ← Retour
       </button>
-      <div class="pro-hero-badge">⭐ Offre commerçants</div>
-      <div class="pro-hero-title"><span>YouGouYou</span> Pro</div>
-      <div class="pro-hero-sub">Boostez votre visibilité et vendez plus vite avec notre abonnement Pro dédié aux commerçants guinéens.</div>
+      <div class="pro-hero-badge" id="pro-hero-badge">⭐ Offre commerçants</div>
+      <div class="pro-hero-title" id="pro-hero-title"><span>YouGouYou</span> Pro</div>
+      <div class="pro-hero-sub" id="pro-hero-sub">Boostez votre visibilité et vendez plus vite avec notre abonnement Pro dédié aux commerçants guinéens.</div>
+    </div>
+
+    <!-- ══ BANDEAU ABONNEMENT ACTIF (visible si Pro) ══ -->
+    <div id="pro-active-banner" style="display:none;border-radius:16px;padding:20px 24px;margin-bottom:4px;position:relative;overflow:hidden">
+      <div style="position:absolute;inset:0;opacity:.08;background:repeating-linear-gradient(45deg,#fff 0,#fff 10px,transparent 10px,transparent 20px)"></div>
+      <div style="position:relative;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <div id="pro-active-icon" style="font-size:40px;flex-shrink:0">⭐</div>
+        <div style="flex:1;min-width:200px">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+            <div id="pro-active-title" style="font-size:17px;font-weight:900;color:#fff">Abonnement Pro Starter actif</div>
+            <span style="background:rgba(255,255,255,.2);color:#fff;font-size:10px;font-weight:800;padding:2px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px">✅ Actif</span>
+          </div>
+          <div id="pro-active-expiry" style="font-size:12px;color:rgba(255,255,255,.7);margin-bottom:8px">Expire le —</div>
+          <div id="pro-active-perks" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0">
+          <button onclick="showDashTab('boutique');loadDash();goTo('dashboard')" id="pro-active-boutique-btn" style="background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.35);color:#fff;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">
+            🏪 Gérer ma boutique
+          </button>
+          <button onclick="openResiliationModal()" style="background:rgba(255,0,0,.15);border:1.5px solid rgba(255,100,100,.3);color:rgba(255,180,180,.9);border-radius:10px;padding:7px 18px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">
+            ⏸ Suspendre / Résilier
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- 3 Formules tarifaires -->
-    <h2 style="font-size:20px;font-weight:800;margin:28px 0 16px;color:var(--ink)">Choisissez votre formule</h2>
-    <div class="pro-plans-grid">
+    <h2 style="font-size:20px;font-weight:800;margin:28px 0 16px;color:var(--ink)" id="pro-plans-title">Choisissez votre formule</h2>
+    <div class="pro-plans-grid" id="pro-plans-grid">
 
-      <!-- Formule 1 : Mensuel -->
-      <div class="pro-plan-card">
+      <!-- Formule 1 : Starter -->
+      <div class="pro-plan-card" id="pro-card-starter" style="position:relative">
+        <div id="pro-lock-starter" style="display:none;position:absolute;inset:0;background:rgba(255,255,255,.82);border-radius:inherit;z-index:10;display:none;align-items:center;justify-content:center;flex-direction:column;gap:6px;backdrop-filter:blur(2px)">
+          <div style="font-size:28px">🔒</div>
+          <div style="font-size:12px;font-weight:700;color:var(--muted);text-align:center;padding:0 12px">Abonnement actif<br>sur une autre formule</div>
+        </div>
         <div class="pro-plan-header">
           <div class="pro-plan-name">Starter</div>
           <div class="pro-plan-badge" style="background:rgba(255,255,255,.15)">Sans engagement</div>
@@ -8864,12 +9305,16 @@ document.addEventListener('DOMContentLoaded',function(){
           <li class="muted">— 2 annonces vedette/mois</li>
           <li class="muted">— Support standard</li>
         </ul>
-        <button class="pro-plan-btn" onclick="activerPro('starter',50000)">Commencer →</button>
-        <div class="pro-plan-note">Résiliable à tout moment</div>
+        <button class="pro-plan-btn" id="pro-btn-starter" onclick="activerPro('starter',50000)">Commencer →</button>
+        <div class="pro-plan-note" id="pro-note-starter">Résiliable à tout moment</div>
       </div>
 
-      <!-- Formule 2 : Trimestriel POPULAIRE -->
-      <div class="pro-plan-card pro-plan-popular">
+      <!-- Formule 2 : Business POPULAIRE -->
+      <div class="pro-plan-card pro-plan-popular" id="pro-card-business" style="position:relative">
+        <div id="pro-lock-business" style="display:none;position:absolute;inset:0;background:rgba(255,255,255,.82);border-radius:inherit;z-index:10;align-items:center;justify-content:center;flex-direction:column;gap:6px;backdrop-filter:blur(2px)">
+          <div style="font-size:28px">🔒</div>
+          <div style="font-size:12px;font-weight:700;color:var(--muted);text-align:center;padding:0 12px">Abonnement actif<br>sur une autre formule</div>
+        </div>
         <div class="pro-plan-popular-badge">🔥 Le plus populaire</div>
         <div class="pro-plan-header">
           <div class="pro-plan-name">Business</div>
@@ -8886,12 +9331,16 @@ document.addEventListener('DOMContentLoaded',function(){
           <li>✓ <strong>5 annonces vedette/mois</strong></li>
           <li>✓ Support prioritaire</li>
         </ul>
-        <button class="pro-plan-btn" onclick="activerPro('business',120000)">Choisir Business →</button>
-        <div class="pro-plan-note">Économisez 30 000 GNF vs mensuel</div>
+        <button class="pro-plan-btn" id="pro-btn-business" onclick="activerPro('business',120000)">Choisir Business →</button>
+        <div class="pro-plan-note" id="pro-note-business">Économisez 30 000 GNF vs mensuel</div>
       </div>
 
-      <!-- Formule 3 : Annuel PREMIUM -->
-      <div class="pro-plan-card">
+      <!-- Formule 3 : Premium -->
+      <div class="pro-plan-card" id="pro-card-premium" style="position:relative">
+        <div id="pro-lock-premium" style="display:none;position:absolute;inset:0;background:rgba(255,255,255,.82);border-radius:inherit;z-index:10;align-items:center;justify-content:center;flex-direction:column;gap:6px;backdrop-filter:blur(2px)">
+          <div style="font-size:28px">🔒</div>
+          <div style="font-size:12px;font-weight:700;color:var(--muted);text-align:center;padding:0 12px">Abonnement actif<br>sur une autre formule</div>
+        </div>
         <div class="pro-plan-header">
           <div class="pro-plan-name">Premium</div>
           <div class="pro-plan-badge" style="background:linear-gradient(135deg,#FFD700,#FFA500);color:#1A1A2E">1 an · Engagement</div>
@@ -8907,8 +9356,8 @@ document.addEventListener('DOMContentLoaded',function(){
           <li>✓ <strong>Vedette illimitée</strong></li>
           <li>✓ Support dédié 7j/7</li>
         </ul>
-        <button class="pro-plan-btn" style="background:linear-gradient(135deg,#FFD700,#FFA500);color:#1A1A2E" onclick="activerPro('premium',360000)">Passer Premium →</button>
-        <div class="pro-plan-note">Économisez 240 000 GNF vs mensuel</div>
+        <button class="pro-plan-btn" id="pro-btn-premium" style="background:linear-gradient(135deg,#FFD700,#FFA500);color:#1A1A2E" onclick="activerPro('premium',360000)">Passer Premium →</button>
+        <div class="pro-plan-note" id="pro-note-premium">Économisez 240 000 GNF vs mensuel</div>
       </div>
 
     </div>
@@ -8954,7 +9403,8 @@ document.addEventListener('DOMContentLoaded',function(){
       <div style="display:flex;flex-direction:column;gap:12px">
         <div><div style="font-weight:700;font-size:13px;margin-bottom:3px">Comment payer ?</div><div style="font-size:12px;color:var(--muted)">Uniquement par Orange Money. Simple, rapide, sécurisé.</div></div>
         <div><div style="font-weight:700;font-size:13px;margin-bottom:3px">L'activation est-elle immédiate ?</div><div style="font-size:12px;color:var(--muted)">Oui, votre compte Pro est activé instantanément après paiement confirmé.</div></div>
-        <div><div style="font-weight:700;font-size:13px;margin-bottom:3px">Puis-je changer de formule ?</div><div style="font-size:12px;color:var(--muted)">Oui, vous pouvez upgrader à tout moment depuis votre tableau de bord.</div></div>
+        <div><div style="font-weight:700;font-size:13px;margin-bottom:3px">Puis-je changer de formule ?</div><div style="font-size:12px;color:var(--muted)">Vous devez d'abord résilier votre abonnement actif avant d'en souscrire un nouveau.</div></div>
+        <div><div style="font-weight:700;font-size:13px;margin-bottom:3px">Comment résilier ?</div><div style="font-size:12px;color:var(--muted)">Cliquez sur "Suspendre / Résilier" et envoyez une demande avec justificatif. Traitement sous 48h.</div></div>
       </div>
     </div>
 
