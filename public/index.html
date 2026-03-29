@@ -2091,6 +2091,15 @@ footer{background:transparent;margin-top:0}
     <button id="submit-ad-btn" class="btn-post-submit" onclick="submitAd()">
       🚀 Publier mon annonce gratuitement
     </button>
+
+    <!-- ══ BOUTON BOUTIQUE (visible si Pro actif) ══ -->
+    <div id="boutique-save-zone" style="display:none;margin-top:10px">
+      <button id="btn-save-boutique" class="btn-post-submit" onclick="saveArticleBoutique()"
+        style="background:linear-gradient(135deg,#1A1A2E,#2D2B0E);margin-top:0">
+        🏪 Enregistrer l'article dans la boutique
+      </button>
+    </div>
+
     <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:10px">En publiant vous acceptez nos <a style="color:var(--or);cursor:pointer">conditions d'utilisation</a></p>
   </div>
 </div>
@@ -4847,6 +4856,451 @@ function submitAd(){
     setTimeout(function(){goTo('home');},1400);
   }
 }
+
+// ══════════════════════════════════════════
+//  BOUTIQUE — PANIER D'ARTICLES
+//  Toutes fonctions ajoutées sans modifier l'existant
+// ══════════════════════════════════════════
+
+// Panier d'articles en attente de publication
+var _boutiqueCart = [];
+
+// Lire les champs du formulaire post courant
+function _readPostFormData(){
+  var user = DB.user() || {};
+  var cat  = CATS.find(function(c){ return c.n === selCat; });
+  return {
+    title:       (document.getElementById('pt')||{value:''}).value.trim(),
+    price:       parseInt((document.getElementById('pp')||{value:'0'}).value) || 0,
+    city:        (document.getElementById('pc')||{value:''}).value,
+    quartier:    (document.getElementById('pq')||{value:''}).value.trim(),
+    category:    selCat || '',
+    description: (document.getElementById('pd')||{value:''}).value.trim(),
+    phone:       (document.getElementById('ptel')||{value:''}).value.trim(),
+    etat:        (document.getElementById('pe')||{value:''}).value,
+    seller:      user.name || user.prenom || '',
+    sellerId:    user._id  || user.id    || '',
+    subCategory: (document.getElementById('post-subcat-hidden')||{value:''}).value  || window._postSelSubCat  || '',
+    subItem:     (document.getElementById('post-subitem-hidden')||{value:''}).value || window._postSelSubItem || '',
+    subFields:   (typeof getDynFieldsValues === 'function') ? getDynFieldsValues() : {},
+    photos:      (selectedPhotos || []).slice(0, 8),
+    catEmoji:    cat ? cat.e : '📦',
+    savedAt:     new Date().toISOString()
+  };
+}
+
+// Valider les champs minimaux
+function _validatePostForm(){
+  var d = _readPostFormData();
+  if(!d.title){ toast('⚠️ Le titre est obligatoire','err'); document.getElementById('pt')&&document.getElementById('pt').focus(); return null; }
+  if(!d.price){ toast('⚠️ Le prix est obligatoire','err'); document.getElementById('pp')&&document.getElementById('pp').focus(); return null; }
+  if(!d.category){ toast('⚠️ Choisissez une catégorie','err'); return null; }
+  if(!d.city){ toast('⚠️ Choisissez une ville','err'); return null; }
+  return d;
+}
+
+// Afficher/masquer le bouton Boutique selon le statut Pro
+function updateBoutiqueSaveBtnVisibility(){
+  var u = DB.user();
+  var proActive = u && u.isPro && u.proUntil && new Date(u.proUntil) > new Date();
+  var zone = document.getElementById('boutique-save-zone');
+  if(zone) zone.style.display = proActive ? 'block' : 'none';
+
+  // Colorer selon le plan
+  var btn = document.getElementById('btn-save-boutique');
+  if(btn && proActive){
+    var cfg = (typeof PRO_MODAL_CFG !== 'undefined') ? (PRO_MODAL_CFG[u.proPlan||'starter'] || PRO_MODAL_CFG.starter) : null;
+    if(cfg) btn.style.background = cfg.headerBg;
+  }
+}
+
+// ── ÉTAPE 1 : Clic sur "Enregistrer l'article dans la boutique" ──
+function saveArticleBoutique(){
+  var data = _validatePostForm();
+  if(!data) return;
+
+  var u = DB.user();
+  var plan = u ? (u.proPlan || 'starter') : 'starter';
+  var cfg  = (typeof PRO_MODAL_CFG !== 'undefined') ? (PRO_MODAL_CFG[plan] || PRO_MODAL_CFG.starter) : { annonces:9, icon:'⭐', label:'Starter', btnBg:'var(--or)' };
+
+  // Vérifier la limite d'annonces autorisées
+  var cartCount = _boutiqueCart.length;
+  if(cartCount >= cfg.annonces){
+    _showBoutiquePublishPrompt(); // limite atteinte → proposer publication directe
+    return;
+  }
+
+  // Ajouter au panier
+  _boutiqueCart.push(data);
+  toast('✅ Article ajouté au panier boutique (' + _boutiqueCart.length + '/' + cfg.annonces + ')','ok');
+
+  // Réinitialiser le formulaire pour le prochain article
+  _resetPostForm();
+
+  // Demander si continuer ou publier
+  setTimeout(function(){ _showContinueOrPublishPrompt(cfg); }, 600);
+}
+
+// ── ÉTAPE 2 : "Voulez-vous continuer ?" ──
+function _showContinueOrPublishPrompt(cfg){
+  var cartCount = _boutiqueCart.length;
+  var limitAtteinte = cfg && cartCount >= cfg.annonces;
+  var cfg2 = cfg || { icon:'⭐', label:'Starter', annonces:9, btnBg:'var(--or)', headerBg:'linear-gradient(135deg,#1A1A2E,#2D2B0E)' };
+
+  var existing = document.getElementById('overlay-boutique-continue');
+  if(existing) existing.remove();
+
+  var overlay = document.createElement('div');
+  overlay.id = 'overlay-boutique-continue';
+  overlay.className = 'overlay';
+  overlay.style.zIndex = '4000';
+
+  var cartPreview = _boutiqueCart.slice(-3).reverse().map(function(a, i){
+    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--brl)">'
+      + '<span style="font-size:22px">' + (a.catEmoji||'📦') + '</span>'
+      + '<div style="flex:1;min-width:0">'
+        + '<div style="font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + a.title + '</div>'
+        + '<div style="font-size:11px;color:var(--muted)">' + a.price.toLocaleString('fr-FR') + ' GNF · ' + a.city + '</div>'
+      + '</div>'
+      + '<div style="font-size:11px;background:var(--orl);color:var(--or);padding:2px 8px;border-radius:10px;font-weight:700;flex-shrink:0">#' + (_boutiqueCart.length - i) + '</div>'
+    + '</div>';
+  }).join('');
+
+  overlay.innerHTML =
+    '<div class="modal" style="max-width:460px;border-radius:16px;overflow:hidden">'
+      // En-tête
+      + '<div style="background:' + cfg2.headerBg + ';padding:20px 24px">'
+        + '<div style="font-size:13px;color:rgba(255,255,255,.6);font-weight:600;margin-bottom:4px">' + cfg2.icon + ' Boutique Pro ' + cfg2.label + '</div>'
+        + '<div style="font-size:18px;font-weight:900;color:#fff;margin-bottom:3px">🛒 Panier en cours</div>'
+        + '<div style="display:flex;align-items:center;gap:8px">'
+          + '<div style="font-size:13px;color:rgba(255,255,255,.75)">' + cartCount + ' article' + (cartCount>1?'s':'') + ' enregistré' + (cartCount>1?'s':'') + '</div>'
+          + '<div style="font-size:11px;background:rgba(255,255,255,.15);color:rgba(255,255,255,.9);padding:2px 10px;border-radius:20px;font-weight:700">' + cartCount + ' / ' + cfg2.annonces + ' max</div>'
+        + '</div>'
+        // Barre de progression
+        + '<div style="background:rgba(255,255,255,.15);border-radius:20px;height:6px;margin-top:10px;overflow:hidden">'
+          + '<div style="background:#fff;border-radius:20px;height:100%;width:' + Math.min(100, Math.round(cartCount/cfg2.annonces*100)) + '%;transition:width .4s"></div>'
+        + '</div>'
+      + '</div>'
+      // Corps
+      + '<div class="modal-body">'
+        // Derniers articles
+        + '<div style="margin-bottom:16px">'
+          + '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Derniers articles ajoutés</div>'
+          + cartPreview
+        + '</div>'
+        // Question
+        + '<div style="background:#F8FAFC;border-radius:12px;padding:14px 16px;margin-bottom:16px;text-align:center">'
+          + '<div style="font-size:15px;font-weight:800;color:var(--ink);margin-bottom:4px">Voulez-vous continuer ?</div>'
+          + '<div style="font-size:12px;color:var(--muted)">Ajoutez un autre article ou publiez les annonces enregistrées</div>'
+        + '</div>'
+        // Boutons
+        + (limitAtteinte
+            ? '<div style="background:#FFF3EE;border:1px solid var(--orm);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--or);font-weight:600;text-align:center">⚠️ Limite atteinte — publiez pour libérer des emplacements</div>'
+            : '')
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+          + (limitAtteinte ? ''
+            : '<button onclick="closeBoutiqueContinueModal();resetAndContinueBoutique()" '
+                + 'style="background:#F1F5F9;color:var(--ink);border:1.5px solid var(--br);border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">'
+                + '➕ Oui, ajouter un autre article'
+              + '</button>'
+          )
+          + '<button onclick="closeBoutiqueContinueModal();_showBoutiquePublishPrompt()" '
+              + 'style="background:' + cfg2.btnBg + ';color:#fff;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;'
+              + (limitAtteinte ? 'grid-column:1/-1;' : '') + '">'
+              + '📤 Non, publier les ' + cartCount + ' annonce' + (cartCount>1?'s':'')
+          + '</button>'
+        + '</div>'
+        // Lien sauvegarder sans publier
+        + '<div style="text-align:center;margin-top:12px">'
+          + '<span onclick="closeBoutiqueContinueModal();_saveBoutiqueCartWithoutPublish()" '
+              + 'style="font-size:12px;color:var(--muted);cursor:pointer;text-decoration:underline;font-weight:600">'
+              + '💾 Sauvegarder sans publier maintenant'
+          + '</span>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+
+  document.body.appendChild(overlay);
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) closeBoutiqueContinueModal(); });
+}
+
+function closeBoutiqueContinueModal(){
+  var ov = document.getElementById('overlay-boutique-continue');
+  if(ov){ ov.classList.remove('open'); setTimeout(function(){ if(ov.parentNode) ov.parentNode.removeChild(ov); }, 220); }
+  document.body.style.overflow = '';
+}
+
+// Réinitialiser le formulaire pour saisir un nouvel article
+function resetAndContinueBoutique(){
+  _resetPostForm();
+  toast('📝 Formulaire prêt pour le prochain article','ok');
+  // Faire défiler vers le haut du formulaire
+  var postPage = document.getElementById('page-post');
+  if(postPage) postPage.scrollTop = 0;
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// ── ÉTAPE 3A : "Voulez-vous publier les annonces ajoutées ?" ──
+function _showBoutiquePublishPrompt(){
+  if(!_boutiqueCart.length){
+    toast('⚠️ Aucun article dans le panier','err');
+    return;
+  }
+  var u = DB.user();
+  var plan = u ? (u.proPlan || 'starter') : 'starter';
+  var cfg  = (typeof PRO_MODAL_CFG !== 'undefined') ? (PRO_MODAL_CFG[plan] || PRO_MODAL_CFG.starter) : { icon:'⭐', label:'Starter', btnBg:'var(--or)', headerBg:'linear-gradient(135deg,#1A1A2E,#2D2B0E)' };
+
+  var existing = document.getElementById('overlay-boutique-publish');
+  if(existing) existing.remove();
+
+  var overlay = document.createElement('div');
+  overlay.id = 'overlay-boutique-publish';
+  overlay.className = 'overlay';
+  overlay.style.zIndex = '4100';
+
+  // Liste complète du panier
+  var listHtml = _boutiqueCart.map(function(a, i){
+    return '<div style="display:flex;align-items:center;gap:10px;padding:9px 14px;background:#fff;border-radius:10px;border:1px solid var(--br)">'
+      + '<div style="width:32px;height:32px;border-radius:8px;background:var(--orl);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">' + (a.catEmoji||'📦') + '</div>'
+      + '<div style="flex:1;min-width:0">'
+        + '<div style="font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + a.title + '</div>'
+        + '<div style="font-size:11px;color:var(--muted)">' + a.category + ' · ' + a.price.toLocaleString('fr-FR') + ' GNF</div>'
+      + '</div>'
+      + '<div style="font-size:10px;font-weight:700;color:var(--or);background:var(--orl);padding:2px 8px;border-radius:10px;flex-shrink:0">N°' + (i+1) + '</div>'
+    + '</div>';
+  }).join('');
+
+  overlay.innerHTML =
+    '<div class="modal" style="max-width:480px;border-radius:16px;overflow:hidden">'
+      + '<div style="background:' + cfg.headerBg + ';padding:20px 24px">'
+        + '<div style="font-size:13px;color:rgba(255,255,255,.6);font-weight:600;margin-bottom:4px">' + cfg.icon + ' Boutique Pro ' + cfg.label + '</div>'
+        + '<div style="font-size:18px;font-weight:900;color:#fff">📤 Publication des annonces</div>'
+        + '<div style="font-size:13px;color:rgba(255,255,255,.7);margin-top:3px">' + _boutiqueCart.length + ' article' + (_boutiqueCart.length>1?'s':'') + ' prêt' + (_boutiqueCart.length>1?'s':'') + ' à être publié' + (_boutiqueCart.length>1?'s':'') + '</div>'
+      + '</div>'
+      + '<div class="modal-body">'
+        + '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px">Articles dans le panier</div>'
+        + '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;max-height:280px;overflow-y:auto">' + listHtml + '</div>'
+        // Question principale
+        + '<div style="background:linear-gradient(135deg,#FFF3EE,#FFE8D5);border:1.5px solid var(--orm);border-radius:12px;padding:14px 16px;margin-bottom:16px;text-align:center">'
+          + '<div style="font-size:15px;font-weight:800;color:var(--ink);margin-bottom:4px">Voulez-vous publier les annonces ajoutées ?</div>'
+          + '<div style="font-size:12px;color:var(--muted)">Elles seront visibles immédiatement dans votre boutique et sur la marketplace</div>'
+        + '</div>'
+        // 2 choix
+        + '<div style="display:flex;flex-direction:column;gap:10px">'
+          + '<button onclick="closeBoutiquePublishModal();_publishBoutiqueCart()" '
+              + 'style="width:100%;background:' + cfg.btnBg + ';color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(0,0,0,.15)">'
+              + '✅ Oui — Publier les ' + _boutiqueCart.length + ' annonce' + (_boutiqueCart.length>1?'s':'') + ' maintenant'
+          + '</button>'
+          + '<button onclick="closeBoutiquePublishModal();_saveBoutiqueCartWithoutPublish()" '
+              + 'style="width:100%;background:#fff;color:var(--ink);border:1.5px solid var(--br);border-radius:12px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">'
+              + '💾 Non — Sauvegarder sans publier'
+          + '</button>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+
+  document.body.appendChild(overlay);
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) closeBoutiquePublishModal(); });
+}
+
+function closeBoutiquePublishModal(){
+  var ov = document.getElementById('overlay-boutique-publish');
+  if(ov){ ov.classList.remove('open'); setTimeout(function(){ if(ov.parentNode) ov.parentNode.removeChild(ov); }, 220); }
+  document.body.style.overflow = '';
+}
+
+// ── ÉTAPE 3B-OUI : Publier tous les articles du panier ──
+function _publishBoutiqueCart(){
+  if(!_boutiqueCart.length){ toast('⚠️ Panier vide','err'); return; }
+  var token = localStorage.getItem('ygy_token');
+  var total = _boutiqueCart.length;
+  var published = 0;
+  var errors = 0;
+
+  toast('⏳ Publication de ' + total + ' annonce' + (total>1?'s':'') + '...','ok');
+
+  // Publier en série pour ne pas surcharger l'API
+  function publishNext(index){
+    if(index >= _boutiqueCart.length){
+      // Tout publié
+      _boutiqueCart = [];
+      localStorage.removeItem('ygy_boutique_cart');
+      fetchAdsFromAPI(function(){ renderAds(); });
+      _showBoutiquePublishSuccess(published, errors);
+      return;
+    }
+    var adData = _boutiqueCart[index];
+    if(token){
+      fetch('/api/ads', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','Authorization':'Bearer '+token},
+        body: JSON.stringify(adData)
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if(!data.error){ published++; } else { errors++; }
+        setTimeout(function(){ publishNext(index+1); }, 300);
+      })
+      .catch(function(){
+        // Fallback local
+        var cat = CATS.find(function(c){ return c.n === adData.category; });
+        DB.addAd({
+          id: Date.now()+'_'+index,
+          e: cat ? cat.e : '📦',
+          t: adData.title, p: adData.price,
+          city: adData.city, cat: adData.category,
+          date: 'À l\'instant', views: 0, feat: false,
+          seller: adData.seller, desc: adData.description,
+          photos: adData.photos || [],
+          bg: 'linear-gradient(135deg,#FFF3EE,#FFB899)'
+        });
+        published++;
+        setTimeout(function(){ publishNext(index+1); }, 200);
+      });
+    } else {
+      // Pas de token → local
+      var cat2 = CATS.find(function(c){ return c.n === adData.category; });
+      DB.addAd({
+        id: Date.now()+'_'+index,
+        e: cat2 ? cat2.e : '📦',
+        t: adData.title, p: adData.price,
+        city: adData.city, cat: adData.category,
+        date: 'À l\'instant', views: 0, feat: false,
+        seller: adData.seller, desc: adData.description,
+        bg: 'linear-gradient(135deg,#FFF3EE,#FFB899)'
+      });
+      published++;
+      publishNext(index+1);
+    }
+  }
+  publishNext(0);
+}
+
+// Écran de succès publication
+function _showBoutiquePublishSuccess(published, errors){
+  var u = DB.user();
+  var plan = u ? (u.proPlan||'starter') : 'starter';
+  var cfg  = (typeof PRO_MODAL_CFG !== 'undefined') ? (PRO_MODAL_CFG[plan]||PRO_MODAL_CFG.starter) : { icon:'⭐', btnBg:'var(--or)', headerBg:'linear-gradient(135deg,#065F46,#059669)' };
+  var overlay = document.createElement('div');
+  overlay.className = 'overlay open';
+  overlay.style.zIndex = '4200';
+  overlay.innerHTML =
+    '<div class="modal" style="max-width:400px;border-radius:16px;overflow:hidden;text-align:center">'
+      + '<div style="background:linear-gradient(135deg,#065F46,#059669);padding:36px 24px 24px">'
+        + '<div style="font-size:56px;margin-bottom:10px">🎉</div>'
+        + '<div style="font-size:20px;font-weight:900;color:#fff;margin-bottom:4px">Publication réussie !</div>'
+        + '<div style="font-size:13px;color:rgba(255,255,255,.75)">'
+          + published + ' annonce' + (published>1?'s':'') + ' publiée' + (published>1?'s':'') + ' dans votre boutique'
+          + (errors > 0 ? ' · ' + errors + ' erreur(s)' : '')
+        + '</div>'
+      + '</div>'
+      + '<div style="padding:24px 28px">'
+        + '<div style="display:flex;gap:10px;flex-direction:column">'
+          + '<button onclick="this.closest(\'.overlay\').remove();document.body.style.overflow=\'\';loadDash();goTo(\'dashboard\');setTimeout(function(){showDashTab(\'boutique\');},300)" '
+              + 'style="width:100%;background:' + cfg.btnBg + ';color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit">'
+              + '🏪 Voir ma boutique →'
+          + '</button>'
+          + '<button onclick="this.closest(\'.overlay\').remove();document.body.style.overflow=\'\';goTo(\'home\')" '
+              + 'style="width:100%;background:none;border:1.5px solid var(--br);border-radius:10px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--muted)">'
+              + 'Retour à l\'accueil'
+          + '</button>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+}
+
+// ── ÉTAPE 3B-NON : Sauvegarder sans publier ──
+function _saveBoutiqueCartWithoutPublish(){
+  if(!_boutiqueCart.length){ toast('⚠️ Aucun article à sauvegarder','err'); return; }
+  // Sauvegarder en localStorage
+  localStorage.setItem('ygy_boutique_cart', JSON.stringify(_boutiqueCart));
+  var count = _boutiqueCart.length;
+
+  var overlay = document.createElement('div');
+  overlay.className = 'overlay open';
+  overlay.style.zIndex = '4200';
+  overlay.innerHTML =
+    '<div class="modal" style="max-width:380px;border-radius:16px;overflow:hidden;text-align:center">'
+      + '<div style="background:linear-gradient(135deg,#1E3A5F,#1D4ED8);padding:32px 24px 20px">'
+        + '<div style="font-size:48px;margin-bottom:10px">💾</div>'
+        + '<div style="font-size:18px;font-weight:900;color:#fff;margin-bottom:4px">Sauvegardé !</div>'
+        + '<div style="font-size:13px;color:rgba(255,255,255,.7)">' + count + ' article' + (count>1?'s':'') + ' en attente de publication</div>'
+      + '</div>'
+      + '<div style="padding:20px 24px">'
+        + '<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:12px 14px;font-size:12px;color:#1D4ED8;line-height:1.6;margin-bottom:16px;text-align:left">'
+          + '📌 Vos articles sont sauvegardés localement. Revenez sur ce formulaire pour reprendre ou publiez depuis votre tableau de bord.'
+        + '</div>'
+        + '<button onclick="this.closest(\'.overlay\').remove();document.body.style.overflow=\'\'" '
+            + 'style="width:100%;background:var(--or);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit">'
+            + '✅ Compris'
+        + '</button>'
+      + '</div>'
+    + '</div>';
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+  // Ne pas vider le panier (articles gardés pour publication future)
+}
+
+// Réinitialiser le formulaire post pour un nouvel article
+function _resetPostForm(){
+  ['pt','pp','pd','ptel','pq','pn'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+  var peEl = document.getElementById('pe');
+  if(peEl) peEl.value = '';
+  // Réinitialiser catégorie
+  selCat = '';
+  document.querySelectorAll('.cat-opt').forEach(function(c){ c.classList.remove('sel'); });
+  // Réinitialiser photos
+  selectedPhotos = [];
+  var pp = document.getElementById('photo-previews');
+  if(pp) pp.innerHTML = '';
+  // Sous-catégories
+  window._postSelSubCat  = '';
+  window._postSelSubItem = '';
+  var sc = document.getElementById('post-subcat-hidden');
+  var si = document.getElementById('post-subitem-hidden');
+  if(sc) sc.value = '';
+  if(si) si.value = '';
+  // Reconstruire les catégories
+  if(typeof renderPostCats === 'function') renderPostCats();
+}
+
+// Restaurer le panier depuis localStorage au chargement
+(function _restoreBoutiqueCart(){
+  try {
+    var saved = localStorage.getItem('ygy_boutique_cart');
+    if(saved){
+      var parsed = JSON.parse(saved);
+      if(Array.isArray(parsed) && parsed.length > 0){
+        _boutiqueCart = parsed;
+      }
+    }
+  } catch(e){}
+})();
+
+// Mettre à jour la visibilité du bouton boutique quand on va sur la page post
+var _origGoToForBoutique = goTo;
+goTo = function(page){
+  _origGoToForBoutique(page);
+  if(page === 'post'){
+    setTimeout(function(){
+      updateBoutiqueSaveBtnVisibility();
+      // Afficher badge panier si articles en attente
+      if(_boutiqueCart.length > 0){
+        var btn = document.getElementById('btn-save-boutique');
+        if(btn) btn.textContent = '🏪 Enregistrer l\'article (' + _boutiqueCart.length + ' en panier)';
+      }
+    }, 80);
+  }
+};
 
 // ══════════════════════════════════════════
 //  AUTH + SMS
