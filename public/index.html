@@ -321,28 +321,88 @@ footer{background:transparent;margin-top:0}
 .btn-post-submit{width:100%;padding:13px;border-radius:6px;background:var(--or);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:background .12s;display:flex;align-items:center;justify-content:center;gap:6px;font-family:var(--font)}
 .btn-post-submit:hover{background:var(--or2)}
 .btn-post-submit:disabled{opacity:.6;cursor:not-allowed}
-.dash-layout{display:grid;grid-template-columns:200px 1fr;min-height:calc(100vh - 62px)}
-.dash-side{background:#fff;border-right:1px solid var(--br);padding:14px 10px;position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto}
+/* ── Dashboard ── */
+#page-dashboard.active{
+  display:block !important;
+  position:fixed;
+  top:104px;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:1100px;
+  height:calc(100vh - 104px);
+  overflow:hidden;
+  z-index:200;
+  background:#F8FAFC;
+  box-shadow:0 2px 12px rgba(0,0,0,.08);
+}
+.dash-layout{display:grid;grid-template-columns:200px 1fr;height:100%;overflow:hidden}
+.dash-side{background:#fff;border-right:1px solid var(--br);padding:14px 10px;height:100%;overflow-y:auto}
+/* ── Admin ── */
+#page-admin.active{
+  display:block !important;
+  position:fixed;
+  top:104px;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:1100px;
+  height:calc(100vh - 104px);
+  overflow:hidden;
+  z-index:200;
+  box-shadow:0 2px 12px rgba(0,0,0,.08);
+}
+.admin-layout{display:grid;grid-template-columns:190px 1fr;height:100%;overflow:hidden}
+.admin-side{background:#1A1A1A;padding:14px 10px;height:100%;overflow-y:auto}
+.admin-main{padding:18px 22px;background:var(--bg);overflow-y:auto;height:100%}
 .dash-avatar{width:46px;height:46px;border-radius:50%;background:var(--or);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;margin-bottom:8px}
 .dash-user-info{padding:10px 6px 14px;border-bottom:1px solid var(--br);margin-bottom:10px;text-align:center}
 .dash-user-name{font-size:13px;font-weight:700;color:var(--ink)}
 .dash-user-phone{font-size:11px;color:var(--muted);margin-top:2px}
 .dash-nav a{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;font-size:13px;font-weight:400;color:var(--muted);cursor:pointer;transition:all .12s;text-decoration:none;margin-bottom:2px}
 .dash-nav a:hover,.dash-nav a.active{background:var(--orl);color:var(--or);font-weight:600}
-.dash-main{padding:20px 24px;background:var(--bg)}
+.dash-main{padding:20px 24px;background:var(--bg);overflow-y:auto;height:100%}
 .dash-section{display:none}.dash-section.active{display:block}
 .dash-section-title{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:14px}
 .stat-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
 .stat-card{background:#fff;border-radius:6px;padding:14px;border:1px solid var(--br);display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
 .stat-card-val{font-size:22px;font-weight:800;color:var(--or)}
 .stat-card-label{font-size:11px;color:var(--muted);font-weight:500}
-.admin-layout{display:grid;grid-template-columns:190px 1fr;min-height:calc(100vh - 62px)}
-.admin-side{background:#1A1A1A;padding:14px 10px;position:sticky;top:62px;height:calc(100vh - 62px)}
-.admin-nav-item{display:flex;align-items:center;gap:7px;padding:8px 10px;border-radius:5px;font-size:12px;font-weight:400;color:rgba(255,255,255,.45);cursor:pointer;transition:all .12s;margin-bottom:2px}
-.admin-nav-item:hover,.admin-nav-item.active{background:rgba(255,255,255,.08);color:#fff}
-.admin-main{padding:18px 22px;background:var(--bg);overflow:auto}
 .admin-title{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:14px}
 .admin-pane{display:none}.admin-pane.active{display:block}
+
+/* ── Dashboard Pro Cards ── */
+.dash-pro-card{
+  background:#fff;border:2px solid #EAECF0;border-radius:14px;
+  padding:18px 16px;cursor:pointer;position:relative;
+  transition:box-shadow .2s,transform .2s,border-color .2s;
+  display:flex;flex-direction:column;
+}
+.dash-pro-card:hover{box-shadow:0 6px 20px rgba(0,0,0,.09);transform:translateY(-2px);border-color:var(--orm)}
+.dash-pro-card-popular{border-color:var(--or);box-shadow:0 3px 12px rgba(255,92,0,.15)}
+.dash-pro-popular-tag{
+  position:absolute;top:-11px;left:50%;transform:translateX(-50%);
+  background:var(--or);color:#fff;font-size:10px;font-weight:800;
+  padding:3px 12px;border-radius:20px;white-space:nowrap;
+}
+.dash-pro-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.dash-pro-card-name{font-size:16px;font-weight:800;color:#1A1A2E}
+.dash-pro-card-badge{
+  background:#F1F5F9;color:#64748B;
+  font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;
+}
+.dash-pro-price{font-size:22px;font-weight:900;color:#1A1A2E;letter-spacing:-.3px}
+.dash-pro-price span{font-size:13px;font-weight:700}
+.dash-pro-period{font-size:11px;color:var(--muted);margin-bottom:14px;margin-top:2px}
+.dash-pro-features{list-style:none;padding:0;margin:0 0 16px;display:flex;flex-direction:column;gap:6px;flex:1}
+.dash-pro-features li{font-size:12px;color:#475569;line-height:1.4}
+.dash-pro-btn{
+  width:100%;background:var(--or);color:#fff;border:none;
+  border-radius:9px;padding:10px;font-size:12px;font-weight:800;
+  cursor:pointer;font-family:inherit;transition:all .15s;
+  box-shadow:0 2px 8px rgba(255,92,0,.25);
+}
+.dash-pro-btn:hover{background:var(--or2)}
 .admin-table{width:100%;border-collapse:collapse;background:#fff;border-radius:6px;overflow:hidden;border:1px solid var(--br)}
 .admin-table th{background:#fafafa;padding:8px 12px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.2px;color:var(--muted);text-align:left;border-bottom:1px solid var(--br)}
 .admin-table td{padding:8px 12px;font-size:12px;color:var(--ink);border-bottom:1px solid var(--brl)}
@@ -1957,6 +2017,7 @@ footer{background:transparent;margin-top:0}
         <a onclick="showDashTab('ads')" id="dtab-ads">📋 Mes annonces <span id="p-count-ads" style="background:var(--orl);color:var(--or);font-size:11px;padding:1px 6px;border-radius:10px;margin-left:auto">0</span></a>
         <a onclick="showDashTab('history')" id="dtab-history">🕐 Historique</a>
         <a onclick="showDashTab('payments')" id="dtab-payments">💳 Paiements</a>
+        <a onclick="showDashTab('pro')" id="dtab-pro" style="background:linear-gradient(135deg,#1A1A2E,#2D1B0E);color:var(--or)!important;border-radius:8px;margin-top:8px;font-weight:700">⭐ Mon abonnement Pro</a>
         <a onclick="showDashTab('alerts')" id="dtab-alerts">🔔 Alertes</a>
         <a id="nav-admin-link" hidden onclick="goAdmin()">👑 Admin</a>
         <a onclick="logout()" style="color:var(--re)!important;margin-top:20px">🚪 Déconnexion</a>
@@ -2050,6 +2111,96 @@ footer{background:transparent;margin-top:0}
       </div>
 
 
+      <!-- ═══ TAB PRO ═══ -->
+      <div class="dash-section" id="dsec-pro">
+        <div class="dash-section-title">⭐ Mon abonnement Pro</div>
+
+        <!-- Statut actuel -->
+        <div id="dash-pro-status-block" style="background:#fff;border-radius:14px;padding:20px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+          <div style="display:flex;align-items:center;gap:14px">
+            <div style="width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,#1A1A2E,#2D1B0E);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">⭐</div>
+            <div style="flex:1">
+              <div id="dash-pro-plan-label" style="font-size:16px;font-weight:800;color:#1A1A2E">Compte Gratuit</div>
+              <div id="dash-pro-plan-sub" style="font-size:12px;color:var(--muted);margin-top:2px">Passez Pro pour plus de visibilité</div>
+            </div>
+            <div id="dash-pro-badge" style="display:none;background:linear-gradient(135deg,#FF5C00,#FF9500);color:#fff;font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px">PRO ACTIF</div>
+          </div>
+          <div id="dash-pro-expiry" style="display:none;margin-top:12px;padding:10px 14px;background:#FFF3EE;border-radius:8px;font-size:12px;color:var(--or);font-weight:600"></div>
+        </div>
+
+        <!-- Choisir / Changer de formule -->
+        <div style="font-size:15px;font-weight:800;color:#1A1A2E;margin-bottom:14px" id="dash-pro-choose-title">Choisissez votre formule</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+
+          <!-- Starter -->
+          <div class="dash-pro-card" id="dash-plan-starter" onclick="activerPro('starter',50000)">
+            <div class="dash-pro-card-header">
+              <div class="dash-pro-card-name">Starter</div>
+              <div class="dash-pro-card-badge">Sans engagement</div>
+            </div>
+            <div class="dash-pro-price">50 000 <span>GNF</span></div>
+            <div class="dash-pro-period">par mois</div>
+            <ul class="dash-pro-features">
+              <li>✓ <strong>9 annonces</strong> simultanées</li>
+              <li>✓ Badge PRO visible</li>
+              <li>✓ Priorité résultats</li>
+              <li>✓ Stats de base</li>
+            </ul>
+            <button class="dash-pro-btn">Commencer →</button>
+          </div>
+
+          <!-- Business -->
+          <div class="dash-pro-card dash-pro-card-popular" id="dash-plan-business" onclick="activerPro('business',120000)">
+            <div class="dash-pro-popular-tag">🔥 Populaire</div>
+            <div class="dash-pro-card-header">
+              <div class="dash-pro-card-name">Business</div>
+              <div class="dash-pro-card-badge" style="background:rgba(255,92,0,.15);color:var(--or)">3 mois</div>
+            </div>
+            <div class="dash-pro-price">120 000 <span>GNF</span></div>
+            <div class="dash-pro-period">3 mois · 40 000/mois</div>
+            <ul class="dash-pro-features">
+              <li>✓ <strong>12 annonces</strong> simultanées</li>
+              <li>✓ Badge PRO visible</li>
+              <li>✓ Priorité renforcée</li>
+              <li>✓ Stats avancées</li>
+            </ul>
+            <button class="dash-pro-btn">Choisir Business →</button>
+          </div>
+
+          <!-- Premium -->
+          <div class="dash-pro-card" id="dash-plan-premium" onclick="activerPro('premium',360000)">
+            <div class="dash-pro-card-header">
+              <div class="dash-pro-card-name">Premium</div>
+              <div class="dash-pro-card-badge" style="background:linear-gradient(135deg,#FFD700,#FFA500);color:#1A1A2E">1 an</div>
+            </div>
+            <div class="dash-pro-price">360 000 <span>GNF</span></div>
+            <div class="dash-pro-period">1 an · 30 000/mois</div>
+            <ul class="dash-pro-features">
+              <li>✓ <strong>18 annonces</strong> simultanées</li>
+              <li>✓ Badge PRO Gold</li>
+              <li>✓ Priorité maximale</li>
+              <li>✓ Stats + Vedette illimitée</li>
+            </ul>
+            <button class="dash-pro-btn" style="background:linear-gradient(135deg,#FFD700,#FFA500);color:#1A1A2E">Passer Premium →</button>
+          </div>
+
+        </div>
+
+        <!-- Avantages résumés -->
+        <div style="background:#fff;border-radius:14px;padding:16px 20px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+          <div style="font-size:13px;font-weight:700;color:#1A1A2E;margin-bottom:12px">Pourquoi passer Pro ?</div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+            <div style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--muted)"><span style="color:var(--or);font-weight:800;flex-shrink:0">✓</span> Plus d'annonces publiées simultanément</div>
+            <div style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--muted)"><span style="color:var(--or);font-weight:800;flex-shrink:0">✓</span> Badge PRO qui inspire confiance</div>
+            <div style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--muted)"><span style="color:var(--or);font-weight:800;flex-shrink:0">✓</span> Priorité dans les résultats de recherche</div>
+            <div style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--muted)"><span style="color:var(--or);font-weight:800;flex-shrink:0">✓</span> Boutique personnalisée avec catalogue</div>
+          </div>
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--brl);font-size:11px;color:var(--muted);text-align:center">
+            🔒 Paiement sécurisé Orange Money · Activation immédiate · Support 7j/7
+          </div>
+        </div>
+      </div>
+
       <!-- ═══ TAB ALERTES ═══ -->
       <div class="dash-section" id="dsec-alerts" >
         <h3 style="margin-bottom:8px;font-size:15px">🔔 Mes alertes de recherche</h3>
@@ -2099,6 +2250,7 @@ footer{background:transparent;margin-top:0}
       <div class="admin-side-title">Gestion</div>
       <div class="admin-nav-item" id="adm-tab-ads" onclick="adminTab('ads')">📋 Annonces</div>
       <div class="admin-nav-item" id="adm-tab-users" onclick="adminTab('users')">👥 Utilisateurs</div>
+      <div class="admin-nav-item" id="adm-tab-pro" onclick="adminTab('pro')" style="color:#FFB84D">⭐ Gestion Pro</div>
       <div class="admin-nav-item" id="adm-tab-payments" onclick="adminTab('payments')">💰 Paiements</div>
       <div style="margin-top:auto;padding-top:20px;border-top:1px solid rgba(255,255,255,.1)">
         <div class="admin-nav-item" onclick="goTo('home')" style="margin-top:10px">← Retour au site</div>
@@ -2136,6 +2288,34 @@ footer{background:transparent;margin-top:0}
           <span id="admin-pay-total" style="font-size:13px;font-weight:700;color:var(--or)"></span>
         </div>
         <table class="admin-table"><thead><tr><th>Réf.</th><th>Acheteur</th><th>Article</th><th>Montant</th><th>Type</th><th>Date</th><th>Statut</th></tr></thead><tbody id="admin-payments-body"></tbody></table>
+      </div>
+
+      <!-- Gestion Pro -->
+      <div class="admin-pane" id="adm-pane-pro">
+        <div class="admin-title">⭐ Gestion des abonnements Pro</div>
+
+        <!-- Activer Pro sur soi-même -->
+        <div style="background:#fff;border-radius:12px;border:1px solid var(--br);padding:20px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+          <div style="font-size:15px;font-weight:800;margin-bottom:4px;color:var(--ink)">👤 Mon compte Admin</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Gérer votre propre abonnement Pro</div>
+          <div id="admin-self-pro-status" style="margin-bottom:14px"></div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <button onclick="adminSetMyPro('starter')" style="background:var(--orl);color:var(--or2);border:1.5px solid var(--orm);border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">⭐ Starter (9 ann.)</button>
+            <button onclick="adminSetMyPro('business')" style="background:#EFF6FF;color:#1D4ED8;border:1.5px solid #BFDBFE;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🔥 Business (12 ann.)</button>
+            <button onclick="adminSetMyPro('premium')" style="background:linear-gradient(135deg,#FFF7E0,#FEEFC3);color:#92400E;border:1.5px solid #FCD34D;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">👑 Premium (18 ann.)</button>
+            <button onclick="adminRemoveMyPro()" style="background:#FEE2E2;color:#DC2626;border:1.5px solid #FECACA;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🚫 Retirer Pro</button>
+          </div>
+        </div>
+
+        <!-- Gérer les utilisateurs Pro -->
+        <div style="background:#fff;border-radius:12px;border:1px solid var(--br);padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+          <div style="font-size:15px;font-weight:800;margin-bottom:4px;color:var(--ink)">👥 Gestion Pro des utilisateurs</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Attribuer ou retirer un abonnement Pro à n'importe quel utilisateur</div>
+          <table class="admin-table" id="admin-pro-table">
+            <thead><tr><th>Utilisateur</th><th>Email / Tél.</th><th>Statut Pro</th><th>Formule</th><th>Expire le</th><th>Actions</th></tr></thead>
+            <tbody id="admin-pro-body"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -5252,12 +5432,13 @@ function goAdmin(){
 
 function adminTab(name){
   _adminTab = name;
-  ['stats','ads','users','payments'].forEach(function(t){
+  ['stats','ads','users','pro','payments'].forEach(function(t){
     var pane = document.getElementById('adm-pane-'+t);
     var tab  = document.getElementById('adm-tab-'+t);
     if(pane) pane.style.display = (t===name)?'block':'none';
     if(tab)  tab.classList.toggle('active', t===name);
   });
+  if(name==='pro') renderAdminPro();
 }
 
 function loadAdmin(){
@@ -5499,6 +5680,143 @@ function adminDeleteUser(idx){
     .catch(function(){ toast('❌ Erreur','err'); });
 }
 
+// ── Gestion Pro Admin ──────────────────────────────
+
+var _proPlanDurations = { starter: 30, business: 90, premium: 365 };
+var _proPlanLabels2 = { starter:'⭐ Starter (9 ann.)', business:'🔥 Business (12 ann.)', premium:'👑 Premium (18 ann.)' };
+
+function renderAdminPro(){
+  // Statut pro de l'admin lui-même
+  var selfEl = document.getElementById('admin-self-pro-status');
+  if(selfEl){
+    var u = DB.user()||{};
+    if(u.isPro && u.proUntil){
+      var exp = new Date(u.proUntil).toLocaleDateString('fr-FR');
+      var plan = u.proPlan||'starter';
+      selfEl.innerHTML = '<div style="display:inline-flex;align-items:center;gap:8px;background:#D1FAE5;color:#065F46;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700">'
+        +'✅ Pro actif — '+(_proPlanLabels2[plan]||plan)+' — expire le '+exp+'</div>';
+    } else {
+      selfEl.innerHTML = '<div style="display:inline-flex;align-items:center;gap:8px;background:#F1F5F9;color:#94A3B8;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700">'
+        +'— Aucun abonnement Pro actif</div>';
+    }
+  }
+
+  // Table utilisateurs Pro
+  var tbody = document.getElementById('admin-pro-body');
+  if(!tbody) return;
+  var users = _adminData.users||[];
+  if(!users.length){
+    tbody.innerHTML = '<tr><td colspan="6" style="padding:40px;text-align:center;color:var(--muted)">Aucun utilisateur.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = users.map(function(u, idx){
+    var isPro = u.isPro && u.proUntil && new Date(u.proUntil) > new Date();
+    var proStatus = isPro
+      ? '<span style="background:#D1FAE5;color:#065F46;font-size:11px;font-weight:800;padding:3px 10px;border-radius:50px">✅ Pro actif</span>'
+      : '<span style="background:#F1F5F9;color:#94A3B8;font-size:11px;font-weight:700;padding:3px 10px;border-radius:50px">Gratuit</span>';
+    var planLabel = isPro ? (_proPlanLabels2[u.proPlan||'starter']||'—') : '—';
+    var expDate = isPro ? new Date(u.proUntil).toLocaleDateString('fr-FR') : '—';
+    var name = ((u.prenom||u.name||'')+ ' '+(u.nom||'')).trim()||'—';
+    return '<tr style="border-top:1px solid var(--br)">'
+      +'<td style="padding:10px 14px"><div style="font-weight:700;font-size:13px">'+name+'</div></td>'
+      +'<td style="padding:10px 14px;font-size:12px;color:var(--muted)">'+(u.email||u.phone||'—')+'</td>'
+      +'<td style="padding:10px 14px">'+proStatus+'</td>'
+      +'<td style="padding:10px 14px;font-size:12px;font-weight:600">'+planLabel+'</td>'
+      +'<td style="padding:10px 14px;font-size:12px;color:var(--muted)">'+expDate+'</td>'
+      +'<td style="padding:10px 14px;white-space:nowrap;display:flex;gap:6px;flex-wrap:wrap">'
+        +'<select id="pro-plan-sel-'+idx+'" style="border:1.5px solid var(--br);border-radius:6px;padding:4px 8px;font-size:11px;font-family:inherit;outline:none;cursor:pointer">'
+          +'<option value="starter">Starter</option>'
+          +'<option value="business">Business</option>'
+          +'<option value="premium">Premium</option>'
+        +'</select>'
+        +'<button onclick="adminSetProUser('+idx+')" style="background:var(--orl);color:var(--or2);border:1px solid var(--orm);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:800;cursor:pointer">✅ Attribuer</button>'
+        +(isPro ? '<button onclick="adminRemoveProUser('+idx+')" style="background:#FEE2E2;color:#DC2626;border:1px solid #FECACA;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer">🚫 Retirer</button>' : '')
+      +'</td></tr>';
+  }).join('');
+}
+
+function adminSetProUser(idx){
+  var id = (window._adminUserIds||[])[idx];
+  var selEl = document.getElementById('pro-plan-sel-'+idx);
+  var plan = selEl ? selEl.value : 'starter';
+  // Convertir plan en mois pour l'API existante
+  var monthsMap = { starter:1, business:3, premium:12 };
+  var months = monthsMap[plan]||1;
+  var days = _proPlanDurations[plan]||30;
+  var token = localStorage.getItem('ygy_token');
+  fetch('/api/admin/users/'+id+'/pro', {
+    method:'PATCH',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+    body: JSON.stringify({ isPro:true, proPlan:plan, months:months })
+  }).then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d.success){
+        toast('⭐ Pro '+plan+' attribué','ok');
+        var u = _adminData.users[idx];
+        if(u){ u.isPro=true; u.proPlan=plan; u.proUntil=d.proUntil||new Date(Date.now()+days*24*3600*1000).toISOString(); }
+        renderAdminPro();
+      } else {
+        toast('❌ '+(d.error||'Erreur serveur'),'err');
+      }
+    }).catch(function(){ toast('❌ Erreur réseau','err'); });
+}
+
+function adminRemoveProUser(idx){
+  var id = (window._adminUserIds||[])[idx];
+  if(!confirm('Retirer l\'abonnement Pro de cet utilisateur ?')) return;
+  var token = localStorage.getItem('ygy_token');
+  fetch('/api/admin/users/'+id+'/pro', {
+    method:'PATCH',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+    body: JSON.stringify({ isPro:false, proPlan:null, proUntil:null })
+  }).then(function(r){ return r.json(); })
+    .then(function(d){
+      toast('🚫 Abonnement Pro retiré','ok');
+      var u = _adminData.users[idx];
+      if(u){ u.isPro=false; u.proPlan=null; u.proUntil=null; }
+      renderAdminPro();
+    }).catch(function(){ toast('❌ Erreur réseau','err'); });
+}
+
+function adminSetMyPro(plan){
+  var days = _proPlanDurations[plan]||30;
+  var u = DB.user()||{};
+  u.isPro = true;
+  u.proPlan = plan;
+  u.proUntil = new Date(Date.now()+days*24*3600*1000).toISOString();
+  DB.login(u);
+  // Synchroniser avec le serveur si connecté
+  var token = localStorage.getItem('ygy_token');
+  if(token && u._id){
+    fetch('/api/admin/users/'+u._id+'/pro', {
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body: JSON.stringify({ isPro:true, proPlan:plan, proUntil:u.proUntil })
+    }).catch(function(){});
+  }
+  toast('⭐ Pro '+plan+' activé sur votre compte','ok');
+  updateNav();
+  renderAdminPro();
+}
+
+function adminRemoveMyPro(){
+  if(!confirm('Retirer votre propre abonnement Pro ?')) return;
+  var u = DB.user()||{};
+  u.isPro = false; u.proPlan = null; u.proUntil = null;
+  DB.login(u);
+  var token = localStorage.getItem('ygy_token');
+  if(token && u._id){
+    fetch('/api/admin/users/'+u._id+'/pro', {
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body: JSON.stringify({ isPro:false, proPlan:null, proUntil:null })
+    }).catch(function(){});
+  }
+  toast('🚫 Pro retiré de votre compte','ok');
+  updateNav();
+  renderAdminPro();
+}
+
 function promoteAdmin(idx){
   var id = (window._adminUserIds||[])[idx];
   var token = localStorage.getItem('ygy_token');
@@ -5728,6 +6046,46 @@ function showDashTab(tab){
   var navEl = document.getElementById('dtab-'+tab);
   if(sec) sec.classList.add('active');
   if(navEl) navEl.classList.add('active');
+  // Charger le statut Pro quand on ouvre l'onglet
+  if(tab === 'pro') updateDashProStatus();
+}
+
+function updateDashProStatus(){
+  var u = DB.user();
+  if(!u) return;
+  var isPro = u.isPro;
+  var proUntil = u.proUntil ? new Date(u.proUntil) : null;
+  var planLabel = document.getElementById('dash-pro-plan-label');
+  var planSub   = document.getElementById('dash-pro-plan-sub');
+  var badge     = document.getElementById('dash-pro-badge');
+  var expiry    = document.getElementById('dash-pro-expiry');
+  var chooseTitle = document.getElementById('dash-pro-choose-title');
+
+  // Déterminer le plan actuel
+  var planNames = { starter:'Starter', business:'Business', premium:'Premium' };
+  var currentPlan = u.proPlan ? planNames[u.proPlan] || 'Pro' : null;
+
+  if(isPro && proUntil && proUntil > new Date()){
+    if(planLabel) planLabel.textContent = 'Abonnement ' + (currentPlan||'Pro') + ' actif';
+    if(planSub)   planSub.textContent   = 'Vous bénéficiez de tous les avantages Pro';
+    if(badge)     badge.style.display   = 'block';
+    var jours = Math.ceil((proUntil - new Date()) / (1000*60*60*24));
+    if(expiry){
+      expiry.style.display = 'block';
+      expiry.textContent = '⏳ Expire le '+proUntil.toLocaleDateString('fr-FR')+' (dans '+jours+' jour'+(jours>1?'s':'')+')';
+    }
+    if(chooseTitle) chooseTitle.textContent = 'Changer ou renouveler ma formule';
+    // Marquer le plan actif
+    document.querySelectorAll('.dash-pro-card').forEach(function(c){ c.style.opacity='0.6'; });
+    var activeCard = document.getElementById('dash-plan-'+(u.proPlan||'starter'));
+    if(activeCard){ activeCard.style.opacity='1'; activeCard.style.borderColor='var(--or)'; }
+  } else {
+    if(planLabel) planLabel.textContent = 'Compte Gratuit';
+    if(planSub)   planSub.textContent   = 'Passez Pro pour booster vos ventes';
+    if(badge)     badge.style.display   = 'none';
+    if(expiry)    expiry.style.display  = 'none';
+    if(chooseTitle) chooseTitle.textContent = 'Choisissez votre formule';
+  }
 }
 
 function toggleFav(id){
