@@ -912,32 +912,135 @@ app.get('/api/users/:id/public', authOptional, async (req, res) => {
 app.get('/api/boutiques', async (req, res) => {
   try {
     const now = new Date();
-    const { sector, search, limit = 50 } = req.query;
+    const { sector, search, category, limit = 50 } = req.query;
     const filter = {
       isPro: true,
       proUntil: { $gt: now },
+      $or: [
+        { 'boutique.name': { $exists: true, $ne: '' } },
+        { boutiqueName: { $exists: true, $ne: '' } },
+      ]
     };
-    if (sector) filter.boutiqueSector = sector;
-    if (search) filter.$or = [
-      { boutiqueName:  new RegExp(search, 'i') },
-      { boutiqueDesc:  new RegExp(search, 'i') },
-      { boutiqueSector:new RegExp(search, 'i') },
-    ];
+    if (sector || category) filter.$or = undefined; // retire le $or si filtre spécifique
+    if (sector)   filter['boutique.category'] = sector;
+    if (category) filter['boutique.category'] = category;
 
     const users = await User.find(filter)
-      .select('prenom nom city boutiqueName boutiqueSlogan boutiqueBanner boutiqueSector boutiqueSocial boutiqueDesc avgRating ratingCount totalViews createdAt')
+      .select('prenom nom city boutique boutiqueName boutiqueSlogan boutiqueBanner boutiqueSector boutiqueSocial boutiqueDesc avgRating ratingCount totalViews proPlan createdAt')
       .sort({ totalViews: -1 })
       .limit(Number(limit))
       .lean();
 
-    // Ajouter le nombre d'annonces pour chaque boutique
-    const boutiques = await Promise.all(users.map(async (u) => {
-      const adsCount = await Ad.countDocuments({ seller: u._id, active: true });
-      return { ...u, adsCount };
+    let filtered = users;
+    if (search) {
+      const q = search.toLowerCase();
+      filtered = users.filter(u =>
+        (u.boutique?.name||u.boutiqueName||'').toLowerCase().includes(q) ||
+        (u.boutique?.description||u.boutiqueDesc||'').toLowerCase().includes(q) ||
+        (`${u.prenom||''} ${u.nom||''}`).toLowerCase().includes(q)
+      );
+    }
+
+    // Compter les annonces pour chaque vendeur
+    const sellerIds = filtered.map(u => u._id);
+    const adCounts  = await Ad.aggregate([
+      { $match: { seller: { $in: sellerIds }, active: true } },
+      { $group: { _id: '$seller', count: { $sum: 1 }, totalViews: { $sum: '$views' } } }
+    ]);
+    const countMap = {};
+    adCounts.forEach(a => { countMap[String(a._id)] = { count: a.count, views: a.totalViews }; });
+
+    const boutiques = filtered.map(u => ({
+      _id:         u._id,
+      sellerId:    u._id,
+      name:        u.boutique?.name        || u.boutiqueName   || `${u.prenom||''} ${u.nom||''} Shop`.trim(),
+      description: u.boutique?.description || u.boutique?.desc || u.boutiqueDesc || '',
+      logo:        u.boutique?.logo        || '',
+      category:    u.boutique?.category    || u.boutiqueSector || '',
+      subcat:      u.boutique?.subcat      || '',
+      address:     u.boutique?.address     || u.city || '',
+      whatsapp:    u.boutique?.whatsapp    || u.boutiqueSocial?.whatsapp || '',
+      videoUrl:    u.boutique?.videoUrl    || '',
+      videoTitle:  u.boutique?.videoTitle  || '',
+      sellerName:  `${u.prenom||''} ${u.nom||''}`.trim(),
+      isPro:       true,
+      proPlan:     u.proPlan || 'starter',
+      avgRating:   u.avgRating  || 0,
+      ratingCount: u.ratingCount|| 0,
+      adCount:     countMap[String(u._id)]?.count || 0,
+      totalViews:  countMap[String(u._id)]?.views || u.totalViews || 0,
     }));
 
     res.json({ boutiques, total: boutiques.length });
-  } catch(err) { res.status(500).json({ error: err.message }); }
+  } catch(err) {
+    console.error('[BOUTIQUES LIST]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Route alias : GET /api/boutique/:id (frontend v31 appelle cette forme aussi)
+app.get('/api/boutique/:id', async (req, res) => {
+  // Rediriger vers la route principale
+  req.params.sellerId = req.params.id;
+  // Chercher par _id (userId = sellerId)
+  try {
+    const mongoose = require('mongoose');
+    let userId = req.params.id;
+    const user = await User.findById(userId)
+      .select('prenom nom city boutique boutiqueName boutiqueDesc boutiqueSector boutiqueSocial proPlan isPro proUntil avgRating ratingCount totalViews createdAt')
+      .lean();
+    if (!user) return res.status(404).json({ error: 'Boutique introuvable' });
+
+    const ads = await Ad.find({ seller: user._id, active: true })
+      .sort({ featured: -1, createdAt: -1 })
+      .select('title description price category subCategory city photos views createdAt featured emoji')
+      .lean();
+
+    const planLabels = { starter:'PRO Starter', business:'PRO Business', premium:'PRO Gold' };
+    const boutique = {
+      _id:         user._id,
+      sellerId:    user._id,
+      name:        user.boutique?.name        || user.boutiqueName   || `${user.prenom||''} ${user.nom||''}`.trim()+' Shop',
+      description: user.boutique?.description || user.boutique?.desc || user.boutiqueDesc || '',
+      logo:        user.boutique?.logo        || '',
+      category:    user.boutique?.category    || user.boutiqueSector || '',
+      subcat:      user.boutique?.subcat      || '',
+      address:     user.boutique?.address     || user.city || '',
+      whatsapp:    user.boutique?.whatsapp    || user.boutiqueSocial?.whatsapp || '',
+      videoUrl:    user.boutique?.videoUrl    || '',
+      videoTitle:  user.boutique?.videoTitle  || '',
+      sellerName:  `${user.prenom||''} ${user.nom||''}`.trim(),
+      isPro:       user.isPro,
+      proPlan:     user.proPlan || 'starter',
+      badge:       planLabels[user.proPlan||'starter'] || 'PRO',
+      avgRating:   user.avgRating   || 0,
+      ratingCount: user.ratingCount || 0,
+      totalViews:  user.totalViews  || 0,
+      productsCount: ads.length,
+      ads,
+    };
+
+    res.json({
+      boutique,
+      products: ads.map(a => ({
+        id:     a._id,
+        title:  a.title,
+        price:  a.price,
+        images: a.photos || [],
+        category: a.category,
+        city:   a.city,
+        views:  a.views || 0,
+      })),
+      seller: {
+        name:  boutique.sellerName,
+        isPro: user.isPro,
+        plan:  user.proPlan,
+      }
+    });
+  } catch(err) {
+    console.error('[BOUTIQUE GET]', err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 app.get('/api/my-stats', auth, async (req, res) => {
   try {
