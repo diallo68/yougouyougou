@@ -36,7 +36,329 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 .page{display:none}.page.active{display:block}
-#app-wrapper{background:#fff;max-width:1100px;margin:0 auto;min-height:100vh;box-shadow:0 4px 24px rgba(0,0,0,.09)}
+/* ═══════════════════════════════════════════════
+   LAYOUT GLOBAL — Inspiré LeBonCoin
+   Structure : body > #ygy-shell
+               nav (sticky)
+               #bg-ad (pub background)
+               #ygy-body (3 colonnes)
+                 .ygy-ad-left | .ygy-main | .ygy-ad-right
+═══════════════════════════════════════════════ */
+
+/* Reset body — fond neutre comme LBC */
+body{
+  background:#E8EDF2;
+}
+
+/* Shell global — pleine largeur */
+#app-wrapper{
+  background:transparent;
+  max-width:none;
+  margin:0;
+  min-height:100vh;
+  box-shadow:none;
+  position:relative;
+}
+
+/* ── NAV — pleine largeur avec contenu centré ── */
+nav{
+  background:#fff;
+  border-bottom:1px solid var(--br);
+  position:sticky;
+  top:0;
+  z-index:600;
+  overflow:visible;
+  width:100%;
+}
+.nav-top{
+  max-width:1440px;
+  margin:0 auto;
+  padding:0 20px;
+  height:60px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  overflow:hidden;
+}
+.nav-cats-in{
+  max-width:1440px;
+  margin:0 auto;
+  padding:0 20px;
+  display:flex;
+  align-items:stretch;
+  overflow-x:auto;
+  overflow-y:visible;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+  -webkit-overflow-scrolling:touch;
+}
+.nav-cats-in::-webkit-scrollbar{display:none}
+
+/* ── PUBLICITÉ BACKGROUND (style LBC — derrière la nav) ── */
+#ygy-bg-ad{
+  width:100%;
+  min-height:100px;
+  background:linear-gradient(135deg,#1A1A2E 0%,#0F172A 100%);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  overflow:hidden;
+  cursor:pointer;
+}
+#ygy-bg-ad::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(ellipse at 20% 50%,rgba(255,92,0,.18),transparent 55%),
+    radial-gradient(ellipse at 80% 50%,rgba(255,92,0,.12),transparent 55%);
+  pointer-events:none;
+}
+.ygy-bg-ad-inner{
+  position:relative;
+  z-index:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:32px;
+  padding:18px 24px;
+  width:100%;
+  max-width:960px;
+  flex-wrap:wrap;
+}
+.ygy-bg-ad-badge{
+  font-size:10px;
+  font-weight:700;
+  color:rgba(255,255,255,.5);
+  text-transform:uppercase;
+  letter-spacing:1px;
+  position:absolute;
+  top:6px;
+  left:50%;
+  transform:translateX(-50%);
+  background:rgba(255,255,255,.08);
+  padding:2px 10px;
+  border-radius:20px;
+}
+.ygy-bg-ad-text{
+  text-align:center;
+}
+.ygy-bg-ad-text h3{
+  font-size:clamp(18px,2.5vw,26px);
+  font-weight:900;
+  color:#fff;
+  margin:0 0 4px;
+  letter-spacing:-.3px;
+}
+.ygy-bg-ad-text p{
+  font-size:13px;
+  color:rgba(255,255,255,.65);
+  margin:0;
+}
+.ygy-bg-ad-btn{
+  background:var(--or);
+  color:#fff;
+  border:none;
+  border-radius:10px;
+  padding:12px 28px;
+  font-size:14px;
+  font-weight:800;
+  cursor:pointer;
+  font-family:var(--font);
+  white-space:nowrap;
+  box-shadow:0 4px 16px rgba(255,92,0,.4);
+  transition:all .15s;
+  flex-shrink:0;
+}
+.ygy-bg-ad-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 20px rgba(255,92,0,.5);
+}
+.ygy-bg-ad-close{
+  position:absolute;
+  top:8px;
+  right:12px;
+  background:rgba(255,255,255,.12);
+  border:none;
+  color:rgba(255,255,255,.6);
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  cursor:pointer;
+  font-size:13px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:var(--font);
+  transition:background .12s;
+}
+.ygy-bg-ad-close:hover{background:rgba(255,255,255,.25);}
+
+/* ── BODY 3 COLONNES ── */
+#ygy-body{
+  display:grid;
+  grid-template-columns:160px 1fr 160px;
+  gap:0;
+  max-width:1440px;
+  margin:0 auto;
+  align-items:start;
+  min-height:calc(100vh - 104px);
+}
+
+/* ── COLONNES PUBLICITAIRES LATÉRALES ── */
+.ygy-ad-side{
+  width:160px;
+  padding:12px 8px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  position:sticky;
+  top:104px;
+  max-height:calc(100vh - 110px);
+  overflow-y:auto;
+  scrollbar-width:none;
+  align-self:start;
+}
+.ygy-ad-side::-webkit-scrollbar{display:none}
+
+/* Slot pub latéral */
+.ygy-ad-slot{
+  width:144px;
+  border-radius:10px;
+  overflow:hidden;
+  border:1px solid #DDE3EA;
+  background:#fff;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition:border-color .15s, box-shadow .15s, transform .12s;
+  position:relative;
+}
+.ygy-ad-slot:hover{
+  border-color:#C5CDD6;
+  box-shadow:0 4px 12px rgba(0,0,0,.10);
+  transform:translateY(-2px);
+}
+.ygy-ad-slot-body{
+  flex:1;
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:14px 10px;
+  gap:8px;
+  min-height:120px;
+}
+.ygy-ad-slot-icon{font-size:28px;line-height:1}
+.ygy-ad-slot-title{
+  font-size:11px;
+  font-weight:700;
+  color:#475569;
+  text-align:center;
+  line-height:1.4;
+}
+.ygy-ad-slot-sub{
+  font-size:9px;
+  color:#94A3B8;
+  text-align:center;
+}
+.ygy-ad-slot-label{
+  font-size:8.5px;
+  font-weight:700;
+  color:#94A3B8;
+  text-transform:uppercase;
+  letter-spacing:.6px;
+  text-align:center;
+  padding:5px 0;
+  border-top:1px solid #F1F5F9;
+  width:100%;
+  background:#F8FAFC;
+}
+
+/* Variantes de hauteur */
+.ygy-ad-slot--tall{ height:300px; }
+.ygy-ad-slot--medium{ height:150px; }
+.ygy-ad-slot--small{ height:110px; }
+
+/* Slot Pro spécial (sombre) */
+.ygy-ad-slot--pro{
+  background:linear-gradient(135deg,#1A1A2E,#2D1B0E);
+  border-color:#2D1B0E;
+  height:110px;
+}
+.ygy-ad-slot--pro .ygy-ad-slot-title{color:#FFB84D;}
+.ygy-ad-slot--pro .ygy-ad-slot-sub{color:rgba(255,255,255,.45);}
+.ygy-ad-slot--pro .ygy-ad-slot-label{
+  background:rgba(255,255,255,.06);
+  border-top:1px solid rgba(255,255,255,.08);
+  color:rgba(255,255,255,.35);
+}
+.ygy-ad-slot--pro:hover{
+  border-color:var(--or);
+  box-shadow:0 4px 16px rgba(255,92,0,.25);
+}
+
+/* ── COLONNE CENTRALE (scroll indépendant) ── */
+.ygy-main{
+  min-width:0;
+  background:#F8FAFC;
+  border-left:1px solid #DDE3EA;
+  border-right:1px solid #DDE3EA;
+  min-height:calc(100vh - 104px);
+}
+
+/* Éléments internes de ygy-main — pleine largeur */
+.ygy-main .hero-inner{ max-width:100%; }
+.ygy-main .main-wrap{ max-width:100%; }
+
+/* ── RESPONSIVE ── */
+
+/* Tablette large (< 1280px) : réduire colonnes pubs */
+@media(max-width:1280px){
+  #ygy-body{
+    grid-template-columns:130px 1fr 130px;
+  }
+  .ygy-ad-side{ width:130px; }
+  .ygy-ad-slot{ width:118px; }
+}
+
+/* Tablette (< 1024px) : masquer colonnes pubs */
+@media(max-width:1024px){
+  #ygy-body{
+    grid-template-columns:1fr;
+    max-width:800px;
+  }
+  .ygy-ad-side{ display:none; }
+  .ygy-main{
+    border-left:none;
+    border-right:none;
+  }
+  #ygy-bg-ad{ min-height:80px; }
+  .ygy-bg-ad-inner{ gap:20px; }
+}
+
+/* Mobile (< 640px) */
+@media(max-width:640px){
+  #ygy-body{ max-width:100%; }
+  .ygy-ad-side{ display:none; }
+  #ygy-bg-ad{ min-height:64px; }
+  .ygy-bg-ad-inner{ padding:12px 16px; gap:12px; }
+  .ygy-bg-ad-text h3{ font-size:15px; }
+  .ygy-bg-ad-btn{ padding:9px 18px; font-size:13px; }
+  .nav-top{ padding:0 12px; height:56px; }
+}
+
+/* ── Compatibilité anciens éléments ── */
+.home-3col{ display:contents; }
+.home-ad-col{ display:none!important; }
+.home-center{ display:contents; }
+/* hero et main-wrap s'adaptent à ygy-main */
+.hero-inner{ max-width:100%!important; }
+.main-wrap{ max-width:100%!important; }
 
 /* ── DÉSACTIVÉS ── */
 #search-banner{display:none;height:auto;overflow:hidden;background:#FFF5F0;border:1px solid #FFD4B0;border-radius:12px;padding:10px 16px;margin-bottom:14px;align-items:center;justify-content:space-between;gap:12px}
@@ -63,7 +385,9 @@ body{
 
 /* ══ NAV ══ */
 nav{background:#fff;border-bottom:1px solid var(--br);position:sticky;top:0;z-index:500;overflow:visible}
-.nav-top{max-width:1100px;margin:0 auto;padding:0 16px;height:60px;display:flex;align-items:center;gap:8px;overflow:hidden}
+.nav-top{max-width:1520px;margin:0 auto;padding:0 16px;height:60px;display:flex;align-items:center;gap:8px;overflow:hidden}
+/* Restreindre le contenu nav au centre (entre les colonnes pubs sur desktop) */
+.nav-top-inner{max-width:1200px;width:100%;margin:0 auto;display:flex;align-items:center;gap:8px;flex:1;min-width:0}
 .logo{display:flex;align-items:center;gap:6px;cursor:pointer;text-decoration:none;flex-shrink:0}
 .logo-anim-wrap{display:flex;align-items:center;position:relative;line-height:1;overflow:visible}
 .logo-block{display:inline-flex;align-items:baseline;font-family:var(--font);font-weight:800;letter-spacing:-.8px;line-height:1}
@@ -85,7 +409,7 @@ nav{background:#fff;border-bottom:1px solid var(--br);position:sticky;top:0;z-in
 .nav-sc-btn:hover{background:var(--or2)}
 .nav-right{margin-left:auto;display:flex;align-items:center;gap:0px;flex-shrink:0}
 .nav-cats{background:#fff;border-top:1px solid var(--br);position:relative;z-index:300;overflow:visible;max-width:100%}
-.nav-cats-in{max-width:1100px;margin:0 auto;padding:0 16px;display:flex;align-items:stretch;overflow-x:auto;overflow-y:visible;scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;}
+.nav-cats-in{max-width:1520px;margin:0 auto;padding:0 16px;display:flex;align-items:stretch;overflow-x:auto;overflow-y:visible;scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;}
 .nav-cats-in::-webkit-scrollbar{display:none}
 .ncat{position:relative;display:inline-flex;align-items:center;gap:3px;padding:6px 7px;cursor:pointer;border-bottom:2px solid transparent;font-size:11.5px;font-weight:500;color:#64748B;white-space:nowrap;flex-shrink:0;transition:color .12s,border-color .12s}
 .ncat:hover,.ncat.active{color:var(--or);border-bottom-color:var(--or)}
@@ -142,7 +466,7 @@ nav{background:#fff;border-bottom:1px solid var(--br);position:sticky;top:0;z-in
 
 /* ══ HERO ══ */
 .hero{background:linear-gradient(160deg,#FFFFFF 0%,#FFF8F5 100%);border-bottom:1px solid #F1F5F9}
-.hero-inner{max-width:1100px;margin:0 auto;padding:36px 28px 28px;text-align:center}
+.hero-inner{max-width:100%;margin:0 auto;padding:36px 28px 28px;text-align:center}
 .hero-kicker{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px;background:#F8FAFC;padding:5px 14px;border-radius:20px;border:1px solid #E2E8F0}
 .hero-kicker .dot{width:6px;height:6px;border-radius:50%;background:var(--gr);display:inline-block;animation:pulse 2s ease-in-out infinite}
 .hero h1{font-size:clamp(24px,3.2vw,38px);font-weight:900;color:#0F172A;letter-spacing:-.8px;line-height:1.12;margin-bottom:10px}
@@ -150,7 +474,7 @@ nav{background:#fff;border-bottom:1px solid var(--br);position:sticky;top:0;z-in
 .hero-sub{font-size:14px;color:var(--muted);max-width:460px;margin:0 auto;line-height:1.6}
 
 /* ══ CONTENU ══ */
-.main-wrap{max-width:1100px;margin:0 auto;padding:24px 20px 48px;background:#F8FAFC}
+.main-wrap{max-width:100%;margin:0 auto;padding:24px 20px 48px;background:#F8FAFC}
 .sec-hd{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid #F1F5F9}
 .sec-hd h2{font-size:20px;font-weight:700;color:var(--ink);letter-spacing:-.3px}
 .sec-hd-sub{font-size:12px;color:#94A3B8;margin-top:3px;font-weight:500}
@@ -200,7 +524,7 @@ nav{background:#fff;border-bottom:1px solid var(--br);position:sticky;top:0;z-in
 
 /* ══ FOOTER ══ */
 footer{background:transparent;margin-top:0}
-.ft{max-width:1100px;margin:0 auto;padding:48px 24px 32px;display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:40px}
+.ft{max-width:100%;margin:0 auto;padding:48px 24px 32px;display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:40px}
 .adm-tab{background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);border:none;padding:6px 12px;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
 .adm-tab.active,.adm-tab:hover{background:var(--or);color:#fff}
 .ft-brand p{font-size:13px;line-height:1.8;color:rgba(255,255,255,.38);margin:12px 0 18px}
@@ -213,7 +537,7 @@ footer{background:transparent;margin-top:0}
 .ft-col a{color:rgba(255,255,255,.42);text-decoration:none;font-size:13px;cursor:pointer;transition:color .12s}
 .ft-col a:hover{color:var(--or)}
 .ft-bottom{border-top:1px solid rgba(255,255,255,.06);padding:16px 20px}
-.ft-bottom-in{max-width:1100px;margin:0 auto;padding:0 28px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.2);flex-wrap:wrap;gap:6px}
+.ft-bottom-in{max-width:100%;margin:0 auto;padding:0 28px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.2);flex-wrap:wrap;gap:6px}
 .ft-gn{background:rgba(255,92,0,.12);color:var(--or);padding:3px 10px;border-radius:3px;font-size:11px;font-weight:600}
 
 /* ══ OVERLAYS / MODAUX ══ */
@@ -1717,6 +2041,66 @@ footer{background:transparent;margin-top:0}
 <!-- ══ PAGE HOME ══ -->
 <div id="page-home" class="page active">
 
+<!-- ── PUBLICITÉ BACKGROUND style LeBonCoin ── -->
+<div id="ygy-bg-ad" onclick="goTo('pro')">
+  <div class="ygy-bg-ad-badge">Publicité</div>
+  <div class="ygy-bg-ad-inner">
+    <div class="ygy-bg-ad-text">
+      <h3>🇬🇳 Boostez votre commerce en <span style="color:var(--or)">Guinée</span></h3>
+      <p>Passez à YouGouYou Pro · Badge visible · 18 annonces · Boutique personnalisée</p>
+    </div>
+    <button class="ygy-bg-ad-btn" onclick="event.stopPropagation();goTo('pro')">
+      ⭐ Découvrir Pro →
+    </button>
+  </div>
+  <button class="ygy-bg-ad-close" onclick="event.stopPropagation();this.parentNode.style.display='none'" title="Fermer">✕</button>
+</div>
+
+<!-- ══ LAYOUT 3 COLONNES : PUB GAUCHE | CONTENU | PUB DROITE ══ -->
+<div id="ygy-body">
+
+  <!-- ── COLONNE PUB GAUCHE ── -->
+  <aside class="ygy-ad-side" id="ygy-ad-left" aria-label="Publicités">
+
+    <div class="ygy-ad-slot ygy-ad-slot--tall" onclick="void(0)">
+      <div class="ygy-ad-slot-body">
+        <div class="ygy-ad-slot-icon">📣</div>
+        <div class="ygy-ad-slot-title">Votre publicité ici</div>
+        <div class="ygy-ad-slot-sub">144 × 300</div>
+      </div>
+      <div class="ygy-ad-slot-label">Publicité</div>
+    </div>
+
+    <div class="ygy-ad-slot ygy-ad-slot--medium" onclick="void(0)">
+      <div class="ygy-ad-slot-body">
+        <div class="ygy-ad-slot-icon">🛒</div>
+        <div class="ygy-ad-slot-title">Annonce sponsorisée</div>
+      </div>
+      <div class="ygy-ad-slot-label">Publicité</div>
+    </div>
+
+    <div class="ygy-ad-slot ygy-ad-slot--medium" onclick="void(0)">
+      <div class="ygy-ad-slot-body">
+        <div class="ygy-ad-slot-icon">💡</div>
+        <div class="ygy-ad-slot-title">Votre offre ici</div>
+      </div>
+      <div class="ygy-ad-slot-label">Publicité</div>
+    </div>
+
+    <div class="ygy-ad-slot ygy-ad-slot--small ygy-ad-slot--pro" onclick="goTo('pro')">
+      <div class="ygy-ad-slot-body">
+        <div class="ygy-ad-slot-icon">⭐</div>
+        <div class="ygy-ad-slot-title">Passer Pro</div>
+        <div class="ygy-ad-slot-sub">Boostez vos ventes</div>
+      </div>
+      <div class="ygy-ad-slot-label">YouGouYou</div>
+    </div>
+
+  </aside>
+
+  <!-- ── COLONNE CENTRALE ── -->
+  <main class="ygy-main">
+
   <!-- HERO -->
   <section class="hero">
     <div class="hero-inner">
@@ -1827,7 +2211,7 @@ footer{background:transparent;margin-top:0}
   </div><!-- /main-two-col -->
 
   <!-- MAP -->
-  <section style="background:#F6F6F6;padding:0 0 32px"><div style="max-width:1100px;margin:0 auto;padding:0 24px">
+  <section style="background:#F6F6F6;padding:0 0 32px"><div style="max-width:100%;margin:0 auto;padding:0 24px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--br)">
       <div>
         <h2 style="font-family:var(--font);font-size:16px;font-weight:800;color:var(--ink)">Carte de la Guinée</h2>
@@ -1978,8 +2362,51 @@ footer{background:transparent;margin-top:0}
 
 </section>
 
+  </main><!-- /ygy-main -->
 
-</div>
+  <!-- ── COLONNE PUB DROITE ── -->
+  <aside class="ygy-ad-side" id="ygy-ad-right" aria-label="Publicités">
+
+    <div class="ygy-ad-slot ygy-ad-slot--tall" onclick="void(0)">
+      <div class="ygy-ad-slot-body">
+        <div class="ygy-ad-slot-icon">🎯</div>
+        <div class="ygy-ad-slot-title">Votre publicité ici</div>
+        <div class="ygy-ad-slot-sub">144 × 300</div>
+      </div>
+      <div class="ygy-ad-slot-label">Publicité</div>
+    </div>
+
+    <div class="ygy-ad-slot ygy-ad-slot--medium" onclick="void(0)">
+      <div class="ygy-ad-slot-body">
+        <div class="ygy-ad-slot-icon">🏪</div>
+        <div class="ygy-ad-slot-title">Boostez votre boutique</div>
+      </div>
+      <div class="ygy-ad-slot-label">Publicité</div>
+    </div>
+
+    <div class="ygy-ad-slot ygy-ad-slot--medium" onclick="void(0)">
+      <div class="ygy-ad-slot-body">
+        <div class="ygy-ad-slot-icon">📈</div>
+        <div class="ygy-ad-slot-title">Annonce vedette</div>
+      </div>
+      <div class="ygy-ad-slot-label">Publicité</div>
+    </div>
+
+    <div class="ygy-ad-slot ygy-ad-slot--small ygy-ad-slot--pro" onclick="goTo('pro')">
+      <div class="ygy-ad-slot-body">
+        <div class="ygy-ad-slot-icon">👑</div>
+        <div class="ygy-ad-slot-title">Pro Premium</div>
+        <div class="ygy-ad-slot-sub">18 annonces · Vedette illimitée</div>
+      </div>
+      <div class="ygy-ad-slot-label">YouGouYou</div>
+    </div>
+
+  </aside>
+
+</div><!-- /ygy-body -->
+
+
+</div><!-- /page-home -->
 
 <!-- ══ PAGE DETAIL ══ -->
 <div id="page-detail" class="page">
