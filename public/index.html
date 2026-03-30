@@ -8715,7 +8715,15 @@ var _allBoutiques = [];
 
 function goToBoutiques(){
   goTo('boutiques');
+
+  // Afficher IMMÉDIATEMENT les boutiques déjà en mémoire (_allBoutiques chargé depuis la CTA accueil)
+  if(_allBoutiques && _allBoutiques.length > 0){
+    renderBoutiquesGrid(_allBoutiques);
+  }
+
+  // Puis recharger depuis toutes les sources (enrichit en arrière-plan)
   loadBoutiquesPage();
+
   // Peupler le filtre catégorie
   var sel = document.getElementById('boutiques-cat-filter');
   if(sel && sel.options.length <= 1){
@@ -8728,14 +8736,10 @@ function goToBoutiques(){
 }
 
 function loadBoutiquesPage(){
-  var token = localStorage.getItem('ygy_token');
+  var token   = localStorage.getItem('ygy_token');
   var headers = token ? {'Authorization':'Bearer '+token} : {};
 
-  // Afficher spinner dans la grille
-  var grid = document.getElementById('boutiques-grid');
-  if(grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)"><div style="font-size:36px;margin-bottom:10px">⏳</div><div style="font-size:13px;font-weight:600">Chargement des boutiques...</div></div>';
-
-  // Construire depuis toutes les sources locales disponibles
+  // ── Construire depuis toutes les sources locales disponibles ──
   function buildFromLocalData(){
     var localBoutiques = [];
     var u = DB.user();
@@ -8768,7 +8772,7 @@ function loadBoutiquesPage(){
       var auShop = au.boutique||{};
       var auName = auShop.name || au.boutiqueName || '';
       if(!auName) return;
-      if(u && String(au._id)===String(u._id||u.id)) return; // éviter doublon
+      if(u && String(au._id)===String(u._id||u.id)) return;
       localBoutiques.push({
         _id:         au._id,
         name:        auName,
@@ -8776,7 +8780,7 @@ function loadBoutiquesPage(){
         category:    auShop.category||au.boutiqueSector||'',
         logo:        auShop.logo||'',
         address:     auShop.address||au.city||'Guinée',
-        whatsapp:    auShop.whatsapp||au.boutiqueSocial?.whatsapp||'',
+        whatsapp:    auShop.whatsapp||(au.boutiqueSocial&&au.boutiqueSocial.whatsapp)||'',
         sellerName:  ((au.prenom||au.name||'')+(au.nom?' '+au.nom:'')).trim(),
         sellerId:    au._id,
         isPro:       true,
@@ -8784,37 +8788,71 @@ function loadBoutiquesPage(){
       });
     });
 
+    // Source 3 : _allBoutiques déjà chargées (depuis la CTA accueil)
+    if(_allBoutiques && _allBoutiques.length > 0){
+      _allBoutiques.forEach(function(ab){
+        var alreadyIn = localBoutiques.some(function(lb){
+          return String(lb.sellerId||lb._id) === String(ab.sellerId||ab._id);
+        });
+        if(!alreadyIn) localBoutiques.push(ab);
+      });
+    }
+
     return localBoutiques;
   }
 
-  // Stratégie : appel API + fallback local robuste + fusion
-  fetch('/api/boutiques', { headers:headers })
-    .then(function(r){ return r.ok ? r.json() : Promise.reject('status:'+r.status); })
+  // ── ÉTAPE 1 : Afficher immédiatement ce qu'on a en local ──
+  var localData = buildFromLocalData();
+  if(localData.length > 0){
+    _allBoutiques = localData;
+    renderBoutiquesGrid(localData);
+  } else {
+    var grid = document.getElementById('boutiques-grid');
+    if(grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)"><div style="font-size:36px;margin-bottom:10px">⏳</div><div style="font-size:13px;font-weight:600">Chargement des boutiques...</div></div>';
+  }
+
+  // ── ÉTAPE 2 : Enrichir depuis l'API en arrière-plan (timeout 5s) ──
+  var apiTimer = setTimeout(function(){
+    // Timeout : si l'API ne répond pas en 5s, on garde les données locales
+    console.log('[BOUTIQUES] API timeout — données locales utilisées');
+    if(_allBoutiques.length === 0){
+      _allBoutiques = buildFromLocalData();
+      renderBoutiquesGrid(_allBoutiques);
+    }
+  }, 5000);
+
+  fetch('/api/boutiques', { headers: headers })
+    .then(function(r){
+      clearTimeout(apiTimer);
+      return r.ok ? r.json() : Promise.reject('HTTP '+r.status);
+    })
     .then(function(data){
       var apiBoutiques = data.boutiques || data || [];
-
-      // Toujours fusionner avec les données locales pour ne jamais être vide
       if(apiBoutiques.length > 0){
-        _allBoutiques = apiBoutiques;
-        // Ajouter la boutique locale si elle n'est pas déjà dans la liste API
-        var local = buildFromLocalData();
-        local.forEach(function(lb){
-          var exists = apiBoutiques.some(function(ab){ return String(ab.sellerId||ab._id)===String(lb.sellerId); });
-          if(!exists) _allBoutiques.push(lb);
+        // Fusionner API + local sans doublons
+        var merged = apiBoutiques.slice();
+        localData.forEach(function(lb){
+          var exists = apiBoutiques.some(function(ab){
+            return String(ab.sellerId||ab._id) === String(lb.sellerId||lb._id);
+          });
+          if(!exists) merged.push(lb);
         });
+        _allBoutiques = merged;
       } else {
-        // API vide → construire depuis local
-        _allBoutiques = buildFromLocalData();
+        // API vide → garder les données locales
+        _allBoutiques = localData.length > 0 ? localData : buildFromLocalData();
       }
       renderBoutiquesGrid(_allBoutiques);
       renderCtaBoutiquesPreview(_allBoutiques);
     })
     .catch(function(err){
-      console.log('[BOUTIQUES] API fallback:', err);
-      // API indispo → construire depuis local
-      _allBoutiques = buildFromLocalData();
-      renderBoutiquesGrid(_allBoutiques);
-      renderCtaBoutiquesPreview(_allBoutiques);
+      clearTimeout(apiTimer);
+      console.log('[BOUTIQUES] API erreur:', err, '— données locales utilisées');
+      // Fallback : garder ce qui est déjà affiché
+      if(_allBoutiques.length === 0){
+        _allBoutiques = buildFromLocalData();
+        renderBoutiquesGrid(_allBoutiques);
+      }
     });
 }
 
@@ -8890,12 +8928,15 @@ function renderBoutiquesGrid(boutiques){
   var planLabels = { starter:'⭐ Starter', business:'🔥 Business', premium:'👑 Premium' };
   grid.innerHTML = boutiques.map(function(b){
     var logo = b.logo
-      ? '<img src="'+b.logo+'" style="width:100%;height:100%;object-fit:cover;border-radius:12px">'
+      ? '<img src="'+b.logo+'" style="width:100%;height:100%;object-fit:cover;border-radius:12px" onerror="this.parentNode.innerHTML=\'<span style=font-size:32px>🏪</span>\'">'
       : '<span style="font-size:32px">🏪</span>';
     var planColor = planColors[b.proPlan||'starter'];
     var planLabel = planLabels[b.proPlan||'starter'];
-    var ads = DB.ads().filter(function(a){ return String(a.sellerId||'')===String(b.sellerId||b._id||''); });
-    return '<div style="background:#fff;border-radius:16px;border:1px solid #F1F5F9;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.05);transition:all .2s;cursor:pointer" onclick="viewBoutique(\''+b._id+'\')" onmouseover="this.style.transform=\'translateY(-3px)\';this.style.boxShadow=\'0 8px 24px rgba(0,0,0,.10)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 1px 4px rgba(0,0,0,.05)\'">'
+    // Utiliser adCount de l'API si disponible, sinon compter en local
+    var adsCount = (b.adCount != null) ? b.adCount
+      : DB.ads().filter(function(a){ return String(a.sellerId||a.seller||'')===String(b.sellerId||b._id||''); }).length;
+    var boutId = b.sellerId || b._id || '';
+    return '<div style="background:#fff;border-radius:16px;border:1px solid #F1F5F9;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.05);transition:all .2s;cursor:pointer" onclick="viewBoutique(\''+boutId+'\')" onmouseover="this.style.transform=\'translateY(-3px)\';this.style.boxShadow=\'0 8px 24px rgba(0,0,0,.10)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 1px 4px rgba(0,0,0,.05)\'">'
       // Header
       +'<div style="background:linear-gradient(135deg,#1A1A2E,#2D1B0E);padding:20px;display:flex;align-items:center;gap:12px;position:relative">'
         +'<div style="width:56px;height:56px;border-radius:12px;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden">'+logo+'</div>'
@@ -8910,12 +8951,12 @@ function renderBoutiquesGrid(boutiques){
         +(b.description ? '<div style="font-size:12px;color:#64748B;line-height:1.5;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">'+b.description+'</div>' : '')
         +'<div style="display:flex;align-items:center;justify-content:space-between">'
           +(b.category ? '<span style="background:#F1F5F9;color:#475569;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px">'+b.category+'</span>' : '<span></span>')
-          +'<span style="font-size:12px;color:var(--muted)">'+ads.length+' annonce'+(ads.length>1?'s':'')+'</span>'
+          +'<span style="font-size:12px;color:var(--muted)">'+adsCount+' annonce'+(adsCount!==1?'s':'')+'</span>'
         +'</div>'
         +(b.address ? '<div style="margin-top:8px;font-size:11px;color:#94A3B8;display:flex;align-items:center;gap:4px">📍 '+b.address+'</div>' : '')
       +'</div>'
       +'<div style="padding:0 16px 14px">'
-        +'<button style="width:100%;background:var(--or);color:#fff;border:none;border-radius:10px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit" onclick="event.stopPropagation();viewBoutique(\''+b._id+'\')">Voir la boutique →</button>'
+        +'<button style="width:100%;background:var(--or);color:#fff;border:none;border-radius:10px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit" onclick="event.stopPropagation();viewBoutique(\''+boutId+'\')">Voir la boutique →</button>'
       +'</div>'
       +'</div>';
   }).join('');
