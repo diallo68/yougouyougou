@@ -912,22 +912,34 @@ app.get('/api/users/:id/public', authOptional, async (req, res) => {
 app.get('/api/boutiques', async (req, res) => {
   try {
     const now = new Date();
-    const { sector, search, category, limit = 50 } = req.query;
+    const { sector, search, category, limit = 100 } = req.query;
+
+    // Requête plus robuste : chercher tous les Pro actifs qui ont au moins un nom de boutique
     const filter = {
       isPro: true,
       proUntil: { $gt: now },
       $or: [
-        { 'boutique.name': { $exists: true, $ne: '' } },
-        { boutiqueName: { $exists: true, $ne: '' } },
+        { 'boutique.name': { $exists: true, $ne: '', $type: 'string' } },
+        { boutiqueName:     { $exists: true, $ne: '', $type: 'string' } },
       ]
     };
-    if (sector || category) filter.$or = undefined; // retire le $or si filtre spécifique
-    if (sector)   filter['boutique.category'] = sector;
-    if (category) filter['boutique.category'] = category;
+
+    // Filtres optionnels par catégorie
+    if (category || sector) {
+      const catVal = category || sector;
+      filter.$and = [
+        { $or: filter.$or },
+        { $or: [
+          { 'boutique.category': new RegExp(catVal, 'i') },
+          { boutiqueSector:       new RegExp(catVal, 'i') },
+        ]}
+      ];
+      delete filter.$or;
+    }
 
     const users = await User.find(filter)
-      .select('prenom nom city boutique boutiqueName boutiqueSlogan boutiqueBanner boutiqueSector boutiqueSocial boutiqueDesc avgRating ratingCount totalViews proPlan createdAt')
-      .sort({ totalViews: -1 })
+      .select('prenom nom city boutique boutiqueName boutiqueDesc boutiqueSector boutiqueSocial avgRating ratingCount totalViews proPlan isPro proUntil createdAt')
+      .sort({ totalViews: -1, createdAt: -1 })
       .limit(Number(limit))
       .lean();
 
@@ -935,8 +947,8 @@ app.get('/api/boutiques', async (req, res) => {
     if (search) {
       const q = search.toLowerCase();
       filtered = users.filter(u =>
-        (u.boutique?.name||u.boutiqueName||'').toLowerCase().includes(q) ||
-        (u.boutique?.description||u.boutiqueDesc||'').toLowerCase().includes(q) ||
+        (u.boutique?.name || u.boutiqueName || '').toLowerCase().includes(q) ||
+        (u.boutique?.description || u.boutiqueDesc || '').toLowerCase().includes(q) ||
         (`${u.prenom||''} ${u.nom||''}`).toLowerCase().includes(q)
       );
     }
