@@ -1467,6 +1467,13 @@ footer{background:transparent;margin-top:0}
 .pro-plan-note{font-size:11px;color:var(--muted);text-align:center;margin-top:8px}
 
 /* ── États actif / grisé pour les cartes Pro ── */
+/* ── CSS pour éléments injectés dynamiquement dans dsec-pro ── */
+.dash-plan-ribbon{ pointer-events:none; }
+.dash-pro-card{
+  position:relative;
+  transition:opacity .2s, border .2s, box-shadow .2s, transform .2s, filter .2s;
+}
+
 /* ── Lightbox zoom photos ── */
 #lightbox-overlay{
   animation: lbFadeIn .18s ease;
@@ -8532,28 +8539,29 @@ function loadBoutiquesPage(){
   var grid = document.getElementById('boutiques-grid');
   if(grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)"><div style="font-size:36px;margin-bottom:10px">⏳</div><div style="font-size:13px;font-weight:600">Chargement des boutiques...</div></div>';
 
+  // Construire depuis toutes les sources locales disponibles
   function buildFromLocalData(){
-    // Construire depuis : API /api/admin/users (si admin) OU données locales
     var localBoutiques = [];
+    var u = DB.user();
+    var proActive = u && u.isPro && u.proUntil && new Date(u.proUntil) > new Date();
 
     // Source 1 : utilisateur courant s'il a une boutique
-    var u = DB.user();
-    if(u && u.isPro && u.boutique && u.boutique.name){
+    if(u && proActive && u.boutique && u.boutique.name){
       localBoutiques.push({
-        _id: u._id||u.id||'local_'+Date.now(),
-        name: u.boutique.name,
-        description: u.boutique.description||u.boutique.desc||'',
-        category: u.boutique.category||'',
-        subcat: u.boutique.subcat||'',
-        logo: u.boutique.logo||'',
-        address: u.boutique.address||'',
-        whatsapp: u.boutique.whatsapp||'',
-        videoUrl: u.boutique.videoUrl||'',
-        videoTitle: u.boutique.videoTitle||'',
-        sellerName: (u.prenom||u.name||'')+(u.nom?' '+u.nom:''),
-        sellerId: u._id||u.id||'',
-        isPro: true,
-        proPlan: u.proPlan||'starter'
+        _id:         u._id||u.id||'local',
+        name:        u.boutique.name,
+        description: u.boutique.description||u.boutique.desc||'Commerçant YouGouYou Pro',
+        category:    u.boutique.category||'',
+        subcat:      u.boutique.subcat||'',
+        logo:        u.boutique.logo||'',
+        address:     u.boutique.address||u.city||'Guinée',
+        whatsapp:    u.boutique.whatsapp||'',
+        videoUrl:    u.boutique.videoUrl||'',
+        videoTitle:  u.boutique.videoTitle||'',
+        sellerName:  ((u.prenom||u.name||'')+(u.nom?' '+u.nom:'')).trim(),
+        sellerId:    u._id||u.id||'',
+        isPro:       true,
+        proPlan:     u.proPlan||'starter'
       });
     }
 
@@ -8561,39 +8569,43 @@ function loadBoutiquesPage(){
     var adminUsers = (_adminData&&_adminData.users)||[];
     adminUsers.forEach(function(au){
       if(!au.isPro) return;
-      if(!au.boutique||!au.boutique.name) return;
-      // Éviter doublon avec l'utilisateur courant
-      if(u && (String(au._id)===String(u._id||u.id))) return;
+      var auShop = au.boutique||{};
+      var auName = auShop.name || au.boutiqueName || '';
+      if(!auName) return;
+      if(u && String(au._id)===String(u._id||u.id)) return; // éviter doublon
       localBoutiques.push({
-        _id: au._id,
-        name: au.boutique.name,
-        description: au.boutique.description||au.boutique.desc||'',
-        category: au.boutique.category||'',
-        subcat: au.boutique.subcat||'',
-        logo: au.boutique.logo||'',
-        address: au.boutique.address||(au.city||'Guinée'),
-        whatsapp: au.boutique.whatsapp||'',
-        videoUrl: au.boutique.videoUrl||'',
-        videoTitle: au.boutique.videoTitle||'',
-        sellerName: (au.prenom||au.name||'')+(au.nom?' '+au.nom:''),
-        sellerId: au._id,
-        isPro: true,
-        proPlan: au.proPlan||'starter'
+        _id:         au._id,
+        name:        auName,
+        description: auShop.description||auShop.desc||au.boutiqueDesc||'Commerçant YouGouYou Pro',
+        category:    auShop.category||au.boutiqueSector||'',
+        logo:        auShop.logo||'',
+        address:     auShop.address||au.city||'Guinée',
+        whatsapp:    auShop.whatsapp||au.boutiqueSocial?.whatsapp||'',
+        sellerName:  ((au.prenom||au.name||'')+(au.nom?' '+au.nom:'')).trim(),
+        sellerId:    au._id,
+        isPro:       true,
+        proPlan:     au.proPlan||'starter'
       });
     });
 
     return localBoutiques;
   }
 
-  // Essayer l'API /api/boutiques d'abord, puis fallback intelligent
+  // Stratégie : appel API + fallback local robuste + fusion
   fetch('/api/boutiques', { headers:headers })
-    .then(function(r){ return r.ok ? r.json() : Promise.reject(r.status); })
+    .then(function(r){ return r.ok ? r.json() : Promise.reject('status:'+r.status); })
     .then(function(data){
       var apiBoutiques = data.boutiques || data || [];
 
-      // Si l'API retourne des données, les enrichir avec les données locales manquantes
+      // Toujours fusionner avec les données locales pour ne jamais être vide
       if(apiBoutiques.length > 0){
         _allBoutiques = apiBoutiques;
+        // Ajouter la boutique locale si elle n'est pas déjà dans la liste API
+        var local = buildFromLocalData();
+        local.forEach(function(lb){
+          var exists = apiBoutiques.some(function(ab){ return String(ab.sellerId||ab._id)===String(lb.sellerId); });
+          if(!exists) _allBoutiques.push(lb);
+        });
       } else {
         // API vide → construire depuis local
         _allBoutiques = buildFromLocalData();
@@ -8601,7 +8613,8 @@ function loadBoutiquesPage(){
       renderBoutiquesGrid(_allBoutiques);
       renderCtaBoutiquesPreview(_allBoutiques);
     })
-    .catch(function(){
+    .catch(function(err){
+      console.log('[BOUTIQUES] API fallback:', err);
       // API indispo → construire depuis local
       _allBoutiques = buildFromLocalData();
       renderBoutiquesGrid(_allBoutiques);
@@ -9309,41 +9322,182 @@ function showDashTab(tab){
 function updateDashProStatus(){
   var u = DB.user();
   if(!u) return;
-  var isPro = u.isPro;
-  var proUntil = u.proUntil ? new Date(u.proUntil) : null;
+
+  // Toujours sync depuis MongoDB pour avoir les données fraîches
+  var token = localStorage.getItem('ygy_token');
+  if(token){
+    fetch('/api/me',{headers:{'Authorization':'Bearer '+token}})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(data){
+      if(data && data.user){
+        var uu = DB.user()||{};
+        if(data.user.isPro !== undefined) uu.isPro = data.user.isPro;
+        if(data.user.proPlan)  uu.proPlan  = data.user.proPlan;
+        if(data.user.proUntil) uu.proUntil = data.user.proUntil;
+        if(data.user.boutique) uu.boutique = data.user.boutique;
+        DB.login(uu);
+        _renderDashProSection(uu);
+      }
+    }).catch(function(){
+      _renderDashProSection(DB.user()||u);
+    });
+  } else {
+    _renderDashProSection(u);
+  }
+  // Afficher CTA boutique
+  if(typeof updateProBoutiqueCTA === 'function') updateProBoutiqueCTA();
+}
+
+function _renderDashProSection(u){
+  var isPro     = u.isPro && u.proUntil && new Date(u.proUntil) > new Date();
+  var plan      = isPro ? (u.proPlan || 'starter') : null;
+  var cfg       = (plan && typeof PRO_MODAL_CFG !== 'undefined') ? (PRO_MODAL_CFG[plan] || PRO_MODAL_CFG.starter) : null;
+  var hasShop   = !!(u.boutique && u.boutique.name);
+  var plans     = ['starter','business','premium'];
+
+  var planConfigs = {
+    starter:  { name:'Starter',  price:'50 000 GNF/mois',   annonces:9,  btnStyle:'background:linear-gradient(135deg,#D97706,#B45309);color:#fff' },
+    business: { name:'Business', price:'120 000 GNF/3 mois', annonces:12, btnStyle:'background:linear-gradient(135deg,#1D4ED8,#1E40AF);color:#fff' },
+    premium:  { name:'Premium',  price:'360 000 GNF/an',    annonces:18, btnStyle:'background:linear-gradient(135deg,#FF5C00,#D94E00);color:#fff' }
+  };
+  var planRingColors = {
+    starter: '#D97706', business: '#1D4ED8', premium: '#FF5C00'
+  };
+
+  // ── Bloc statut ──
   var planLabel = document.getElementById('dash-pro-plan-label');
   var planSub   = document.getElementById('dash-pro-plan-sub');
   var badge     = document.getElementById('dash-pro-badge');
   var expiry    = document.getElementById('dash-pro-expiry');
   var chooseTitle = document.getElementById('dash-pro-choose-title');
+  var statusBlock = document.getElementById('dash-pro-status-block');
 
-  // Déterminer le plan actuel
-  var planNames = { starter:'Starter', business:'Business', premium:'Premium' };
-  var currentPlan = u.proPlan ? planNames[u.proPlan] || 'Pro' : null;
+  if(isPro && cfg){
+    var dt    = new Date(u.proUntil);
+    var jours = Math.ceil((dt - new Date()) / (1000*60*60*24));
 
-  if(isPro && proUntil && proUntil > new Date()){
-    if(planLabel) planLabel.textContent = 'Abonnement ' + (currentPlan||'Pro') + ' actif';
+    if(planLabel) planLabel.textContent = 'Abonnement ' + cfg.label + ' actif';
     if(planSub)   planSub.textContent   = 'Vous bénéficiez de tous les avantages Pro';
-    if(badge)     badge.style.display   = 'block';
-    var jours = Math.ceil((proUntil - new Date()) / (1000*60*60*24));
+    if(badge){
+      badge.style.display = 'inline-flex';
+      badge.style.background = cfg.btnBg;
+      badge.textContent = cfg.icon + ' PRO ACTIF';
+    }
     if(expiry){
       expiry.style.display = 'block';
-      expiry.textContent = '⏳ Expire le '+proUntil.toLocaleDateString('fr-FR')+' (dans '+jours+' jour'+(jours>1?'s':'')+')';
+      expiry.style.background = '#FFF3EE';
+      expiry.style.color = 'var(--or)';
+      expiry.innerHTML = '⏳ Expire le <strong>'+dt.toLocaleDateString('fr-FR')+'</strong> (dans '+jours+' jour'+(jours>1?'s':'')+')';
     }
-    if(chooseTitle) chooseTitle.textContent = 'Changer ou renouveler ma formule';
-    // Marquer le plan actif
-    document.querySelectorAll('.dash-pro-card').forEach(function(c){ c.style.opacity='0.6'; });
-    var activeCard = document.getElementById('dash-plan-'+(u.proPlan||'starter'));
-    if(activeCard){ activeCard.style.opacity='1'; activeCard.style.borderColor='var(--or)'; }
+    if(statusBlock){
+      // Colorer l'icône selon le plan
+      var iconDiv = statusBlock.querySelector('div[style*="background:linear-gradient"]') || statusBlock.querySelector('div[style*="52px"]');
+      if(iconDiv){ iconDiv.style.background = cfg.headerBg; }
+    }
+    if(chooseTitle) chooseTitle.textContent = 'Votre abonnement';
   } else {
     if(planLabel) planLabel.textContent = 'Compte Gratuit';
-    if(planSub)   planSub.textContent   = 'Passez Pro pour booster vos ventes';
+    if(planSub)   planSub.textContent   = 'Passez Pro pour plus de visibilité';
     if(badge)     badge.style.display   = 'none';
     if(expiry)    expiry.style.display  = 'none';
     if(chooseTitle) chooseTitle.textContent = 'Choisissez votre formule';
   }
-  // Afficher/masquer le CTA boutique selon le statut Pro
-  if(typeof updateProBoutiqueCTA === 'function') updateProBoutiqueCTA();
+
+  // ── Cartes plans : plan actif mis en avant, autres grisés ──
+  plans.forEach(function(p){
+    var card = document.getElementById('dash-plan-' + p);
+    if(!card) return;
+
+    // Nettoyer les éléments injectés précédemment
+    var oldRibbon = card.querySelector('.dash-plan-ribbon');
+    if(oldRibbon) oldRibbon.remove();
+    var oldLock = card.querySelector('.dash-plan-lock');
+    if(oldLock) oldLock.remove();
+    var oldBtn2 = card.querySelector('.dash-plan-btn2');
+    if(oldBtn2) oldBtn2.remove();
+
+    // Reset styles
+    card.style.opacity    = '';
+    card.style.border     = '';
+    card.style.boxShadow  = '';
+    card.style.transform  = '';
+    card.style.pointerEvents = '';
+    card.style.filter     = '';
+
+    // Réinitialiser le bouton
+    var btns = card.querySelectorAll('.dash-pro-btn');
+    btns.forEach(function(b){
+      b.disabled = false;
+      b.style.pointerEvents = '';
+      b.style.opacity = '';
+    });
+
+    if(!isPro){
+      // Pas d'abonnement : toutes les cartes normales, boutons actifs
+      return;
+    }
+
+    if(p === plan){
+      // ── Plan ACTIF ──
+      var ringColor = planRingColors[plan] || 'var(--or)';
+      card.style.border     = '2.5px solid ' + ringColor;
+      card.style.boxShadow  = '0 0 0 4px ' + ringColor + '22, 0 8px 28px rgba(0,0,0,.10)';
+      card.style.transform  = 'translateY(-3px)';
+      card.style.pointerEvents = 'auto';
+
+      // Ruban "✅ VOTRE PLAN"
+      var ribbon = document.createElement('div');
+      ribbon.className = 'dash-plan-ribbon';
+      ribbon.style.cssText = 'position:absolute;top:12px;right:-1px;background:'+ringColor+';color:#fff;font-size:10px;font-weight:800;padding:4px 12px 4px 8px;border-radius:4px 0 0 4px;text-transform:uppercase;letter-spacing:.5px;z-index:5;box-shadow:-2px 2px 8px rgba(0,0,0,.15)';
+      ribbon.textContent = '✅ VOTRE PLAN';
+      card.style.position = 'relative';
+      card.appendChild(ribbon);
+
+      // Remplacer le bouton par "Gérer/Créer boutique"
+      btns.forEach(function(b){ b.style.display='none'; });
+      var btn2 = document.createElement('button');
+      btn2.className = 'dash-pro-btn dash-plan-btn2';
+      btn2.style.cssText = (planConfigs[plan]||{}).btnStyle || 'background:var(--or);color:#fff';
+      btn2.style.border = 'none';
+      btn2.style.borderRadius = '10px';
+      btn2.style.padding = '11px';
+      btn2.style.width = '100%';
+      btn2.style.fontFamily = 'inherit';
+      btn2.style.fontSize = '13px';
+      btn2.style.fontWeight = '800';
+      btn2.style.cursor = 'pointer';
+      btn2.style.marginTop = '4px';
+      btn2.style.boxShadow = '0 3px 10px rgba(0,0,0,.15)';
+      btn2.textContent = hasShop ? '🏪 Gérer ma boutique' : '🏪 Créer ma boutique';
+      btn2.onclick = function(e){ e.stopPropagation(); showDashTab('boutique'); };
+      card.appendChild(btn2);
+
+      // Note sous le bouton
+      var noteEl = card.querySelector('.dash-pro-period') ? card.querySelector('.dash-pro-period').nextElementSibling : null;
+      var noteDiv = document.createElement('div');
+      noteDiv.style.cssText = 'font-size:11px;color:var(--muted);text-align:center;margin-top:6px';
+      noteDiv.textContent = hasShop ? 'Cliquez pour gérer votre boutique' : 'Cliquez pour créer votre boutique';
+      card.appendChild(noteDiv);
+
+    } else {
+      // ── Plan GRISÉ ──
+      card.style.opacity       = '0.45';
+      card.style.filter        = 'grayscale(0.4)';
+      card.style.pointerEvents = 'none';
+      card.style.transform     = '';
+
+      // Overlay cadenas
+      var lock = document.createElement('div');
+      lock.className = 'dash-plan-lock';
+      lock.style.cssText = 'position:absolute;inset:0;background:rgba(255,255,255,.75);border-radius:inherit;z-index:8;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:5px;backdrop-filter:blur(1px)';
+      lock.innerHTML = '<div style="font-size:26px">🔒</div><div style="font-size:11px;font-weight:700;color:#6B7280;text-align:center;padding:0 10px;line-height:1.4">Abonnement actif<br>sur une autre formule</div>';
+      card.style.position = 'relative';
+      card.appendChild(lock);
+
+      // Désactiver les boutons
+      btns.forEach(function(b){ b.disabled=true; b.style.opacity='0.4'; });
+    }
+  });
 }
 
 function toggleFav(id){
