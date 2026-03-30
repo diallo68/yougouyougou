@@ -364,6 +364,54 @@ footer{background:transparent;margin-top:0}
 .dash-user-phone{font-size:11px;color:var(--muted);margin-top:2px}
 .dash-nav a{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;font-size:13px;font-weight:400;color:var(--muted);cursor:pointer;transition:all .12s;text-decoration:none;margin-bottom:2px}
 .dash-nav a:hover,.dash-nav a.active{background:var(--orl);color:var(--or);font-weight:600}
+
+/* Avatar photo hover */
+#d-av:hover #d-photo-overlay{ display:flex!important; }
+.dash-avatar{ cursor:pointer; }
+.dash-avatar:hover{ opacity:.9; }
+
+/* Nav Pro item styles */
+.dash-nav-pro-item{
+  background:linear-gradient(135deg,#1A1A2E,#2D1B0E)!important;
+  color:var(--or)!important;
+  font-weight:700!important;
+  border-radius:8px!important;
+  margin-top:2px!important;
+}
+.dash-nav-pro-item:hover{
+  background:linear-gradient(135deg,#2D2B0E,#3D2B10)!important;
+  color:#FFD700!important;
+}
+.dash-nav-boutique-starter{
+  background:linear-gradient(135deg,#854D0E,#A16207)!important;
+  color:#FDE68A!important;
+  font-weight:700!important;
+  border-radius:8px!important;
+}
+.dash-nav-boutique-business{
+  background:linear-gradient(135deg,#1E3A5F,#1D4ED8)!important;
+  color:#BFDBFE!important;
+  font-weight:700!important;
+  border-radius:8px!important;
+}
+.dash-nav-boutique-premium{
+  background:linear-gradient(135deg,#7C2D12,#C2410C)!important;
+  color:#FFEDD5!important;
+  font-weight:700!important;
+  border-radius:8px!important;
+}
+.dash-nav-boutique-starter:hover,.dash-nav-boutique-business:hover,.dash-nav-boutique-premium:hover{
+  filter:brightness(1.15);
+}
+.dash-nav-visit{
+  color:#059669!important;
+  border:1px solid #BBF7D0;
+  background:#F0FDF4!important;
+}
+.dash-nav-visit:hover{
+  background:#DCFCE7!important;
+  color:#065F46!important;
+}
 .dash-main{padding:20px 24px;background:var(--bg);overflow-y:auto;height:100%}
 .dash-section{display:none}.dash-section.active{display:block}
 .dash-section-title{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:14px}
@@ -2121,22 +2169,96 @@ footer{background:transparent;margin-top:0}
 <div id="page-dashboard" class="page">
   <div class="dash-layout">
     <div class="dash-side">
+
+      <!-- Avatar + infos utilisateur -->
       <div class="dash-user-info">
-        <div class="dash-avatar" id="d-av">MD</div>
+        <!-- Photo de profil -->
+        <div style="position:relative;display:inline-block;margin-bottom:8px">
+          <div class="dash-avatar" id="d-av" style="cursor:pointer;position:relative" onclick="document.getElementById('d-photo-input').click()" title="Changer la photo">MD
+            <div id="d-photo-overlay" style="display:none;position:absolute;inset:0;border-radius:50%;background:rgba(0,0,0,.45);align-items:center;justify-content:center;font-size:16px;color:#fff">📷</div>
+          </div>
+          <input type="file" id="d-photo-input" accept="image/*" style="display:none" onchange="previewDashAvatar(this)">
+        </div>
         <div class="dash-user-name" id="d-nm">Utilisateur</div>
         <div class="dash-user-phone" id="d-ph"></div>
+        <!-- Badge Pro/Admin sous le nom -->
+        <div id="d-status-badge" style="margin-top:5px"></div>
       </div>
-      <nav class="dash-nav">
-        <a onclick="showDashTab('profil')" class="active" id="dtab-profil">👤 Mon profil</a>
-        <a onclick="showDashTab('ads')" id="dtab-ads">📋 Mes annonces <span id="p-count-ads" style="background:var(--orl);color:var(--or);font-size:11px;padding:1px 6px;border-radius:10px;margin-left:auto">0</span></a>
-        <a onclick="showDashTab('history')" id="dtab-history">🕐 Historique</a>
-        <a onclick="showDashTab('payments')" id="dtab-payments">💳 Paiements</a>
-        <a onclick="showDashTab('pro')" id="dtab-pro" style="background:linear-gradient(135deg,#1A1A2E,#2D1B0E);color:var(--or)!important;border-radius:8px;margin-top:8px;font-weight:700">⭐ Mon abonnement Pro</a>
-        <!-- Menu Boutique — visible + stylé selon plan Pro (géré par renderDash) -->
-        <a onclick="showDashTab('boutique')" id="dtab-boutique" style="display:none;border-radius:8px;margin-top:4px;font-weight:700">⭐ Créer votre boutique</a>
-        <a onclick="showDashTab('alerts')" id="dtab-alerts">🔔 Alertes</a>
-        <a id="nav-admin-link" hidden onclick="goAdmin()">👑 Admin</a>
-        <a onclick="logout()" style="color:var(--re)!important;margin-top:20px">🚪 Déconnexion</a>
+
+      <!-- ══ MENU DYNAMIQUE ══ -->
+      <nav class="dash-nav" id="dash-nav-dynamic">
+
+        <!-- 1. Mon profil — toujours visible -->
+        <a onclick="showDashTab('profil')" class="active" id="dtab-profil">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          Mon profil
+        </a>
+
+        <!-- 2. Mes annonces — toujours visible -->
+        <a onclick="showDashTab('ads')" id="dtab-ads">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+          Mes annonces
+          <span id="p-count-ads" style="background:var(--orl);color:var(--or);font-size:10px;font-weight:800;padding:1px 7px;border-radius:10px;margin-left:auto;min-width:18px;text-align:center">0</span>
+        </a>
+
+        <!-- 3. Historique — toujours visible -->
+        <a onclick="showDashTab('history')" id="dtab-history">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+          Historique
+        </a>
+
+        <!-- 4. Paiements — toujours visible -->
+        <a onclick="showDashTab('payments')" id="dtab-payments">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          Paiements
+          <span id="p-count-pay-nav" style="display:none;background:#DCFCE7;color:#065F46;font-size:10px;font-weight:800;padding:1px 7px;border-radius:10px;margin-left:auto"></span>
+        </a>
+
+        <!-- 5. Alertes — toujours visible -->
+        <a onclick="showDashTab('alerts')" id="dtab-alerts">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          Alertes
+        </a>
+
+        <!-- Séparateur Pro (visible si Pro actif) -->
+        <div id="dash-sep-pro" style="display:none;height:1px;background:var(--br);margin:8px 4px;"></div>
+        <div id="dash-sep-pro-label" style="display:none;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:0 8px 4px">Espace Pro</div>
+
+        <!-- 5b. Mon abonnement Pro — visible si isPro -->
+        <a onclick="showDashTab('pro')" id="dtab-pro" style="display:none">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <span id="dtab-pro-label">Mon abonnement Pro</span>
+        </a>
+
+        <!-- 6. Gérer ma boutique — visible si isPro && hasShop -->
+        <a onclick="showDashTab('boutique')" id="dtab-boutique" style="display:none">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span id="dtab-boutique-label">Créer votre boutique</span>
+        </a>
+
+        <!-- Ma boutique publique — visible si isPro && hasShop -->
+        <a onclick="ouvrirMaBoutique()" id="dtab-ma-boutique" style="display:none">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Visiter ma boutique
+        </a>
+
+        <!-- Séparateur Admin -->
+        <div id="dash-sep-admin" style="display:none;height:1px;background:var(--br);margin:8px 4px;"></div>
+
+        <!-- 7. Admin — visible si role === 'admin' -->
+        <a id="nav-admin-link" hidden onclick="goAdmin()" style="color:#7C3AED!important">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Administration
+        </a>
+
+        <!-- Séparateur final -->
+        <div style="height:1px;background:var(--br);margin:8px 4px;"></div>
+
+        <!-- 8. Déconnexion — toujours visible -->
+        <a onclick="logout()" style="color:var(--re)!important">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Déconnexion
+        </a>
       </nav>
     </div>
     <div class="dash-main">
@@ -6717,6 +6839,156 @@ function syncRoleFromServer(callback){
 // ══════════════════════════════════════════
 //  DASHBOARD
 // ══════════════════════════════════════════
+// ══════════════════════════════════════════
+//  MENU LATÉRAL DYNAMIQUE — renderDashNav
+//  Construit le menu selon : isPro, hasShop, role
+// ══════════════════════════════════════════
+
+function renderDashNav(u){
+  if(!u) return;
+
+  var proActive = u.isPro && u.proUntil && new Date(u.proUntil) > new Date();
+  var plan      = proActive ? (u.proPlan || 'starter') : null;
+  var hasShop   = !!(u.boutique && u.boutique.name);
+  var isAdmin   = (u.role === 'admin');
+
+  var planIcons  = { starter:'⭐', business:'🔷', premium:'👑' };
+  var planLabels = { starter:'Starter', business:'Business', premium:'Premium' };
+  var planClasses= { starter:'dash-nav-boutique-starter', business:'dash-nav-boutique-business', premium:'dash-nav-boutique-premium' };
+
+  // ── Badge statut sous le nom ──
+  var badge = document.getElementById('d-status-badge');
+  if(badge){
+    if(isAdmin){
+      badge.innerHTML = '<span style="background:#EFF6FF;color:#1D4ED8;font-size:10px;font-weight:800;padding:2px 10px;border-radius:20px;display:inline-block">👑 Administrateur</span>';
+    } else if(proActive){
+      var planColors = { starter:'#D97706', business:'#1D4ED8', premium:'#FF5C00' };
+      badge.innerHTML = '<span style="background:rgba(0,0,0,.07);color:'+planColors[plan]+';font-size:10px;font-weight:800;padding:2px 10px;border-radius:20px;display:inline-block">'+planIcons[plan]+' Pro '+planLabels[plan]+'</span>';
+    } else {
+      badge.innerHTML = '<span style="background:#D1FAE5;color:#065F46;font-size:10px;font-weight:800;padding:2px 10px;border-radius:20px;display:inline-block">✅ Membre vérifié</span>';
+    }
+  }
+
+  // ── Éléments toujours visibles : profil, annonces, historique, paiements, alertes ──
+  // (déjà dans le HTML — rien à faire)
+
+  // ── Séparateur + espace Pro ──
+  var sepPro   = document.getElementById('dash-sep-pro');
+  var sepLabel = document.getElementById('dash-sep-pro-label');
+  if(sepPro)   sepPro.style.display   = proActive ? 'block' : 'none';
+  if(sepLabel) sepLabel.style.display  = proActive ? 'block' : 'none';
+
+  // ── Mon abonnement Pro (visible si isPro) ──
+  var dtabPro = document.getElementById('dtab-pro');
+  if(dtabPro){
+    if(proActive){
+      dtabPro.style.display = 'flex';
+      dtabPro.className = 'dash-nav-pro-item';
+      var proLabel = document.getElementById('dtab-pro-label');
+      if(proLabel) proLabel.textContent = planIcons[plan] + ' Mon abonnement Pro';
+    } else {
+      // Pas Pro → visible quand même pour inciter à souscrire, mais style normal
+      dtabPro.style.display = 'flex';
+      dtabPro.className = '';
+      var proLabel2 = document.getElementById('dtab-pro-label');
+      if(proLabel2) proLabel2.textContent = '⭐ Devenir Pro';
+    }
+  }
+
+  // ── Gérer ma boutique (visible si isPro) ──
+  var dtabBoutique = document.getElementById('dtab-boutique');
+  if(dtabBoutique){
+    if(proActive){
+      dtabBoutique.style.display = 'flex';
+      dtabBoutique.className = planClasses[plan] || 'dash-nav-boutique-starter';
+      var bLabel = document.getElementById('dtab-boutique-label');
+      if(bLabel) bLabel.textContent = hasShop
+        ? (planIcons[plan] + ' Gérer ma boutique')
+        : (planIcons[plan] + ' Créer votre boutique');
+    } else {
+      dtabBoutique.style.display = 'none';
+    }
+  }
+
+  // ── Visiter ma boutique (visible si isPro && hasShop) ──
+  var dtabVisit = document.getElementById('dtab-ma-boutique');
+  if(dtabVisit){
+    if(proActive && hasShop){
+      dtabVisit.style.display = 'flex';
+      dtabVisit.className = 'dash-nav-visit';
+    } else {
+      dtabVisit.style.display = 'none';
+    }
+  }
+
+  // ── Admin (source de vérité = MongoDB) ──
+  var adminLink = document.getElementById('nav-admin-link');
+  var sepAdmin  = document.getElementById('dash-sep-admin');
+  // Masquer par défaut, puis vérifier via API
+  if(adminLink) adminLink.setAttribute('hidden','');
+  if(sepAdmin)  sepAdmin.style.display = 'none';
+
+  var _tok = localStorage.getItem('ygy_token');
+  if(_tok){
+    fetch('/api/me',{headers:{'Authorization':'Bearer '+_tok}})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(data){
+      if(data && data.user){
+        // Mettre à jour le user local avec les données fraîches
+        var uu = DB.user()||{};
+        if(data.user.role)    uu.role    = data.user.role;
+        if(data.user.isPro !== undefined) uu.isPro = data.user.isPro;
+        if(data.user.proPlan) uu.proPlan = data.user.proPlan;
+        if(data.user.proUntil)uu.proUntil= data.user.proUntil;
+        if(data.user.boutique)uu.boutique= data.user.boutique;
+        DB.login(uu);
+
+        var isAdminFresh = data.user.role === 'admin';
+        if(isAdminFresh){
+          if(adminLink){ adminLink.removeAttribute('hidden'); adminLink.style.display='flex'; }
+          if(sepAdmin) sepAdmin.style.display = 'block';
+          // Bouton footer admin
+          var ftBtn = document.getElementById('ft-admin-btn');
+          if(ftBtn) ftBtn.style.display = 'block';
+        }
+
+        // Re-rendre le menu avec les données fraîches si statut différent
+        var proFresh = data.user.isPro && data.user.proUntil && new Date(data.user.proUntil) > new Date();
+        var hasShopFresh = !!(data.user.boutique && data.user.boutique.name);
+        if(proFresh !== proActive || hasShopFresh !== hasShop){
+          renderDashNav(uu);
+        }
+      }
+    }).catch(function(){});
+  }
+}
+
+// Upload photo de profil dans l'avatar dashboard
+function previewDashAvatar(input){
+  if(!input.files || !input.files[0]) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var dav = document.getElementById('d-av');
+    if(!dav) return;
+    dav.innerHTML = '<img src="'+e.target.result+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'
+      + '<div id="d-photo-overlay" onclick="document.getElementById(\'d-photo-input\').click()" style="display:none;position:absolute;inset:0;border-radius:50%;background:rgba(0,0,0,.45);align-items:center;justify-content:center;font-size:16px;color:#fff;cursor:pointer">📷</div>';
+    // Sauvegarder la photo de profil localement + API
+    var u = DB.user()||{};
+    u.avatar = e.target.result;
+    DB.login(u);
+    var token = localStorage.getItem('ygy_token');
+    if(token){
+      fetch('/api/me',{
+        method:'PATCH',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+        body: JSON.stringify({ avatar: e.target.result })
+      }).catch(function(){});
+    }
+    toast('📷 Photo de profil mise à jour','ok');
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
 function loadDash(){
   var u=DB.user();if(!u){openModal('auth');return;}
   syncRoleFromServer(function(){renderDash();});
@@ -6724,67 +6996,27 @@ function loadDash(){
 function renderDash(){
   var u=DB.user();if(!u)return;
 
-  // Sidebar
+  // Sidebar — infos utilisateur
   var initials=(u.prenom||u.name||'U').charAt(0).toUpperCase()+((u.nom||'').charAt(0)||'').toUpperCase();
-  document.getElementById('d-av').textContent=initials||'U';
+  var dav=document.getElementById('d-av');
+  if(dav && !dav.querySelector('img')) dav.textContent=initials||'U';
   document.getElementById('d-nm').textContent=u.name||u.prenom||'Utilisateur';
   document.getElementById('d-ph').textContent=u.phone||u.email||'';
 
-  // Lien Admin : masquer par défaut, afficher seulement après vérification serveur
-  var adminLink=document.getElementById('nav-admin-link');
-  if(adminLink) adminLink.setAttribute('hidden','');
-  // Vérifier le rôle depuis MongoDB (source de vérité)
-  var _tok = localStorage.getItem('ygy_token');
-  if(_tok){
-    fetch('/api/me',{headers:{'Authorization':'Bearer '+_tok}})
-    .then(function(r){return r.ok?r.json():null;})
-    .then(function(data){
-      if(data&&data.user&&data.user.role==='admin'){
-        var al=document.getElementById('nav-admin-link');
-        if(al) al.removeAttribute('hidden');
-      }
-    }).catch(function(){});
-  }
+  // Rendre le menu latéral dynamique
+  renderDashNav(u);
+
   // Footer admin btn
   var ftAdminBtn=document.getElementById('ft-admin-btn');
   if(ftAdminBtn) ftAdminBtn.style.display=(u&&u.role==='admin')?'block':'none';
 
-  // Menu Boutique — visible + stylé selon plan Pro
-  var btab = document.getElementById('dtab-boutique');
-  if(btab){
-    var proActive = u.isPro && u.proUntil && new Date(u.proUntil) > new Date();
-    if(proActive){
-      var plan = u.proPlan||'starter';
-      // Couleurs par plan
-      var planStyles = {
-        starter: 'background:linear-gradient(135deg,#854D0E,#A16207);color:#FDE68A!important',
-        business: 'background:linear-gradient(135deg,#1E3A5F,#1D4ED8);color:#BFDBFE!important',
-        premium:  'background:linear-gradient(135deg,#7C2D12,#C2410C);color:#FFEDD5!important'
-      };
-      var planIcons = { starter:'⭐', business:'🔷', premium:'👑' };
-      var boutiqueCreee = u.boutique && u.boutique.name;
-      var label = boutiqueCreee
-        ? (planIcons[plan]+' Ma Boutique')
-        : (planIcons[plan]+' Créer votre boutique');
-      btab.setAttribute('style', (planStyles[plan]||'') + ';border-radius:8px;margin-top:4px;font-weight:700;display:flex');
-      btab.textContent = label;
-    } else {
-      btab.style.display = 'none';
-    }
-  }
-
   // Avatar dashboard avec couleur Pro
-  var dav = document.getElementById('d-av');
-  if(dav){
+  if(dav && !dav.querySelector('img')){
     var proActive2 = u.isPro && u.proUntil && new Date(u.proUntil) > new Date();
     var planBg = { starter:'#EAB308', business:'#3B82F6', premium:'#FF5C00' };
     dav.style.background = proActive2 ? (planBg[u.proPlan||'starter']||'var(--or)') : 'var(--or)';
-    if(proActive2){
-      var planRing = { starter:'0 0 0 3px #FEF08A', business:'0 0 0 3px #BFDBFE', premium:'0 0 0 3px #FFEDD5' };
-      dav.style.boxShadow = planRing[u.proPlan||'starter']||'';
-    } else {
-      dav.style.boxShadow = '';
-    }
+    var planRing = { starter:'0 0 0 3px #FEF08A', business:'0 0 0 3px #BFDBFE', premium:'0 0 0 3px #FFEDD5' };
+    dav.style.boxShadow = proActive2 ? (planRing[u.proPlan||'starter']||'') : '';
   }
 
   // Onglet Profil — infos personnelles
