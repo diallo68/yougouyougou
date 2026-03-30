@@ -1467,6 +1467,23 @@ footer{background:transparent;margin-top:0}
 .pro-plan-note{font-size:11px;color:var(--muted);text-align:center;margin-top:8px}
 
 /* ── États actif / grisé pour les cartes Pro ── */
+/* ── Lightbox zoom photos ── */
+#lightbox-overlay{
+  animation: lbFadeIn .18s ease;
+}
+@keyframes lbFadeIn{ from{opacity:0} to{opacity:1} }
+#lightbox-img{
+  transition: opacity .15s;
+}
+#lightbox-thumbnails::-webkit-scrollbar{ height:4px }
+#lightbox-thumbnails::-webkit-scrollbar-thumb{ background:#555;border-radius:2px }
+
+/* ── Page boutique publique ── */
+#page-boutique-publique{ background:#F8FAFC; }
+#page-boutique-publique .lbc-img img{ cursor:zoom-in; }
+.pbp-filter-btn{ transition:all .12s; }
+.pbp-filter-btn.pbp-filter-active{ background:var(--or)!important;color:#fff!important;border-color:var(--or)!important; }
+
 .pro-plan-card.is-active-plan{
   transform:translateY(-4px);
 }
@@ -8709,12 +8726,349 @@ function filterBoutiques(){
   renderBoutiquesGrid(filtered);
 }
 
+// ══════════════════════════════════════════
+//  PAGE BOUTIQUE PUBLIQUE — SANS LOGIN
+//  Accessible à tous — actions sensibles protégées
+// ══════════════════════════════════════════
+
+var _pbpData = { boutique:{}, ads:[], sellerId:'', sellerName:'' };
+var _pbpAllAds = [];
+
+// Point d'entrée depuis la grille boutiques (clic "Voir la boutique")
 function viewBoutique(id){
-  // Ouvrir le profil vendeur
-  var b = _allBoutiques.find(function(x){ return String(x._id)===String(id); });
-  if(b && b.sellerId){ loadSellerProfile(b.sellerId); }
-  else { toast('Boutique non trouvée','err'); }
+  if(!id){ toast('Boutique introuvable','err'); return; }
+  _pbpData = { boutique:{}, ads:[], sellerId: String(id), sellerName:'' };
+  _pbpAllAds = [];
+
+  // Afficher la page immédiatement avec un état de chargement
+  _pbpRenderSkeleton();
+  goTo('boutique-publique');
+
+  // Charger depuis l'API (sans auth requise)
+  fetch('/api/boutiques/' + id)
+    .then(function(r){ return r.ok ? r.json() : Promise.reject(r.status); })
+    .then(function(data){
+      var b = data.boutique || {};
+      _pbpData.boutique   = b;
+      _pbpData.ads        = b.ads || data.products || [];
+      _pbpData.sellerId   = String(b.sellerId || b._id || id);
+      _pbpData.sellerName = b.sellerName || b.seller?.name || 'Vendeur Pro';
+      _pbpAllAds = _pbpData.ads;
+      _pbpRenderFull();
+    })
+    .catch(function(){
+      // Fallback : chercher dans les données locales
+      var local = _allBoutiques.find(function(x){ return String(x._id)===String(id) || String(x.sellerId)===String(id); });
+      if(local){
+        _pbpData.boutique   = local;
+        _pbpData.sellerId   = String(local.sellerId || local._id);
+        _pbpData.sellerName = local.sellerName || 'Vendeur Pro';
+        // Charger les annonces depuis les données locales
+        var localAds = DB.ads().filter(function(a){
+          return String(a.sellerId||a.seller_id||a.seller||'') === _pbpData.sellerId;
+        });
+        _pbpData.ads = localAds;
+        _pbpAllAds   = localAds;
+        _pbpRenderFull();
+      } else {
+        document.getElementById('pbp-name').textContent = 'Boutique introuvable';
+        var g = document.getElementById('pbp-ads-grid');
+        if(g) g.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)"><div style="font-size:36px">🏪</div><div style="margin-top:8px;font-size:14px;font-weight:700">Boutique non disponible</div></div>';
+      }
+    });
 }
+
+// Squelette de chargement
+function _pbpRenderSkeleton(){
+  var nameEl = document.getElementById('pbp-name');
+  var descEl = document.getElementById('pbp-desc');
+  var grid   = document.getElementById('pbp-ads-grid');
+  if(nameEl) nameEl.textContent = 'Chargement...';
+  if(descEl) descEl.textContent = '';
+  if(grid)   grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--muted)"><div style="font-size:36px;margin-bottom:12px">⏳</div><div style="font-size:14px;font-weight:700">Chargement du catalogue...</div></div>';
+}
+
+// Rendu complet de la page boutique publique
+function _pbpRenderFull(){
+  var b      = _pbpData.boutique;
+  var ads    = _pbpData.ads;
+  var u      = DB.user();
+  var plan   = b.proPlan || 'starter';
+  var cfg    = (typeof PRO_MODAL_CFG!=='undefined') ? (PRO_MODAL_CFG[plan]||PRO_MODAL_CFG.starter) : {icon:'⭐',badge:'PRO',btnBg:'var(--or)',headerBg:'linear-gradient(135deg,#1A1A2E,#2D2B0E)'};
+  var planIcons  = { starter:'⭐', business:'🔷', premium:'👑' };
+  var planLabels = { starter:'PRO Starter', business:'PRO Business', premium:'PRO Gold' };
+
+  // ── Hero ──
+  var heroEl = document.getElementById('pbp-hero');
+  if(heroEl) heroEl.style.background = cfg.headerBg;
+
+  var logoEl = document.getElementById('pbp-logo');
+  if(logoEl){
+    if(b.logo) logoEl.innerHTML = '<img src="'+b.logo+'" style="width:100%;height:100%;object-fit:cover;border-radius:14px" onerror="this.parentNode.textContent=\'🏪\'">';
+    else logoEl.textContent = cfg.icon;
+  }
+
+  var nm = document.getElementById('pbp-name');
+  if(nm) nm.textContent = b.name || 'Boutique';
+
+  var bdg = document.getElementById('pbp-badge');
+  if(bdg){
+    bdg.textContent = (planIcons[plan]||'⭐') + ' ' + (planLabels[plan]||'PRO');
+    bdg.style.background = cfg.btnBg ? cfg.btnBg.split(',')[0].replace('linear-gradient(135deg','rgba(0,0,0,.2') : 'rgba(255,92,0,.25)';
+  }
+
+  var catEl = document.getElementById('pbp-category');
+  if(catEl) catEl.textContent = b.category ? ('📂 ' + b.category + (b.subcat?' › '+b.subcat:'')) : '';
+
+  var descEl = document.getElementById('pbp-desc');
+  if(descEl) descEl.textContent = b.description || b.desc || '';
+
+  // Adresse
+  var addrW = document.getElementById('pbp-addr-wrap');
+  var addrS = document.getElementById('pbp-addr');
+  if(b.address && addrS){ addrS.textContent = b.address; if(addrW) addrW.style.display='flex'; }
+  else if(addrW){ addrW.style.display='none'; }
+
+  // Vendeur
+  var sellerEl = document.getElementById('pbp-seller-name');
+  if(sellerEl) sellerEl.textContent = _pbpData.sellerName;
+
+  // WhatsApp (bouton visible mais action protégée)
+  var waWrap = document.getElementById('pbp-wa-wrap');
+  if(waWrap) waWrap.style.display = b.whatsapp ? 'block' : 'none';
+
+  // Bouton retour contextuel
+  var backBtn = document.getElementById('pbp-back-btn');
+  if(backBtn) backBtn.textContent = '← Retour aux boutiques';
+
+  // Actions propriétaire
+  var ownerActions = document.getElementById('pbp-owner-actions');
+  if(ownerActions){
+    var isOwner = u && (String(u._id||u.id) === String(_pbpData.sellerId));
+    ownerActions.style.display = isOwner ? 'flex' : 'none';
+  }
+
+  // Vidéo
+  var vidSec = document.getElementById('pbp-video-section');
+  var vidEmbed = document.getElementById('pbp-video-embed');
+  var vidTitle = document.getElementById('pbp-video-title');
+  if(b.videoUrl && _buildVideoEmbed && vidEmbed){
+    var embedHtml = _buildVideoEmbed(b.videoUrl,'width:100%;height:100%;border:none');
+    if(embedHtml){
+      vidEmbed.innerHTML = embedHtml;
+      if(vidSec) vidSec.style.display='block';
+      if(vidTitle) vidTitle.textContent = b.videoTitle||'';
+    }
+  } else if(vidSec){ vidSec.style.display='none'; }
+
+  // Stats
+  var stAds  = document.getElementById('pbp-stat-ads');
+  var stViews= document.getElementById('pbp-stat-views');
+  var stRat  = document.getElementById('pbp-stat-rating');
+  if(stAds)   stAds.textContent   = ads.length;
+  if(stViews) stViews.textContent = (b.totalViews||ads.reduce(function(s,a){return s+(a.views||0);},0)).toLocaleString('fr-FR');
+  if(stRat)   stRat.textContent   = b.avgRating ? b.avgRating.toFixed(1)+'★' : '—';
+
+  // Catalogue
+  _pbpRenderGrid(ads);
+}
+
+function _pbpRenderGrid(ads){
+  var grid = document.getElementById('pbp-ads-grid');
+  var filtersEl = document.getElementById('pbp-filters');
+  if(!grid) return;
+
+  if(!ads.length){
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)"><div style="font-size:36px;margin-bottom:8px">📦</div><div style="font-size:14px;font-weight:700">Aucun article pour l\'instant</div></div>';
+    if(filtersEl) filtersEl.innerHTML='';
+    return;
+  }
+
+  // Filtres sous-catégorie
+  if(filtersEl){
+    var subcats={};
+    ads.forEach(function(a){ var sc=a.subCategory||a.category||''; if(sc) subcats[sc]=(subcats[sc]||0)+1; });
+    var fHtml = '<button onclick="filterPbpGrid(null,this)" class="pbp-filter-btn pbp-filter-active" style="background:var(--or);color:#fff;border:none;border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Tout ('+ads.length+')</button>';
+    Object.keys(subcats).forEach(function(sc){
+      fHtml += '<button onclick="filterPbpGrid(\''+sc+'\',this)" class="pbp-filter-btn" style="background:#F1F5F9;color:var(--ink);border:1px solid var(--br);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">'+sc+' ('+subcats[sc]+')</button>';
+    });
+    filtersEl.innerHTML = fHtml;
+  }
+
+  // Cartes avec zoom photo activé
+  grid.innerHTML = ads.map(function(a, idx){
+    var adId    = String(a._id||a.id||'');
+    var price   = (a.price||a.p||0).toLocaleString('fr-FR') + ' GNF';
+    var title   = a.title||a.t||'Article';
+    var city    = a.city||'';
+    var photos  = a.photos||[];
+    var imgHtml = photos[0]
+      ? '<img src="'+photos[0]+'" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in" onclick="event.stopPropagation();lbOpen('+idx+','+JSON.stringify(photos).replace(/"/g,"'")+')" loading="lazy" onerror="this.style.display=\'none\'">'
+      : '<span style="font-size:40px;line-height:1">'+(a.emoji||a.e||'📦')+'</span>';
+    return '<div class="lbc-card" onclick="viewAd(\''+adId+'\')" style="cursor:pointer">'
+      +'<div class="lbc-img" style="position:relative">'
+        + imgHtml
+        + (photos.length>1 ? '<div style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;pointer-events:none">📷 '+photos.length+'</div>' : '')
+      +'</div>'
+      +'<div class="lbc-body">'
+        +'<div class="lbc-title">'+title+'</div>'
+        +'<div class="lbc-price">'+price+'</div>'
+        +'<div class="lbc-meta"><span class="lbc-city">'+city+'</span></div>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+var _pbpActiveSubcat = null;
+function filterPbpGrid(subcat, btn){
+  _pbpActiveSubcat = subcat || null;
+  document.querySelectorAll('.pbp-filter-btn').forEach(function(b){
+    b.classList.remove('pbp-filter-active');
+    b.style.background='#F1F5F9'; b.style.color='var(--ink)'; b.style.border='1px solid var(--br)';
+  });
+  if(btn){ btn.style.background='var(--or)'; btn.style.color='#fff'; btn.style.border='none'; }
+  _pbpApplyFilters();
+}
+
+function _pbpApplyFilters(){
+  var q       = ((document.getElementById('pbp-search')||{}).value||'').toLowerCase().trim();
+  var filtered = _pbpAllAds.filter(function(a){
+    if(_pbpActiveSubcat && (a.subCategory||a.category||'') !== _pbpActiveSubcat) return false;
+    if(q){
+      var txt = ((a.title||a.t||'') + ' ' + (a.description||a.desc||'')).toLowerCase();
+      if(!txt.includes(q)) return false;
+    }
+    return true;
+  });
+  _pbpRenderGrid(filtered);
+}
+
+// Alias pour la recherche live
+window.filterPbpGrid = function(subcat, btn){ filterPbpGrid(subcat, btn); };
+document.addEventListener('input', function(e){ if(e.target && e.target.id==='pbp-search') _pbpApplyFilters(); });
+
+// ── Actions sensibles protégées ──
+function _requireAuth(action){
+  var u = DB.user();
+  if(u) return true;
+  // Afficher modal de connexion avec message contextuel
+  var existing = document.getElementById('overlay-auth-required');
+  if(existing) existing.remove();
+  var overlay = document.createElement('div');
+  overlay.id = 'overlay-auth-required';
+  overlay.className = 'overlay open';
+  overlay.style.zIndex = '5000';
+  overlay.innerHTML =
+    '<div class="modal" style="max-width:380px;border-radius:16px;overflow:hidden;text-align:center">'
+      +'<div style="background:linear-gradient(135deg,#1A1A2E,#2D2B0E);padding:28px 24px 20px">'
+        +'<div style="font-size:44px;margin-bottom:8px">🔒</div>'
+        +'<div style="font-size:17px;font-weight:900;color:#fff;margin-bottom:4px">Connexion requise</div>'
+        +'<div style="font-size:13px;color:rgba(255,255,255,.65);line-height:1.6">'+action+'</div>'
+      +'</div>'
+      +'<div style="padding:20px 24px">'
+        +'<button onclick="document.getElementById(\'overlay-auth-required\').remove();document.body.style.overflow=\'\';openModal(\'auth\')" '
+            +'style="width:100%;background:var(--or);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:8px">'
+            +'Se connecter →'
+        +'</button>'
+        +'<button onclick="document.getElementById(\'overlay-auth-required\').remove();document.body.style.overflow=\'\'" '
+            +'style="width:100%;background:none;border:1.5px solid var(--br);border-radius:10px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--muted)">'
+            +'Continuer à naviguer'
+        +'</button>'
+      +'</div>'
+    +'</div>';
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+  overlay.addEventListener('click', function(e){
+    if(e.target===overlay){ overlay.remove(); document.body.style.overflow=''; }
+  });
+  return false;
+}
+
+function pbpContactWhatsapp(){
+  if(!_requireAuth('Connectez-vous pour contacter le vendeur sur WhatsApp.')) return;
+  var b = _pbpData.boutique;
+  var waNum = (b.whatsapp||'').replace(/\D/g,'');
+  if(!waNum){ toast('Numéro WhatsApp non disponible','err'); return; }
+  window.open('https://wa.me/224'+waNum+'?text=Bonjour, j\'ai vu votre boutique sur YouGouYou !','_blank');
+}
+
+function pbpContactMessage(){
+  if(!_requireAuth('Connectez-vous pour envoyer un message au vendeur.')) return;
+  // Ouvrir la messagerie avec ce vendeur
+  if(_pbpData.sellerId){
+    window._pendingOpenConvData = { sellerId: _pbpData.sellerId, sellerName: _pbpData.sellerName };
+    navGoMessages();
+  }
+}
+
+function pbpGoBack(){
+  goToBoutiques();
+}
+
+// ══════════════════════════════════════════
+//  LIGHTBOX — ZOOM PHOTOS
+// ══════════════════════════════════════════
+var _lbPhotos  = [];
+var _lbIdx     = 0;
+
+function lbOpen(idx, photos){
+  if(!photos || !photos.length) return;
+  _lbPhotos = Array.isArray(photos) ? photos : [photos];
+  _lbIdx    = Math.max(0, Math.min(idx, _lbPhotos.length-1));
+  _lbShow();
+  var ov = document.getElementById('lightbox-overlay');
+  if(ov){ ov.style.display='flex'; document.body.style.overflow='hidden'; }
+  document.addEventListener('keydown', _lbKeydown);
+}
+
+function _lbShow(){
+  var img  = document.getElementById('lightbox-img');
+  var ctr  = document.getElementById('lightbox-counter');
+  var tmbs = document.getElementById('lightbox-thumbnails');
+  if(img)  img.src = _lbPhotos[_lbIdx];
+  if(ctr)  ctr.textContent = (_lbIdx+1) + ' / ' + _lbPhotos.length;
+
+  // Miniatures
+  if(tmbs && _lbPhotos.length > 1){
+    tmbs.innerHTML = _lbPhotos.map(function(p,i){
+      return '<div onclick="lbGoTo('+i+')" style="width:44px;height:44px;border-radius:6px;overflow:hidden;cursor:pointer;border:2px solid '+(i===_lbIdx?'#FF5C00':'rgba(255,255,255,.3)')+';flex-shrink:0;transition:border .15s">'
+        +'<img src="'+p+'" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.style.display=\'none\'">'
+      +'</div>';
+    }).join('');
+  } else if(tmbs){ tmbs.innerHTML=''; }
+}
+
+function lbGoTo(i){ _lbIdx = (i+_lbPhotos.length)%_lbPhotos.length; _lbShow(); }
+function lbNav(dir){ lbGoTo(_lbIdx + dir); }
+
+function lbClose(e){
+  if(e && e.target !== document.getElementById('lightbox-overlay') && !e.target.classList.contains('lb-close')) return;
+  var ov = document.getElementById('lightbox-overlay');
+  if(ov){ ov.style.display='none'; document.body.style.overflow=''; }
+  document.removeEventListener('keydown', _lbKeydown);
+  _lbPhotos = []; _lbIdx = 0;
+}
+
+function _lbKeydown(e){
+  if(e.key==='ArrowRight') lbNav(1);
+  if(e.key==='ArrowLeft')  lbNav(-1);
+  if(e.key==='Escape')     lbClose({target:document.getElementById('lightbox-overlay')});
+}
+
+// ── Patcher adCard pour activer le zoom photos ──
+var _origAdCardLb = adCard;
+adCard = function(a, feat){
+  var html = _origAdCardLb(a, feat);
+  // Injecter onclick zoom sur l'image si photos disponibles
+  if(a.photos && a.photos.length > 0){
+    var photosJson = JSON.stringify(a.photos).replace(/"/g,"'");
+    html = html.replace(
+      'class="lbc-img"',
+      'class="lbc-img" style="position:relative" ondblclick="lbOpen(0,'+photosJson+')"'
+    );
+  }
+  return html;
+};
 
 function promoteAdmin(idx){
   var id = (window._adminUserIds||[])[idx];
@@ -10677,6 +11031,112 @@ document.addEventListener('DOMContentLoaded',function(){
     </div>
 
   </div>
+</div>
+
+<!-- ══ PAGE BOUTIQUE PUBLIQUE (accessible sans connexion) ══ -->
+<div id="page-boutique-publique" class="page">
+  <div style="max-width:960px;margin:0 auto;padding:0 0 60px">
+
+    <!-- Bouton retour -->
+    <div id="pbp-back-bar" style="padding:12px 20px 0">
+      <button id="pbp-back-btn" onclick="pbpGoBack()" style="display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:14px;font-family:inherit">
+        ← Retour aux boutiques
+      </button>
+    </div>
+
+    <!-- Hero dynamique -->
+    <div id="pbp-hero" style="background:linear-gradient(135deg,#1A1A2E,#2D2B0E);margin:12px 20px 0;border-radius:18px;padding:28px 28px 22px;position:relative;overflow:hidden">
+      <div style="position:absolute;inset:0;background:radial-gradient(circle at 80% 40%,rgba(255,92,0,.15),transparent 65%);pointer-events:none"></div>
+      <div style="position:relative;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+        <div id="pbp-logo" style="width:80px;height:80px;border-radius:16px;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0;overflow:hidden">🏪</div>
+        <div style="flex:1;min-width:180px">
+          <div id="pbp-name" style="font-size:22px;font-weight:900;color:#fff;margin-bottom:5px">Boutique</div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+            <div id="pbp-badge" style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,92,0,.25);border:1px solid rgba(255,92,0,.4);color:#FFB84D;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px">⭐ PRO</div>
+            <div id="pbp-category" style="font-size:11px;color:rgba(255,255,255,.5);font-weight:600"></div>
+          </div>
+          <div id="pbp-desc" style="font-size:13px;color:rgba(255,255,255,.65);line-height:1.6;max-width:520px"></div>
+        </div>
+        <!-- Actions propriétaire (visibles si c'est sa boutique) -->
+        <div id="pbp-owner-actions" style="display:none;flex-direction:column;gap:6px;flex-shrink:0">
+          <button onclick="goTo('dashboard');showDashTab('boutique')" style="background:var(--or);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">⚙️ Gérer</button>
+          <button onclick="addAnnonceFromBoutique()" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:7px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">➕ Ajouter</button>
+        </div>
+      </div>
+      <!-- Contact + localisation -->
+      <div id="pbp-contact-row" style="position:relative;display:flex;gap:12px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.1)">
+        <div id="pbp-addr-wrap" style="display:none;align-items:center;gap:5px;font-size:12px;color:rgba(255,255,255,.6)">📍 <span id="pbp-addr"></span></div>
+        <div id="pbp-seller-wrap" style="font-size:12px;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:5px">
+          👤 <span id="pbp-seller-name">Vendeur Pro</span>
+        </div>
+        <!-- Bouton WhatsApp — protégé par auth -->
+        <div id="pbp-wa-wrap" style="display:none">
+          <button onclick="pbpContactWhatsapp()" style="display:inline-flex;align-items:center;gap:6px;background:rgba(37,211,102,.2);border:1px solid rgba(37,211,102,.35);color:#4ADE80;font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px;cursor:pointer;font-family:inherit">
+            📲 Contacter sur WhatsApp
+          </button>
+        </div>
+        <!-- Bouton Messagerie — protégé par auth -->
+        <button onclick="pbpContactMessage()" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);font-size:12px;font-weight:600;padding:5px 14px;border-radius:20px;cursor:pointer;font-family:inherit">
+          💬 Envoyer un message
+        </button>
+      </div>
+    </div>
+
+    <!-- Vidéo de présentation -->
+    <div id="pbp-video-section" style="display:none;padding:20px 20px 0">
+      <div style="font-size:14px;font-weight:800;color:var(--ink);margin-bottom:10px">🎬 Présentation vidéo</div>
+      <div id="pbp-video-embed" style="width:100%;border-radius:14px;overflow:hidden;background:#000;aspect-ratio:16/9;box-shadow:0 4px 20px rgba(0,0,0,.12)"></div>
+      <div id="pbp-video-title" style="font-size:12px;color:var(--muted);margin-top:6px;font-weight:600;padding-left:2px"></div>
+    </div>
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:20px 20px 0">
+      <div style="background:#fff;border-radius:12px;padding:14px;border:1px solid var(--br);text-align:center">
+        <div style="font-size:22px;font-weight:900;color:var(--or)" id="pbp-stat-ads">—</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Articles</div>
+      </div>
+      <div style="background:#fff;border-radius:12px;padding:14px;border:1px solid var(--br);text-align:center">
+        <div style="font-size:22px;font-weight:900;color:#7C3AED" id="pbp-stat-views">—</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Vues</div>
+      </div>
+      <div style="background:#fff;border-radius:12px;padding:14px;border:1px solid var(--br);text-align:center">
+        <div style="font-size:22px;font-weight:900;color:#059669" id="pbp-stat-rating">—</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Note</div>
+      </div>
+    </div>
+
+    <!-- Catalogue -->
+    <div style="padding:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div style="font-size:16px;font-weight:800;color:var(--ink)">📦 Catalogue</div>
+        <!-- Barre de recherche dans la boutique -->
+        <div style="display:flex;align-items:center;gap:8px;background:#F8FAFC;border:1.5px solid var(--br);border-radius:10px;padding:6px 14px;min-width:200px">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input id="pbp-search" type="text" placeholder="Rechercher dans la boutique..." oninput="filterPbpGrid()" style="border:none;background:transparent;font-family:inherit;font-size:12px;color:var(--ink);outline:none;width:100%">
+        </div>
+      </div>
+      <!-- Filtres sous-catégorie -->
+      <div id="pbp-filters" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"></div>
+      <!-- Grille annonces -->
+      <div id="pbp-ads-grid" class="ads-grid" style="min-height:200px">
+        <div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--muted)">
+          <div style="font-size:36px;margin-bottom:12px">⏳</div>
+          <div style="font-size:14px;font-weight:700">Chargement du catalogue...</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ LIGHTBOX ZOOM PHOTOS ══ -->
+<div id="lightbox-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;flex-direction:column;align-items:center;justify-content:center" onclick="lbClose(event)">
+  <button onclick="lbClose()" style="position:absolute;top:18px;right:22px;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:24px;cursor:pointer;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-family:inherit;z-index:2">✕</button>
+  <button onclick="lbNav(-1)" style="position:absolute;left:16px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);border:none;color:#fff;font-size:30px;cursor:pointer;border-radius:50%;width:50px;height:50px;display:flex;align-items:center;justify-content:center;font-family:inherit;z-index:2">‹</button>
+  <button onclick="lbNav(1)"  style="position:absolute;right:16px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);border:none;color:#fff;font-size:30px;cursor:pointer;border-radius:50%;width:50px;height:50px;display:flex;align-items:center;justify-content:center;font-family:inherit;z-index:2">›</button>
+  <img id="lightbox-img" src="" alt="" style="max-width:90vw;max-height:85vh;object-fit:contain;border-radius:10px;box-shadow:0 8px 40px rgba(0,0,0,.5);user-select:none">
+  <div id="lightbox-counter" style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.5);color:#fff;font-size:13px;font-weight:600;padding:4px 16px;border-radius:20px"></div>
+  <div id="lightbox-thumbnails" style="position:absolute;bottom:50px;left:50%;transform:translateX(-50%);display:flex;gap:8px;max-width:90vw;overflow-x:auto;padding:8px 0"></div>
 </div>
 
 <!-- ══ PAGE MESSAGES ══ -->
