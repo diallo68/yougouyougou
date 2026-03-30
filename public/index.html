@@ -5536,69 +5536,93 @@ function renderAuthForm(tab){
   var body=document.getElementById('auth-body');
   var gBtn='<button class="g-btn" onclick="loginWithGoogle()"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Continuer avec Google</button><div class="or-sep">ou</div>';
 
+  // ══════════════════════════════════════════
+  //  CONNEXION — 2 onglets : Téléphone | Email ou Pseudo
+  // ══════════════════════════════════════════
   if(tab==='login'){
     body.innerHTML=gBtn+
-      // Toggle : connexion par téléphone, email OU pseudo
-      '<div style="display:flex;background:var(--brl);border-radius:50px;padding:3px;margin-bottom:16px" id="login-toggle">'+
-        '<div id="lt-phone" style="flex:1;text-align:center;padding:8px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;background:var(--wh);box-shadow:var(--sh);color:var(--ink);transition:all .2s" onclick="loginToggle(\'phone\')">📱 Tél.</div>'+
-        '<div id="lt-email" style="flex:1;text-align:center;padding:8px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;color:var(--muted);transition:all .2s" onclick="loginToggle(\'email\')">📧 Email</div>'+
-        '<div id="lt-pseudo" style="flex:1;text-align:center;padding:8px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;color:var(--muted);transition:all .2s" onclick="loginToggle(\'pseudo\')">🏷️ Pseudo</div>'+
+      // Toggle : 2 modes seulement
+      '<div style="display:flex;background:var(--brl);border-radius:50px;padding:3px;margin-bottom:18px" id="login-toggle">'+
+        '<div id="lt-phone" style="flex:1;text-align:center;padding:9px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;background:var(--wh);box-shadow:var(--sh);color:var(--ink);transition:all .2s" onclick="loginToggle(\'phone\')">📱 Téléphone</div>'+
+        '<div id="lt-email" style="flex:1;text-align:center;padding:9px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted);transition:all .2s" onclick="loginToggle(\'email\')">📧 Email ou Pseudo</div>'+
       '</div>'+
-      '<div id="li-phone-wrap" class="fg"><label>Téléphone</label><div class="ph-row"><span class="ph-pfx">🇬🇳 +224</span><input type="tel" id="li-phone" placeholder="620 00 00 00" style="flex:1"></div></div>'+
-      '<div id="li-email-wrap" class="fg" style="display:none"><label>Adresse email</label><input type="email" id="li-email" placeholder="votre@email.com"></div>'+
-      '<div id="li-pseudo-wrap" class="fg" style="display:none"><label>Pseudonyme</label>'+
+
+      // Mode Téléphone
+      '<div id="li-phone-wrap" class="fg">'+
+        '<label>📱 Numéro de téléphone</label>'+
+        '<div class="ph-row"><span class="ph-pfx">🇬🇳 +224</span><input type="tel" id="li-phone" placeholder="620 00 00 00" style="flex:1" inputmode="tel"></div>'+
+      '</div>'+
+
+      // Mode Email / Pseudo — MÊME champ, détection automatique
+      '<div id="li-email-wrap" class="fg" style="display:none">'+
+        '<label id="li-email-label">📧 Adresse email ou pseudonyme</label>'+
         '<div style="position:relative">'+
-          '<span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:700;font-size:14px">@</span>'+
-          '<input type="text" id="li-pseudo" placeholder="votre_pseudo" style="padding-left:28px" autocomplete="username" autocapitalize="none">'+
+          '<input type="text" id="li-email" placeholder="email@exemple.com ou @mon_pseudo"'+
+            ' autocomplete="username" autocapitalize="none" autocorrect="off"'+
+            ' oninput="detectLoginType(this.value)"'+
+            ' style="padding-right:80px">'+
+          '<span id="li-type-badge" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:#F1F5F9;color:var(--muted);pointer-events:none;transition:all .2s"></span>'+
         '</div>'+
+        '<div style="font-size:11px;color:var(--muted);margin-top:4px">💡 Entrez votre email ou votre @pseudo</div>'+
       '</div>'+
-      '<div class="fg"><label>Mot de passe</label><input type="password" id="lp" placeholder="••••••••"></div>'+
-      '<div style="text-align:right;margin:-6px 0 12px"><a style="font-size:12px;color:var(--or);cursor:pointer;font-weight:700" onclick="showForgotPassword()">🔑 Mot de passe oublié ?</a></div>'+
+
+      '<div class="fg"><label>🔒 Mot de passe</label><input type="password" id="lp" placeholder="••••••••" autocomplete="current-password"></div>'+
+      '<div style="text-align:right;margin:-6px 0 14px"><a style="font-size:12px;color:var(--or);cursor:pointer;font-weight:700" onclick="showForgotPassword()">🔑 Mot de passe oublié ?</a></div>'+
       '<button class="btn btn-ink btn-full" style="border-radius:12px" onclick="doLogin()">Se connecter →</button>'+
       '<p style="text-align:center;font-size:13px;color:var(--muted);margin-top:14px">Pas de compte ? <a style="color:var(--or);cursor:pointer;font-weight:700" onclick="authTab(\'reg\')">S\'inscrire gratuitement</a></p>';
 
+    loginMode = 'phone';
+
+  // ══════════════════════════════════════════
+  //  INSCRIPTION — 2 onglets : Téléphone | Email & Pseudo
+  // ══════════════════════════════════════════
   } else {
-    // INSCRIPTION
     var opts='<option value="">Choisir votre préfecture...</option>';
     ALL_CITIES.forEach(function(c){opts+='<option>'+c+'</option>';});
+
     body.innerHTML=gBtn+
-      // Toggle mode inscription
+      // Toggle inscription
       '<div style="display:flex;background:var(--brl);border-radius:50px;padding:3px;margin-bottom:20px">'+
         '<div id="rt-phone" style="flex:1;text-align:center;padding:9px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;background:var(--wh);box-shadow:var(--sh);color:var(--ink);transition:all .2s" onclick="regToggle(\'phone\')">📱 Téléphone</div>'+
-        '<div id="rt-email" style="flex:1;text-align:center;padding:9px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted);transition:all .2s" onclick="regToggle(\'email\')">📧 Email</div>'+
+        '<div id="rt-email" style="flex:1;text-align:center;padding:9px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted);transition:all .2s" onclick="regToggle(\'email\')">📧 Email & Pseudo</div>'+
       '</div>'+
-      // Prénom + Nom
+
+      // Bloc commun : Prénom + Nom
       '<div class="frow">'+
-        '<div class="fg"><label>Prénom *</label><input type="text" id="rfn" placeholder="Prénom"></div>'+
-        '<div class="fg"><label>Nom</label><input type="text" id="rln" placeholder="Nom"></div>'+
+        '<div class="fg"><label>Prénom *</label><input type="text" id="rfn" placeholder="Prénom" autocomplete="given-name"></div>'+
+        '<div class="fg"><label>Nom</label><input type="text" id="rln" placeholder="Nom" autocomplete="family-name"></div>'+
       '</div>'+
-      // ── CHAMP PSEUDONYME ──
-      '<div class="fg" id="rpseudo-wrap">'+
-        '<label>🏷️ Pseudonyme * <span style="font-size:11px;color:var(--muted);font-weight:500">(unique, pour vous connecter)</span></label>'+
-        '<div style="position:relative">'+
-          '<span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:700;font-size:14px">@</span>'+
-          '<input type="text" id="rpseudo" placeholder="mon_pseudo" style="padding-left:28px" autocapitalize="none" autocomplete="username"'+
-            ' oninput="checkPseudo(this.value)">'+
-        '</div>'+
-        '<div id="pseudo-status" style="font-size:12px;font-weight:600;margin-top:4px;height:16px"></div>'+
+
+      // ── MODE TÉLÉPHONE : numéro ──
+      '<div id="rph-wrap" class="fg">'+
+        '<label>📱 Téléphone Orange *</label>'+
+        '<div class="ph-row"><span class="ph-pfx">🇬🇳 +224</span><input type="tel" id="rph" placeholder="620 00 00 00" maxlength="9" style="flex:1" inputmode="tel"></div>'+
       '</div>'+
-      // Téléphone
-      '<div class="fg" id="rph-wrap">'+
-        '<label id="rph-label">📱 Téléphone Orange *</label>'+
-        '<div class="ph-row"><span class="ph-pfx">🇬🇳 +224</span><input type="tel" id="rph" placeholder="620 00 00 00" maxlength="9" style="flex:1"></div>'+
-      '</div>'+
-      // Email
-      '<div class="fg" id="rem-wrap" style="display:none">'+
+
+      // ── MODE EMAIL : email + pseudo (cachés par défaut) ──
+      '<div id="rem-wrap" class="fg" style="display:none">'+
         '<label>📧 Adresse email *</label>'+
-        '<input type="email" id="rem" placeholder="votre@email.com">'+
+        '<input type="email" id="rem" placeholder="votre@email.com" autocomplete="email">'+
       '</div>'+
+
+      '<div id="rpseudo-wrap" class="fg" style="display:none">'+
+        '<label>🏷️ Pseudonyme * <span style="font-size:11px;color:var(--muted);font-weight:500">(unique · pour vous connecter)</span></label>'+
+        '<div style="position:relative">'+
+          '<span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--or);font-weight:900;font-size:15px;pointer-events:none">@</span>'+
+          '<input type="text" id="rpseudo" placeholder="mon_pseudo" style="padding-left:30px" autocapitalize="none" autocomplete="username" oninput="checkPseudo(this.value)">'+
+        '</div>'+
+        '<div id="pseudo-status" style="font-size:12px;font-weight:600;margin-top:4px;min-height:16px"></div>'+
+      '</div>'+
+
       // Mot de passe
-      '<div class="fg"><label>Mot de passe *</label><input type="password" id="rpw" placeholder="8 caractères minimum" oninput="checkPwMatch()"></div>'+
-      '<div class="fg"><label>Confirmer le mot de passe *</label><input type="password" id="rpw2" placeholder="Répétez votre mot de passe" oninput="checkPwMatch()"></div>'+
+      '<div class="fg"><label>🔒 Mot de passe *</label><input type="password" id="rpw" placeholder="8 caractères minimum" autocomplete="new-password" oninput="checkPwMatch()"></div>'+
+      '<div class="fg"><label>🔒 Confirmer le mot de passe *</label><input type="password" id="rpw2" placeholder="Répétez votre mot de passe" autocomplete="new-password" oninput="checkPwMatch()"></div>'+
       '<div id="pw-match-msg" style="margin-top:-10px;margin-bottom:12px;font-size:13px;font-weight:700;display:none"></div>'+
+
       // Ville
       '<div class="fg"><label>📍 Préfecture / Ville *</label><select id="rct">'+opts+'</select></div>'+
-      '<button class="btn btn-or btn-full" style="border-radius:12px" id="btn-sendcode" onclick="sendVerifCode()">📱 Recevoir le code SMS →</button>'+
+
+      '<button class="btn btn-or btn-full" style="border-radius:12px" id="btn-sendcode" onclick="sendVerifCode()">📱 Recevoir le code de vérification →</button>'+
       '<p style="text-align:center;font-size:13px;color:var(--muted);margin-top:14px">Déjà un compte ? <a style="color:var(--or);cursor:pointer;font-weight:700" onclick="authTab(\'login\')">Se connecter</a></p>';
 
     regMode = 'phone';
@@ -5676,37 +5700,38 @@ function checkPseudo(val){
   }, 500); // 500ms debounce
 }
 
-var regMode='phone'; // 'phone' ou 'email'
-
+var regMode='phone';
 function regToggle(mode){
-  regMode=mode;
-  var phoneWrap=document.getElementById('rph-wrap');
-  var emailWrap=document.getElementById('rem-wrap');
-  var phoneLabel=document.getElementById('rph-label');
-  var rtPhone=document.getElementById('rt-phone');
-  var rtEmail=document.getElementById('rt-email');
-  var btn=document.getElementById('btn-sendcode');
-  var activeStyle={background:'var(--wh)',boxShadow:'var(--sh)',color:'var(--ink)'};
-  var inactiveStyle={background:'transparent',boxShadow:'none',color:'var(--muted)'};
+  regMode = mode;
+  var phoneWrap  = document.getElementById('rph-wrap');
+  var emailWrap  = document.getElementById('rem-wrap');
+  var pseudoWrap = document.getElementById('rpseudo-wrap');
+  var rtPhone    = document.getElementById('rt-phone');
+  var rtEmail    = document.getElementById('rt-email');
+  var btn        = document.getElementById('btn-sendcode');
+  var active   = {background:'var(--wh)',boxShadow:'var(--sh)',color:'var(--ink)'};
+  var inactive = {background:'transparent',boxShadow:'none',color:'var(--muted)'};
 
-  if(mode==='phone'){
-    // Mode téléphone : téléphone obligatoire, email caché
-    if(phoneWrap) phoneWrap.style.display='';
-    if(phoneLabel) phoneLabel.textContent='📱 Téléphone Orange *';
-    if(emailWrap) emailWrap.style.display='none';
-    if(rtPhone) Object.assign(rtPhone.style,activeStyle);
-    if(rtEmail) Object.assign(rtEmail.style,inactiveStyle);
-    verifyMethod='sms';
-    if(btn) btn.textContent='📱 Recevoir le code SMS →';
+  if(mode === 'phone'){
+    // Téléphone : afficher champ tél, cacher email + pseudo
+    if(phoneWrap)  phoneWrap.style.display  = '';
+    if(emailWrap)  emailWrap.style.display  = 'none';
+    if(pseudoWrap) pseudoWrap.style.display = 'none';
+    if(rtPhone) Object.assign(rtPhone.style, active);
+    if(rtEmail) Object.assign(rtEmail.style, inactive);
+    verifyMethod = 'sms';
+    if(btn) btn.textContent = '📱 Recevoir le code par SMS →';
   } else {
-    // Mode email : email obligatoire + téléphone optionnel
-    if(emailWrap) emailWrap.style.display='';
-    if(phoneWrap) phoneWrap.style.display='';
-    if(phoneLabel) phoneLabel.textContent='📱 Téléphone Orange (optionnel)';
-    if(rtPhone) Object.assign(rtPhone.style,inactiveStyle);
-    if(rtEmail) Object.assign(rtEmail.style,activeStyle);
-    verifyMethod='email';
-    if(btn) btn.textContent='📧 Recevoir le code par email →';
+    // Email & Pseudo : afficher email + pseudo, cacher tél
+    if(phoneWrap)  phoneWrap.style.display  = 'none';
+    if(emailWrap)  emailWrap.style.display  = '';
+    if(pseudoWrap) pseudoWrap.style.display = '';
+    if(rtPhone) Object.assign(rtPhone.style, inactive);
+    if(rtEmail) Object.assign(rtEmail.style, active);
+    verifyMethod = 'email';
+    if(btn) btn.textContent = '📧 Recevoir le code par email →';
+    // Focus auto sur l'email
+    setTimeout(function(){ var e=document.getElementById('rem'); if(e)e.focus(); },80);
   }
 }
 
@@ -5723,21 +5748,46 @@ function pickVerifyMethod(m){
 
 var loginMode='phone';
 function loginToggle(mode){
-  loginMode=mode;
-  var pw=document.getElementById('li-phone-wrap');
-  var ew=document.getElementById('li-email-wrap');
-  var psw=document.getElementById('li-pseudo-wrap');
-  var ltp=document.getElementById('lt-phone');
-  var lte=document.getElementById('lt-email');
-  var ltps=document.getElementById('lt-pseudo');
-  var active={background:'var(--wh)',boxShadow:'var(--sh)',color:'var(--ink)'};
-  var inactive={background:'transparent',boxShadow:'none',color:'var(--muted)'};
-  if(pw)  pw.style.display  = mode==='phone'  ? '' : 'none';
-  if(ew)  ew.style.display  = mode==='email'  ? '' : 'none';
-  if(psw) psw.style.display = mode==='pseudo' ? '' : 'none';
-  if(ltp)  Object.assign(ltp.style,  mode==='phone'  ? active : inactive);
-  if(lte)  Object.assign(lte.style,  mode==='email'  ? active : inactive);
-  if(ltps) Object.assign(ltps.style, mode==='pseudo' ? active : inactive);
+  loginMode = mode;
+  var phoneWrap = document.getElementById('li-phone-wrap');
+  var emailWrap = document.getElementById('li-email-wrap');
+  var ltp = document.getElementById('lt-phone');
+  var lte = document.getElementById('lt-email');
+  var active   = {background:'var(--wh)',boxShadow:'var(--sh)',color:'var(--ink)'};
+  var inactive = {background:'transparent',boxShadow:'none',color:'var(--muted)'};
+
+  if(phoneWrap) phoneWrap.style.display = mode==='phone' ? '' : 'none';
+  if(emailWrap) emailWrap.style.display = mode==='email' ? '' : 'none';
+  if(ltp) Object.assign(ltp.style, mode==='phone' ? active : inactive);
+  if(lte) Object.assign(lte.style, mode==='email' ? active : inactive);
+
+  // Focus automatique
+  setTimeout(function(){
+    var el = mode==='phone'
+      ? document.getElementById('li-phone')
+      : document.getElementById('li-email');
+    if(el) el.focus();
+  }, 80);
+}
+
+// Détection automatique du type (email ou pseudo) dans le champ unifié
+function detectLoginType(val){
+  var badge = document.getElementById('li-type-badge');
+  if(!badge || !val) { if(badge) badge.textContent=''; return; }
+  var v = val.trim();
+  var isEmail = v.includes('@') && v.includes('.');
+  var isPseudo = v.startsWith('@') || (!v.includes('@') && v.length >= 3);
+  if(isEmail){
+    badge.textContent = '📧 Email';
+    badge.style.background = '#EFF6FF';
+    badge.style.color = '#1D4ED8';
+  } else if(isPseudo){
+    badge.textContent = '🏷️ Pseudo';
+    badge.style.background = '#FFF3EE';
+    badge.style.color = 'var(--or)';
+  } else {
+    badge.textContent = '';
+  }
 }
 
 function markField(el,valid){
@@ -5748,72 +5798,86 @@ function markField(el,valid){
 }
 
 function sendVerifCode(){
-  var fn=(document.getElementById('rfn')||{value:''}).value.trim();
-  var ph=(document.getElementById('rph')||{value:''}).value.trim();
-  var em=(document.getElementById('rem')||{value:''}).value.trim();
-  var pw=(document.getElementById('rpw')||{value:''}).value.trim();
-  var pw2=(document.getElementById('rpw2')||{value:''}).value.trim();
-  var city=(document.getElementById('rct')||{value:''}).value;
-  var pseudo=((document.getElementById('rpseudo')||{value:''}).value.trim()).toLowerCase().replace(/[^a-z0-9_.-]/g,'');
+  var fn   = (document.getElementById('rfn')||{value:''}).value.trim();
+  var ph   = (document.getElementById('rph')||{value:''}).value.trim();
+  var em   = (document.getElementById('rem')||{value:''}).value.trim();
+  var pw   = (document.getElementById('rpw')||{value:''}).value.trim();
+  var pw2  = (document.getElementById('rpw2')||{value:''}).value.trim();
+  var city = (document.getElementById('rct')||{value:''}).value;
+  var pseudo = ((document.getElementById('rpseudo')||{value:''}).value.trim()).toLowerCase().replace(/[^a-z0-9_.-]/g,'');
 
-  var ok=true;
-  if(!fn){markField(document.getElementById('rfn'),false);ok=false;}
-  // Validation pseudo
-  if(!pseudo||pseudo.length<3){
-    markField(document.getElementById('rpseudo'),false);
-    var ps=document.getElementById('pseudo-status');
-    if(ps){ps.textContent='⚠️ Pseudo requis (3 caractères minimum)';ps.style.color='#DC2626';}
-    ok=false;
-  }
-  if(regMode==='phone'){if(!ph||ph.length<8){markField(document.getElementById('rph'),false);ok=false;}}
-  else{if(!em||!em.includes('@')){markField(document.getElementById('rem'),false);ok=false;}}
-  if(!pw||pw.length<8){markField(document.getElementById('rpw'),false);ok=false;}
-  if(!pw2||pw!==pw2){markField(document.getElementById('rpw2'),false);ok=false;}
-  if(!city){markField(document.getElementById('rct'),false);ok=false;}
-  if(!ok){toast('⚠️ Remplissez les champs en rouge','err');return;}
+  var ok = true;
 
-  var sendBtn=document.getElementById('btn-sendcode');
-  if(sendBtn){sendBtn.disabled=true;sendBtn.textContent='⏳ Vérification...';}
+  // Prénom obligatoire dans tous les cas
+  if(!fn){ markField(document.getElementById('rfn'),false); ok=false; }
 
-  // Vérifier l'unicité du pseudo avant d'envoyer le code
-  fetch('/api/auth/check-pseudo',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({pseudo:pseudo})
-  })
-  .then(function(r){return r.json();})
-  .then(function(data){
-    if(data.taken){
-      if(sendBtn){sendBtn.disabled=false;sendBtn.textContent=verifyMethod==='sms'?'📱 Recevoir le code SMS →':'📧 Recevoir le code par email →';}
-      var ps=document.getElementById('pseudo-status');
-      if(ps){ps.textContent='❌ Ce pseudo est déjà pris';ps.style.color='#DC2626';}
+  if(regMode === 'phone'){
+    // Mode téléphone : tél obligatoire, pseudo non requis
+    if(!ph || ph.length < 8){ markField(document.getElementById('rph'),false); ok=false; }
+  } else {
+    // Mode email+pseudo : email ET pseudo obligatoires
+    if(!em || !em.includes('@')){ markField(document.getElementById('rem'),false); ok=false; }
+    if(!pseudo || pseudo.length < 3){
       markField(document.getElementById('rpseudo'),false);
-      toast('❌ Ce pseudo est déjà utilisé','err');
-      return;
+      var ps = document.getElementById('pseudo-status');
+      if(ps){ ps.textContent='⚠️ Pseudo requis (3 caractères minimum)'; ps.style.color='#DC2626'; }
+      ok=false;
     }
-    // Pseudo disponible → procéder à l'envoi du code
+  }
+
+  if(!pw || pw.length < 8){ markField(document.getElementById('rpw'),false); ok=false; }
+  if(!pw2 || pw !== pw2){ markField(document.getElementById('rpw2'),false); ok=false; }
+  if(!city){ markField(document.getElementById('rct'),false); ok=false; }
+  if(!ok){ toast('⚠️ Remplissez les champs en rouge','err'); return; }
+
+  var sendBtn = document.getElementById('btn-sendcode');
+  if(sendBtn){ sendBtn.disabled=true; sendBtn.textContent='⏳ Vérification...'; }
+
+  if(regMode === 'email' && pseudo){
+    // Vérifier unicité du pseudo avant d'envoyer le code
+    fetch('/api/auth/check-pseudo',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({pseudo: pseudo})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if(data.taken){
+        if(sendBtn){ sendBtn.disabled=false; sendBtn.textContent='📧 Recevoir le code par email →'; }
+        var ps2 = document.getElementById('pseudo-status');
+        if(ps2){ ps2.textContent='❌ Ce pseudo est déjà pris'; ps2.style.color='#DC2626'; }
+        markField(document.getElementById('rpseudo'),false);
+        toast('❌ Ce pseudo est déjà utilisé, choisissez-en un autre','err');
+        return;
+      }
+      _doSendVerifCode(fn, ph, em, pw, city, pseudo, sendBtn);
+    })
+    .catch(function(){
+      // Pas de réseau → continuer, le serveur vérifiera
+      _doSendVerifCode(fn, ph, em, pw, city, pseudo, sendBtn);
+    });
+  } else {
+    // Mode téléphone : pas de vérif pseudo
     _doSendVerifCode(fn, ph, em, pw, city, pseudo, sendBtn);
-  })
-  .catch(function(){
-    // Si API inaccessible → on continue quand même, le serveur vérifiera à l'inscription
-    _doSendVerifCode(fn, ph, em, pw, city, pseudo, sendBtn);
-  });
+  }
 }
 
 function _doSendVerifCode(fn, ph, em, pw, city, pseudo, sendBtn){
-  pendingUser={
-    prenom: fn,
-    nom: (document.getElementById('rln')||{value:''}).value.trim(),
-    pseudo: pseudo,
-    phone: ph ? '+224'+ph : '',
-    email: regMode==='email' ? em : '',
+  var btnLabel = regMode==='phone' ? '📱 Recevoir le code par SMS →' : '📧 Recevoir le code par email →';
+
+  pendingUser = {
+    prenom:   fn,
+    nom:      (document.getElementById('rln')||{value:''}).value.trim(),
+    pseudo:   pseudo || '',
+    phone:    (regMode==='phone' && ph) ? '+224'+ph : '',
+    email:    regMode==='email' ? em : '',
     password: pw,
-    city: city,
-    method: regMode==='email'?'email':'sms',
-    initials:(fn.charAt(0)+((document.getElementById('rln')||{value:''}).value.trim().charAt(0)||'')).toUpperCase()
+    city:     city,
+    method:   regMode==='email' ? 'email' : 'sms',
+    initials: (fn.charAt(0)+((document.getElementById('rln')||{value:''}).value.trim().charAt(0)||'')).toUpperCase()
   };
 
-  if(sendBtn){sendBtn.disabled=true;sendBtn.textContent='⏳ Envoi en cours...';}
+  if(sendBtn){ sendBtn.disabled=true; sendBtn.textContent='⏳ Envoi en cours...'; }
 
   var apiDone = false;
   var dest = verifyMethod==='email' ? em : '+224 '+ph;
@@ -5822,7 +5886,7 @@ function _doSendVerifCode(fn, ph, em, pw, city, pseudo, sendBtn){
   var timeout = setTimeout(function(){
     if(!apiDone){
       apiDone = true;
-      if(sendBtn){sendBtn.disabled=false;sendBtn.textContent=verifyMethod==='sms'?'📱 Recevoir le code SMS →':'📧 Recevoir le code par email →';}
+      if(sendBtn){ sendBtn.disabled=false; sendBtn.textContent=btnLabel; }
       codeFromServer = true;
       showCodeForm(dest, icon);
       toast('⚠️ Délai dépassé — si vous recevez le code, saisissez-le','warn');
@@ -5832,19 +5896,24 @@ function _doSendVerifCode(fn, ph, em, pw, city, pseudo, sendBtn){
   fetch('/api/auth/send-code',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({phone: ph ? '+224'+ph : '', email:em, method:verifyMethod, prenom:fn})
+    body: JSON.stringify({
+      phone:  (ph && regMode==='phone') ? '+224'+ph : '',
+      email:  em,
+      method: verifyMethod,
+      prenom: fn
+    })
   })
-  .then(function(r){return r.json();})
+  .then(function(r){ return r.json(); })
   .then(function(data){
-    if(apiDone) return; apiDone = true; clearTimeout(timeout);
-    if(sendBtn){sendBtn.disabled=false;sendBtn.textContent=verifyMethod==='sms'?'📱 Recevoir le code SMS →':'📧 Recevoir le code par email →';}
-    if(data.error){toast('❌ '+data.error,'err');return;}
+    if(apiDone) return; apiDone=true; clearTimeout(timeout);
+    if(sendBtn){ sendBtn.disabled=false; sendBtn.textContent=btnLabel; }
+    if(data.error){ toast('❌ '+data.error,'err'); return; }
     codeFromServer = true;
     showCodeForm(dest, icon);
   })
   .catch(function(){
-    if(apiDone) return; apiDone = true; clearTimeout(timeout);
-    if(sendBtn){sendBtn.disabled=false;sendBtn.textContent=verifyMethod==='sms'?'📱 Recevoir le code SMS →':'📧 Recevoir le code par email →';}
+    if(apiDone) return; apiDone=true; clearTimeout(timeout);
+    if(sendBtn){ sendBtn.disabled=false; sendBtn.textContent=btnLabel; }
     codeFromServer = false;
     toast('❌ Erreur réseau — vérifiez votre connexion','err');
   });
@@ -6089,42 +6158,40 @@ function fetchGoogleProfile(token){
 window.addEventListener('load',function(){setTimeout(initGoogleAuth,1000);});
 
 function doLogin(){
-  var id='';
-  if(loginMode==='phone'){
-    id=(document.getElementById('li-phone')||{value:''}).value.trim();
-  } else if(loginMode==='email'){
-    id=(document.getElementById('li-email')||{value:''}).value.trim();
-  } else {
-    // mode pseudo
-    id=(document.getElementById('li-pseudo')||{value:''}).value.trim().toLowerCase();
-  }
-  var pw=(document.getElementById('lp')||{value:''}).value.trim();
+  var id='', identifier='', detectedMode='';
 
-  if(!id){
-    var labels={'phone':'téléphone','email':'email','pseudo':'pseudonyme'};
-    toast('⚠️ Remplissez votre '+(labels[loginMode]||'identifiant'),'err');
-    return;
+  if(loginMode==='phone'){
+    id = (document.getElementById('li-phone')||{value:''}).value.trim().replace(/\s/g,'');
+    if(!id){ toast('⚠️ Entrez votre numéro de téléphone','err'); return; }
+    identifier  = '+224'+id.replace(/^\+224/,'');
+    detectedMode = 'phone';
+  } else {
+    // Champ unifié email/pseudo — détection automatique
+    id = (document.getElementById('li-email')||{value:''}).value.trim();
+    if(!id){ toast('⚠️ Entrez votre email ou pseudonyme','err'); return; }
+
+    var isEmail = id.includes('@') && id.includes('.');
+    if(isEmail){
+      identifier  = id.toLowerCase();
+      detectedMode = 'email';
+    } else {
+      // C'est un pseudo — normaliser
+      identifier  = '@'+id.replace(/^@/,'').toLowerCase();
+      detectedMode = 'pseudo';
+    }
   }
-  if(!pw){toast('⚠️ Entrez votre mot de passe','err');return;}
+
+  var pw=(document.getElementById('lp')||{value:''}).value.trim();
+  if(!pw){ toast('⚠️ Entrez votre mot de passe','err'); return; }
 
   var btns=document.querySelectorAll('#auth-body .btn-ink');
   btns.forEach(function(b){b.disabled=true;b.textContent='⏳ Connexion...';});
   function resetBtn(){btns.forEach(function(b){b.disabled=false;b.textContent='Se connecter →';});}
 
-  // Construire l'identifiant selon le mode
-  var identifier;
-  if(loginMode==='phone'){
-    identifier = '+224'+id.replace(/\s/g,'').replace(/^\+224/,'');
-  } else if(loginMode==='pseudo'){
-    identifier = '@'+id.replace(/^@/,'').toLowerCase();
-  } else {
-    identifier = id.toLowerCase();
-  }
-
   fetch('/api/login',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({identifier: identifier, password: pw, mode: loginMode})
+    body:JSON.stringify({ identifier: identifier, password: pw, mode: detectedMode })
   })
   .then(function(r){return r.json();})
   .then(function(data){
@@ -6145,19 +6212,19 @@ function doLogin(){
   })
   .catch(function(){
     resetBtn();
+    // Fallback local si serveur indisponible
     var users=DB._d.users||[];
     var found=users.find(function(u){
-      if(loginMode==='phone'){
-        var fullId='+224'+id.replace(/\s/g,'').replace(/^\+224/,'');
-        return u.phone&&u.phone.replace(/\s/g,'')===fullId;
-      } else if(loginMode==='pseudo'){
-        return u.pseudo&&u.pseudo.toLowerCase()===id.replace(/^@/,'').toLowerCase();
+      if(detectedMode==='phone'){
+        return u.phone&&u.phone.replace(/\s/g,'')===identifier.replace(/\s/g,'');
+      } else if(detectedMode==='pseudo'){
+        var ps = identifier.replace(/^@/,'').toLowerCase();
+        return u.pseudo&&u.pseudo.toLowerCase()===ps;
       } else {
-        return u.email&&u.email.toLowerCase()===id.toLowerCase();
+        return u.email&&u.email.toLowerCase()===identifier.toLowerCase();
       }
     });
     if(!found){toast('❌ Serveur indisponible — compte introuvable localement','err');return;}
-    if(found.password&&found.password!==pw){toast('❌ Mot de passe incorrect','err');return;}
     DB.login(found);updateNav();closeModal('auth');document.body.style.overflow='';
     toast('⚠️ Connecté hors-ligne — mode limité','ok');
   });
