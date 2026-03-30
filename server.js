@@ -199,6 +199,7 @@ function emailAlertHTML(alert, ad) {
 const UserSchema = new mongoose.Schema({
   prenom:       { type: String, required: true, trim: true },
   nom:          { type: String, trim: true },
+  pseudo:       { type: String, trim: true, lowercase: true, unique: true, sparse: true, maxlength: 30 },
   phone:        { type: String, unique: true, sparse: true },
   email:        { type: String, trim: true, lowercase: true },
   password:     { type: String, required: true },
@@ -267,6 +268,7 @@ const UserSchema = new mongoose.Schema({
 });
 UserSchema.index({ phone: 1 });
 UserSchema.index({ email: 1 });
+UserSchema.index({ pseudo: 1 }, { sparse: true });
 const User = mongoose.model('User', UserSchema);
 
 // ── Annonce ──────────────────────────────────────────────────
@@ -609,11 +611,47 @@ app.post('/api/auth/send-code', async (req, res) => {
 });
 
 // Étape 2 : vérifier le code et créer le compte
+// ── Vérifier la disponibilité d'un pseudo (public, sans auth) ──
+app.post('/api/auth/check-pseudo', async (req, res) => {
+  try {
+    const { pseudo } = req.body;
+    if (!pseudo || pseudo.trim().length < 3)
+      return res.json({ taken: false, valid: false, error: 'Pseudo trop court' });
+
+    const clean = pseudo.trim().toLowerCase().replace(/[^a-z0-9_.-]/g, '');
+    if (clean.length < 3)
+      return res.json({ taken: false, valid: false, error: 'Pseudo invalide' });
+
+    // Mots réservés
+    const reserved = ['admin','support','yougou','yougouyou','moderateur','system','api','help','guinee','conakry'];
+    if (reserved.includes(clean))
+      return res.json({ taken: true, valid: false, error: 'Pseudo réservé' });
+
+    const existing = await User.findOne({ pseudo: clean }).select('_id');
+    res.json({ taken: !!existing, valid: !existing, pseudo: clean });
+  } catch(err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.post('/api/register', async (req, res) => {
   try {
-    const { prenom, nom, phone, email, password, city, code, method = 'sms', dob } = req.body;
+    const { prenom, nom, pseudo, phone, email, password, city, code, method = 'sms', dob } = req.body;
     if (!prenom || !password || !code)
       return res.status(400).json({ error: 'Champs requis manquants' });
+
+    // ── Validation pseudo ─────────────────────────────────────
+    const cleanPseudo = pseudo ? pseudo.trim().toLowerCase().replace(/[^a-z0-9_.-]/g, '') : null;
+    if (!cleanPseudo || cleanPseudo.length < 3)
+      return res.status(400).json({ error: 'Pseudonyme requis (3 caractères minimum, lettres et chiffres uniquement)' });
+    if (cleanPseudo.length > 30)
+      return res.status(400).json({ error: 'Pseudonyme trop long (30 caractères maximum)' });
+
+    // Vérifier unicité du pseudo
+    const pseudoExists = await User.findOne({ pseudo: cleanPseudo }).select('_id');
+    if (pseudoExists)
+      return res.status(409).json({ error: `Le pseudo "@${cleanPseudo}" est déjà utilisé. Choisissez-en un autre.` });
+    // ─────────────────────────────────────────────────────────────
 
     // ── Vérification âge minimum 18 ans ──────────────────────────
     if (!dob) return res.status(400).json({ error: 'Date de naissance requise' });
@@ -658,6 +696,7 @@ app.post('/api/register', async (req, res) => {
     const hashed = await bcrypt.hash(password, 10);
     pending.prenom    = prenom;
     pending.nom       = nom || '';
+    pending.pseudo    = cleanPseudo;
     pending.password  = hashed;
     pending.city      = city || '';
     pending.dob       = dob;
@@ -670,11 +709,12 @@ app.post('/api/register', async (req, res) => {
     await pending.save();
 
     const token = jwt.sign({ id: pending._id, role: pending.role }, JWT_SECRET, { expiresIn: '90d' });
-    console.log(`[REGISTER] ✅ Compte créé: ${pending._id} email=${pending.email}`);
+    console.log(`[REGISTER] ✅ Compte créé: ${pending._id} pseudo=${cleanPseudo} email=${pending.email}`);
     res.json({
       success: true, token,
-      user: { id: pending._id, name: `${prenom} ${nom||''}`.trim(),
-              prenom, nom: nom||'',
+      user: { id: pending._id, _id: pending._id,
+              name: `${prenom} ${nom||''}`.trim(),
+              prenom, nom: nom||'', pseudo: cleanPseudo,
               phone: pending.phone||'', email: pending.email||'',
               city: city||'', role: pending.role }
     });
@@ -703,27 +743,60 @@ app.post('/api/auth/refresh', auth, async (req, res) => {
 // Connexion
 app.post('/api/login', async (req, res) => {
   try {
-    const { identifier, password } = req.body;
+    const { identifier, password, mode } = req.body;
     if (!identifier || !password)
       return res.status(400).json({ error: 'Identifiant et mot de passe requis' });
 
-    const phoneVariants = [identifier, '+224'+identifier.replace(/^\+224/,''), identifier.replace(/^\+224/,'')];
-    const user = await User.findOne({
-      $or: [{ phone: { $in: phoneVariants } }, { email: identifier.toLowerCase() }]
-    });
-    if (!user) return res.status(400).json({ error: 'Compte introuvable' });
-    if (!user.verified) return res.status(400).json({ error: 'Compte non vérifié' });
+    let user = null;
+
+    if (mode === 'pseudo' || identifier.startsWith('@')) {
+      // Connexion par pseudo
+      const cleanPseudo = identifier.replace(/^@/, '').trim().toLowerCase();
+      user = await User.findOne({ pseudo: cleanPseudo });
+      if (!user) return res.status(400).json({ error: `Aucun compte trouvé avec le pseudo "@${cleanPseudo}"` });
+    } else {
+      // Connexion par téléphone ou email (comportement existant)
+      const phoneVariants = [identifier, '+224'+identifier.replace(/^\+224/,''), identifier.replace(/^\+224/,'')];
+      user = await User.findOne({
+        $or: [
+          { phone: { $in: phoneVariants } },
+          { email: identifier.toLowerCase() },
+        ]
+      });
+      if (!user) return res.status(400).json({ error: 'Compte introuvable — vérifiez votre email ou téléphone' });
+    }
+
+    if (!user.verified) return res.status(400).json({ error: 'Compte non vérifié — vérifiez votre SMS ou email' });
 
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(400).json({ error: 'Mot de passe incorrect' });
 
     const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '90d' });
+
+    console.log(`[LOGIN] ✅ user=${user._id} mode=${mode||'auto'} pseudo=${user.pseudo||'—'}`);
     res.json({
       success: true, token,
-      user: { id: user._id, name: `${user.prenom} ${user.nom||''}`.trim(),
-              phone: user.phone, email: user.email, city: user.city, role: user.role }
+      user: {
+        id:     user._id,
+        _id:    user._id,
+        name:   `${user.prenom} ${user.nom||''}`.trim(),
+        prenom: user.prenom,
+        nom:    user.nom||'',
+        pseudo: user.pseudo||'',
+        phone:  user.phone||'',
+        email:  user.email||'',
+        city:   user.city||'',
+        role:   user.role,
+        isPro:  user.isPro && user.proUntil && user.proUntil > new Date() ? true : false,
+        proPlan: user.proPlan||null,
+        proUntil: user.proUntil||null,
+        boutique: user.boutique||null,
+      }
     });
-  } catch(err) { res.status(500).json({ error: err.message }); }
+  } catch(err) {
+    console.error('[LOGIN]', err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Renvoyer un code
