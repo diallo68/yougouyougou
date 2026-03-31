@@ -37,22 +37,22 @@ body{
 }
 .page{display:none}.page.active{display:block}
 /* ═══════════════════════════════════════════════
-   LAYOUT GLOBAL — Inspiré LeBonCoin
-   Structure : body > #ygy-shell
+   LAYOUT GLOBAL — Une colonne centrée
+   Structure : body > #app-wrapper
                nav (sticky)
-               #bg-ad (pub background)
-               #ygy-body (3 colonnes)
-                 .ygy-ad-left | .ygy-main | .ygy-ad-right
+               #ygy-bg-ad (pub background, optionnel)
+               #ygy-body (conteneur centré)
+                 .ygy-main (colonne unique)
 ═══════════════════════════════════════════════ */
 
-/* Reset body — fond neutre comme LBC */
+/* Corps — fond neutre sobre */
 body{
-  background:#E8EDF2;
+  background:#F1F3F5;
 }
 
-/* Shell global — pleine largeur */
+/* Shell global — pleine largeur, fond blanc */
 #app-wrapper{
-  background:transparent;
+  background:#fff;
   max-width:none;
   margin:0;
   min-height:100vh;
@@ -60,7 +60,7 @@ body{
   position:relative;
 }
 
-/* ── NAV — pleine largeur avec contenu centré ── */
+/* ── NAV — pleine largeur, contenu centré ── */
 nav{
   background:#fff;
   border-bottom:1px solid var(--br);
@@ -71,19 +71,19 @@ nav{
   width:100%;
 }
 .nav-top{
-  max-width:1440px;
+  max-width:1200px;
   margin:0 auto;
-  padding:0 20px;
-  height:60px;
+  padding:0 24px;
+  height:62px;
   display:flex;
   align-items:center;
   gap:8px;
   overflow:hidden;
 }
 .nav-cats-in{
-  max-width:1440px;
+  max-width:1200px;
   margin:0 auto;
-  padding:0 20px;
+  padding:0 24px;
   display:flex;
   align-items:stretch;
   overflow-x:auto;
@@ -94,10 +94,10 @@ nav{
 }
 .nav-cats-in::-webkit-scrollbar{display:none}
 
-/* ── PUBLICITÉ BACKGROUND (style LBC — derrière la nav) ── */
+/* ── PUBLICITÉ BACKGROUND — barre sombre sous la nav ── */
 #ygy-bg-ad{
   width:100%;
-  min-height:100px;
+  min-height:88px;
   background:linear-gradient(135deg,#1A1A2E 0%,#0F172A 100%);
   display:flex;
   align-items:center;
@@ -121,39 +121,38 @@ nav{
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:32px;
-  padding:18px 24px;
+  gap:28px;
+  padding:16px 24px;
   width:100%;
-  max-width:960px;
+  max-width:1200px;
   flex-wrap:wrap;
 }
 .ygy-bg-ad-badge{
   font-size:10px;
   font-weight:700;
-  color:rgba(255,255,255,.5);
+  color:rgba(255,255,255,.4);
   text-transform:uppercase;
   letter-spacing:1px;
   position:absolute;
   top:6px;
   left:50%;
   transform:translateX(-50%);
-  background:rgba(255,255,255,.08);
+  background:rgba(255,255,255,.07);
   padding:2px 10px;
   border-radius:20px;
+  white-space:nowrap;
 }
-.ygy-bg-ad-text{
-  text-align:center;
-}
+.ygy-bg-ad-text{ text-align:center; }
 .ygy-bg-ad-text h3{
-  font-size:clamp(18px,2.5vw,26px);
+  font-size:clamp(16px,2vw,22px);
   font-weight:900;
   color:#fff;
   margin:0 0 4px;
   letter-spacing:-.3px;
 }
 .ygy-bg-ad-text p{
-  font-size:13px;
-  color:rgba(255,255,255,.65);
+  font-size:12px;
+  color:rgba(255,255,255,.6);
   margin:0;
 }
 .ygy-bg-ad-btn{
@@ -161,7 +160,7 @@ nav{
   color:#fff;
   border:none;
   border-radius:10px;
-  padding:12px 28px;
+  padding:11px 26px;
   font-size:14px;
   font-weight:800;
   cursor:pointer;
@@ -178,187 +177,98 @@ nav{
 .ygy-bg-ad-close{
   position:absolute;
   top:8px;
-  right:12px;
-  background:rgba(255,255,255,.12);
+  right:14px;
+  background:rgba(255,255,255,.1);
   border:none;
-  color:rgba(255,255,255,.6);
-  width:24px;
-  height:24px;
+  color:rgba(255,255,255,.55);
+  width:26px;
+  height:26px;
   border-radius:50%;
   cursor:pointer;
-  font-size:13px;
+  font-size:14px;
   display:flex;
   align-items:center;
   justify-content:center;
   font-family:var(--font);
   transition:background .12s;
+  line-height:1;
 }
-.ygy-bg-ad-close:hover{background:rgba(255,255,255,.25);}
+.ygy-bg-ad-close:hover{ background:rgba(255,255,255,.22); }
 
-/* ── BODY 3 COLONNES ── */
+/* ── CONTENEUR PRINCIPAL — une seule colonne ── */
 #ygy-body{
-  display:grid;
-  grid-template-columns:160px 1fr 160px;
-  gap:0;
-  max-width:1440px;
+  max-width:1200px;
   margin:0 auto;
-  align-items:start;
-  min-height:calc(100vh - 104px);
-}
-
-/* ── COLONNES PUBLICITAIRES LATÉRALES ── */
-.ygy-ad-side{
-  width:160px;
-  padding:12px 8px;
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-  position:sticky;
-  top:104px;
-  max-height:calc(100vh - 110px);
-  overflow-y:auto;
-  scrollbar-width:none;
-  align-self:start;
-}
-.ygy-ad-side::-webkit-scrollbar{display:none}
-
-/* Slot pub latéral */
-.ygy-ad-slot{
-  width:144px;
-  border-radius:10px;
-  overflow:hidden;
-  border:1px solid #DDE3EA;
-  background:#fff;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  transition:border-color .15s, box-shadow .15s, transform .12s;
-  position:relative;
-}
-.ygy-ad-slot:hover{
-  border-color:#C5CDD6;
-  box-shadow:0 4px 12px rgba(0,0,0,.10);
-  transform:translateY(-2px);
-}
-.ygy-ad-slot-body{
-  flex:1;
   width:100%;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  padding:14px 10px;
-  gap:8px;
-  min-height:120px;
-}
-.ygy-ad-slot-icon{font-size:28px;line-height:1}
-.ygy-ad-slot-title{
-  font-size:11px;
-  font-weight:700;
-  color:#475569;
-  text-align:center;
-  line-height:1.4;
-}
-.ygy-ad-slot-sub{
-  font-size:9px;
-  color:#94A3B8;
-  text-align:center;
-}
-.ygy-ad-slot-label{
-  font-size:8.5px;
-  font-weight:700;
-  color:#94A3B8;
-  text-transform:uppercase;
-  letter-spacing:.6px;
-  text-align:center;
-  padding:5px 0;
-  border-top:1px solid #F1F5F9;
-  width:100%;
-  background:#F8FAFC;
 }
 
-/* Variantes de hauteur */
-.ygy-ad-slot--tall{ height:300px; }
-.ygy-ad-slot--medium{ height:150px; }
-.ygy-ad-slot--small{ height:110px; }
-
-/* Slot Pro spécial (sombre) */
-.ygy-ad-slot--pro{
-  background:linear-gradient(135deg,#1A1A2E,#2D1B0E);
-  border-color:#2D1B0E;
-  height:110px;
-}
-.ygy-ad-slot--pro .ygy-ad-slot-title{color:#FFB84D;}
-.ygy-ad-slot--pro .ygy-ad-slot-sub{color:rgba(255,255,255,.45);}
-.ygy-ad-slot--pro .ygy-ad-slot-label{
-  background:rgba(255,255,255,.06);
-  border-top:1px solid rgba(255,255,255,.08);
-  color:rgba(255,255,255,.35);
-}
-.ygy-ad-slot--pro:hover{
-  border-color:var(--or);
-  box-shadow:0 4px 16px rgba(255,92,0,.25);
-}
-
-/* ── COLONNE CENTRALE (scroll indépendant) ── */
+/* ── COLONNE CENTRALE ── */
 .ygy-main{
   min-width:0;
-  background:#F8FAFC;
-  border-left:1px solid #DDE3EA;
-  border-right:1px solid #DDE3EA;
+  background:#fff;
   min-height:calc(100vh - 104px);
+  width:100%;
 }
 
-/* Éléments internes de ygy-main — pleine largeur */
-.ygy-main .hero-inner{ max-width:100%; }
-.ygy-main .main-wrap{ max-width:100%; }
+/* hero et main-wrap pleine largeur dans .ygy-main */
+.ygy-main .hero-inner,
+.hero-inner{
+  max-width:100% !important;
+  padding-left:28px;
+  padding-right:28px;
+}
+.ygy-main .main-wrap,
+.main-wrap{
+  max-width:100% !important;
+}
+
+/* Suppression totale des colonnes pubs latérales */
+.ygy-ad-side,
+#ygy-ad-left,
+#ygy-ad-right,
+.ygy-ad-slot,
+.ygy-ad-slot-body,
+.ygy-ad-slot-label,
+.home-3col,
+.home-ad-col,
+.home-center,
+.ad-slot,
+.ad-slot-tall,
+.ad-slot-medium,
+.ad-slot-label{
+  display:none !important;
+}
 
 /* ── RESPONSIVE ── */
-
-/* Tablette large (< 1280px) : réduire colonnes pubs */
-@media(max-width:1280px){
-  #ygy-body{
-    grid-template-columns:130px 1fr 130px;
-  }
-  .ygy-ad-side{ width:130px; }
-  .ygy-ad-slot{ width:118px; }
-}
-
-/* Tablette (< 1024px) : masquer colonnes pubs */
-@media(max-width:1024px){
-  #ygy-body{
-    grid-template-columns:1fr;
-    max-width:800px;
-  }
-  .ygy-ad-side{ display:none; }
-  .ygy-main{
-    border-left:none;
-    border-right:none;
-  }
-  #ygy-bg-ad{ min-height:80px; }
-  .ygy-bg-ad-inner{ gap:20px; }
-}
-
-/* Mobile (< 640px) */
-@media(max-width:640px){
+@media(max-width:1260px){
   #ygy-body{ max-width:100%; }
-  .ygy-ad-side{ display:none; }
-  #ygy-bg-ad{ min-height:64px; }
-  .ygy-bg-ad-inner{ padding:12px 16px; gap:12px; }
+  .nav-top{ max-width:100%; }
+  .nav-cats-in{ max-width:100%; }
+  .ygy-bg-ad-inner{ max-width:100%; }
+}
+
+@media(max-width:768px){
+  .nav-top{ padding:0 14px; height:56px; }
+  .nav-cats-in{ padding:0 14px; }
+  #ygy-bg-ad{ min-height:72px; }
+  .ygy-bg-ad-inner{ padding:10px 16px; gap:14px; }
   .ygy-bg-ad-text h3{ font-size:15px; }
   .ygy-bg-ad-btn{ padding:9px 18px; font-size:13px; }
-  .nav-top{ padding:0 12px; height:56px; }
 }
 
-/* ── Compatibilité anciens éléments ── */
-.home-3col{ display:contents; }
-.home-ad-col{ display:none!important; }
-.home-center{ display:contents; }
-/* hero et main-wrap s'adaptent à ygy-main */
-.hero-inner{ max-width:100%!important; }
-.main-wrap{ max-width:100%!important; }
+@media(max-width:480px){
+  #ygy-bg-ad{ min-height:60px; }
+  .ygy-bg-ad-text p{ display:none; }
+  .ygy-bg-ad-text h3{ font-size:14px; margin-bottom:0; }
+  .ygy-bg-ad-btn{ padding:8px 14px; font-size:12px; }
+  .hero-inner{ padding-left:16px !important; padding-right:16px !important; }
+}
+
+/* ── Nettoyage anciens styles de layout ── */
+.hero-inner{ max-width:100% !important; }
+.main-wrap{ max-width:100% !important; }
+.ft{ max-width:100% !important; }
+.ft-bottom-in{ max-width:100% !important; }
 
 /* ── DÉSACTIVÉS ── */
 #search-banner{display:none;height:auto;overflow:hidden;background:#FFF5F0;border:1px solid #FFD4B0;border-radius:12px;padding:10px 16px;margin-bottom:14px;align-items:center;justify-content:space-between;gap:12px}
@@ -383,11 +293,7 @@ nav{
 .fade-up-2{animation:fadeUp .35s .07s ease both}
 .fade-up-3{animation:fadeUp .35s .14s ease both}
 
-/* ══ NAV ══ */
-nav{background:#fff;border-bottom:1px solid var(--br);position:sticky;top:0;z-index:500;overflow:visible}
-.nav-top{max-width:1520px;margin:0 auto;padding:0 16px;height:60px;display:flex;align-items:center;gap:8px;overflow:hidden}
-/* Restreindre le contenu nav au centre (entre les colonnes pubs sur desktop) */
-.nav-top-inner{max-width:1200px;width:100%;margin:0 auto;display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+/* ══ NAV — éléments ══ */
 .logo{display:flex;align-items:center;gap:6px;cursor:pointer;text-decoration:none;flex-shrink:0}
 .logo-anim-wrap{display:flex;align-items:center;position:relative;line-height:1;overflow:visible}
 .logo-block{display:inline-flex;align-items:baseline;font-family:var(--font);font-weight:800;letter-spacing:-.8px;line-height:1}
@@ -409,8 +315,6 @@ nav{background:#fff;border-bottom:1px solid var(--br);position:sticky;top:0;z-in
 .nav-sc-btn:hover{background:var(--or2)}
 .nav-right{margin-left:auto;display:flex;align-items:center;gap:0px;flex-shrink:0}
 .nav-cats{background:#fff;border-top:1px solid var(--br);position:relative;z-index:300;overflow:visible;max-width:100%}
-.nav-cats-in{max-width:1520px;margin:0 auto;padding:0 16px;display:flex;align-items:stretch;overflow-x:auto;overflow-y:visible;scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;}
-.nav-cats-in::-webkit-scrollbar{display:none}
 .ncat{position:relative;display:inline-flex;align-items:center;gap:3px;padding:6px 7px;cursor:pointer;border-bottom:2px solid transparent;font-size:11.5px;font-weight:500;color:#64748B;white-space:nowrap;flex-shrink:0;transition:color .12s,border-color .12s}
 .ncat:hover,.ncat.active{color:var(--or);border-bottom-color:var(--or)}
 .ncat.active{font-weight:600}
@@ -2059,46 +1963,7 @@ footer{background:transparent;margin-top:0}
 <!-- ══ LAYOUT 3 COLONNES : PUB GAUCHE | CONTENU | PUB DROITE ══ -->
 <div id="ygy-body">
 
-  <!-- ── COLONNE PUB GAUCHE ── -->
-  <aside class="ygy-ad-side" id="ygy-ad-left" aria-label="Publicités">
-
-    <div class="ygy-ad-slot ygy-ad-slot--tall" onclick="void(0)">
-      <div class="ygy-ad-slot-body">
-        <div class="ygy-ad-slot-icon">📣</div>
-        <div class="ygy-ad-slot-title">Votre publicité ici</div>
-        <div class="ygy-ad-slot-sub">144 × 300</div>
-      </div>
-      <div class="ygy-ad-slot-label">Publicité</div>
-    </div>
-
-    <div class="ygy-ad-slot ygy-ad-slot--medium" onclick="void(0)">
-      <div class="ygy-ad-slot-body">
-        <div class="ygy-ad-slot-icon">🛒</div>
-        <div class="ygy-ad-slot-title">Annonce sponsorisée</div>
-      </div>
-      <div class="ygy-ad-slot-label">Publicité</div>
-    </div>
-
-    <div class="ygy-ad-slot ygy-ad-slot--medium" onclick="void(0)">
-      <div class="ygy-ad-slot-body">
-        <div class="ygy-ad-slot-icon">💡</div>
-        <div class="ygy-ad-slot-title">Votre offre ici</div>
-      </div>
-      <div class="ygy-ad-slot-label">Publicité</div>
-    </div>
-
-    <div class="ygy-ad-slot ygy-ad-slot--small ygy-ad-slot--pro" onclick="goTo('pro')">
-      <div class="ygy-ad-slot-body">
-        <div class="ygy-ad-slot-icon">⭐</div>
-        <div class="ygy-ad-slot-title">Passer Pro</div>
-        <div class="ygy-ad-slot-sub">Boostez vos ventes</div>
-      </div>
-      <div class="ygy-ad-slot-label">YouGouYou</div>
-    </div>
-
-  </aside>
-
-  <!-- ── COLONNE CENTRALE ── -->
+  <!-- ── CONTENU CENTRAL ── -->
   <main class="ygy-main">
 
   <!-- HERO -->
@@ -2363,45 +2228,6 @@ footer{background:transparent;margin-top:0}
 </section>
 
   </main><!-- /ygy-main -->
-
-  <!-- ── COLONNE PUB DROITE ── -->
-  <aside class="ygy-ad-side" id="ygy-ad-right" aria-label="Publicités">
-
-    <div class="ygy-ad-slot ygy-ad-slot--tall" onclick="void(0)">
-      <div class="ygy-ad-slot-body">
-        <div class="ygy-ad-slot-icon">🎯</div>
-        <div class="ygy-ad-slot-title">Votre publicité ici</div>
-        <div class="ygy-ad-slot-sub">144 × 300</div>
-      </div>
-      <div class="ygy-ad-slot-label">Publicité</div>
-    </div>
-
-    <div class="ygy-ad-slot ygy-ad-slot--medium" onclick="void(0)">
-      <div class="ygy-ad-slot-body">
-        <div class="ygy-ad-slot-icon">🏪</div>
-        <div class="ygy-ad-slot-title">Boostez votre boutique</div>
-      </div>
-      <div class="ygy-ad-slot-label">Publicité</div>
-    </div>
-
-    <div class="ygy-ad-slot ygy-ad-slot--medium" onclick="void(0)">
-      <div class="ygy-ad-slot-body">
-        <div class="ygy-ad-slot-icon">📈</div>
-        <div class="ygy-ad-slot-title">Annonce vedette</div>
-      </div>
-      <div class="ygy-ad-slot-label">Publicité</div>
-    </div>
-
-    <div class="ygy-ad-slot ygy-ad-slot--small ygy-ad-slot--pro" onclick="goTo('pro')">
-      <div class="ygy-ad-slot-body">
-        <div class="ygy-ad-slot-icon">👑</div>
-        <div class="ygy-ad-slot-title">Pro Premium</div>
-        <div class="ygy-ad-slot-sub">18 annonces · Vedette illimitée</div>
-      </div>
-      <div class="ygy-ad-slot-label">YouGouYou</div>
-    </div>
-
-  </aside>
 
 </div><!-- /ygy-body -->
 
