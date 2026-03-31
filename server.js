@@ -221,6 +221,7 @@ const UserSchema = new mongoose.Schema({
     description: { type: String, maxlength: 1000 },
     desc:        { type: String, maxlength: 1000 },      // alias description
     logo:        { type: String },                        // base64 ou URL
+    banner:      { type: String },                        // image bannière (URL ou base64)
     category:    { type: String },                        // catégorie principale
     subcat:      { type: String },                        // sous-catégorie (niveau 2)
     subsubcat:   { type: String },                        // sous-sous-catégorie (niveau 3)
@@ -1047,6 +1048,7 @@ app.get('/api/boutiques', async (req, res) => {
       whatsapp:    u.boutique?.whatsapp    || u.boutiqueSocial?.whatsapp || '',
       videoUrl:    u.boutique?.videoUrl    || '',
       videoTitle:  u.boutique?.videoTitle  || '',
+      banner:      u.boutique?.banner       || '',
       sellerName:  `${u.prenom||''} ${u.nom||''}`.trim(),
       isPro:       true,
       proPlan:     u.proPlan || 'starter',
@@ -1094,6 +1096,7 @@ app.get('/api/boutique/:id', async (req, res) => {
       whatsapp:    user.boutique?.whatsapp    || user.boutiqueSocial?.whatsapp || '',
       videoUrl:    user.boutique?.videoUrl    || '',
       videoTitle:  user.boutique?.videoTitle  || '',
+      banner:      user.boutique?.banner       || '',
       sellerName:  `${user.prenom||''} ${user.nom||''}`.trim(),
       isPro:       user.isPro,
       proPlan:     user.proPlan || 'starter',
@@ -2347,6 +2350,7 @@ app.get('/api/me/boutique', auth, async (req, res) => {
       address:     user.boutique?.address     || '',
       videoUrl:    user.boutique?.videoUrl    || '',
       videoTitle:  user.boutique?.videoTitle  || '',
+      banner:      user.boutique?.banner       || '',
     };
     res.json({ boutique: b, proPlan: user.proPlan, isPro: user.isPro, proUntil: user.proUntil });
   } catch(err) { res.status(500).json({ error: err.message }); }
@@ -2361,7 +2365,7 @@ app.put('/api/me/boutique', auth, async (req, res) => {
     if (!isAdmin && !isProActive)
       return res.status(403).json({ error: 'Réservé aux membres Pro' });
 
-    const { name, description, desc, logo, category, subcat, subsubcat,
+    const { name, description, desc, logo, banner, category, subcat, subsubcat,
             whatsapp, address, videoUrl, videoTitle } = req.body;
 
     // Construire l'update boutique (merge avec l'existant)
@@ -2370,6 +2374,7 @@ app.put('/api/me/boutique', auth, async (req, res) => {
     if (description !== undefined) boutiqueUpdate.description = description;
     if (desc        !== undefined) boutiqueUpdate.desc        = desc || description;
     if (logo        !== undefined) boutiqueUpdate.logo        = logo;
+    if (banner      !== undefined) boutiqueUpdate.banner      = banner;
     if (category    !== undefined) boutiqueUpdate.category    = category;
     if (subcat      !== undefined) boutiqueUpdate.subcat      = subcat;
     if (subsubcat   !== undefined) boutiqueUpdate.subsubcat   = subsubcat;
@@ -2479,6 +2484,7 @@ app.get('/api/boutiques', authOptional, async (req, res) => {
       whatsapp:    u.boutique?.whatsapp    || '',
       videoUrl:    u.boutique?.videoUrl    || '',
       videoTitle:  u.boutique?.videoTitle  || '',
+      banner:      u.boutique?.banner       || '',
       sellerName:  `${u.prenom||''} ${u.nom||''}`.trim(),
       sellerId:    u._id,
       isPro:       u.isPro,
@@ -2521,6 +2527,7 @@ app.get('/api/boutiques/:sellerId', authOptional, async (req, res) => {
       whatsapp:    user.boutique?.whatsapp    || '',
       videoUrl:    user.boutique?.videoUrl    || '',
       videoTitle:  user.boutique?.videoTitle  || '',
+      banner:      user.boutique?.banner       || '',
       sellerName:  `${user.prenom||''} ${user.nom||''}`.trim(),
       sellerId:    user._id,
       isPro:       user.isPro,
