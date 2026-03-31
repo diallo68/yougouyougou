@@ -6356,6 +6356,14 @@ function renderAuthForm(tab){
       '<div class="fg"><label>🔒 Confirmer le mot de passe *</label><input type="password" id="rpw2" placeholder="Répétez votre mot de passe" autocomplete="new-password" oninput="checkPwMatch()"></div>'+
       '<div id="pw-match-msg" style="margin-top:-10px;margin-bottom:12px;font-size:13px;font-weight:700;display:none"></div>'+
 
+      // Date de naissance
+      '<div class="fg">'+
+        '<label>🎂 Date de naissance * <span style="font-size:11px;color:var(--muted);font-weight:500">(18 ans minimum)</span></label>'+
+        '<input type="date" id="rdob" autocomplete="bday"'+
+          ' max="'+(function(){ var d=new Date(); d.setFullYear(d.getFullYear()-18); return d.toISOString().split('T')[0]; })()+'">'+
+        '<div id="dob-status" style="font-size:12px;font-weight:600;margin-top:4px;min-height:16px"></div>'+
+      '</div>'+
+
       // Ville
       '<div class="fg"><label>📍 Préfecture / Ville *</label><select id="rct">'+opts+'</select></div>'+
 
@@ -6612,6 +6620,7 @@ function sendVerifCode(){
   var pw   = (document.getElementById('rpw')||{value:''}).value.trim();
   var pw2  = (document.getElementById('rpw2')||{value:''}).value.trim();
   var city = (document.getElementById('rct')||{value:''}).value;
+  var dob  = (document.getElementById('rdob')||{value:''}).value.trim();
   var pseudo = ((document.getElementById('rpseudo')||{value:''}).value.trim()).toLowerCase().replace(/[^a-z0-9_.-]/g,'');
 
   var ok = true;
@@ -6636,6 +6645,31 @@ function sendVerifCode(){
   if(!pw || pw.length < 8){ markField(document.getElementById('rpw'),false); ok=false; }
   if(!pw2 || pw !== pw2){ markField(document.getElementById('rpw2'),false); ok=false; }
   if(!city){ markField(document.getElementById('rct'),false); ok=false; }
+
+  // ── Validation date de naissance ──
+  var dobStatus = document.getElementById('dob-status');
+  var dobInput  = document.getElementById('rdob');
+  if(!dob){
+    markField(dobInput, false);
+    if(dobStatus){ dobStatus.textContent='⚠️ Date de naissance requise'; dobStatus.style.color='#DC2626'; }
+    ok = false;
+  } else {
+    var birth   = new Date(dob);
+    var today   = new Date();
+    var ageYear = today.getFullYear() - birth.getFullYear();
+    var ageM    = today.getMonth()    - birth.getMonth();
+    var ageD    = today.getDate()     - birth.getDate();
+    var age     = ageYear - (ageM < 0 || (ageM === 0 && ageD < 0) ? 1 : 0);
+    if(age < 18){
+      markField(dobInput, false);
+      if(dobStatus){ dobStatus.textContent='❌ Vous devez avoir au moins 18 ans pour vous inscrire'; dobStatus.style.color='#DC2626'; }
+      ok = false;
+    } else {
+      if(dobStatus){ dobStatus.textContent='✅ '+age+' ans'; dobStatus.style.color='#059669'; }
+      markField(dobInput, true);
+    }
+  }
+
   if(!ok){ toast('⚠️ Remplissez les champs en rouge','err'); return; }
 
   var sendBtn = document.getElementById('btn-sendcode');
@@ -6658,19 +6692,17 @@ function sendVerifCode(){
         toast('❌ Ce pseudo est déjà utilisé, choisissez-en un autre','err');
         return;
       }
-      _doSendVerifCode(fn, ph, em, pw, city, pseudo, sendBtn);
+      _doSendVerifCode(fn, ph, em, pw, city, pseudo, dob, sendBtn);
     })
     .catch(function(){
-      // Pas de réseau → continuer, le serveur vérifiera
-      _doSendVerifCode(fn, ph, em, pw, city, pseudo, sendBtn);
+      _doSendVerifCode(fn, ph, em, pw, city, pseudo, dob, sendBtn);
     });
   } else {
-    // Mode téléphone : pas de vérif pseudo
-    _doSendVerifCode(fn, ph, em, pw, city, pseudo, sendBtn);
+    _doSendVerifCode(fn, ph, em, pw, city, pseudo, dob, sendBtn);
   }
 }
 
-function _doSendVerifCode(fn, ph, em, pw, city, pseudo, sendBtn){
+function _doSendVerifCode(fn, ph, em, pw, city, pseudo, dob, sendBtn){
   var btnLabel = regMode==='phone' ? '📱 Recevoir le code par SMS →' : '📧 Recevoir le code par email →';
 
   pendingUser = {
@@ -6681,6 +6713,7 @@ function _doSendVerifCode(fn, ph, em, pw, city, pseudo, sendBtn){
     email:    regMode==='email' ? em : '',
     password: pw,
     city:     city,
+    dob:      dob || '',
     method:   regMode==='email' ? 'email' : 'sms',
     initials: (fn.charAt(0)+((document.getElementById('rln')||{value:''}).value.trim().charAt(0)||'')).toUpperCase()
   };
@@ -6810,6 +6843,7 @@ function verifyCode(){
         email: pendingUser.email||'',
         password: pendingUser.password,
         city: pendingUser.city||'',
+        dob: pendingUser.dob||'',
         code: entered,
         method: pendingUser.method||'sms'
       })
