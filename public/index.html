@@ -1713,11 +1713,485 @@ footer{background:transparent;margin-top:0}
 #lightbox-thumbnails::-webkit-scrollbar{ height:4px }
 #lightbox-thumbnails::-webkit-scrollbar-thumb{ background:#555;border-radius:2px }
 
-/* ── Page boutique publique ── */
-#page-boutique-publique{ background:#F8FAFC; }
-#page-boutique-publique .lbc-img img{ cursor:zoom-in; }
-.pbp-filter-btn{ transition:all .12s; }
-.pbp-filter-btn.pbp-filter-active{ background:var(--or)!important;color:#fff!important;border-color:var(--or)!important; }
+/* ══ PAGE BOUTIQUE PUBLIQUE — Design Pro ══ */
+#page-boutique-publique{ background:#F1F3F5; }
+
+/* Shell principal */
+.pbp-shell{
+  max-width:1060px;
+  margin:0 auto;
+  padding-bottom:60px;
+}
+
+/* ── Bannière ── */
+.pbp-banner{
+  position:relative;
+  width:100%;
+  height:220px;
+  background:linear-gradient(135deg,#1A1A2E 0%,#0F172A 100%);
+  overflow:hidden;
+}
+.pbp-banner-img{
+  width:100%;
+  height:100%;
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  transition:opacity .3s;
+}
+.pbp-banner-overlay{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,rgba(0,0,0,.15) 0%,rgba(0,0,0,.45) 100%);
+}
+.pbp-back-btn{
+  position:absolute;
+  top:16px;
+  left:20px;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  background:rgba(255,255,255,.15);
+  backdrop-filter:blur(6px);
+  border:1px solid rgba(255,255,255,.25);
+  color:#fff;
+  font-size:13px;
+  font-weight:700;
+  padding:7px 14px;
+  border-radius:24px;
+  cursor:pointer;
+  font-family:var(--font);
+  transition:background .15s;
+  z-index:2;
+}
+.pbp-back-btn:hover{ background:rgba(255,255,255,.25); }
+.pbp-owner-actions{
+  position:absolute;
+  top:16px;
+  right:20px;
+  display:flex;
+  gap:8px;
+  z-index:2;
+}
+.pbp-owner-btn{
+  background:rgba(255,255,255,.15);
+  backdrop-filter:blur(6px);
+  border:1px solid rgba(255,255,255,.25);
+  color:#fff;
+  font-size:12px;
+  font-weight:700;
+  padding:7px 14px;
+  border-radius:24px;
+  cursor:pointer;
+  font-family:var(--font);
+  transition:all .15s;
+}
+.pbp-owner-btn--add{ background:rgba(255,92,0,.4); border-color:rgba(255,92,0,.6); }
+.pbp-owner-btn:hover{ background:rgba(255,255,255,.3); }
+
+/* ── Carte entête boutique ── */
+.pbp-header-card{
+  background:#fff;
+  margin:0 20px;
+  border-radius:0 0 20px 20px;
+  padding:20px 28px 24px;
+  box-shadow:0 4px 20px rgba(0,0,0,.08);
+  position:relative;
+}
+.pbp-header-top{
+  display:flex;
+  align-items:flex-start;
+  gap:20px;
+  margin-bottom:20px;
+}
+.pbp-logo{
+  width:88px;
+  height:88px;
+  border-radius:18px;
+  border:3px solid #fff;
+  box-shadow:0 4px 16px rgba(0,0,0,.12);
+  background:#F1F3F5;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:40px;
+  flex-shrink:0;
+  overflow:hidden;
+  margin-top:-44px; /* remonte sur la bannière */
+  position:relative;
+  z-index:3;
+}
+.pbp-logo img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:15px;
+}
+.pbp-header-info{ flex:1; min-width:0; }
+.pbp-header-badges{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:6px;
+  margin-top:8px;
+}
+.pbp-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  font-size:11px;
+  font-weight:800;
+  padding:3px 12px;
+  border-radius:20px;
+  border:1.5px solid;
+}
+.pbp-cat-tag{
+  font-size:11px;
+  font-weight:600;
+  color:#64748B;
+  background:#F1F5F9;
+  padding:3px 10px;
+  border-radius:20px;
+}
+.pbp-shop-name{
+  font-size:24px;
+  font-weight:900;
+  color:var(--ink);
+  margin:0 0 8px;
+  letter-spacing:-.3px;
+  line-height:1.2;
+}
+.pbp-meta-row{
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+  margin-bottom:10px;
+}
+.pbp-meta-item{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  font-size:12px;
+  color:#64748B;
+  font-weight:500;
+}
+.pbp-desc{
+  font-size:13px;
+  color:#64748B;
+  line-height:1.65;
+  margin:0;
+  max-width:560px;
+}
+
+/* Boutons d'action */
+.pbp-action-row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  padding-top:16px;
+  border-top:1px solid #F1F5F9;
+}
+.pbp-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:10px 22px;
+  border-radius:10px;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+  font-family:var(--font);
+  border:none;
+  transition:all .15s;
+}
+.pbp-btn--wa{
+  background:#DCF8C6;
+  color:#128C7E;
+  border:1.5px solid #25D366;
+}
+.pbp-btn--wa:hover{ background:#25D366; color:#fff; }
+.pbp-btn--msg{
+  background:var(--orl);
+  color:var(--or);
+  border:1.5px solid var(--orm);
+}
+.pbp-btn--msg:hover{ background:var(--or); color:#fff; }
+
+/* ── Stats ── */
+.pbp-stats-row{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  padding:20px 20px 0;
+}
+.pbp-stat-card{
+  background:#fff;
+  border-radius:14px;
+  padding:16px;
+  border:1px solid #E2E8F0;
+  text-align:center;
+  box-shadow:0 1px 4px rgba(0,0,0,.04);
+  transition:box-shadow .15s;
+}
+.pbp-stat-card:hover{ box-shadow:0 4px 14px rgba(0,0,0,.08); }
+.pbp-stat-val{
+  font-size:24px;
+  font-weight:900;
+  line-height:1.1;
+  margin-bottom:6px;
+}
+.pbp-stat-val--orange{ color:var(--or); }
+.pbp-stat-val--purple{ color:#7C3AED; }
+.pbp-stat-val--green{ color:#059669; }
+.pbp-stat-val--blue{ color:#1D4ED8; }
+.pbp-stat-label{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  font-size:11px;
+  color:#94A3B8;
+  font-weight:600;
+}
+
+/* ── Vidéo ── */
+.pbp-video-section{
+  padding:20px 20px 0;
+}
+.pbp-section-title{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  font-size:15px;
+  font-weight:800;
+  color:var(--ink);
+  margin-bottom:14px;
+}
+.pbp-video-embed{
+  width:100%;
+  border-radius:14px;
+  overflow:hidden;
+  background:#000;
+  aspect-ratio:16/9;
+  box-shadow:0 4px 20px rgba(0,0,0,.12);
+}
+.pbp-video-title-txt{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:6px;
+  font-weight:600;
+  padding-left:2px;
+}
+
+/* ── Catalogue ── */
+.pbp-catalogue{
+  padding:20px;
+}
+.pbp-catalogue-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:12px;
+  margin-bottom:14px;
+}
+.pbp-catalogue-count{
+  display:inline-block;
+  background:var(--orl);
+  color:var(--or);
+  font-size:11px;
+  font-weight:800;
+  padding:2px 10px;
+  border-radius:20px;
+  margin-left:8px;
+}
+.pbp-search-wrap{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:#fff;
+  border:1.5px solid #E2E8F0;
+  border-radius:10px;
+  padding:7px 14px;
+  min-width:220px;
+  transition:border-color .15s;
+}
+.pbp-search-wrap:focus-within{ border-color:var(--or); }
+.pbp-search-input{
+  border:none;
+  background:transparent;
+  font-family:var(--font);
+  font-size:12px;
+  color:var(--ink);
+  outline:none;
+  width:100%;
+}
+.pbp-filters{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:16px;
+}
+
+/* Grille catalogue — 4 cols desktop, 3 tablette, 2 mobile, 1 petit */
+.pbp-ads-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  min-height:200px;
+}
+
+/* Carte article boutique */
+.pbp-ad-card{
+  background:#fff;
+  border-radius:14px;
+  overflow:hidden;
+  border:1px solid #E8EDF2;
+  box-shadow:0 1px 4px rgba(0,0,0,.05);
+  transition:transform .18s, box-shadow .18s;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+}
+.pbp-ad-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 8px 24px rgba(0,0,0,.10);
+  border-color:#C5CDD6;
+}
+.pbp-ad-img{
+  width:100%;
+  aspect-ratio:4/3;
+  overflow:hidden;
+  background:#F1F5F9;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+}
+.pbp-ad-img img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transition:transform .25s;
+}
+.pbp-ad-card:hover .pbp-ad-img img{ transform:scale(1.04); }
+.pbp-ad-img-count{
+  position:absolute;
+  bottom:6px;
+  right:8px;
+  background:rgba(0,0,0,.55);
+  color:#fff;
+  font-size:10px;
+  font-weight:600;
+  padding:2px 8px;
+  border-radius:10px;
+}
+.pbp-ad-body{
+  padding:12px 14px;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.pbp-ad-title{
+  font-size:13px;
+  font-weight:700;
+  color:var(--ink);
+  line-height:1.35;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.pbp-ad-price{
+  font-size:15px;
+  font-weight:900;
+  color:var(--or);
+  margin-top:2px;
+}
+.pbp-ad-meta{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:11px;
+  color:#94A3B8;
+  margin-top:auto;
+  padding-top:6px;
+  border-top:1px solid #F1F5F9;
+}
+.pbp-ad-btn{
+  width:100%;
+  background:var(--or);
+  color:#fff;
+  border:none;
+  padding:9px;
+  font-size:12px;
+  font-weight:700;
+  cursor:pointer;
+  font-family:var(--font);
+  transition:background .12s;
+}
+.pbp-ad-btn:hover{ background:var(--or2); }
+
+/* Loading state */
+.pbp-loading{
+  grid-column:1/-1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:60px 20px;
+  gap:12px;
+  color:var(--muted);
+}
+.pbp-loading-icon{ font-size:40px; animation:spin 2s linear infinite; }
+.pbp-loading-txt{ font-size:14px; font-weight:600; }
+
+/* Empty state */
+.pbp-empty{
+  grid-column:1/-1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:60px 20px;
+  gap:10px;
+  color:var(--muted);
+  background:#fff;
+  border-radius:14px;
+  border:1.5px dashed #E2E8F0;
+}
+.pbp-empty-icon{ font-size:48px; }
+.pbp-empty-title{ font-size:15px; font-weight:700; color:var(--ink); }
+.pbp-empty-sub{ font-size:13px; }
+
+/* Responsive */
+@media(max-width:1024px){
+  .pbp-ads-grid{ grid-template-columns:repeat(3,1fr); }
+  .pbp-stats-row{ grid-template-columns:repeat(2,1fr); }
+}
+@media(max-width:768px){
+  .pbp-shell{ padding-bottom:40px; }
+  .pbp-banner{ height:160px; }
+  .pbp-header-card{ margin:0 12px; padding:16px 18px 20px; }
+  .pbp-logo{ width:72px; height:72px; margin-top:-36px; }
+  .pbp-shop-name{ font-size:20px; }
+  .pbp-ads-grid{ grid-template-columns:repeat(2,1fr); gap:10px; }
+  .pbp-catalogue{ padding:16px 12px; }
+  .pbp-stats-row{ padding:16px 12px 0; gap:8px; }
+  .pbp-header-top{ gap:14px; }
+}
+@media(max-width:480px){
+  .pbp-banner{ height:130px; }
+  .pbp-header-card{ margin:0; border-radius:0; }
+  .pbp-logo{ width:60px; height:60px; margin-top:-30px; font-size:28px; }
+  .pbp-shop-name{ font-size:18px; }
+  .pbp-ads-grid{ grid-template-columns:1fr 1fr; gap:8px; }
+  .pbp-stats-row{ grid-template-columns:repeat(2,1fr); }
+  .pbp-catalogue-head{ flex-direction:column; align-items:flex-start; }
+  .pbp-search-wrap{ min-width:0; width:100%; }
+}
 
 .pro-plan-card.is-active-plan{
   transform:translateY(-4px);
@@ -9303,62 +9777,78 @@ function _pbpRenderFull(){
   var cfg    = (typeof PRO_MODAL_CFG!=='undefined') ? (PRO_MODAL_CFG[plan]||PRO_MODAL_CFG.starter) : {icon:'⭐',badge:'PRO',btnBg:'var(--or)',headerBg:'linear-gradient(135deg,#1A1A2E,#2D2B0E)'};
   var planIcons  = { starter:'⭐', business:'🔷', premium:'👑' };
   var planLabels = { starter:'PRO Starter', business:'PRO Business', premium:'PRO Gold' };
+  var planBadgeColors = {
+    starter:  { bg:'rgba(217,119,6,.12)',  border:'rgba(217,119,6,.35)',  color:'#D97706' },
+    business: { bg:'rgba(29,78,216,.10)',  border:'rgba(29,78,216,.3)',   color:'#1D4ED8' },
+    premium:  { bg:'rgba(255,92,0,.12)',   border:'rgba(255,92,0,.3)',    color:'#FF5C00' },
+  };
+  var planColor = planBadgeColors[plan] || planBadgeColors.starter;
 
-  // ── Hero ──
-  var heroEl = document.getElementById('pbp-hero');
-  if(heroEl) heroEl.style.background = cfg.headerBg;
+  // ── Bannière ──
+  var bannerEl = document.getElementById('pbp-banner-img');
+  if(bannerEl){
+    if(b.banner){
+      bannerEl.style.backgroundImage = 'url('+b.banner+')';
+    } else {
+      // Bannière de couleur selon le plan
+      bannerEl.style.background = cfg.headerBg;
+    }
+  }
 
+  // ── Logo ──
   var logoEl = document.getElementById('pbp-logo');
   if(logoEl){
-    if(b.logo) logoEl.innerHTML = '<img src="'+b.logo+'" style="width:100%;height:100%;object-fit:cover;border-radius:14px" onerror="this.parentNode.textContent=\'🏪\'">';
+    if(b.logo) logoEl.innerHTML = '<img src="'+b.logo+'" onerror="this.parentNode.textContent=\'🏪\'">';
     else logoEl.textContent = cfg.icon;
   }
 
-  var nm = document.getElementById('pbp-name');
-  if(nm) nm.textContent = b.name || 'Boutique';
-
+  // ── Badge ──
   var bdg = document.getElementById('pbp-badge');
   if(bdg){
     bdg.textContent = (planIcons[plan]||'⭐') + ' ' + (planLabels[plan]||'PRO');
-    bdg.style.background = cfg.btnBg ? cfg.btnBg.split(',')[0].replace('linear-gradient(135deg','rgba(0,0,0,.2') : 'rgba(255,92,0,.25)';
+    bdg.style.background = planColor.bg;
+    bdg.style.borderColor = planColor.border;
+    bdg.style.color       = planColor.color;
   }
 
+  // ── Catégorie ──
   var catEl = document.getElementById('pbp-category');
   if(catEl) catEl.textContent = b.category ? ('📂 ' + b.category + (b.subcat?' › '+b.subcat:'')) : '';
 
+  // ── Nom ──
+  var nm = document.getElementById('pbp-name');
+  if(nm) nm.textContent = b.name || 'Boutique';
+
+  // ── Description ──
   var descEl = document.getElementById('pbp-desc');
   if(descEl) descEl.textContent = b.description || b.desc || '';
 
-  // Adresse
+  // ── Adresse ──
   var addrW = document.getElementById('pbp-addr-wrap');
   var addrS = document.getElementById('pbp-addr');
   if(b.address && addrS){ addrS.textContent = b.address; if(addrW) addrW.style.display='flex'; }
   else if(addrW){ addrW.style.display='none'; }
 
-  // Vendeur
+  // ── Vendeur ──
   var sellerEl = document.getElementById('pbp-seller-name');
   if(sellerEl) sellerEl.textContent = _pbpData.sellerName;
 
-  // WhatsApp (bouton visible mais action protégée)
+  // ── WhatsApp ──
   var waWrap = document.getElementById('pbp-wa-wrap');
   if(waWrap) waWrap.style.display = b.whatsapp ? 'block' : 'none';
 
-  // Bouton retour contextuel
-  var backBtn = document.getElementById('pbp-back-btn');
-  if(backBtn) backBtn.textContent = '← Retour aux boutiques';
-
-  // Actions propriétaire
+  // ── Actions propriétaire ──
   var ownerActions = document.getElementById('pbp-owner-actions');
   if(ownerActions){
     var isOwner = u && (String(u._id||u.id) === String(_pbpData.sellerId));
     ownerActions.style.display = isOwner ? 'flex' : 'none';
   }
 
-  // Vidéo
-  var vidSec = document.getElementById('pbp-video-section');
-  var vidEmbed = document.getElementById('pbp-video-embed');
-  var vidTitle = document.getElementById('pbp-video-title');
-  if(b.videoUrl && _buildVideoEmbed && vidEmbed){
+  // ── Vidéo ──
+  var vidSec  = document.getElementById('pbp-video-section');
+  var vidEmbed= document.getElementById('pbp-video-embed');
+  var vidTitle= document.getElementById('pbp-video-title');
+  if(b.videoUrl && typeof _buildVideoEmbed === 'function' && vidEmbed){
     var embedHtml = _buildVideoEmbed(b.videoUrl,'width:100%;height:100%;border:none');
     if(embedHtml){
       vidEmbed.innerHTML = embedHtml;
@@ -9367,60 +9857,94 @@ function _pbpRenderFull(){
     }
   } else if(vidSec){ vidSec.style.display='none'; }
 
-  // Stats
-  var stAds  = document.getElementById('pbp-stat-ads');
-  var stViews= document.getElementById('pbp-stat-views');
-  var stRat  = document.getElementById('pbp-stat-rating');
+  // ── Stats ──
+  var stAds   = document.getElementById('pbp-stat-ads');
+  var stViews = document.getElementById('pbp-stat-views');
+  var stRat   = document.getElementById('pbp-stat-rating');
+  var stSince = document.getElementById('pbp-stat-since');
   if(stAds)   stAds.textContent   = ads.length;
   if(stViews) stViews.textContent = (b.totalViews||ads.reduce(function(s,a){return s+(a.views||0);},0)).toLocaleString('fr-FR');
   if(stRat)   stRat.textContent   = b.avgRating ? b.avgRating.toFixed(1)+'★' : '—';
+  if(stSince && b.createdAt){
+    var since = new Date(b.createdAt);
+    stSince.textContent = since.toLocaleDateString('fr-FR',{month:'short',year:'numeric'});
+  }
 
-  // Catalogue
+  // ── Compteur catalogue ──
+  var countEl = document.getElementById('pbp-catalogue-count');
+  if(countEl) countEl.textContent = ads.length + ' article' + (ads.length!==1?'s':'');
+
+  // ── Catalogue ──
   _pbpRenderGrid(ads);
 }
 
 function _pbpRenderGrid(ads){
-  var grid = document.getElementById('pbp-ads-grid');
-  var filtersEl = document.getElementById('pbp-filters');
+  var grid     = document.getElementById('pbp-ads-grid');
+  var filtersEl= document.getElementById('pbp-filters');
+  var countEl  = document.getElementById('pbp-catalogue-count');
   if(!grid) return;
 
+  if(countEl) countEl.textContent = ads.length + ' article' + (ads.length!==1?'s':'');
+
   if(!ads.length){
-    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)"><div style="font-size:36px;margin-bottom:8px">📦</div><div style="font-size:14px;font-weight:700">Aucun article pour l\'instant</div></div>';
+    grid.innerHTML = '<div class="pbp-empty">'
+      +'<div class="pbp-empty-icon">📦</div>'
+      +'<div class="pbp-empty-title">Aucun article pour l\'instant</div>'
+      +'<div class="pbp-empty-sub">Cette boutique n\'a pas encore d\'articles publiés</div>'
+      +'</div>';
     if(filtersEl) filtersEl.innerHTML='';
     return;
   }
 
-  // Filtres sous-catégorie
+  // ── Filtres sous-catégorie ──
   if(filtersEl){
     var subcats={};
     ads.forEach(function(a){ var sc=a.subCategory||a.category||''; if(sc) subcats[sc]=(subcats[sc]||0)+1; });
-    var fHtml = '<button onclick="filterPbpGrid(null,this)" class="pbp-filter-btn pbp-filter-active" style="background:var(--or);color:#fff;border:none;border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Tout ('+ads.length+')</button>';
+    var fHtml = '<button onclick="filterPbpGrid(null,this)" class="pbp-filter-btn pbp-filter-active"'
+      +' style="background:var(--or);color:#fff;border:none;border-radius:20px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .12s">'
+      +'Tout ('+ads.length+')</button>';
     Object.keys(subcats).forEach(function(sc){
-      fHtml += '<button onclick="filterPbpGrid(\''+sc+'\',this)" class="pbp-filter-btn" style="background:#F1F5F9;color:var(--ink);border:1px solid var(--br);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">'+sc+' ('+subcats[sc]+')</button>';
+      fHtml += '<button onclick="filterPbpGrid(\''+sc+'\',this)" class="pbp-filter-btn"'
+        +' style="background:#fff;color:var(--ink);border:1.5px solid #E2E8F0;border-radius:20px;padding:6px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .12s">'
+        +sc+' <span style="color:var(--muted)">'+subcats[sc]+'</span></button>';
     });
     filtersEl.innerHTML = fHtml;
   }
 
-  // Cartes avec zoom photo activé
+  // ── Cartes articles ──
   grid.innerHTML = ads.map(function(a, idx){
-    var adId    = String(a._id||a.id||'');
-    var price   = (a.price||a.p||0).toLocaleString('fr-FR') + ' GNF';
-    var title   = a.title||a.t||'Article';
-    var city    = a.city||'';
-    var photos  = a.photos||[];
+    var adId   = String(a._id||a.id||'');
+    var price  = (a.price||a.p||0).toLocaleString('fr-FR') + ' GNF';
+    var title  = a.title||a.t||'Article';
+    var city   = a.city||'';
+    var date   = a.createdAt ? new Date(a.createdAt).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}) : '';
+    var etat   = a.etat||'';
+    var photos = a.photos||[];
+
     var imgHtml = photos[0]
-      ? '<img src="'+photos[0]+'" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in" onclick="event.stopPropagation();lbOpen('+idx+','+JSON.stringify(photos).replace(/"/g,"'")+')" loading="lazy" onerror="this.style.display=\'none\'">'
-      : '<span style="font-size:40px;line-height:1">'+(a.emoji||a.e||'📦')+'</span>';
-    return '<div class="lbc-card" onclick="viewAd(\''+adId+'\')" style="cursor:pointer">'
-      +'<div class="lbc-img" style="position:relative">'
-        + imgHtml
-        + (photos.length>1 ? '<div style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;pointer-events:none">📷 '+photos.length+'</div>' : '')
+      ? '<img src="'+photos[0]+'" loading="lazy"'
+          +' onclick="event.stopPropagation();lbOpen('+idx+','+JSON.stringify(photos).replace(/"/g,"'")+')"'
+          +' onerror="this.style.display=\'none\'">'
+      : '<span style="font-size:48px">'+(a.emoji||a.e||'📦')+'</span>';
+
+    var etatBadge = etat
+      ? '<span style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px">'+etat+'</span>'
+      : '';
+    var photoCount = photos.length > 1
+      ? '<span class="pbp-ad-img-count">📷 '+photos.length+'</span>'
+      : '';
+
+    return '<div class="pbp-ad-card" onclick="viewAd(\''+adId+'\')">'
+      +'<div class="pbp-ad-img">'+imgHtml+etatBadge+photoCount+'</div>'
+      +'<div class="pbp-ad-body">'
+        +'<div class="pbp-ad-title">'+title+'</div>'
+        +'<div class="pbp-ad-price">'+price+'</div>'
+        +'<div class="pbp-ad-meta">'
+          +(city ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg><span>'+city+'</span>' : '')
+          +(date ? '<span style="margin-left:auto">'+date+'</span>' : '')
+        +'</div>'
       +'</div>'
-      +'<div class="lbc-body">'
-        +'<div class="lbc-title">'+title+'</div>'
-        +'<div class="lbc-price">'+price+'</div>'
-        +'<div class="lbc-meta"><span class="lbc-city">'+city+'</span></div>'
-      +'</div>'
+      +'<button class="pbp-ad-btn" onclick="event.stopPropagation();viewAd(\''+adId+'\')">Voir l\'annonce →</button>'
     +'</div>';
   }).join('');
 }
@@ -11682,99 +12206,134 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <!-- ══ PAGE BOUTIQUE PUBLIQUE (accessible sans connexion) ══ -->
 <div id="page-boutique-publique" class="page">
-  <div style="max-width:960px;margin:0 auto;padding:0 0 60px">
+<div class="pbp-shell">
 
-    <!-- Bouton retour -->
-    <div id="pbp-back-bar" style="padding:12px 20px 0">
-      <button id="pbp-back-btn" onclick="pbpGoBack()" style="display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:var(--or);font-weight:700;cursor:pointer;font-size:14px;font-family:inherit">
-        ← Retour aux boutiques
-      </button>
+  <!-- ══ BANNIÈRE ══ -->
+  <div id="pbp-banner-wrap" class="pbp-banner">
+    <div id="pbp-banner-img" class="pbp-banner-img"></div>
+    <div class="pbp-banner-overlay"></div>
+    <!-- Bouton retour flottant -->
+    <button id="pbp-back-btn" onclick="pbpGoBack()" class="pbp-back-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      Retour
+    </button>
+    <!-- Boutons propriétaire flottants -->
+    <div id="pbp-owner-actions" class="pbp-owner-actions" style="display:none">
+      <button onclick="goTo('dashboard');showDashTab('boutique')" class="pbp-owner-btn">⚙️ Gérer</button>
+      <button onclick="addAnnonceFromBoutique()" class="pbp-owner-btn pbp-owner-btn--add">➕ Ajouter</button>
+    </div>
+  </div>
+
+  <!-- ══ ENTÊTE BOUTIQUE ══ -->
+  <div class="pbp-header-card">
+    <!-- Logo + infos principales -->
+    <div class="pbp-header-top">
+      <div id="pbp-logo" class="pbp-logo">🏪</div>
+      <div class="pbp-header-info">
+        <div class="pbp-header-badges">
+          <span id="pbp-badge" class="pbp-badge">⭐ PRO</span>
+          <span id="pbp-category" class="pbp-cat-tag"></span>
+        </div>
+        <h1 id="pbp-name" class="pbp-shop-name">Boutique</h1>
+        <div class="pbp-meta-row">
+          <span id="pbp-addr-wrap" class="pbp-meta-item" style="display:none">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span id="pbp-addr"></span>
+          </span>
+          <span id="pbp-seller-wrap" class="pbp-meta-item">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span id="pbp-seller-name">Vendeur Pro</span>
+          </span>
+        </div>
+        <p id="pbp-desc" class="pbp-desc"></p>
+      </div>
     </div>
 
-    <!-- Hero dynamique -->
-    <div id="pbp-hero" style="background:linear-gradient(135deg,#1A1A2E,#2D2B0E);margin:12px 20px 0;border-radius:18px;padding:28px 28px 22px;position:relative;overflow:hidden">
-      <div style="position:absolute;inset:0;background:radial-gradient(circle at 80% 40%,rgba(255,92,0,.15),transparent 65%);pointer-events:none"></div>
-      <div style="position:relative;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
-        <div id="pbp-logo" style="width:80px;height:80px;border-radius:16px;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0;overflow:hidden">🏪</div>
-        <div style="flex:1;min-width:180px">
-          <div id="pbp-name" style="font-size:22px;font-weight:900;color:#fff;margin-bottom:5px">Boutique</div>
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
-            <div id="pbp-badge" style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,92,0,.25);border:1px solid rgba(255,92,0,.4);color:#FFB84D;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px">⭐ PRO</div>
-            <div id="pbp-category" style="font-size:11px;color:rgba(255,255,255,.5);font-weight:600"></div>
-          </div>
-          <div id="pbp-desc" style="font-size:13px;color:rgba(255,255,255,.65);line-height:1.6;max-width:520px"></div>
-        </div>
-        <!-- Actions propriétaire (visibles si c'est sa boutique) -->
-        <div id="pbp-owner-actions" style="display:none;flex-direction:column;gap:6px;flex-shrink:0">
-          <button onclick="goTo('dashboard');showDashTab('boutique')" style="background:var(--or);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">⚙️ Gérer</button>
-          <button onclick="addAnnonceFromBoutique()" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:7px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">➕ Ajouter</button>
-        </div>
-      </div>
-      <!-- Contact + localisation -->
-      <div id="pbp-contact-row" style="position:relative;display:flex;gap:12px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.1)">
-        <div id="pbp-addr-wrap" style="display:none;align-items:center;gap:5px;font-size:12px;color:rgba(255,255,255,.6)">📍 <span id="pbp-addr"></span></div>
-        <div id="pbp-seller-wrap" style="font-size:12px;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:5px">
-          👤 <span id="pbp-seller-name">Vendeur Pro</span>
-        </div>
-        <!-- Bouton WhatsApp — protégé par auth -->
-        <div id="pbp-wa-wrap" style="display:none">
-          <button onclick="pbpContactWhatsapp()" style="display:inline-flex;align-items:center;gap:6px;background:rgba(37,211,102,.2);border:1px solid rgba(37,211,102,.35);color:#4ADE80;font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px;cursor:pointer;font-family:inherit">
-            📲 Contacter sur WhatsApp
-          </button>
-        </div>
-        <!-- Bouton Messagerie — protégé par auth -->
-        <button onclick="pbpContactMessage()" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);font-size:12px;font-weight:600;padding:5px 14px;border-radius:20px;cursor:pointer;font-family:inherit">
-          💬 Envoyer un message
+    <!-- Boutons d'action -->
+    <div class="pbp-action-row">
+      <div id="pbp-wa-wrap" style="display:none">
+        <button onclick="pbpContactWhatsapp()" class="pbp-btn pbp-btn--wa">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          WhatsApp
         </button>
       </div>
+      <button onclick="pbpContactMessage()" class="pbp-btn pbp-btn--msg">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Envoyer un message
+      </button>
     </div>
-
-    <!-- Vidéo de présentation -->
-    <div id="pbp-video-section" style="display:none;padding:20px 20px 0">
-      <div style="font-size:14px;font-weight:800;color:var(--ink);margin-bottom:10px">🎬 Présentation vidéo</div>
-      <div id="pbp-video-embed" style="width:100%;border-radius:14px;overflow:hidden;background:#000;aspect-ratio:16/9;box-shadow:0 4px 20px rgba(0,0,0,.12)"></div>
-      <div id="pbp-video-title" style="font-size:12px;color:var(--muted);margin-top:6px;font-weight:600;padding-left:2px"></div>
-    </div>
-
-    <!-- Stats -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:20px 20px 0">
-      <div style="background:#fff;border-radius:12px;padding:14px;border:1px solid var(--br);text-align:center">
-        <div style="font-size:22px;font-weight:900;color:var(--or)" id="pbp-stat-ads">—</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px">Articles</div>
-      </div>
-      <div style="background:#fff;border-radius:12px;padding:14px;border:1px solid var(--br);text-align:center">
-        <div style="font-size:22px;font-weight:900;color:#7C3AED" id="pbp-stat-views">—</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px">Vues</div>
-      </div>
-      <div style="background:#fff;border-radius:12px;padding:14px;border:1px solid var(--br);text-align:center">
-        <div style="font-size:22px;font-weight:900;color:#059669" id="pbp-stat-rating">—</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px">Note</div>
-      </div>
-    </div>
-
-    <!-- Catalogue -->
-    <div style="padding:20px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
-        <div style="font-size:16px;font-weight:800;color:var(--ink)">📦 Catalogue</div>
-        <!-- Barre de recherche dans la boutique -->
-        <div style="display:flex;align-items:center;gap:8px;background:#F8FAFC;border:1.5px solid var(--br);border-radius:10px;padding:6px 14px;min-width:200px">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-          <input id="pbp-search" type="text" placeholder="Rechercher dans la boutique..." oninput="filterPbpGrid()" style="border:none;background:transparent;font-family:inherit;font-size:12px;color:var(--ink);outline:none;width:100%">
-        </div>
-      </div>
-      <!-- Filtres sous-catégorie -->
-      <div id="pbp-filters" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"></div>
-      <!-- Grille annonces -->
-      <div id="pbp-ads-grid" class="ads-grid" style="min-height:200px">
-        <div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--muted)">
-          <div style="font-size:36px;margin-bottom:12px">⏳</div>
-          <div style="font-size:14px;font-weight:700">Chargement du catalogue...</div>
-        </div>
-      </div>
-    </div>
-
   </div>
-</div>
+
+  <!-- ══ STATS ══ -->
+  <div class="pbp-stats-row">
+    <div class="pbp-stat-card">
+      <div id="pbp-stat-ads" class="pbp-stat-val pbp-stat-val--orange">—</div>
+      <div class="pbp-stat-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Articles
+      </div>
+    </div>
+    <div class="pbp-stat-card">
+      <div id="pbp-stat-views" class="pbp-stat-val pbp-stat-val--purple">—</div>
+      <div class="pbp-stat-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Vues totales
+      </div>
+    </div>
+    <div class="pbp-stat-card">
+      <div id="pbp-stat-rating" class="pbp-stat-val pbp-stat-val--green">—</div>
+      <div class="pbp-stat-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Note moyenne
+      </div>
+    </div>
+    <div class="pbp-stat-card">
+      <div id="pbp-stat-since" class="pbp-stat-val pbp-stat-val--blue">—</div>
+      <div class="pbp-stat-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Membre depuis
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ VIDÉO ══ -->
+  <div id="pbp-video-section" class="pbp-video-section" style="display:none">
+    <div class="pbp-section-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+      Présentation vidéo
+    </div>
+    <div id="pbp-video-embed" class="pbp-video-embed"></div>
+    <div id="pbp-video-title" class="pbp-video-title-txt"></div>
+  </div>
+
+  <!-- ══ CATALOGUE ══ -->
+  <div class="pbp-catalogue">
+    <div class="pbp-catalogue-head">
+      <div class="pbp-section-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Catalogue
+        <span id="pbp-catalogue-count" class="pbp-catalogue-count"></span>
+      </div>
+      <div class="pbp-search-wrap">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input id="pbp-search" type="text" placeholder="Rechercher un article..." oninput="filterPbpGrid()" class="pbp-search-input">
+      </div>
+    </div>
+
+    <!-- Filtres sous-catégorie -->
+    <div id="pbp-filters" class="pbp-filters"></div>
+
+    <!-- Grille articles -->
+    <div id="pbp-ads-grid" class="pbp-ads-grid">
+      <div class="pbp-loading">
+        <div class="pbp-loading-icon">⏳</div>
+        <div class="pbp-loading-txt">Chargement du catalogue...</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /pbp-shell -->
+</div><!-- /page-boutique-publique -->
 
 <!-- ══ LIGHTBOX ZOOM PHOTOS ══ -->
 <div id="lightbox-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;flex-direction:column;align-items:center;justify-content:center" onclick="lbClose(event)">
