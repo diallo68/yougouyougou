@@ -6319,8 +6319,8 @@ function renderAuthForm(tab){
 
       // Bloc commun : Prénom + Nom
       '<div class="frow">'+
-        '<div class="fg"><label>Prénom *</label><input type="text" id="rfn" placeholder="Prénom" autocomplete="given-name"></div>'+
-        '<div class="fg"><label>Nom</label><input type="text" id="rln" placeholder="Nom" autocomplete="family-name"></div>'+
+        '<div class="fg"><label>Prénom *</label><input type="text" id="rfn" placeholder="Prénom" autocomplete="given-name" oninput="autoSuggestPseudo()"></div>'+
+        '<div class="fg"><label>Nom</label><input type="text" id="rln" placeholder="Nom" autocomplete="family-name" oninput="autoSuggestPseudo()"></div>'+
       '</div>'+
 
       // ── MODE TÉLÉPHONE : numéro ──
@@ -6336,10 +6336,17 @@ function renderAuthForm(tab){
       '</div>'+
 
       '<div id="rpseudo-wrap" class="fg" style="display:none">'+
-        '<label>🏷️ Pseudonyme * <span style="font-size:11px;color:var(--muted);font-weight:500">(unique · pour vous connecter)</span></label>'+
-        '<div style="position:relative">'+
-          '<span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--or);font-weight:900;font-size:15px;pointer-events:none">@</span>'+
-          '<input type="text" id="rpseudo" placeholder="mon_pseudo" style="padding-left:30px" autocapitalize="none" autocomplete="username" oninput="checkPseudo(this.value)">'+
+        '<label style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'+
+          '🏷️ Pseudonyme * '+
+          '<span style="font-size:11px;color:var(--muted);font-weight:500">(unique · pour vous connecter)</span>'+
+          '<span id="pseudo-auto-badge" style="display:none;font-size:10px;font-weight:700;background:#EFF6FF;color:#1D4ED8;padding:2px 8px;border-radius:20px;border:1px solid #BFDBFE">✨ Suggéré</span>'+
+        '</label>'+
+        '<div style="position:relative;display:flex;align-items:center">'+
+          '<span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--or);font-weight:900;font-size:15px;pointer-events:none;z-index:1">@</span>'+
+          '<input type="text" id="rpseudo" placeholder="mon_pseudo" style="padding-left:30px;padding-right:40px;flex:1" autocapitalize="none" autocomplete="username" oninput="onPseudoManualInput(this.value)">'+
+          '<button type="button" id="btn-regen-pseudo" onclick="autoSuggestPseudo(true)" title="Générer un autre pseudo" '+
+            'style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;padding:4px;border-radius:6px;color:var(--muted);transition:color .15s" '+
+            'onmouseover="this.style.color=\'var(--or)\'" onmouseout="this.style.color=\'var(--muted)\'">🔄</button>'+
         '</div>'+
         '<div id="pseudo-status" style="font-size:12px;font-weight:600;margin-top:4px;min-height:16px"></div>'+
       '</div>'+
@@ -6357,6 +6364,8 @@ function renderAuthForm(tab){
 
     regMode = 'phone';
     verifyMethod = 'sms';
+    _pseudoWasManuallyEdited = false;
+    _pseudoVariant = 0;
   }
 }
 
@@ -6373,6 +6382,71 @@ function checkPwMatch(){
     msg.textContent='❌ Les mots de passe ne correspondent pas';
     msg.style.color='#DC2626';
   }
+}
+
+// ── Suggestion automatique de pseudo depuis Prénom + Nom ──
+var _pseudoWasManuallyEdited = false;
+
+function _buildPseudoSuggestion(variant){
+  var fn = ((document.getElementById('rfn')||{value:''}).value.trim()).toLowerCase();
+  var ln = ((document.getElementById('rln')||{value:''}).value.trim()).toLowerCase();
+
+  // Nettoyer : enlever accents et caractères spéciaux
+  fn = fn.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
+  ln = ln.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
+
+  if(!fn && !ln) return '';
+
+  var base = fn && ln ? fn+'_'+ln : (fn||ln);
+  var suffix = Math.floor(10+Math.random()*90); // suffixe 2 chiffres
+
+  var variants = [
+    base,                                            // 0 : prenom_nom
+    fn && ln ? ln+'_'+fn : base,                     // 1 : nom_prenom
+    base + suffix,                                   // 2 : prenom_nom42
+    fn ? fn + suffix : base + suffix,                // 3 : prenom42
+    fn && ln ? fn.charAt(0)+ln : base,               // 4 : pnom
+    base.replace('_',''),                            // 5 : prenonom
+  ];
+
+  var chosen = variants[variant % variants.length] || base+suffix;
+  // Limiter à 20 chars, supprimer caractères invalides
+  return chosen.slice(0,20).replace(/[^a-z0-9_.-]/g,'');
+}
+
+var _pseudoVariant = 0; // indice de la variante actuelle
+
+function autoSuggestPseudo(forceRegen){
+  // Ne pas écraser si l'utilisateur a modifié manuellement (sauf si forceRegen)
+  if(_pseudoWasManuallyEdited && !forceRegen) return;
+
+  var input  = document.getElementById('rpseudo');
+  var badge  = document.getElementById('pseudo-auto-badge');
+  if(!input) return;
+
+  if(forceRegen) _pseudoVariant++;
+
+  var suggestion = _buildPseudoSuggestion(_pseudoVariant);
+  if(!suggestion) return;
+
+  input.value = suggestion;
+  _pseudoWasManuallyEdited = false; // reset flag — c'est une suggestion
+
+  // Afficher le badge "Suggéré"
+  if(badge) badge.style.display = 'inline-flex';
+
+  // Vérifier disponibilité
+  checkPseudo(suggestion);
+}
+
+function onPseudoManualInput(val){
+  _pseudoWasManuallyEdited = true;
+  _pseudoVariant = 0; // reset le compteur de variants
+  // Cacher le badge "Suggéré" dès que l'utilisateur tape
+  var badge = document.getElementById('pseudo-auto-badge');
+  if(badge) badge.style.display = 'none';
+  // Lancer la vérification normale
+  checkPseudo(val);
 }
 
 // Vérification live du pseudo (debounced)
@@ -6462,6 +6536,10 @@ function regToggle(mode){
     if(btn) btn.textContent = '📧 Recevoir le code par email →';
     // Focus auto sur l'email
     setTimeout(function(){ var e=document.getElementById('rem'); if(e)e.focus(); },80);
+    // Suggérer un pseudo si le champ est vide
+    _pseudoWasManuallyEdited = false;
+    _pseudoVariant = 0;
+    setTimeout(function(){ autoSuggestPseudo(false); }, 120);
   }
 }
 
