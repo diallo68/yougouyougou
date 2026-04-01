@@ -904,6 +904,8 @@ app.get('/api/me', auth, async (req, res) => {
       name: `${user.prenom} ${user.nom||''}`.trim(),
       prenom: user.prenom, nom: user.nom, phone: user.phone,
       email: user.email, city: user.city,
+      pseudo: user.pseudo || '',
+      dob:    user.dob    || '',
       role: user.role,
       verified: user.verified,
       isPro:    proActive ? true : false,
