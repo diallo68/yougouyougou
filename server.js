@@ -424,6 +424,45 @@ ResiliationSchema.index({ userId: 1, createdAt: -1 });
 ResiliationSchema.index({ status: 1, createdAt: -1 });
 const Resiliation = mongoose.model('Resiliation', ResiliationSchema);
 
+// ── ★ PANIER BOUTIQUE ─────────────────────────────────────
+const CartItemSchema = new mongoose.Schema({
+  adId:      { type: mongoose.Schema.Types.ObjectId, ref: 'Ad', required: true },
+  adTitle:   { type: String },
+  adPrice:   { type: Number },
+  adEmoji:   { type: String, default: '📦' },
+  adPhoto:   { type: String },              // première photo de l'annonce
+  quantity:  { type: Number, default: 1, min: 1, max: 99 },
+}, { _id: true });
+
+const CartSchema = new mongoose.Schema({
+  // Boutique / vendeur ciblé
+  sellerId:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+  sellerName:  { type: String },
+
+  // Acheteur
+  buyerId:     { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
+  buyerName:   { type: String },
+  buyerPhone:  { type: String },
+  buyerMessage:{ type: String, maxlength: 500 },
+
+  // Articles
+  items:       [CartItemSchema],
+
+  // Totaux
+  totalItems:  { type: Number, default: 0 },
+  totalAmount: { type: Number, default: 0 },
+
+  // Statut
+  status:      { type: String, enum: ['pending','confirmed','cancelled'], default: 'pending', index: true },
+  statusNote:  { type: String },            // note du vendeur (ex: raison annulation)
+
+  createdAt:   { type: Date, default: Date.now, index: true },
+  updatedAt:   { type: Date, default: Date.now },
+});
+CartSchema.index({ sellerId: 1, status: 1, createdAt: -1 });
+CartSchema.index({ buyerId: 1, createdAt: -1 });
+const Cart = mongoose.model('Cart', CartSchema);
+
 // ── ★ NOTIFICATIONS ─────────────────────────────────────────
 const NotificationSchema = new mongoose.Schema({
   userId:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
@@ -2410,6 +2449,226 @@ app.get('/api/notifications/unread-count', auth, async (req, res) => {
 
 
 // ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+//  PANIER BOUTIQUE
+// ═══════════════════════════════════════════════════════════
+
+// POST /api/cart  — créer un panier (acheteur → boutique)
+app.post('/api/cart', auth, async (req, res) => {
+  try {
+    const { sellerId, items, buyerPhone, buyerMessage } = req.body;
+    if (!sellerId) return res.status(400).json({ error: 'sellerId requis' });
+    if (!items || !items.length) return res.status(400).json({ error: 'Panier vide' });
+    if (String(req.user.id) === String(sellerId))
+      return res.status(400).json({ error: 'Vous ne pouvez pas commander dans votre propre boutique' });
+
+    const buyer  = await User.findById(req.user.id).select('prenom nom phone');
+    const seller = await User.findById(sellerId).select('prenom nom email boutique');
+    if (!seller) return res.status(404).json({ error: 'Boutique introuvable' });
+
+    // Enrichir les articles avec infos depuis la DB
+    const adIds    = items.map(i => i.adId);
+    const ads      = await Ad.find({ _id: { $in: adIds }, active: true }).select('title price emoji photos');
+    const adsMap   = {};
+    ads.forEach(a => { adsMap[String(a._id)] = a; });
+
+    const enrichedItems = items.map(item => {
+      const ad = adsMap[String(item.adId)];
+      if (!ad) return null;
+      return {
+        adId:     ad._id,
+        adTitle:  ad.title,
+        adPrice:  ad.price,
+        adEmoji:  ad.emoji || '📦',
+        adPhoto:  (ad.photos && ad.photos[0]) || '',
+        quantity: Math.max(1, Math.min(99, parseInt(item.quantity) || 1)),
+      };
+    }).filter(Boolean);
+
+    if (!enrichedItems.length) return res.status(400).json({ error: 'Aucun article valide' });
+
+    const totalAmount = enrichedItems.reduce((sum, i) => sum + (i.adPrice * i.quantity), 0);
+    const totalItems  = enrichedItems.reduce((sum, i) => sum + i.quantity, 0);
+
+    const buyerName = `${buyer?.prenom || ''} ${buyer?.nom || ''}`.trim() || 'Acheteur';
+
+    const cart = await Cart.create({
+      sellerId,
+      sellerName: `${seller.prenom || ''} ${seller.nom || ''}`.trim(),
+      buyerId:    req.user.id,
+      buyerName,
+      buyerPhone: buyerPhone || buyer?.phone || '',
+      buyerMessage: buyerMessage || '',
+      items:       enrichedItems,
+      totalItems,
+      totalAmount,
+      status: 'pending',
+    });
+
+    // 🔔 Notification in-app au vendeur
+    const boutiqueName = seller.boutique?.name || 'votre boutique';
+    await createNotif(
+      sellerId,
+      'new_message',
+      '🛒 Nouveau panier reçu !',
+      `${buyerName} a ajouté ${totalItems} article${totalItems > 1 ? 's' : ''} dans ${boutiqueName} — Total : ${totalAmount.toLocaleString('fr-FR')} GNF`,
+      'dashboard/cart',
+      '🛒',
+      { cartId: cart._id, buyerName, totalItems, totalAmount }
+    );
+
+    // 📧 Email au vendeur
+    if (seller.email && seller.email.includes('@')) {
+      const itemsList = enrichedItems.map(i =>
+        `<tr><td style="padding:6px 8px">${i.adEmoji} ${i.adTitle}</td><td style="padding:6px 8px;text-align:center">${i.quantity}</td><td style="padding:6px 8px;text-align:right">${(i.adPrice * i.quantity).toLocaleString('fr-FR')} GNF</td></tr>`
+      ).join('');
+      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+      <body style="font-family:Arial,sans-serif;background:#f5f5f5;padding:20px">
+        <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden">
+          <div style="background:linear-gradient(135deg,#FF5C00,#FF9500);padding:24px;text-align:center">
+            <div style="font-size:36px">🛒</div>
+            <div style="font-size:20px;font-weight:900;color:#fff;margin-top:8px">Nouveau panier reçu !</div>
+            <div style="color:rgba(255,255,255,.85);font-size:13px;margin-top:4px">${boutiqueName}</div>
+          </div>
+          <div style="padding:24px">
+            <p>Bonjour <strong>${seller.prenom || 'Commerçant'}</strong>,</p>
+            <p><strong>${buyerName}</strong> a passé une commande dans votre boutique.</p>
+            <table style="width:100%;border-collapse:collapse;margin:16px 0;font-size:13px">
+              <thead><tr style="background:#F8FAFC">
+                <th style="padding:8px;text-align:left">Article</th>
+                <th style="padding:8px">Qté</th>
+                <th style="padding:8px;text-align:right">Prix</th>
+              </tr></thead>
+              <tbody>${itemsList}</tbody>
+              <tfoot><tr style="background:#FFF0E8;font-weight:900">
+                <td colspan="2" style="padding:8px">TOTAL</td>
+                <td style="padding:8px;text-align:right">${totalAmount.toLocaleString('fr-FR')} GNF</td>
+              </tr></tfoot>
+            </table>
+            ${buyerPhone ? `<p>📱 <strong>Téléphone :</strong> ${buyerPhone}</p>` : ''}
+            ${buyerMessage ? `<p>💬 <strong>Message :</strong> ${buyerMessage}</p>` : ''}
+            <div style="text-align:center;margin-top:20px">
+              <a href="https://yougouyougou.net" style="background:#FF5C00;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:800;font-size:14px">Gérer mes paniers →</a>
+            </div>
+          </div>
+        </div>
+      </body></html>`;
+      sendEmail(seller.email, `🛒 Nouveau panier — ${boutiqueName}`, html,
+        `${buyerName} a commandé ${totalItems} article(s) pour ${totalAmount.toLocaleString('fr-FR')} GNF`)
+        .catch(e => console.error('[CART EMAIL]', e.message));
+    }
+
+    console.log(`[CART] ✅ Nouveau panier → seller=${sellerId} buyer=${req.user.id} items=${totalItems}`);
+    res.json({ success: true, cartId: cart._id, totalItems, totalAmount });
+  } catch(err) {
+    console.error('[CART POST]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/cart/seller  — paniers reçus par le vendeur connecté
+app.get('/api/cart/seller', auth, async (req, res) => {
+  try {
+    const { status, page = 1, limit = 20 } = req.query;
+    const filter = { sellerId: req.user.id };
+    if (status && ['pending','confirmed','cancelled'].includes(status)) filter.status = status;
+
+    const total = await Cart.countDocuments(filter);
+    const carts = await Cart.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(Number(limit))
+      .lean();
+
+    // Compteurs par statut
+    const [pendingCount, confirmedCount, cancelledCount] = await Promise.all([
+      Cart.countDocuments({ sellerId: req.user.id, status: 'pending' }),
+      Cart.countDocuments({ sellerId: req.user.id, status: 'confirmed' }),
+      Cart.countDocuments({ sellerId: req.user.id, status: 'cancelled' }),
+    ]);
+
+    res.json({ carts, total, pendingCount, confirmedCount, cancelledCount });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/cart/buyer  — paniers passés par l'acheteur connecté
+app.get('/api/cart/buyer', auth, async (req, res) => {
+  try {
+    const carts = await Cart.find({ buyerId: req.user.id })
+      .sort({ createdAt: -1 }).limit(50).lean();
+    res.json({ carts });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// PATCH /api/cart/:id/status  — vendeur change le statut d'un panier
+app.patch('/api/cart/:id/status', auth, async (req, res) => {
+  try {
+    const { status, statusNote } = req.body;
+    if (!['confirmed','cancelled'].includes(status))
+      return res.status(400).json({ error: 'Statut invalide (confirmed | cancelled)' });
+
+    const cart = await Cart.findOne({ _id: req.params.id, sellerId: req.user.id });
+    if (!cart) return res.status(404).json({ error: 'Panier introuvable' });
+    if (cart.status !== 'pending')
+      return res.status(400).json({ error: 'Ce panier a déjà été traité' });
+
+    cart.status    = status;
+    cart.statusNote= statusNote || '';
+    cart.updatedAt = new Date();
+    await cart.save();
+
+    // 🔔 Notification à l'acheteur
+    const seller = await User.findById(req.user.id).select('prenom nom boutique');
+    const boutiqueName = seller?.boutique?.name || 'la boutique';
+    const icons = { confirmed: '✅', cancelled: '❌' };
+    const msgs  = {
+      confirmed: `Votre panier dans ${boutiqueName} a été confirmé ! Le vendeur vous contactera.`,
+      cancelled: `Votre panier dans ${boutiqueName} a été annulé${statusNote ? ' : ' + statusNote : ''}.`,
+    };
+    if (cart.buyerId) {
+      await createNotif(
+        cart.buyerId,
+        status === 'confirmed' ? 'pro_activated' : 'ad_reply',
+        icons[status] + ' Panier ' + (status === 'confirmed' ? 'confirmé' : 'annulé'),
+        msgs[status],
+        'dashboard',
+        icons[status],
+        { cartId: cart._id, status, boutiqueName }
+      );
+    }
+
+    res.json({ success: true, status, cart });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// DELETE /api/cart/:id  — vendeur supprime un panier traité
+app.delete('/api/cart/:id', auth, async (req, res) => {
+  try {
+    const cart = await Cart.findOneAndDelete({ _id: req.params.id, sellerId: req.user.id });
+    if (!cart) return res.status(404).json({ error: 'Panier introuvable' });
+    res.json({ success: true });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/cart/seller/stats  — statistiques paniers du vendeur
+app.get('/api/cart/seller/stats', auth, async (req, res) => {
+  try {
+    const [pending, confirmed, cancelled, totalRevenue] = await Promise.all([
+      Cart.countDocuments({ sellerId: req.user.id, status: 'pending' }),
+      Cart.countDocuments({ sellerId: req.user.id, status: 'confirmed' }),
+      Cart.countDocuments({ sellerId: req.user.id, status: 'cancelled' }),
+      Cart.aggregate([
+        { $match: { sellerId: new mongoose.Types.ObjectId(req.user.id), status: 'confirmed' }},
+        { $group: { _id: null, total: { $sum: '$totalAmount' }}},
+      ]),
+    ]);
+    res.json({
+      pending, confirmed, cancelled,
+      totalRevenue: totalRevenue[0]?.total || 0,
+    });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
 //  CLOUDINARY — Upload signé sécurisé
 // ═══════════════════════════════════════════════════════════
 
