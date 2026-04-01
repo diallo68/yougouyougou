@@ -2410,6 +2410,59 @@ app.get('/api/notifications/unread-count', auth, async (req, res) => {
 
 
 // ═══════════════════════════════════════════════════════════
+//  CLOUDINARY — Upload signé sécurisé
+// ═══════════════════════════════════════════════════════════
+
+// POST /api/upload/sign  — génère une signature pour l'upload direct Cloudinary
+app.post('/api/upload/sign', auth, (req, res) => {
+  const cloudName  = process.env.CLOUDINARY_CLOUD_NAME;
+  const apiKey     = process.env.CLOUDINARY_API_KEY;
+  const apiSecret  = process.env.CLOUDINARY_API_SECRET;
+  const uploadPreset = process.env.CLOUDINARY_PRESET || 'yougouyougou';
+
+  if (!cloudName || !apiKey || !apiSecret) {
+    return res.status(503).json({ error: 'Cloudinary non configuré' });
+  }
+
+  const { folder = 'yougouyougou', type = 'ad' } = req.body;
+  const timestamp = Math.round(Date.now() / 1000);
+
+  // Dossier selon le type d'upload
+  const folders = {
+    ad:     `yougouyougou/ads/${req.user.id}`,
+    avatar: `yougouyougou/avatars`,
+    logo:   `yougouyougou/boutiques/${req.user.id}/logo`,
+    banner: `yougouyougou/boutiques/${req.user.id}/banner`,
+  };
+  const uploadFolder = folders[type] || folders.ad;
+
+  // Paramètres à signer
+  const params = {
+    folder:    uploadFolder,
+    timestamp: timestamp,
+  };
+
+  // Générer la signature HMAC-SHA1
+  const crypto   = require('crypto');
+  const paramStr = Object.keys(params).sort()
+    .map(k => `${k}=${params[k]}`)
+    .join('&');
+  const signature = crypto
+    .createHash('sha1')
+    .update(paramStr + apiSecret)
+    .digest('hex');
+
+  res.json({
+    signature,
+    timestamp,
+    apiKey,
+    cloudName,
+    folder:     uploadFolder,
+    uploadPreset,
+  });
+});
+
+// ═══════════════════════════════════════════════════════════
 //  HEALTH CHECK + SPA FALLBACK
 // ═══════════════════════════════════════════════════════════
 app.get('/api/health', (req, res) => {
