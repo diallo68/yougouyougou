@@ -1713,6 +1713,101 @@ footer{background:transparent;margin-top:0}
 #lightbox-thumbnails::-webkit-scrollbar{ height:4px }
 #lightbox-thumbnails::-webkit-scrollbar-thumb{ background:#555;border-radius:2px }
 
+/* ══ NOTIFICATIONS ══ */
+#nav-notif-badge{ display:none; }
+#nav-notif-badge.active{ display:inline-flex!important; }
+
+@keyframes notifPulse{0%{transform:scale(1)}50%{transform:scale(1.4)}100%{transform:scale(1)}}
+
+/* Page notifications dans le dashboard */
+.notif-list{ display:flex; flex-direction:column; gap:8px; }
+
+.notif-item{
+  background:#fff;
+  border-radius:12px;
+  padding:14px 16px;
+  border:1px solid #E2E8F0;
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  transition:background .12s, border-color .12s;
+  cursor:pointer;
+  position:relative;
+}
+.notif-item:hover{ background:#FAFBFC; border-color:#C5CDD6; }
+.notif-item.unread{
+  background:#FFF8F5;
+  border-color:#FFCBB0;
+}
+.notif-item.unread::before{
+  content:'';
+  position:absolute;
+  left:0; top:50%; transform:translateY(-50%);
+  width:4px; height:60%;
+  background:var(--or);
+  border-radius:0 4px 4px 0;
+}
+.notif-icon{
+  width:40px; height:40px;
+  border-radius:10px;
+  background:#F1F5F9;
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px; flex-shrink:0;
+}
+.notif-icon.unread{ background:var(--orl); }
+.notif-body{ flex:1; min-width:0; }
+.notif-title{
+  font-size:13px; font-weight:700; color:var(--ink);
+  margin-bottom:3px; line-height:1.3;
+}
+.notif-text{
+  font-size:12px; color:#64748B; line-height:1.5;
+  display:-webkit-box; -webkit-line-clamp:2;
+  -webkit-box-orient:vertical; overflow:hidden;
+}
+.notif-time{
+  font-size:11px; color:#94A3B8; margin-top:4px;
+  font-weight:500;
+}
+.notif-del{
+  background:none; border:none;
+  color:#CBD5E1; cursor:pointer; font-size:16px;
+  padding:4px; border-radius:6px; flex-shrink:0;
+  transition:color .12s, background .12s;
+  line-height:1;
+}
+.notif-del:hover{ color:#DC2626; background:#FEE2E2; }
+
+.notif-empty{
+  text-align:center; padding:60px 20px;
+  color:var(--muted);
+}
+.notif-empty-icon{ font-size:48px; margin-bottom:12px; }
+.notif-empty-title{ font-size:15px; font-weight:700; color:var(--ink); margin-bottom:6px; }
+.notif-empty-sub{ font-size:13px; }
+
+.notif-header{
+  display:flex; align-items:center;
+  justify-content:space-between;
+  margin-bottom:16px; flex-wrap:wrap; gap:8px;
+}
+.notif-badge-count{
+  display:inline-flex; align-items:center; gap:4px;
+  background:#FEE2E2; color:#DC2626;
+  font-size:11px; font-weight:800;
+  padding:3px 10px; border-radius:20px;
+}
+.notif-mark-all{
+  background:none; border:1px solid var(--br);
+  color:var(--muted); font-size:12px; font-weight:600;
+  padding:5px 14px; border-radius:8px;
+  cursor:pointer; font-family:var(--font);
+  transition:all .12s;
+}
+.notif-mark-all:hover{
+  border-color:var(--or); color:var(--or);
+}
+
 /* ══ PAGE BOUTIQUE PUBLIQUE — Design Pro ══ */
 #page-boutique-publique{ background:#F1F3F5; }
 
@@ -2404,6 +2499,12 @@ footer{background:transparent;margin-top:0}
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       <span>Messages</span>
     </button>
+    <!-- 🔔 Cloche notifications -->
+    <button class="nav-lbc-btn" id="nav-notif-btn" onclick="goToNotifications()" title="Notifications" style="display:none;position:relative">
+      <span id="nav-notif-badge" style="display:none;position:absolute;top:3px;right:3px;background:#DC2626;color:#fff;border-radius:50%;min-width:16px;height:16px;font-size:9px;font-weight:900;align-items:center;justify-content:center;padding:0 3px;line-height:16px;box-shadow:0 0 0 2px #fff">0</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span>Notifications</span>
+    </button>
     <button class="nav-lbc-btn nav-lbc-auth" id="nav-auth-btn" onclick="openModal('auth')">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       <span id="nav-user-label">Se connecter</span>
@@ -2972,6 +3073,13 @@ footer{background:transparent;margin-top:0}
           Alertes
         </a>
 
+        <!-- 5b. Notifications -->
+        <a onclick="showDashTab('notifications')" id="dtab-notifications">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          Notifications
+          <span id="dash-notif-badge" style="display:none;background:#DC2626;color:#fff;font-size:9px;font-weight:900;padding:1px 6px;border-radius:10px;margin-left:auto"></span>
+        </a>
+
         <!-- Séparateur Pro (visible si Pro actif) -->
         <div id="dash-sep-pro" style="display:none;height:1px;background:var(--br);margin:8px 4px;"></div>
         <div id="dash-sep-pro-label" style="display:none;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:0 8px 4px">Espace Pro</div>
@@ -3393,6 +3501,29 @@ footer{background:transparent;margin-top:0}
         <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Recevez un email dès qu'une nouvelle annonce correspond à vos critères.</p>
         <button onclick="showAlertModal()" style="background:var(--or);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;margin-bottom:16px">➕ Créer une alerte</button>
         <div id="alerts-list"><div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">⏳ Chargement...</div></div>
+      </div>
+
+      <!-- ═══ TAB NOTIFICATIONS ═══ -->
+      <div class="dash-section" id="dsec-notifications">
+        <div class="notif-header">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="dash-section-title" style="margin-bottom:0">🔔 Notifications</div>
+            <span id="notif-unread-count" class="notif-badge-count" style="display:none">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+              <span id="notif-unread-num">0</span> non lues
+            </span>
+          </div>
+          <button class="notif-mark-all" onclick="markAllNotifsRead()" id="btn-mark-all-notifs" style="display:none">
+            ✓ Tout marquer comme lu
+          </button>
+        </div>
+        <div id="notif-list-container">
+          <div class="notif-empty">
+            <div class="notif-empty-icon">🔔</div>
+            <div class="notif-empty-title">Aucune notification</div>
+            <div class="notif-empty-sub">Vos notifications apparaîtront ici</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -6869,7 +7000,7 @@ function verifyCode(){
       serverUser.name=serverUser.name||(serverUser.prenom+(serverUser.nom?' '+serverUser.nom:''));
       if(data.token) localStorage.setItem('ygy_token',data.token);
       DB.addUser(serverUser);DB.login(serverUser);updateNav();closeModal('auth');document.body.style.overflow='';
-      toast('🎉 Bienvenue '+u.prenom+' ! Compte créé 🇬🇳','ok'); resetInactivityTimer();
+      toast('🎉 Bienvenue '+u.prenom+' ! Compte créé 🇬🇳','ok'); resetInactivityTimer(); startNotifPolling();
       pendingUser=null;smsCode='';codeFromServer=false;
     })
     .catch(function(){
@@ -7058,6 +7189,7 @@ function doLogin(){
     closeModal('auth');
     document.body.style.overflow='';
     resetInactivityTimer();
+    startNotifPolling();
     toast('✅ Bienvenue '+(u.prenom||u.name||'').split(' ')[0]+' ! 🇬🇳','ok');
   })
   .catch(function(){
@@ -7122,7 +7254,7 @@ function saveProfile(){
   toast('✅ Profil mis à jour !','ok');
 }
 
-function logout(){DB.logout();localStorage.removeItem('ygy_token');updateNav();goTo('home');toast('👋 Déconnecté');}
+function logout(){DB.logout();localStorage.removeItem('ygy_token');updateNav();stopNotifPolling();goTo('home');toast('👋 Déconnecté');}
 
 /* ═══════════════════════════════════════
    MOT DE PASSE OUBLIÉ — RÉINITIALISATION
@@ -7780,6 +7912,248 @@ async function contacterVendeur3pct(){
 // Alias
 function contactVendeur(){ contacterVendeur3pct(); }
 function envoyerMessage(){ contacterVendeur3pct(); }
+
+// ══════════════════════════════════════════════════════════
+//  SYSTÈME DE NOTIFICATIONS — Polling 30s
+// ══════════════════════════════════════════════════════════
+
+var _notifTimer      = null;   // timer polling
+var _notifCache      = [];     // cache local des notifs
+var _notifUnread     = 0;      // count non lues
+
+// ── Formater le temps relatif ──
+function _notifTimeAgo(dateStr){
+  var d    = new Date(dateStr);
+  var diff = (Date.now() - d.getTime()) / 1000;
+  if(diff < 60)   return 'À l\'instant';
+  if(diff < 3600) return Math.floor(diff/60) + ' min';
+  if(diff < 86400)return Math.floor(diff/3600) + 'h';
+  if(diff < 604800)return Math.floor(diff/86400) + 'j';
+  return d.toLocaleDateString('fr-FR', {day:'numeric', month:'short'});
+}
+
+// ── Mettre à jour le badge dans la nav ──
+function _updateNotifBadge(count){
+  var btn   = document.getElementById('nav-notif-btn');
+  var badge = document.getElementById('nav-notif-badge');
+  if(!btn) return;
+  // Afficher la cloche si connecté
+  var u = DB.user();
+  btn.style.display = u ? '' : 'none';
+  if(!badge) return;
+  if(count > 0){
+    badge.style.display   = 'inline-flex';
+    badge.textContent     = count > 99 ? '99+' : String(count);
+    // Animation pulse sur le badge
+    badge.style.animation = 'notifPulse .4s ease';
+    setTimeout(function(){ badge.style.animation = ''; }, 400);
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+// ── Charger les notifications depuis l'API ──
+function loadNotifications(callback){
+  var token = localStorage.getItem('ygy_token');
+  if(!token){ if(callback) callback([], 0); return; }
+  fetch('/api/notifications', {
+    headers:{ 'Authorization': 'Bearer ' + token }
+  })
+  .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+  .then(function(data){
+    _notifCache  = data.notifications || [];
+    _notifUnread = data.unread || 0;
+    _updateNotifBadge(_notifUnread);
+    if(callback) callback(_notifCache, _notifUnread);
+  })
+  .catch(function(){ if(callback) callback(_notifCache, _notifUnread); });
+}
+
+// ── Polling léger — juste le compteur (badge nav) ──
+function _pollNotifCount(){
+  var token = localStorage.getItem('ygy_token');
+  if(!token) return;
+  fetch('/api/notifications/unread-count', {
+    headers:{ 'Authorization': 'Bearer ' + token }
+  })
+  .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+  .then(function(data){
+    var prev = _notifUnread;
+    _notifUnread = data.unread || 0;
+    _updateNotifBadge(_notifUnread);
+    // Badge dans le menu dashboard
+    var dashBadge = document.getElementById('dash-notif-badge');
+    if(dashBadge){
+      if(_notifUnread > 0){ dashBadge.style.display='inline-block'; dashBadge.textContent=_notifUnread; }
+      else dashBadge.style.display='none';
+    }
+    // Si nouvelles notifs → rafraîchir la page notifs si ouverte
+    if(_notifUnread > prev){
+      var sec = document.getElementById('dsec-notifications');
+      if(sec && sec.style.display !== 'none' && sec.offsetParent !== null){
+        loadNotifications(renderNotifications);
+      }
+    }
+  })
+  .catch(function(){});
+}
+
+// ── Démarrer le polling toutes les 30s ──
+function startNotifPolling(){
+  if(_notifTimer) return; // déjà actif
+  _pollNotifCount(); // appel immédiat
+  _notifTimer = setInterval(_pollNotifCount, 30000);
+}
+
+// ── Arrêter le polling (à la déconnexion) ──
+function stopNotifPolling(){
+  if(_notifTimer){ clearInterval(_notifTimer); _notifTimer = null; }
+  _notifUnread = 0;
+  _notifCache  = [];
+  _updateNotifBadge(0);
+}
+
+// ── Marquer une notif comme lue ──
+function markNotifRead(notifId, link){
+  var token = localStorage.getItem('ygy_token');
+  if(token){
+    fetch('/api/notifications/' + notifId + '/read', {
+      method:'PATCH',
+      headers:{ 'Authorization': 'Bearer ' + token }
+    }).catch(function(){});
+  }
+  // Mettre à jour le cache local
+  var n = _notifCache.find(function(x){ return String(x._id) === String(notifId); });
+  if(n && !n.read){
+    n.read = true;
+    _notifUnread = Math.max(0, _notifUnread - 1);
+    _updateNotifBadge(_notifUnread);
+  }
+  // Naviguer vers le lien si fourni
+  if(link){
+    if(link.startsWith('dashboard/')){
+      var tab = link.replace('dashboard/','');
+      loadDash(); goTo('dashboard');
+      setTimeout(function(){ showDashTab(tab); }, 200);
+    } else if(link.startsWith('ad/')){
+      var adId = link.replace('ad/','');
+      viewAd(adId);
+    }
+  }
+}
+
+// ── Marquer toutes comme lues ──
+function markAllNotifsRead(){
+  var token = localStorage.getItem('ygy_token');
+  if(!token) return;
+  fetch('/api/notifications/read-all', {
+    method:'PATCH',
+    headers:{ 'Authorization': 'Bearer ' + token }
+  })
+  .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+  .then(function(){
+    _notifCache.forEach(function(n){ n.read = true; });
+    _notifUnread = 0;
+    _updateNotifBadge(0);
+    renderNotifications(_notifCache, 0);
+    toast('✅ Toutes les notifications marquées comme lues', 'ok');
+  })
+  .catch(function(){ toast('❌ Erreur, réessayez', 'err'); });
+}
+
+// ── Supprimer une notif ──
+function deleteNotif(notifId, event){
+  if(event) event.stopPropagation();
+  var token = localStorage.getItem('ygy_token');
+  if(!token) return;
+  fetch('/api/notifications/' + notifId, {
+    method:'DELETE',
+    headers:{ 'Authorization': 'Bearer ' + token }
+  }).catch(function(){});
+  // Retirer du cache local
+  var idx = _notifCache.findIndex(function(x){ return String(x._id) === String(notifId); });
+  if(idx > -1){
+    var wasUnread = !_notifCache[idx].read;
+    _notifCache.splice(idx, 1);
+    if(wasUnread) _notifUnread = Math.max(0, _notifUnread - 1);
+    _updateNotifBadge(_notifUnread);
+    renderNotifications(_notifCache, _notifUnread);
+  }
+}
+
+// ── Aller à la page notifications ──
+function goToNotifications(){
+  var u = DB.user();
+  if(!u){ openModal('auth'); return; }
+  loadDash();
+  goTo('dashboard');
+  setTimeout(function(){
+    showDashTab('notifications');
+    loadNotifications(renderNotifications);
+  }, 150);
+}
+
+// ── Rendu de la liste notifications ──
+function renderNotifications(notifs, unread){
+  var container = document.getElementById('notif-list-container');
+  var countEl   = document.getElementById('notif-unread-count');
+  var countNum  = document.getElementById('notif-unread-num');
+  var markAllBtn= document.getElementById('btn-mark-all-notifs');
+  if(!container) return;
+
+  var u = unread !== undefined ? unread : _notifUnread;
+
+  // Badge compteur
+  if(countEl && countNum){
+    if(u > 0){
+      countEl.style.display = 'inline-flex';
+      countNum.textContent  = u;
+    } else {
+      countEl.style.display = 'none';
+    }
+  }
+  // Bouton "Tout marquer"
+  if(markAllBtn) markAllBtn.style.display = u > 0 ? '' : 'none';
+
+  if(!notifs || !notifs.length){
+    container.innerHTML = '<div class="notif-empty">'
+      + '<div class="notif-empty-icon">🔔</div>'
+      + '<div class="notif-empty-title">Aucune notification</div>'
+      + '<div class="notif-empty-sub">Vos notifications apparaîtront ici</div>'
+      + '</div>';
+    return;
+  }
+
+  // Icônes par type
+  var typeIcons = {
+    new_message:   '💬',
+    ad_reply:      '📞',
+    ad_favorited:  '❤️',
+    pro_activated: '⭐',
+    ad_featured:   '🌟',
+  };
+
+  container.innerHTML = '<div class="notif-list">'
+    + notifs.map(function(n){
+      var icon    = n.icon || typeIcons[n.type] || '🔔';
+      var isUnread= !n.read;
+      var time    = _notifTimeAgo(n.createdAt);
+      return '<div class="notif-item'+(isUnread?' unread':'')+'" onclick="markNotifRead(\''+n._id+'\',\''+( n.link||'')+'\' )">'
+        + '<div class="notif-icon'+(isUnread?' unread':'')+'">'+icon+'</div>'
+        + '<div class="notif-body">'
+          + '<div class="notif-title">'+( n.title||'Notification')+'</div>'
+          + (n.body ? '<div class="notif-text">'+n.body+'</div>' : '')
+          + '<div class="notif-time">'+time+'</div>'
+        + '</div>'
+        + '<button class="notif-del" onclick="deleteNotif(\''+n._id+'\',event)" title="Supprimer">×</button>'
+      + '</div>';
+    }).join('')
+  + '</div>';
+}
+
+// ══════════════════════════════════════════════════════════
+//  FIN NOTIFICATIONS
+// ══════════════════════════════════════════════════════════
 
 function updateNav(){
   var btn=document.getElementById('nav-auth-btn');if(!btn)return;
@@ -10504,9 +10878,17 @@ function showDashTab(tab){
   if(sec) sec.classList.add('active');
   if(navEl) navEl.classList.add('active');
   if(tab === 'pro') updateDashProStatus();
-  if(tab === 'boutique'){
-    // renderBoutiqueSection gère l'affichage selon le statut Pro
-    // (appelé par le wrapper étendu showDashTab ci-dessous)
+  // Charger les notifications quand on ouvre l'onglet
+  if(tab === 'notifications'){
+    loadNotifications(function(notifs, unread){
+      renderNotifications(notifs, unread);
+      // Mettre à jour le badge du menu dash
+      var dashBadge = document.getElementById('dash-notif-badge');
+      if(dashBadge){
+        if(unread > 0){ dashBadge.style.display='inline-block'; dashBadge.textContent=unread; }
+        else dashBadge.style.display='none';
+      }
+    });
   }
 }
 
@@ -11783,6 +12165,10 @@ goTo=function(page){
 
 document.addEventListener('DOMContentLoaded',function(){
   DB.load();
+  // Démarrer le polling notifications si déjà connecté
+  if(localStorage.getItem('ygy_token') && DB.user()){
+    startNotifPolling();
+  }
   // Sync rôle depuis MongoDB au chargement
   (function(){
     var token = localStorage.getItem('ygy_token');
