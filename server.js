@@ -424,6 +424,36 @@ ResiliationSchema.index({ userId: 1, createdAt: -1 });
 ResiliationSchema.index({ status: 1, createdAt: -1 });
 const Resiliation = mongoose.model('Resiliation', ResiliationSchema);
 
+// ── ★ NOTIFICATIONS ─────────────────────────────────────────
+const NotificationSchema = new mongoose.Schema({
+  userId:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+  type:      { type: String, required: true, enum: [
+    'new_message',      // nouveau message reçu
+    'ad_reply',         // réponse à une annonce
+    'ad_favorited',     // quelqu'un a mis en favori
+    'pro_activated',    // abonnement Pro activé (admin → user)
+    'ad_featured',      // annonce mise à la une
+  ]},
+  title:     { type: String, required: true },
+  body:      { type: String },
+  link:      { type: String },             // route frontend cible
+  icon:      { type: String, default: '🔔' },
+  read:      { type: Boolean, default: false, index: true },
+  data:      { type: mongoose.Schema.Types.Mixed },  // données contextuelles
+  createdAt: { type: Date, default: Date.now, index: true },
+});
+NotificationSchema.index({ userId: 1, read: 1, createdAt: -1 });
+const Notification = mongoose.model('Notification', NotificationSchema);
+
+// Helper — créer une notification en base
+async function createNotif(userId, type, title, body, link, icon, data) {
+  try {
+    await Notification.create({ userId, type, title, body, link, icon: icon||'🔔', data: data||{} });
+  } catch(e) {
+    console.error('[NOTIF] Erreur création:', e.message);
+  }
+}
+
 // ═══════════════════════════════════════════════════════════
 //  UTILITAIRES
 // ═══════════════════════════════════════════════════════════
@@ -1355,6 +1385,21 @@ app.post('/api/me/favorites/:adId', auth, async (req, res) => {
       if (favs.length >= 200) return res.status(400).json({ error: 'Maximum 200 favoris' });
       await User.findByIdAndUpdate(req.user.id, { $addToSet: { favorites: adId } });
       action = 'added';
+      // 🔔 Notification au vendeur de l'annonce
+      const ad = await Ad.findById(adId).select('title seller sellerName');
+      if (ad && ad.seller && String(ad.seller) !== String(req.user.id)) {
+        const liker = await User.findById(req.user.id).select('prenom nom');
+        const likerName = liker ? `${liker.prenom||''} ${liker.nom||''}`.trim() : 'Un utilisateur';
+        await createNotif(
+          ad.seller,
+          'ad_favorited',
+          '❤️ Nouvelle mise en favori',
+          `${likerName} a ajouté votre annonce "${ad.title}" à ses favoris`,
+          `ad/${adId}`,
+          '❤️',
+          { adId, adTitle: ad.title, likerId: req.user.id }
+        );
+      }
     }
     // Retourner la liste à jour
     const updated = await User.findById(req.user.id).select('favorites');
@@ -1392,6 +1437,31 @@ app.post('/api/ads/:id/boost', auth, async (req, res) => {
       ad: ad._id, adTitle: ad.title,
       amount, boostType: type, reference: ref, status: 'success'
     });
+
+    // 🔔 Notification au vendeur — annonce mise à la une
+    if (String(ad.seller) !== String(req.user.id)) {
+      // Admin/autre a mis l'annonce en avant
+      await createNotif(
+        ad.seller,
+        'ad_featured',
+        '🌟 Annonce mise à la une !',
+        `Votre annonce "${ad.title}" a été mise à la une. Elle sera plus visible pendant 7 jours.`,
+        `ad/${ad._id}`,
+        '🌟',
+        { adId: ad._id, adTitle: ad.title, type }
+      );
+    } else if (type === 'feature') {
+      // Le vendeur lui-même a boosté — confirmer
+      await createNotif(
+        req.user.id,
+        'ad_featured',
+        '🌟 Annonce mise à la une !',
+        `Votre annonce "${ad.title}" est maintenant à la une pendant 7 jours.`,
+        `ad/${ad._id}`,
+        '🌟',
+        { adId: ad._id, adTitle: ad.title }
+      );
+    }
 
     res.json({ success: true, reference: ref, type, amount, ad });
   } catch(err) { res.status(500).json({ error: err.message }); }
@@ -1488,6 +1558,33 @@ app.post('/api/conversations', auth, async (req, res) => {
       User.findByIdAndUpdate(ad.seller, { $inc: { totalContacts: 1 } }).catch(()=>{});
     }
 
+    // 🔔 Notification au vendeur — nouveau message
+    if (message && message.trim() && ad.seller) {
+      const buyerName = `${buyer?.prenom||''} ${buyer?.nom||''}`.trim() || 'Un acheteur';
+      await createNotif(
+        ad.seller,
+        'new_message',
+        '💬 Nouveau message',
+        `${buyerName} vous a envoyé un message concernant "${ad.title}"`,
+        'dashboard/messages',
+        '💬',
+        { conversationId: conv._id, adId, adTitle: ad.title, buyerName }
+      );
+    }
+    // 🔔 Notification au vendeur — nouvelle mise en contact (sans message)
+    if (isNew && !message) {
+      const buyerName = `${buyer?.prenom||''} ${buyer?.nom||''}`.trim() || 'Un acheteur';
+      await createNotif(
+        ad.seller,
+        'ad_reply',
+        '📞 Nouvelle demande de contact',
+        `${buyerName} souhaite vous contacter pour "${ad.title}"`,
+        'dashboard/messages',
+        '📞',
+        { conversationId: conv._id, adId, adTitle: ad.title }
+      );
+    }
+
     res.json({ success: true, conversationId: conv._id });
   } catch(err) {
     // Gérer la violation d'unicité (race condition)
@@ -1550,6 +1647,19 @@ app.post('/api/conversations/:id', auth, async (req, res) => {
     if (isBuyer)  conv.unreadSeller += 1;
     else          conv.unreadBuyer  += 1;
     await conv.save();
+
+    // 🔔 Notification au destinataire
+    const recipientId = isBuyer ? conv.sellerId : conv.buyerId;
+    const senderName  = isBuyer ? conv.buyerName : conv.sellerName;
+    await createNotif(
+      recipientId,
+      'new_message',
+      '💬 Nouveau message',
+      `${senderName||'Quelqu\'un'} vous a envoyé un message : "${text.substring(0,60)}${text.length>60?'…':''}"`,
+      'dashboard/messages',
+      '💬',
+      { conversationId: conv._id, adTitle: conv.adTitle }
+    );
 
     // Renvoyer uniquement le dernier message (optimisation)
     const last = conv.messages[conv.messages.length - 1];
@@ -2031,6 +2141,18 @@ app.patch('/api/admin/users/:id/pro', auth, adminOnly, async (req, res) => {
     }
 
     console.log(`[ADMIN PRO] Activé → ${req.params.id} (${m} mois, expire: ${proUntil.toISOString()})`);
+
+    // 🔔 Notification in-app à l'utilisateur
+    await createNotif(
+      req.params.id,
+      'pro_activated',
+      '⭐ Abonnement Pro activé !',
+      `Félicitations ! Votre abonnement YouGouYou Pro (${m} mois) est maintenant actif jusqu'au ${proUntil.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}.`,
+      'dashboard/pro',
+      '⭐',
+      { months: m, proUntil: proUntil.toISOString() }
+    );
+
     res.json({ success: true, isPro: true, proUntil: proUntil.toISOString(), months: m });
   } catch(err) {
     console.error('[ADMIN PRO]', err.message);
@@ -2232,6 +2354,58 @@ app.post('/api/contact', async (req, res) => {
     console.error('[CONTACT] Erreur:', err.message);
     res.status(500).json({ error: err.message });
   }
+});
+
+
+// ═══════════════════════════════════════════════════════════
+//  NOTIFICATIONS
+// ═══════════════════════════════════════════════════════════
+
+// GET  /api/notifications        — liste des notifs (50 dernières)
+app.get('/api/notifications', auth, async (req, res) => {
+  try {
+    const notifs = await Notification.find({ userId: req.user.id })
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .lean();
+    const unread = await Notification.countDocuments({ userId: req.user.id, read: false });
+    res.json({ notifications: notifs, unread });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// PATCH /api/notifications/read-all  — marquer tout comme lu
+app.patch('/api/notifications/read-all', auth, async (req, res) => {
+  try {
+    await Notification.updateMany({ userId: req.user.id, read: false }, { read: true });
+    res.json({ success: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// PATCH /api/notifications/:id/read  — marquer une notif comme lue
+app.patch('/api/notifications/:id/read', auth, async (req, res) => {
+  try {
+    await Notification.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user.id },
+      { read: true }
+    );
+    res.json({ success: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// DELETE /api/notifications/:id  — supprimer une notif
+app.delete('/api/notifications/:id', auth, async (req, res) => {
+  try {
+    await Notification.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
+    res.json({ success: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// GET /api/notifications/unread-count  — badge polling 30s
+app.get('/api/notifications/unread-count', auth, async (req, res) => {
+  try {
+    const count = await Notification.countDocuments({ userId: req.user.id, read: false });
+    res.json({ unread: count });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 
@@ -2635,6 +2809,19 @@ app.post('/api/payment/pro', auth, async (req, res) => {
     }
 
     console.log(`[PAYMENT PRO] ✅ user=${req.user.id} plan=${plan} expires=${proUntil.toISOString()} ref=${ref}`);
+
+    // 🔔 Notification in-app — Pro activé
+    const planLabels2 = { starter:'Starter', business:'Business', premium:'Premium' };
+    await createNotif(
+      req.user.id,
+      'pro_activated',
+      '⭐ Abonnement Pro activé !',
+      `Votre YouGouYou Pro ${planLabels2[plan]||plan} est actif pour ${cfg.months} mois. Créez votre boutique !`,
+      'dashboard/pro',
+      '⭐',
+      { plan, months: cfg.months, proUntil: proUntil.toISOString(), reference: ref }
+    );
+
     res.json({ success: true, reference: ref, proUntil: proUntil.toISOString(), plan, months: cfg.months });
 
   } catch(err) {
