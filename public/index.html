@@ -2925,6 +2925,11 @@ footer{background:transparent;margin-top:0}
     <div class="post-section">
       <div class="post-section-title">📂 Catégorie *</div>
       <div class="cat-grid" id="post-cats"></div>
+      <!-- Sous-catégories — apparaissent après sélection catégorie -->
+      <div id="post-subcats-boutique" style="margin-top:12px"></div>
+      <!-- Champs hidden pour stocker les valeurs -->
+      <input type="hidden" id="post-subcat-hidden">
+      <input type="hidden" id="post-subitem-hidden">
     </div>
 
     <!-- Infos -->
@@ -2991,12 +2996,13 @@ footer{background:transparent;margin-top:0}
 
     <!-- Photos -->
     <div class="post-section">
-      <div class="post-section-title">📸 Photos (max 8)</div>
+      <div class="post-section-title" id="photos-section-title">📸 Photos <span id="photos-limit-badge" style="font-size:11px;font-weight:600;color:var(--muted)">(max 3)</span></div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px" id="photos-pro-hint"></div>
       <div class="photo-upload-zone" id="upload-zone-el" onclick="document.getElementById('photo-input').click()">
         <input type="file" id="photo-input" accept="image/*" multiple onchange="handlePhotos(this)">
         <div class="photo-upload-icon">📷</div>
         <div class="photo-upload-text">Cliquer pour ajouter des photos</div>
-        <p class="photo-upload-sub" style="font-size:11px;color:var(--muted);margin-top:2px">JPG, PNG · Max 8 Mo · <strong>5 photos maximum</strong></p>
+        <p class="photo-upload-sub" style="font-size:11px;color:var(--muted);margin-top:2px" id="photo-upload-sub-txt">JPG, PNG · Max 8 Mo · <strong>3 photos maximum</strong></p>
       </div>
       <div class="photo-previews" id="photo-previews"></div>
     </div>
@@ -3985,6 +3991,11 @@ function goTo(page){
   }
   if(page==='dashboard') loadDash();
   if(page==='home') renderAds();
+  if(page==='post'){
+    // Initialiser le formulaire selon le statut Pro
+    setTimeout(initPostForm, 50);
+    renderPostCats();
+  }
   if(page!=='post'){
     // Quitter le formulaire post : réinitialiser le mode boutique
     window._postBoutiqueMode = false;
@@ -5310,53 +5321,49 @@ function renderPostCats(){
   }).join('');
 }
 
-// Afficher sous-catégories et sous-sous-catégories filtrées pour la boutique
+// Afficher sous-catégories et sous-sous-catégories
 function renderPostSubCats(cat){
   var container = document.getElementById('post-subcats-boutique');
-  if(!container){
-    // Créer le conteneur après post-cats
-    var postCatsEl = document.getElementById('post-cats');
-    if(!postCatsEl) return;
-    container = document.createElement('div');
-    container.id = 'post-subcats-boutique';
-    container.style.cssText = 'margin-top:14px';
-    postCatsEl.parentNode.insertBefore(container, postCatsEl.nextSibling);
-  }
+  if(!container) return;
   if(!cat || !cat.sub || !cat.sub.length){ container.innerHTML=''; return; }
 
-  var is3levels = typeof cat.sub[0] === 'object';
-  var html = '<div style="margin-bottom:8px">';
+  // Réinitialiser les sélections
+  window._postSelSubCat  = '';
+  window._postSelSubItem = '';
+
+  var is3levels = cat.sub.length > 0 && typeof cat.sub[0] === 'object';
+  var html = '';
+
+  // ── Niveau 2 : sous-catégories ──
+  html += '<div style="margin-bottom:10px">';
+  html += '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">📁 Sous-catégorie <span style="color:var(--or)">*</span></div>';
+  html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
 
   if(is3levels){
-    // Niveau 2 (sous-catégories) + niveau 3 (sous-sous-catégories)
-    html += '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Sous-catégorie</div>';
-    html += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">';
     cat.sub.forEach(function(sub){
       html += '<div class="post-subcat-opt" data-sub="'+sub.n+'" onclick="pickPostSub(this,\''+cat.n+'\',\''+sub.n+'\')" '
         +'style="background:#F1F5F9;border:1.5px solid #E2E8F0;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s">'
         +sub.n+'</div>';
     });
-    html += '</div>';
-
-    // Zone sous-sous-catégories (apparaît après sélection sous-cat)
-    html += '<div id="post-subsubcats-boutique" style="display:none">';
-    html += '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Spécialité</div>';
-    html += '<div id="post-subsubcats-list" style="display:flex;flex-wrap:wrap;gap:6px"></div>';
-    html += '</div>';
   } else {
-    // Niveau 2 seulement (strings)
-    html += '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Sous-catégorie</div>';
-    html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
     cat.sub.forEach(function(s){
       html += '<div class="post-subcat-opt" data-sub="'+s+'" onclick="pickPostSub(this,\''+cat.n+'\',\''+s+'\')" '
         +'style="background:#F1F5F9;border:1.5px solid #E2E8F0;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s">'
         +s+'</div>';
     });
+  }
+
+  html += '</div></div>';
+
+  // ── Niveau 3 : sous-sous-catégories (masquées jusqu'à sélection sous-cat) ──
+  if(is3levels){
+    html += '<div id="post-subsubcats-boutique" style="display:none;margin-bottom:10px">';
+    html += '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">🏷️ Spécialité</div>';
+    html += '<div id="post-subsubcats-list" style="display:flex;flex-wrap:wrap;gap:6px"></div>';
     html += '</div>';
   }
-  html += '</div>';
+
   container.innerHTML = html;
-  // Stocker la ref pour les sous-sous-cats
   window._postBoutiqueCatObj = cat;
 }
 
@@ -5366,30 +5373,38 @@ function pickPostSub(el, catName, subName){
     o.style.background='#F1F5F9'; o.style.borderColor='#E2E8F0'; o.style.color='';
   });
   el.style.background='var(--orl)'; el.style.borderColor='var(--or)'; el.style.color='var(--or)';
-  // Stocker la sous-catégorie sélectionnée
+
+  // Stocker la sous-catégorie
   window._postSelSubCat = subName;
+  var subInput = document.getElementById('post-subcat-hidden');
+  if(subInput) subInput.value = subName;
+
+  // Réinitialiser la sous-sous-catégorie
+  window._postSelSubItem = '';
+  var itemInput = document.getElementById('post-subitem-hidden');
+  if(itemInput) itemInput.value = '';
 
   // Afficher les sous-sous-catégories si elles existent
   var cat = window._postBoutiqueCatObj;
   if(!cat) return;
-  var is3levels = typeof cat.sub[0] === 'object';
+  var is3levels = cat.sub.length > 0 && typeof cat.sub[0] === 'object';
   if(!is3levels) return;
-  var sub = cat.sub.find(function(s){ return s.n === subName; });
+
+  var sub  = cat.sub.find(function(s){ return s.n === subName; });
   var zone = document.getElementById('post-subsubcats-boutique');
   var list = document.getElementById('post-subsubcats-list');
   if(!zone || !list) return;
+
   if(sub && sub.items && sub.items.length){
     list.innerHTML = sub.items.map(function(item){
       return '<div class="post-subsubcat-opt" data-item="'+item+'" onclick="pickPostSubSub(this,\''+item+'\')" '
         +'style="background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:8px;padding:5px 11px;font-size:11.5px;font-weight:600;cursor:pointer;transition:all .15s">'
         +item+'</div>';
     }).join('');
-    zone.style.display='block';
-    // Stocker dans le formulaire hidden
-    var subInput = document.getElementById('post-subcat-hidden');
-    if(subInput) subInput.value = subName;
+    zone.style.display = 'block';
+    setTimeout(function(){ zone.scrollIntoView({ behavior:'smooth', block:'nearest' }); }, 100);
   } else {
-    zone.style.display='none';
+    zone.style.display = 'none';
   }
 }
 
@@ -5808,14 +5823,83 @@ function addFav(){if(curAd){DB.addFav(curAd.id);toast('❤️ Ajouté aux favori
 //  POST AD
 // ══════════════════════════════════════════
 var selCat='';
-function pickCat(el,name){document.querySelectorAll('.cat-opt').forEach(function(c){c.classList.remove('sel');});el.classList.add('sel');selCat=name;}
+function pickCat(el, name){
+  // Highlight catégorie
+  document.querySelectorAll('.cat-opt').forEach(function(c){ c.classList.remove('sel'); });
+  el.classList.add('sel');
+  selCat = name;
+
+  // Trouver la catégorie dans CATS
+  var cat = CATS.find(function(c){ return c.n === name; });
+  if(!cat){ return; }
+
+  // Stocker la ref pour les sous-cats
+  window._postBoutiqueCatObj = cat;
+  window._postSelSubCat  = '';
+  window._postSelSubItem = '';
+
+  // Réinitialiser les champs cachés
+  var sh = document.getElementById('post-subcat-hidden');
+  var si = document.getElementById('post-subitem-hidden');
+  if(sh) sh.value = '';
+  if(si) si.value = '';
+
+  // Afficher les sous-catégories
+  renderPostSubCats(cat);
+
+  // Scroll vers les sous-catégories
+  var sc = document.getElementById('post-subcats-boutique');
+  if(sc) setTimeout(function(){ sc.scrollIntoView({ behavior:'smooth', block:'nearest' }); }, 100);
+}
 // ══════════════════════════════════════════════════════════
 //  CLOUDINARY — Upload photos centralisé
 // ══════════════════════════════════════════════════════════
 
 var selectedPhotos   = [];   // URLs Cloudinary (ou base64 en fallback)
 var _uploadingCount  = 0;    // photos en cours d'upload
-var MAX_PHOTOS       = 5;    // maximum par annonce
+var MAX_PHOTOS = 3; // 3 pour membre normal, 5 pour Pro — mis à jour dans initPostForm()
+
+// ── Initialiser le formulaire de dépôt selon le statut Pro ──
+function initPostForm(){
+  var u    = DB.user();
+  var isPro = u && u.isPro && u.proUntil && new Date(u.proUntil) > new Date();
+  MAX_PHOTOS = isPro ? 5 : 3;
+
+  // Mettre à jour l'interface photos
+  var badge   = document.getElementById('photos-limit-badge');
+  var hint    = document.getElementById('photos-pro-hint');
+  var subTxt  = document.getElementById('photo-upload-sub-txt');
+
+  if(badge) badge.textContent = '(max ' + MAX_PHOTOS + ')';
+  if(subTxt) subTxt.innerHTML = 'JPG, PNG · Max 8 Mo · <strong>' + MAX_PHOTOS + ' photos maximum</strong>';
+
+  if(hint){
+    if(isPro){
+      hint.innerHTML = '⭐ <strong>Pro</strong> — vous pouvez ajouter jusqu\'à 5 photos';
+      hint.style.color = 'var(--or)';
+    } else {
+      hint.innerHTML = '💡 Passez <a onclick="goTo(\'pro\')" style="color:var(--or);cursor:pointer;font-weight:700">Pro</a> pour ajouter jusqu\'à 5 photos par annonce';
+      hint.style.color = 'var(--muted)';
+    }
+  }
+
+  // Reset des photos sélectionnées
+  selectedPhotos  = [];
+  _uploadingCount = 0;
+  var preview = document.getElementById('photo-previews');
+  if(preview) preview.innerHTML = '';
+  _updateUploadZoneText(document.getElementById('upload-zone-el'));
+
+  // Reset sous-catégories
+  window._postSelSubCat  = '';
+  window._postSelSubItem = '';
+  var sc = document.getElementById('post-subcats-boutique');
+  if(sc) sc.innerHTML = '';
+  var sh = document.getElementById('post-subcat-hidden');
+  var si = document.getElementById('post-subitem-hidden');
+  if(sh) sh.value = '';
+  if(si) si.value = '';
+}
 
 // ── Uploader un fichier vers Cloudinary ──
 async function _uploadToCloudinary(file, type) {
@@ -6091,8 +6175,21 @@ function submitAd(){
   if(!selCat){toast('⚠️ Choisissez une catégorie','err');return;}
   if(!city){toast('⚠️ Choisissez une ville','err');return;}
 
-  var cat=CATS.find(function(ct){return ct.n===selCat;});
+  // Vérifier uploads en cours
+  if(_uploadingCount > 0){
+    toast('⏳ Photos en cours d\'upload, attendez...','err');
+    return;
+  }
+
+  // Vérification sous-catégorie
   var subCatVal = (document.getElementById('post-subcat-hidden')||{}).value || window._postSelSubCat || '';
+  if(!subCatVal){
+    toast('⚠️ Choisissez une sous-catégorie','err');
+    var sc = document.getElementById('post-subcats-boutique');
+    if(sc) sc.scrollIntoView({ behavior:'smooth', block:'center' });
+    return;
+  }
+  var cat       = CATS.find(function(ct){ return ct.n === selCat; });
   var subItemVal = (document.getElementById('post-subitem-hidden')||{}).value || window._postSelSubItem || '';
   var adData={
     title:title, price:parseInt(price)||0,
