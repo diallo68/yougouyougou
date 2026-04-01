@@ -2996,7 +2996,7 @@ footer{background:transparent;margin-top:0}
         <input type="file" id="photo-input" accept="image/*" multiple onchange="handlePhotos(this)">
         <div class="photo-upload-icon">📷</div>
         <div class="photo-upload-text">Cliquer pour ajouter des photos</div>
-        <div class="photo-upload-sub">JPG, PNG · Max 5 Mo par photo</div>
+        <p class="photo-upload-sub" style="font-size:11px;color:var(--muted);margin-top:2px">JPG, PNG · Max 8 Mo · <strong>5 photos maximum</strong></p>
       </div>
       <div class="photo-previews" id="photo-previews"></div>
     </div>
@@ -3342,10 +3342,16 @@ footer{background:transparent;margin-top:0}
         <div id="boutique-form-block">
 
         <!-- En-tête boutique -->
-        <div id="boutique-header" style="background:linear-gradient(135deg,#1A1A2E,#2D2B0E);border-radius:16px;padding:24px;margin-bottom:16px;position:relative;overflow:hidden">
-          <div style="position:absolute;inset:0;background:radial-gradient(circle at 80% 50%,rgba(255,92,0,.15),transparent 60%)"></div>
-          <div style="display:flex;align-items:center;gap:16px;position:relative">
-            <div id="boutique-logo-preview" style="width:64px;height:64px;border-radius:14px;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;cursor:pointer" onclick="document.getElementById('boutique-logo-input').click()" title="Changer le logo">🏪</div>
+        <div id="boutique-header" style="background:linear-gradient(135deg,#1A1A2E,#2D2B0E);border-radius:16px;padding:0;margin-bottom:16px;position:relative;overflow:hidden">
+          <!-- Bannière cliquable -->
+          <div id="boutique-banner-preview" onclick="document.getElementById('boutique-banner-input').click()" title="Changer la bannière"
+            style="width:100%;height:100px;background:linear-gradient(135deg,#1A1A2E,#2D2B0E);background-size:cover;background-position:center;cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;transition:all .2s">
+            <div style="background:rgba(0,0,0,.4);border:1.5px dashed rgba(255,255,255,.3);border-radius:8px;padding:6px 14px;font-size:11px;font-weight:700;color:rgba(255,255,255,.7)">📸 Changer la bannière</div>
+          </div>
+          <input type="file" id="boutique-banner-input" accept="image/*" style="display:none" onchange="previewBoutiqueBanner(this)">
+          <div style="position:absolute;inset:0;background:radial-gradient(circle at 80% 50%,rgba(255,92,0,.15),transparent 60%);pointer-events:none"></div>
+          <div style="display:flex;align-items:center;gap:16px;padding:16px 24px;position:relative">
+            <div id="boutique-logo-preview" style="width:64px;height:64px;border-radius:14px;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;cursor:pointer;margin-top:-32px;box-shadow:0 4px 14px rgba(0,0,0,.3)" onclick="document.getElementById('boutique-logo-input').click()" title="Changer le logo">🏪</div>
             <input type="file" id="boutique-logo-input" accept="image/*" style="display:none" onchange="previewBoutiqueLogo(this)">
             <div style="flex:1">
               <div id="boutique-name-display" style="font-size:20px;font-weight:900;color:#fff;margin-bottom:4px">Ma Boutique</div>
@@ -5803,49 +5809,258 @@ function addFav(){if(curAd){DB.addFav(curAd.id);toast('❤️ Ajouté aux favori
 // ══════════════════════════════════════════
 var selCat='';
 function pickCat(el,name){document.querySelectorAll('.cat-opt').forEach(function(c){c.classList.remove('sel');});el.classList.add('sel');selCat=name;}
-var selectedPhotos = []; // stockage base64 des photos
+// ══════════════════════════════════════════════════════════
+//  CLOUDINARY — Upload photos centralisé
+// ══════════════════════════════════════════════════════════
 
-function handlePhotos(input){
-  var files = Array.from(input.files);
-  if(!files.length) return;
-  var remaining = 8 - selectedPhotos.length;
-  if(remaining <= 0){ toast('⚠️ Maximum 8 photos','err'); return; }
-  files = files.slice(0, remaining);
+var selectedPhotos   = [];   // URLs Cloudinary (ou base64 en fallback)
+var _uploadingCount  = 0;    // photos en cours d'upload
+var MAX_PHOTOS       = 5;    // maximum par annonce
 
-  var zone = document.getElementById('upload-zone-el');
-  var preview = document.getElementById('photo-previews');
+// ── Uploader un fichier vers Cloudinary ──
+async function _uploadToCloudinary(file, type) {
+  type = type || 'ad';
+  var token = localStorage.getItem('ygy_token');
 
-  files.forEach(function(file){
-    if(file.size > 5 * 1024 * 1024){ toast('⚠️ '+file.name+' dépasse 5 Mo','err'); return; }
+  // Obtenir la signature depuis notre serveur
+  var signRes = await fetch('/api/upload/sign', {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+(token||'') },
+    body: JSON.stringify({ type: type })
+  });
+
+  if (!signRes.ok) throw new Error('Signature échouée');
+  var sign = await signRes.json();
+
+  // Upload direct vers Cloudinary
+  var formData = new FormData();
+  formData.append('file',       file);
+  formData.append('api_key',    sign.apiKey);
+  formData.append('timestamp',  sign.timestamp);
+  formData.append('signature',  sign.signature);
+  formData.append('folder',     sign.folder);
+
+  var upRes = await fetch(
+    'https://api.cloudinary.com/v1_1/' + sign.cloudName + '/image/upload',
+    { method: 'POST', body: formData }
+  );
+
+  if (!upRes.ok) throw new Error('Upload Cloudinary échoué');
+  var data = await upRes.json();
+
+  // Retourner l'URL optimisée (WebP auto, qualité auto)
+  return data.secure_url.replace('/upload/', '/upload/q_auto,f_auto,w_1200/');
+}
+
+// ── Fallback base64 si Cloudinary non configuré ──
+function _toBase64(file) {
+  return new Promise(function(resolve) {
     var reader = new FileReader();
-    reader.onload = function(e){
-      var b64 = e.target.result;
-      selectedPhotos.push(b64);
-      // Miniature
-      var idx = selectedPhotos.length - 1;
-      var div = document.createElement('div');
-      div.style.cssText = 'position:relative;width:80px;height:80px;border-radius:10px;overflow:hidden;border:1.5px solid var(--br)';
-      div.innerHTML = '<img src="'+b64+'" style="width:100%;height:100%;object-fit:cover">'
-        +'<button onclick="removePhoto('+idx+',this.parentNode)" style="position:absolute;top:3px;right:3px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;line-height:1;font-family:inherit">✕</button>';
-      preview.appendChild(div);
-      // Mettre à jour le texte de la zone
-      if(zone) zone.querySelector('p').textContent = selectedPhotos.length+' photo'+(selectedPhotos.length>1?'s':'')+' sélectionnée'+(selectedPhotos.length>1?'s':'');
-    };
+    reader.onload = function(e) { resolve(e.target.result); };
     reader.readAsDataURL(file);
   });
 }
 
-function removePhoto(idx, el){
-  selectedPhotos.splice(idx, 1);
-  if(el) el.remove();
-  var zone = document.getElementById('upload-zone-el');
-  if(zone){
-    var p = zone.querySelector('p');
-    if(p) p.textContent = selectedPhotos.length > 0
-      ? selectedPhotos.length+' photo'+(selectedPhotos.length>1?'s':'')+' sélectionnée'+(selectedPhotos.length>1?'s':'')
-      : 'Cliquez pour ajouter des photos';
+// ── Handler upload annonce ──
+function handlePhotos(input){
+  var files = Array.from(input.files);
+  if (!files.length) return;
+
+  var remaining = MAX_PHOTOS - selectedPhotos.length - _uploadingCount;
+  if (remaining <= 0) { toast('⚠️ Maximum '+MAX_PHOTOS+' photos','err'); return; }
+  files = files.slice(0, remaining);
+
+  var preview = document.getElementById('photo-previews');
+  var zone    = document.getElementById('upload-zone-el');
+  var btn     = document.getElementById('submit-ad-btn');
+
+  files.forEach(function(file) {
+    if (file.size > 8 * 1024 * 1024) { toast('⚠️ '+file.name+' dépasse 8 Mo','err'); return; }
+
+    // Créer un placeholder de chargement
+    var placeholder = document.createElement('div');
+    placeholder.style.cssText = 'position:relative;width:80px;height:80px;border-radius:10px;overflow:hidden;border:2px dashed var(--orm);background:var(--orl);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px';
+    placeholder.innerHTML = '<div style="font-size:18px">⏳</div><div style="font-size:9px;color:var(--or);font-weight:700">Upload...</div>';
+    if (preview) preview.appendChild(placeholder);
+
+    _uploadingCount++;
+    if (btn) btn.disabled = true;
+    _updateUploadZoneText(zone);
+
+    _uploadToCloudinary(file, 'ad')
+      .then(function(url) {
+        selectedPhotos.push(url);
+        var idx = selectedPhotos.length - 1;
+
+        // Remplacer le placeholder par la vraie image
+        placeholder.style.cssText = 'position:relative;width:80px;height:80px;border-radius:10px;overflow:hidden;border:1.5px solid #10B981;background:#fff';
+        placeholder.innerHTML = '<img src="'+url+'" style="width:100%;height:100%;object-fit:cover">'
+          + '<button onclick="removePhoto('+idx+',this.parentNode)" style="position:absolute;top:3px;right:3px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;line-height:1;font-family:inherit">✕</button>'
+          + '<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(16,185,129,.8);color:#fff;font-size:8px;font-weight:700;text-align:center;padding:2px">✓</div>';
+      })
+      .catch(function(err) {
+        console.warn('[UPLOAD] Cloudinary indisponible, fallback base64:', err.message);
+        // Fallback base64
+        _toBase64(file).then(function(b64) {
+          selectedPhotos.push(b64);
+          var idx = selectedPhotos.length - 1;
+          placeholder.style.cssText = 'position:relative;width:80px;height:80px;border-radius:10px;overflow:hidden;border:1.5px solid var(--br)';
+          placeholder.innerHTML = '<img src="'+b64+'" style="width:100%;height:100%;object-fit:cover">'
+            + '<button onclick="removePhoto('+idx+',this.parentNode)" style="position:absolute;top:3px;right:3px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;line-height:1;font-family:inherit">✕</button>';
+        });
+      })
+      .finally(function() {
+        _uploadingCount--;
+        _updateUploadZoneText(zone);
+        if (_uploadingCount === 0 && btn) btn.disabled = false;
+      });
+  });
+
+  // Reset input pour permettre re-sélection du même fichier
+  input.value = '';
+}
+
+function _updateUploadZoneText(zone) {
+  if (!zone) return;
+  var p = zone.querySelector('p');
+  if (!p) return;
+  var total = selectedPhotos.length + _uploadingCount;
+  if (_uploadingCount > 0) {
+    p.innerHTML = '<span style="color:var(--or)">⏳ Upload en cours... ('+_uploadingCount+')</span>';
+  } else if (total > 0) {
+    p.textContent = total + ' photo' + (total > 1 ? 's' : '') + ' · ' + (MAX_PHOTOS - total) + ' restante' + (MAX_PHOTOS - total > 1 ? 's' : '');
+  } else {
+    p.textContent = 'Cliquez pour ajouter des photos';
   }
 }
+
+function removePhoto(idx, el){
+  selectedPhotos.splice(idx, 1);
+  if (el) el.remove();
+  // Recalculer les indices des boutons restants
+  var preview = document.getElementById('photo-previews');
+  if (preview) {
+    Array.from(preview.children).forEach(function(div, i) {
+      var btn = div.querySelector('button');
+      if (btn) btn.setAttribute('onclick', 'removePhoto('+i+',this.parentNode)');
+    });
+  }
+  var zone = document.getElementById('upload-zone-el');
+  _updateUploadZoneText(zone);
+}
+
+// ── Upload avatar profil ──
+function previewDashAvatar(input){
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  var dav  = document.getElementById('d-av');
+
+  // Aperçu immédiat local
+  _toBase64(file).then(function(b64) {
+    if (dav) {
+      dav.innerHTML = '<img src="'+b64+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'
+        + '<div id="d-photo-overlay" onclick="document.getElementById(\'d-photo-input\').click()" style="display:none;position:absolute;inset:0;border-radius:50%;background:rgba(0,0,0,.45);align-items:center;justify-content:center;font-size:16px;color:#fff;cursor:pointer">📷</div>';
+      dav.style.background = '';
+    }
+  });
+
+  toast('⏳ Upload de la photo...','ok');
+
+  _uploadToCloudinary(file, 'avatar')
+    .then(function(url) {
+      var u = DB.user() || {};
+      u.avatar = url;
+      DB.login(u);
+      var token = localStorage.getItem('ygy_token');
+      if (token) {
+        fetch('/api/me', {
+          method:'PATCH',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+          body: JSON.stringify({ avatar: url })
+        }).catch(function(){});
+      }
+      if (dav) {
+        var img = dav.querySelector('img');
+        if (img) img.src = url;
+      }
+      toast('✅ Photo de profil mise à jour !','ok');
+    })
+    .catch(function() {
+      // Déjà affiché en base64, sauvegarder quand même
+      _toBase64(file).then(function(b64) {
+        var u = DB.user() || {};
+        u.avatar = b64;
+        DB.login(u);
+        var token = localStorage.getItem('ygy_token');
+        if (token) {
+          fetch('/api/me', {
+            method:'PATCH',
+            headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+            body: JSON.stringify({ avatar: b64 })
+          }).catch(function(){});
+        }
+        toast('📷 Photo de profil mise à jour','ok');
+      });
+    });
+}
+
+// ── Upload logo boutique ──
+function previewBoutiqueLogo(input){
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  var lp   = document.getElementById('boutique-logo-preview');
+
+  _toBase64(file).then(function(b64) {
+    if (lp) lp.innerHTML = '<img src="'+b64+'" style="width:100%;height:100%;object-fit:cover;border-radius:12px">';
+    _boutiqueData._logoBase64 = b64; // fallback immédiat
+  });
+
+  toast('⏳ Upload du logo...','ok');
+  _uploadToCloudinary(file, 'logo')
+    .then(function(url) {
+      _boutiqueData._logoBase64 = null;
+      _boutiqueData.logo = url;
+      if (lp) lp.innerHTML = '<img src="'+url+'" style="width:100%;height:100%;object-fit:cover;border-radius:12px">';
+      toast('✅ Logo uploadé !','ok');
+    })
+    .catch(function() {
+      toast('⚠️ Logo sauvegardé localement','ok');
+    });
+}
+
+// ── Upload bannière boutique ──
+function previewBoutiqueBanner(input){
+  if (!input.files || !input.files[0]) return;
+  var file    = input.files[0];
+  var preview = document.getElementById('boutique-banner-preview');
+
+  _toBase64(file).then(function(b64) {
+    if (preview) {
+      preview.style.backgroundImage = 'url('+b64+')';
+      preview.style.backgroundSize  = 'cover';
+      preview.style.backgroundPosition = 'center';
+    }
+    _boutiqueData._bannerBase64 = b64;
+  });
+
+  toast('⏳ Upload de la bannière...','ok');
+  _uploadToCloudinary(file, 'banner')
+    .then(function(url) {
+      _boutiqueData._bannerBase64 = null;
+      _boutiqueData.banner = url;
+      if (preview) {
+        preview.style.backgroundImage = 'url('+url+')';
+      }
+      toast('✅ Bannière uploadée !','ok');
+    })
+    .catch(function() {
+      toast('⚠️ Bannière sauvegardée localement','ok');
+    });
+}
+
+// ══════════════════════════════════════════════════════════
+//  FIN CLOUDINARY
+// ══════════════════════════════════════════════════════════
 
 function requireLoginThenPost(){
   if(!DB.user()){
@@ -5890,7 +6105,7 @@ function submitAd(){
     etat:etat, seller:user.name||user.prenom||'',
     sellerId:user._id||user.id||'',
     date:new Date().toISOString(),
-    photos: selectedPhotos.slice(0,8),
+    photos: selectedPhotos.slice(0, MAX_PHOTOS),
     nego: document.getElementById('post-nego')&&document.getElementById('post-nego').checked||false,
     subFields: getDynFieldsValues()
   };
@@ -5913,7 +6128,7 @@ function submitAd(){
     .then(function(data){
       if(data.error){toast('❌ '+data.error,'err');if(btn){btn.disabled=false;btn.textContent='🚀 Publier mon annonce gratuitement';}return;}
       // Aussi ajouter en local pour affichage immédiat
-      DB.addAd({id:data._id||Date.now(),_id:data._id,e:cat?cat.e:'📦',t:title,p:parseInt(price)||0,city:city,cat:selCat,date:'À l\'instant',views:0,feat:false,seller:user.name||user.prenom||'Vendeur',desc:desc,tags:[selCat],bg:'linear-gradient(135deg,#FFF3EE,#FFB899)',photos:selectedPhotos.slice(0,8)});
+      DB.addAd({id:data._id||Date.now(),_id:data._id,e:cat?cat.e:'📦',t:title,p:parseInt(price)||0,city:city,cat:selCat,date:'À l\'instant',views:0,feat:false,seller:user.name||user.prenom||'Vendeur',desc:desc,tags:[selCat],bg:'linear-gradient(135deg,#FFF3EE,#FFB899)',photos:selectedPhotos.slice(0,MAX_PHOTOS)});
       fetchAdsFromAPI(function(){renderAds();});
       toast('🎉 Annonce publiée avec succès !','ok');
       // Réinitialiser le formulaire
@@ -9633,11 +9848,21 @@ function saveBoutiqueInfo(){
   var subsubcat = (document.getElementById('boutique-subsubcat-val')||{}).value||'';
   if(!nm.trim()){ toast('📝 Entrez un nom pour votre boutique','err'); return; }
 
+  // Vérifier qu'aucun upload n'est en cours
+  if(_boutiqueData._uploadingLogo || _boutiqueData._uploadingBanner){
+    toast('⏳ Upload en cours, attendez...','err'); return;
+  }
+
   var token = localStorage.getItem('ygy_token');
   var payload = { name:nm, description:dc, whatsapp:wa, address:ad, category:cat };
   if(subcat)    payload.subcat    = subcat;
   if(subsubcat) payload.subsubcat = subsubcat;
-  if(_boutiqueData._logoBase64) payload.logo = _boutiqueData._logoBase64;
+  // Logo : URL Cloudinary ou base64 fallback
+  if(_boutiqueData.logo)        payload.logo   = _boutiqueData.logo;
+  else if(_boutiqueData._logoBase64) payload.logo = _boutiqueData._logoBase64;
+  // Bannière : URL Cloudinary ou base64 fallback
+  if(_boutiqueData.banner)       payload.banner = _boutiqueData.banner;
+  else if(_boutiqueData._bannerBase64) payload.banner = _boutiqueData._bannerBase64;
 
   fetch('/api/me/boutique', {
     method:'PUT',
@@ -9648,21 +9873,17 @@ function saveBoutiqueInfo(){
       _boutiqueData = Object.assign(_boutiqueData, payload);
       var nd = document.getElementById('boutique-name-display');
       if(nd) nd.textContent = nm;
-      // Mettre à jour le user local
       var u = DB.user()||{};
       u.boutique = Object.assign(u.boutique||{}, payload);
       DB.login(u);
-      // Rafraîchir le menu latéral
       if(typeof renderDash === 'function') renderDash();
       toast('✅ Boutique sauvegardée !','ok');
     })
     .catch(function(err){
-      // Sauvegarder localement si API pas encore dispo
       _boutiqueData = Object.assign(_boutiqueData, payload);
       var u = DB.user()||{};
       u.boutique = Object.assign(u.boutique||{}, payload);
       DB.login(u);
-      // Rafraîchir le titre de section
       if(typeof renderBoutiqueSection === 'function') renderBoutiqueSection();
       toast('✅ Boutique sauvegardée (local)','ok');
     });
