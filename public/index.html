@@ -5302,12 +5302,15 @@ function viewAd_display(ad){
         var btn = document.getElementById('btn-contacter-vendeur');
         var badge = document.getElementById('seller-pro-badge-contact');
         if(d.sellerIsPro){
-          // Vendeur Pro — gratuit
-          if(badge) badge.style.display = 'block';
+          // Vendeur Pro — gratuit : transformer le bouton mais garder l'onclick
           if(btn){
-            var lbl = btn.querySelector('#btn-fee-label,.btn-fee-badge');
-            if(lbl) lbl.textContent = 'GRATUIT';
+            btn.style.background = '#059669';
+            btn.style.boxShadow = '0 2px 8px rgba(5,150,105,.35)';
+            btn.innerHTML = '✅ Contacter — Vendeur Pro · Gratuit';
+            btn.disabled = false;
+            // NE PAS changer l'id ni l'onclick — contacterVendeur3pct() gère le cas Pro
           }
+          if(badge) badge.style.display = 'none'; // le bouton suffit
         } else if(d.unlocked){
           // Déjà payé ou gratuit mensuel utilisé
           if(btn){
@@ -8003,10 +8006,12 @@ async function contacterVendeur3pct(){
     toast('❌ Erreur réseau — vérifiez votre connexion','err');
   } finally {
     if(btn){
-      var isUnlocked = document.getElementById('btn-contacter-vendeur-unlocked');
-      if(!isUnlocked){
-        btn.disabled = false;
+      btn.disabled = false;
+      // Ne restaurer le texte que si ce n'est pas un vendeur Pro (le statut Pro est géré séparément)
+      if(!btn.innerHTML.includes('Vendeur Pro') && !btn.innerHTML.includes('Débloquée')){
         btn.innerHTML = '💬 Contacter le vendeur <span class="btn-fee-badge">2%</span>';
+        btn.style.background = '';
+        btn.style.boxShadow = '';
       }
     }
   }
@@ -8059,13 +8064,15 @@ async function _createConversationAndNavigate(adId, titre, vendeur, tok){
       buyerId:    String(user._id || user.id || '')
     };
 
-    // Badge "Relation débloquée" si vendeur Pro
+    // Badge "Relation débloquée" si vendeur Pro — garder le bouton fonctionnel
     if(data.sellerIsPro){
       var btnEl = document.getElementById('btn-contacter-vendeur');
       if(btnEl){
-        btnEl.innerHTML = '✅ Vendeur Pro — Gratuit';
         btnEl.style.background = '#059669';
-        btnEl.id = 'btn-contacter-vendeur-unlocked';
+        btnEl.style.boxShadow = '0 2px 8px rgba(5,150,105,.35)';
+        btnEl.innerHTML = '✅ Contacter — Vendeur Pro · Gratuit';
+        btnEl.disabled = false;
+        // NE PAS changer l'id — le bouton doit rester cliquable avec contacterVendeur3pct()
       }
     }
 
@@ -8074,9 +8081,13 @@ async function _createConversationAndNavigate(adId, titre, vendeur, tok){
     toast('❌ Erreur réseau','err');
   } finally {
     var b = document.getElementById('btn-contacter-vendeur');
-    if(b && b.id !== 'btn-contacter-vendeur-unlocked'){
+    if(b){
       b.disabled = false;
-      b.innerHTML = '💬 Contacter le vendeur <span class="btn-fee-badge">2%</span>';
+      if(!b.innerHTML.includes('Vendeur Pro') && !b.innerHTML.includes('Débloquée')){
+        b.innerHTML = '💬 Contacter le vendeur <span class="btn-fee-badge">2%</span>';
+        b.style.background = '';
+        b.style.boxShadow = '';
+      }
     }
   }
 }
@@ -8237,8 +8248,10 @@ function _showContactUnlockedBadge(){
   var btn = document.getElementById('btn-contacter-vendeur');
   if(!btn) return;
   btn.style.background = '#059669';
-  btn.innerHTML = '🔓 Mise en relation débloquée <span style="background:rgba(255,255,255,.2);font-size:10px;padding:2px 6px;border-radius:10px;margin-left:4px">✅</span>';
+  btn.style.boxShadow = '0 2px 8px rgba(5,150,105,.35)';
+  btn.innerHTML = '🔓 Mise en relation Débloquée ✅';
   btn.disabled = false;
+  // NE PAS changer l'id ni l'onclick — le bouton reste fonctionnel
 }
 
 // Alias
