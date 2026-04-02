@@ -229,6 +229,7 @@ const UserSchema = new mongoose.Schema({
     address:     { type: String },
     videoUrl:    { type: String },                        // lien YouTube ou MP4
     videoTitle:  { type: String },
+    videoType:   { type: String, enum: ['link','upload',''], default: '' }, // 'link' | 'upload'
     createdAt:   { type: Date, default: Date.now },
     updatedAt:   { type: Date, default: Date.now },
   },
@@ -2854,7 +2855,7 @@ app.put('/api/me/boutique', auth, async (req, res) => {
       return res.status(403).json({ error: 'Réservé aux membres Pro' });
 
     const { name, description, desc, logo, banner, category, subcat, subsubcat,
-            whatsapp, address, videoUrl, videoTitle } = req.body;
+            whatsapp, address, videoUrl, videoTitle, videoType } = req.body;
 
     // Construire l'update boutique (merge avec l'existant)
     const boutiqueUpdate = { ...(user.boutique?.toObject?.() || user.boutique || {}) };
@@ -2870,6 +2871,7 @@ app.put('/api/me/boutique', auth, async (req, res) => {
     if (address     !== undefined) boutiqueUpdate.address     = address;
     if (videoUrl    !== undefined) boutiqueUpdate.videoUrl    = videoUrl;
     if (videoTitle  !== undefined) boutiqueUpdate.videoTitle  = videoTitle;
+    if (videoType   !== undefined) boutiqueUpdate.videoType   = videoType;
     boutiqueUpdate.updatedAt = new Date();
 
     // Mise à jour aussi des champs legacy pour la compatibilité
