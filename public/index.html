@@ -2948,53 +2948,170 @@ footer{background:transparent;margin-top:0}
         </div>
 
         <!-- Vidéo de présentation -->
-        <div style="background:#fff;border-radius:12px;border:1px solid var(--br);overflow:hidden;margin-top:14px">
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--br)">
+        <div id="boutique-video-block" style="background:#fff;border-radius:14px;border:1px solid var(--br);overflow:hidden;margin-top:14px">
+
+          <!-- En-tête -->
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--br);background:#FAFBFD">
             <div>
-              <div style="font-size:14px;font-weight:800;color:var(--ink)">🎬 Vidéo de présentation</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:2px">Ajoutez une vidéo YouTube ou un lien direct pour présenter votre boutique</div>
+              <div style="font-size:14px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:7px">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+                Vidéo de présentation
+              </div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px">Importez une vidéo ou collez un lien YouTube / Vimeo / MP4</div>
             </div>
-            <button onclick="toggleBoutiqueVideoForm()" id="btn-toggle-video" style="background:var(--orl);color:var(--or);border:1.5px solid var(--orm);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">➕ Ajouter une vidéo</button>
+            <button onclick="toggleBoutiqueVideoForm()" id="btn-toggle-video"
+              style="background:var(--orl);color:var(--or);border:1.5px solid var(--orm);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s">
+              ➕ Ajouter une vidéo
+            </button>
           </div>
 
-          <!-- Aperçu vidéo existante -->
-          <div id="boutique-video-preview" style="display:none;padding:14px 18px">
-            <div id="boutique-video-embed" style="width:100%;border-radius:10px;overflow:hidden;background:#000;aspect-ratio:16/9"></div>
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px">
-              <div id="boutique-video-title" style="font-size:12px;color:var(--muted);font-weight:600"></div>
-              <button onclick="supprimerBoutiqueVideo()" style="background:#FEE2E2;color:#DC2626;border:1px solid #FECACA;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">🗑️ Supprimer</button>
+          <!-- ── Aperçu vidéo existante ── -->
+          <div id="boutique-video-preview" style="display:none;padding:16px 18px">
+            <div id="boutique-video-embed" style="width:100%;border-radius:12px;overflow:hidden;background:#000;aspect-ratio:16/9;box-shadow:0 4px 16px rgba(0,0,0,.10)"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;gap:10px">
+              <div>
+                <div id="boutique-video-title" style="font-size:13px;color:var(--ink);font-weight:700"></div>
+                <div id="boutique-video-type-badge" style="font-size:11px;color:var(--muted);margin-top:2px"></div>
+              </div>
+              <div style="display:flex;gap:8px;flex-shrink:0">
+                <button onclick="toggleBoutiqueVideoForm()" style="background:var(--orl);color:var(--or);border:1.5px solid var(--orm);border-radius:7px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">✏️ Modifier</button>
+                <button onclick="supprimerBoutiqueVideo()" style="background:#FEE2E2;color:#DC2626;border:1px solid #FECACA;border-radius:7px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">🗑️ Supprimer</button>
+              </div>
             </div>
           </div>
 
-          <!-- Formulaire ajout vidéo -->
-          <div id="boutique-video-form" style="display:none;padding:16px 18px">
-            <div style="margin-bottom:12px">
-              <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Lien de la vidéo *</div>
-              <input type="url" id="boutique-video-url" placeholder="Ex: https://youtube.com/watch?v=... ou https://youtu.be/..."
-                style="width:100%;border:1.5px solid var(--br);border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none"
-                onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'"
-                oninput="previewBoutiqueVideoUrl(this.value)">
-              <div style="font-size:11px;color:var(--muted);margin-top:4px">Accepte : YouTube, lien direct MP4</div>
+          <!-- ── Formulaire ajout/modification ── -->
+          <div id="boutique-video-form" style="display:none">
+
+            <!-- Sélecteur de méthode -->
+            <div style="display:flex;gap:0;border-bottom:1px solid var(--br)">
+              <button id="vid-tab-link" onclick="switchVideoTab('link')"
+                style="flex:1;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;border:none;border-bottom:2.5px solid var(--or);background:#FFF5EE;color:var(--or);transition:all .15s">
+                🔗 Lien vidéo
+              </button>
+              <button id="vid-tab-upload" onclick="switchVideoTab('upload')"
+                style="flex:1;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;border:none;border-bottom:2.5px solid transparent;background:#fff;color:var(--muted);transition:all .15s">
+                📁 Importer depuis l'appareil
+              </button>
             </div>
-            <!-- Aperçu temps réel -->
-            <div id="boutique-video-preview-small" style="display:none;margin-bottom:12px;border-radius:10px;overflow:hidden;border:1px solid var(--br);aspect-ratio:16/9;background:#000"></div>
-            <div style="margin-bottom:12px">
-              <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Titre de la vidéo (optionnel)</div>
-              <input type="text" id="boutique-video-title-input" placeholder="Ex: Présentation de ma boutique Mode Conakry"
-                style="width:100%;border:1.5px solid var(--br);border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none"
-                onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'">
+
+            <!-- ── Option A : Lien ── -->
+            <div id="vid-panel-link" style="padding:18px">
+
+              <!-- Lien URL -->
+              <div style="margin-bottom:14px">
+                <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Lien de la vidéo *</label>
+                <div style="position:relative">
+                  <input type="url" id="boutique-video-url" placeholder="https://youtube.com/watch?v=...  ou  https://vimeo.com/..."
+                    style="width:100%;border:1.5px solid var(--br);border-radius:10px;padding:10px 40px 10px 12px;font-size:13px;font-family:inherit;outline:none;transition:border-color .15s;box-sizing:border-box"
+                    onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'"
+                    oninput="onVideolinkInput(this.value)">
+                  <span id="vid-link-status" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:14px"></span>
+                </div>
+                <div style="display:flex;gap:12px;margin-top:6px;flex-wrap:wrap">
+                  <span style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:3px">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="red" style="flex-shrink:0"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/></svg>
+                    YouTube
+                  </span>
+                  <span style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:3px">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="#1AB7EA" style="flex-shrink:0"><path d="M12.012 1.784C5.8 1.784.786 6.798.786 13.01s5.014 11.226 11.226 11.226 11.226-5.014 11.226-11.226S18.224 1.784 12.012 1.784zm4.93 7.302l-1.67 7.869c-.125.556-.455.694-.923.432l-2.554-1.882-1.232 1.185c-.136.136-.25.25-.513.25l.183-2.598 4.728-4.273c.206-.183-.045-.284-.319-.102L7.01 15.54l-2.51-.784c-.546-.17-.557-.546.114-.808l9.802-3.78c.455-.17.853.102.526 1.918z"/></svg>
+                    Vimeo
+                  </span>
+                  <span style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:3px">📎 Lien direct MP4</span>
+                </div>
+              </div>
+
+              <!-- Aperçu temps réel -->
+              <div id="boutique-video-preview-small" style="display:none;margin-bottom:14px;border-radius:12px;overflow:hidden;border:1px solid var(--br);aspect-ratio:16/9;background:#000;box-shadow:0 2px 10px rgba(0,0,0,.08)"></div>
+
+              <!-- Titre -->
+              <div style="margin-bottom:16px">
+                <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Titre de la vidéo (optionnel)</label>
+                <input type="text" id="boutique-video-title-input" placeholder="Ex: Présentation de ma boutique Mode Conakry"
+                  style="width:100%;border:1.5px solid var(--br);border-radius:10px;padding:10px 12px;font-size:13px;font-family:inherit;outline:none;transition:border-color .15s;box-sizing:border-box"
+                  onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'">
+              </div>
+
+              <!-- Actions -->
+              <div style="display:flex;gap:8px">
+                <button onclick="saveBoutiqueVideo()" id="vid-save-btn"
+                  style="flex:1;background:var(--or);color:#fff;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:6px">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Enregistrer la vidéo
+                </button>
+                <button onclick="toggleBoutiqueVideoForm()"
+                  style="background:#F1F5F9;color:var(--muted);border:1.5px solid var(--br);border-radius:10px;padding:11px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">
+                  Annuler
+                </button>
+              </div>
             </div>
-            <div style="display:flex;gap:8px">
-              <button onclick="saveBoutiqueVideo()" style="flex:1;background:var(--or);color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit">💾 Enregistrer la vidéo</button>
-              <button onclick="toggleBoutiqueVideoForm()" style="background:#F1F5F9;color:var(--muted);border:1.5px solid var(--br);border-radius:8px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Annuler</button>
+
+            <!-- ── Option B : Upload local ── -->
+            <div id="vid-panel-upload" style="display:none;padding:18px">
+
+              <!-- Zone de drop -->
+              <div id="vid-drop-zone"
+                style="border:2px dashed var(--br);border-radius:12px;padding:32px 20px;text-align:center;cursor:pointer;transition:all .2s;background:#FAFBFD;margin-bottom:14px"
+                onclick="document.getElementById('vid-file-input').click()"
+                ondragover="event.preventDefault();this.style.borderColor='var(--or)';this.style.background='var(--orl)'"
+                ondragleave="this.style.borderColor='var(--br)';this.style.background='#FAFBFD'"
+                ondrop="event.preventDefault();this.style.borderColor='var(--br)';this.style.background='#FAFBFD';handleVideoFileDrop(event)">
+                <input type="file" id="vid-file-input" accept="video/mp4,video/quicktime,video/x-msvideo,.mp4,.mov,.avi"
+                  style="display:none" onchange="handleVideoFileSelect(this)">
+                <div id="vid-drop-icon" style="font-size:40px;margin-bottom:10px">📁</div>
+                <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px">Cliquez ou glissez votre vidéo ici</div>
+                <div style="font-size:12px;color:var(--muted)">Formats acceptés : MP4, MOV, AVI · Max <strong>50 Mo</strong></div>
+              </div>
+
+              <!-- Barre de progression -->
+              <div id="vid-progress-wrap" style="display:none;margin-bottom:14px">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+                  <span id="vid-progress-label" style="font-size:12px;font-weight:600;color:var(--ink)">Upload en cours...</span>
+                  <span id="vid-progress-pct" style="font-size:12px;font-weight:800;color:var(--or)">0%</span>
+                </div>
+                <div style="background:var(--br);border-radius:50px;height:6px;overflow:hidden">
+                  <div id="vid-progress-bar" style="background:linear-gradient(90deg,var(--or),#FF9500);height:100%;border-radius:50px;width:0%;transition:width .3s ease"></div>
+                </div>
+                <div id="vid-progress-file" style="font-size:11px;color:var(--muted);margin-top:4px"></div>
+              </div>
+
+              <!-- Aperçu vidéo uploadée -->
+              <div id="vid-upload-preview" style="display:none;margin-bottom:14px">
+                <video id="vid-upload-player" controls style="width:100%;border-radius:12px;background:#000;aspect-ratio:16/9;box-shadow:0 2px 10px rgba(0,0,0,.08)"></video>
+                <div id="vid-upload-info" style="font-size:12px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:8px">
+                  <span id="vid-upload-name" style="font-weight:600;color:var(--ink)"></span>
+                  <span id="vid-upload-size" style="background:var(--orl);color:var(--or);padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700"></span>
+                </div>
+              </div>
+
+              <!-- Titre -->
+              <div style="margin-bottom:16px">
+                <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Titre de la vidéo (optionnel)</label>
+                <input type="text" id="boutique-video-title-upload" placeholder="Ex: Ma boutique en action — Conakry"
+                  style="width:100%;border:1.5px solid var(--br);border-radius:10px;padding:10px 12px;font-size:13px;font-family:inherit;outline:none;transition:border-color .15s;box-sizing:border-box"
+                  onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--br)'">
+              </div>
+
+              <!-- Actions -->
+              <div style="display:flex;gap:8px">
+                <button onclick="uploadAndSaveBoutiqueVideo()" id="vid-upload-btn"
+                  style="flex:1;background:var(--or);color:#fff;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;transition:background .15s">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
+                  Uploader et enregistrer
+                </button>
+                <button onclick="toggleBoutiqueVideoForm()"
+                  style="background:#F1F5F9;color:var(--muted);border:1.5px solid var(--br);border-radius:10px;padding:11px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">
+                  Annuler
+                </button>
+              </div>
             </div>
           </div>
 
           <!-- État vide -->
-          <div id="boutique-video-empty" style="padding:28px;text-align:center;color:var(--muted)">
-            <div style="font-size:36px;margin-bottom:8px">🎬</div>
-            <div style="font-size:13px;font-weight:600;margin-bottom:3px">Aucune vidéo de présentation</div>
-            <div style="font-size:12px">Ajoutez une vidéo YouTube pour attirer plus de clients</div>
+          <div id="boutique-video-empty" style="padding:36px;text-align:center;color:var(--muted)">
+            <div style="width:64px;height:64px;background:linear-gradient(135deg,var(--orl),#FFD9C0);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 14px">🎬</div>
+            <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:5px">Aucune vidéo de présentation</div>
+            <div style="font-size:12px;line-height:1.6">Ajoutez une vidéo pour présenter votre boutique.<br>Importez depuis votre appareil ou collez un lien YouTube.</div>
           </div>
         </div>
 
@@ -9743,64 +9860,128 @@ function filterMaBoutiqueGrid(subcat, btn){
   if(grid) grid.innerHTML = filtered.length ? filtered.map(function(a){return adCard(a,false);}).join('') : '<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted)">Aucun article dans cette catégorie</div>';
 }
 
-// ── Vidéo de présentation ──
-function _renderMaBoutiqueVideo(b){
-  var section = document.getElementById('mab-video-section');
-  var embedEl = document.getElementById('mab-video-embed');
-  var titleEl = document.getElementById('mab-video-title-display');
-  if(!section || !embedEl) return;
+// ══════════════════════════════════════════════════════════
+//  VIDÉO DE PRÉSENTATION BOUTIQUE — v2
+//  Support : Lien (YouTube/Vimeo/MP4) + Upload local (Cloudinary)
+// ══════════════════════════════════════════════════════════
 
-  var videoUrl = b && (b.videoUrl || b.video_url || '');
-  if(!videoUrl){ section.style.display='none'; return; }
+var _videoMode       = 'link';   // 'link' | 'upload'
+var _videoLocalFile  = null;     // fichier sélectionné pour upload
+var _videoLocalUrl   = '';       // URL blob de prévisualisation
 
-  section.style.display = 'block';
-  var embedHtml = _buildVideoEmbed(videoUrl, 'width:100%;height:100%;border:none');
-  embedEl.innerHTML = embedHtml || '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;font-size:13px">Vidéo non disponible</div>';
-  if(titleEl) titleEl.textContent = b.videoTitle || '';
-}
-
+// ── Construire l'embed HTML pour une URL vidéo ──
 function _buildVideoEmbed(url, extraStyle){
   if(!url) return '';
-  // YouTube
-  var ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+
+  // YouTube — youtube.com ou youtu.be
+  var ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
   if(ytMatch){
-    return '<iframe src="https://www.youtube.com/embed/'+ytMatch[1]+'?rel=0" style="'+extraStyle+'" allowfullscreen></iframe>';
+    return '<iframe src="https://www.youtube.com/embed/'+ytMatch[1]+'?rel=0&modestbranding=1" '
+      + 'style="'+extraStyle+'" allowfullscreen loading="lazy" '
+      + 'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>';
   }
-  // Lien direct vidéo
-  if(url.match(/\.(mp4|webm|ogg)(\?.*)?$/i)){
-    return '<video src="'+url+'" controls style="'+extraStyle+'"></video>';
+
+  // Vimeo
+  var vmMatch = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if(vmMatch){
+    return '<iframe src="https://player.vimeo.com/video/'+vmMatch[1]+'?byline=0&portrait=0" '
+      + 'style="'+extraStyle+'" allowfullscreen loading="lazy"></iframe>';
   }
+
+  // Lien direct vidéo MP4/WebM/OGG
+  if(url.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i)){
+    return '<video src="'+url+'" controls style="'+extraStyle+'" preload="metadata"></video>';
+  }
+
   return '';
 }
 
 function _getYouTubeThumbnail(url){
-  var ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  var ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
   if(ytMatch) return 'https://img.youtube.com/vi/'+ytMatch[1]+'/hqdefault.jpg';
   return '';
 }
 
-// ── Formulaire vidéo (dashboard boutique) ──
+// ── Valider une URL vidéo ──
+function _isValidVideoUrl(url){
+  if(!url) return false;
+  return !!(url.match(/(?:youtube\.com\/|youtu\.be\/)/)
+    || url.match(/vimeo\.com\//)
+    || url.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i));
+}
+
+// ── Détecter le type de vidéo pour le badge ──
+function _videoTypeBadge(url){
+  if(!url) return '';
+  if(url.match(/youtube|youtu\.be/)) return '▶️ YouTube';
+  if(url.match(/vimeo/)) return '▶️ Vimeo';
+  if(url.match(/\.(mp4|webm|ogg|mov)/i)) return '📎 Vidéo MP4';
+  return '▶️ Vidéo';
+}
+
+// ── Toggle formulaire ──
 function toggleBoutiqueVideoForm(){
-  var form  = document.getElementById('boutique-video-form');
-  var empty = document.getElementById('boutique-video-empty');
-  var btn   = document.getElementById('btn-toggle-video');
+  var form    = document.getElementById('boutique-video-form');
+  var empty   = document.getElementById('boutique-video-empty');
   var preview = document.getElementById('boutique-video-preview');
+  var btn     = document.getElementById('btn-toggle-video');
   if(!form) return;
 
-  var open = form.style.display === 'none' || form.style.display === '';
-  form.style.display  = open ? 'block' : 'none';
-  if(empty) empty.style.display = open ? 'none' : (preview && preview.style.display==='block' ? 'none' : 'block');
-  if(btn) btn.textContent = open ? '✕ Annuler' : '➕ Ajouter une vidéo';
+  var isOpen = form.style.display !== 'none' && form.style.display !== '';
+  if(isOpen){
+    form.style.display = 'none';
+    if(btn) btn.textContent = '➕ Ajouter une vidéo';
+    return;
+  }
 
-  if(open){
-    // Pré-remplir si vidéo existante
-    var u = DB.user()||{};
-    var b = u.boutique||{};
+  // Ouvrir
+  form.style.display = 'block';
+  if(btn) btn.style.display = 'none';
+
+  // Pré-remplir si données existantes
+  var u = DB.user()||{};
+  var b = u.boutique||{};
+  if(b.videoUrl && b.videoType !== 'upload'){
     var urlInput = document.getElementById('boutique-video-url');
     var titleInput = document.getElementById('boutique-video-title-input');
-    if(urlInput && b.videoUrl) urlInput.value = b.videoUrl;
-    if(titleInput && b.videoTitle) titleInput.value = b.videoTitle;
-    if(b.videoUrl) previewBoutiqueVideoUrl(b.videoUrl);
+    if(urlInput) urlInput.value = b.videoUrl;
+    if(titleInput) titleInput.value = b.videoTitle||'';
+    onVideolinkInput(b.videoUrl);
+    switchVideoTab('link');
+  } else {
+    switchVideoTab('link');
+  }
+}
+
+// ── Basculer entre onglets ──
+function switchVideoTab(mode){
+  _videoMode = mode;
+  var panelLink   = document.getElementById('vid-panel-link');
+  var panelUpload = document.getElementById('vid-panel-upload');
+  var tabLink     = document.getElementById('vid-tab-link');
+  var tabUpload   = document.getElementById('vid-tab-upload');
+
+  if(panelLink) panelLink.style.display = (mode==='link') ? 'block' : 'none';
+  if(panelUpload) panelUpload.style.display = (mode==='upload') ? 'block' : 'none';
+
+  var activeStyle = 'border-bottom:2.5px solid var(--or);background:#FFF5EE;color:var(--or);';
+  var inactiveStyle = 'border-bottom:2.5px solid transparent;background:#fff;color:var(--muted);';
+
+  if(tabLink)   tabLink.style.cssText   += (mode==='link')   ? activeStyle : inactiveStyle;
+  if(tabUpload) tabUpload.style.cssText += (mode==='upload') ? activeStyle : inactiveStyle;
+}
+
+// ── Gestion input lien ──
+function onVideolinkInput(url){
+  // Alias pour compatibilité
+  previewBoutiqueVideoUrl(url);
+
+  // Icône de validation
+  var statusEl = document.getElementById('vid-link-status');
+  if(statusEl){
+    if(!url)                statusEl.textContent = '';
+    else if(_isValidVideoUrl(url)) statusEl.textContent = '✅';
+    else                    statusEl.textContent = '⚠️';
   }
 }
 
@@ -9817,64 +9998,232 @@ function previewBoutiqueVideoUrl(url){
   }
 }
 
+// ── Enregistrer vidéo (méthode lien) ──
 function saveBoutiqueVideo(){
   var urlInput   = document.getElementById('boutique-video-url');
   var titleInput = document.getElementById('boutique-video-title-input');
   var url   = (urlInput   ? urlInput.value.trim()   : '');
   var title = (titleInput ? titleInput.value.trim() : '');
 
-  if(!url){ toast('⚠️ Entrez un lien de vidéo','err'); return; }
-  var embedTest = _buildVideoEmbed(url, '');
-  if(!embedTest){ toast('⚠️ Lien non reconnu — utilisez YouTube ou un lien MP4','err'); return; }
+  if(!url){ toast('⚠️ Entrez un lien de vidéo','err'); urlInput && urlInput.focus(); return; }
+  if(!_isValidVideoUrl(url)){ toast('⚠️ Lien non reconnu — YouTube, Vimeo ou MP4 direct uniquement','err'); return; }
+
+  var btn = document.getElementById('vid-save-btn');
+  if(btn){ btn.disabled=true; btn.innerHTML='⏳ Enregistrement...'; }
 
   var token = localStorage.getItem('ygy_token');
-  var payload = { videoUrl: url, videoTitle: title };
+  var payload = { videoUrl: url, videoTitle: title, videoType: 'link' };
 
-  // Sauvegarder via API boutique
   fetch('/api/me/boutique', {
     method: 'PUT',
     headers: {'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},
     body: JSON.stringify(payload)
   })
   .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
-  .then(function(){ _afterVideoSave(url, title); })
-  .catch(function(){
-    // Fallback local
-    _afterVideoSave(url, title);
+  .then(function(){ _afterVideoSave(url, title, 'link'); })
+  .catch(function(){ _afterVideoSave(url, title, 'link'); })
+  .finally(function(){ if(btn){ btn.disabled=false; btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Enregistrer la vidéo'; } });
+}
+
+// ── Gestion sélection fichier local ──
+function handleVideoFileDrop(event){
+  var file = event.dataTransfer.files && event.dataTransfer.files[0];
+  if(file) _handleVideoFile(file);
+}
+
+function handleVideoFileSelect(input){
+  var file = input.files && input.files[0];
+  if(file) _handleVideoFile(file);
+}
+
+function _handleVideoFile(file){
+  var maxSize = 50 * 1024 * 1024; // 50 Mo
+
+  // Validation format
+  var allowed = ['video/mp4','video/quicktime','video/x-msvideo','video/mpeg'];
+  if(!file.type.startsWith('video/') && !allowed.includes(file.type)){
+    toast('⚠️ Format non supporté. Utilisez MP4, MOV ou AVI','err'); return;
+  }
+
+  // Validation taille
+  if(file.size > maxSize){
+    toast('⚠️ Vidéo trop lourde (max 50 Mo). La vôtre fait '+Math.round(file.size/1024/1024)+' Mo','err'); return;
+  }
+
+  _videoLocalFile = file;
+
+  // Aperçu local immédiat
+  if(_videoLocalUrl) URL.revokeObjectURL(_videoLocalUrl);
+  _videoLocalUrl = URL.createObjectURL(file);
+
+  var player    = document.getElementById('vid-upload-player');
+  var preview   = document.getElementById('vid-upload-preview');
+  var nameEl    = document.getElementById('vid-upload-name');
+  var sizeEl    = document.getElementById('vid-upload-size');
+  var dropIcon  = document.getElementById('vid-drop-icon');
+  var dropZone  = document.getElementById('vid-drop-zone');
+
+  if(player){ player.src = _videoLocalUrl; }
+  if(preview) preview.style.display = 'block';
+  if(nameEl) nameEl.textContent = file.name;
+  if(sizeEl) sizeEl.textContent = Math.round(file.size/1024/1024*10)/10 + ' Mo';
+  if(dropIcon) dropIcon.textContent = '✅';
+  if(dropZone) dropZone.style.borderColor = 'var(--gr)';
+
+  toast('📁 Vidéo sélectionnée : '+file.name,'ok');
+}
+
+// ── Upload + enregistrement (méthode local) ──
+async function uploadAndSaveBoutiqueVideo(){
+  if(!_videoLocalFile){ toast('⚠️ Sélectionnez d\'abord une vidéo','err'); return; }
+
+  var titleInput = document.getElementById('boutique-video-title-upload');
+  var title = titleInput ? titleInput.value.trim() : '';
+  var btn   = document.getElementById('vid-upload-btn');
+
+  if(btn){ btn.disabled=true; btn.innerHTML='⏳ Upload en cours...'; }
+
+  var progressWrap = document.getElementById('vid-progress-wrap');
+  var progressBar  = document.getElementById('vid-progress-bar');
+  var progressPct  = document.getElementById('vid-progress-pct');
+  var progressFile = document.getElementById('vid-progress-file');
+  var progressLabel= document.getElementById('vid-progress-label');
+
+  if(progressWrap) progressWrap.style.display = 'block';
+  if(progressFile) progressFile.textContent = _videoLocalFile.name + ' (' + Math.round(_videoLocalFile.size/1024/1024*10)/10 + ' Mo)';
+
+  // Simuler progression upload + upload réel via Cloudinary
+  var token = localStorage.getItem('ygy_token');
+  var finalUrl = '';
+
+  try {
+    // Obtenir signature Cloudinary
+    if(progressLabel) progressLabel.textContent = 'Obtention de la signature...';
+    _updateVideoProgress(progressBar, progressPct, 10);
+
+    var signRes = await fetch('/api/upload/sign', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},
+      body: JSON.stringify({ type: 'video' })
+    });
+
+    if(!signRes.ok) throw new Error('Signature échouée');
+    var sign = await signRes.json();
+
+    if(progressLabel) progressLabel.textContent = 'Upload vers le cloud...';
+    _updateVideoProgress(progressBar, progressPct, 30);
+
+    // Upload Cloudinary avec progression via XMLHttpRequest
+    finalUrl = await new Promise(function(resolve, reject){
+      var formData = new FormData();
+      formData.append('file',      _videoLocalFile);
+      formData.append('api_key',   sign.apiKey);
+      formData.append('timestamp', sign.timestamp);
+      formData.append('signature', sign.signature);
+      formData.append('folder',    sign.folder.replace('/ads/', '/videos/'));
+      formData.append('resource_type', 'video');
+
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', 'https://api.cloudinary.com/v1_1/'+sign.cloudName+'/video/upload');
+
+      xhr.upload.onprogress = function(e){
+        if(e.lengthComputable){
+          var pct = Math.round(30 + (e.loaded / e.total) * 60);
+          _updateVideoProgress(progressBar, progressPct, pct);
+        }
+      };
+
+      xhr.onload = function(){
+        if(xhr.status === 200){
+          var data = JSON.parse(xhr.responseText);
+          resolve(data.secure_url);
+        } else {
+          reject(new Error('Upload échoué'));
+        }
+      };
+      xhr.onerror = function(){ reject(new Error('Erreur réseau')); };
+      xhr.send(formData);
+    });
+
+  } catch(uploadErr) {
+    console.warn('[VIDEO UPLOAD] Cloudinary indisponible, utilisation URL locale:', uploadErr.message);
+    // Fallback : sauvegarder l'URL blob (ou URL locale si serveur local)
+    finalUrl = _videoLocalUrl || '';
+    if(!finalUrl){
+      toast('❌ Upload échoué. Utilisez plutôt un lien YouTube.','err');
+      if(btn){ btn.disabled=false; btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg> Uploader et enregistrer'; }
+      if(progressWrap) progressWrap.style.display='none';
+      return;
+    }
+  }
+
+  _updateVideoProgress(progressBar, progressPct, 90);
+  if(progressLabel) progressLabel.textContent = 'Enregistrement...';
+
+  // Sauvegarder via API
+  var payload = { videoUrl: finalUrl, videoTitle: title, videoType: 'upload' };
+  fetch('/api/me/boutique', {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},
+    body: JSON.stringify(payload)
+  })
+  .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+  .then(function(){ _afterVideoSave(finalUrl, title, 'upload'); })
+  .catch(function(){ _afterVideoSave(finalUrl, title, 'upload'); })
+  .finally(function(){
+    _updateVideoProgress(progressBar, progressPct, 100);
+    setTimeout(function(){
+      if(progressWrap) progressWrap.style.display='none';
+      if(btn){ btn.disabled=false; btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg> Uploader et enregistrer'; }
+    }, 600);
   });
 }
 
-function _afterVideoSave(url, title){
-  // Mettre à jour le user local
+function _updateVideoProgress(bar, pct, value){
+  if(bar) bar.style.width = value + '%';
+  if(pct) pct.textContent = value + '%';
+}
+
+// ── Après sauvegarde ──
+function _afterVideoSave(url, title, type){
+  type = type || 'link';
   var u = DB.user()||{};
-  u.boutique = Object.assign(u.boutique||{}, { videoUrl: url, videoTitle: title });
+  u.boutique = Object.assign(u.boutique||{}, { videoUrl:url, videoTitle:title, videoType:type });
   DB.login(u);
 
-  // Afficher l'aperçu dans la section dashboard
   var previewSection = document.getElementById('boutique-video-preview');
-  var embedEl = document.getElementById('boutique-video-embed');
-  var titleEl = document.getElementById('boutique-video-title');
-  var emptyEl = document.getElementById('boutique-video-empty');
-  var form    = document.getElementById('boutique-video-form');
-  var btn     = document.getElementById('btn-toggle-video');
+  var embedEl        = document.getElementById('boutique-video-embed');
+  var titleEl        = document.getElementById('boutique-video-title');
+  var typeBadgeEl    = document.getElementById('boutique-video-type-badge');
+  var emptyEl        = document.getElementById('boutique-video-empty');
+  var form           = document.getElementById('boutique-video-form');
+  var btn            = document.getElementById('btn-toggle-video');
 
-  if(embedEl) embedEl.innerHTML = _buildVideoEmbed(url, 'width:100%;height:100%;border:none');
-  if(titleEl) titleEl.textContent = title;
+  if(embedEl){
+    if(type === 'upload'){
+      embedEl.innerHTML = '<video src="'+url+'" controls style="width:100%;height:100%;border:none" preload="metadata"></video>';
+    } else {
+      embedEl.innerHTML = _buildVideoEmbed(url,'width:100%;height:100%;border:none');
+    }
+  }
+  if(titleEl) titleEl.textContent = title || '';
+  if(typeBadgeEl) typeBadgeEl.textContent = type === 'upload' ? '📁 Vidéo importée' : _videoTypeBadge(url);
   if(previewSection) previewSection.style.display = 'block';
   if(emptyEl) emptyEl.style.display = 'none';
   if(form) form.style.display = 'none';
-  if(btn) btn.textContent = '✏️ Modifier la vidéo';
+  if(btn){ btn.style.display=''; btn.textContent = '✏️ Modifier la vidéo'; }
 
-  toast('🎬 Vidéo enregistrée !','ok');
+  toast('🎬 Vidéo enregistrée avec succès !','ok');
 }
 
+// ── Supprimer la vidéo ──
 function supprimerBoutiqueVideo(){
   if(!confirm('Supprimer la vidéo de présentation ?')) return;
   var token = localStorage.getItem('ygy_token');
   fetch('/api/me/boutique', {
     method: 'PUT',
     headers: {'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},
-    body: JSON.stringify({ videoUrl:'', videoTitle:'' })
+    body: JSON.stringify({ videoUrl:'', videoTitle:'', videoType:'' })
   })
   .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
   .then(function(){ _afterVideoDelete(); })
@@ -9883,49 +10232,91 @@ function supprimerBoutiqueVideo(){
 
 function _afterVideoDelete(){
   var u = DB.user()||{};
-  if(u.boutique){ u.boutique.videoUrl=''; u.boutique.videoTitle=''; }
+  if(u.boutique){ u.boutique.videoUrl=''; u.boutique.videoTitle=''; u.boutique.videoType=''; }
   DB.login(u);
 
   var previewSection = document.getElementById('boutique-video-preview');
-  var embedEl = document.getElementById('boutique-video-embed');
-  var emptyEl = document.getElementById('boutique-video-empty');
-  var btn     = document.getElementById('btn-toggle-video');
-  var urlInput = document.getElementById('boutique-video-url');
-  var psmall  = document.getElementById('boutique-video-preview-small');
+  var embedEl        = document.getElementById('boutique-video-embed');
+  var emptyEl        = document.getElementById('boutique-video-empty');
+  var btn            = document.getElementById('btn-toggle-video');
+  var urlInput       = document.getElementById('boutique-video-url');
+  var psmall         = document.getElementById('boutique-video-preview-small');
+  var uploadPreview  = document.getElementById('vid-upload-preview');
+  var dropIcon       = document.getElementById('vid-drop-icon');
+  var dropZone       = document.getElementById('vid-drop-zone');
 
-  if(previewSection) previewSection.style.display = 'none';
-  if(embedEl) embedEl.innerHTML = '';
-  if(emptyEl) emptyEl.style.display = 'block';
-  if(btn) btn.textContent = '➕ Ajouter une vidéo';
-  if(urlInput) urlInput.value = '';
+  if(previewSection) previewSection.style.display='none';
+  if(embedEl) embedEl.innerHTML='';
+  if(emptyEl) emptyEl.style.display='block';
+  if(btn){ btn.style.display=''; btn.textContent='➕ Ajouter une vidéo'; }
+  if(urlInput) urlInput.value='';
   if(psmall){ psmall.style.display='none'; psmall.innerHTML=''; }
+  if(uploadPreview) uploadPreview.style.display='none';
+  if(dropIcon) dropIcon.textContent='📁';
+  if(dropZone) dropZone.style.borderColor='var(--br)';
+
+  _videoLocalFile = null;
+  if(_videoLocalUrl){ URL.revokeObjectURL(_videoLocalUrl); _videoLocalUrl=''; }
 
   toast('🗑️ Vidéo supprimée','ok');
 }
 
-// Initialiser la section vidéo au chargement de l'onglet boutique
-// (appelé par renderBoutiqueSection existant via renderBoutiqueTabExtras)
+// ── Init section vidéo au chargement onglet boutique ──
 function initBoutiqueVideoSection(){
   var u = DB.user()||{};
   var b = u.boutique||{};
   var previewSection = document.getElementById('boutique-video-preview');
-  var embedEl = document.getElementById('boutique-video-embed');
-  var titleEl = document.getElementById('boutique-video-title');
-  var emptyEl = document.getElementById('boutique-video-empty');
-  var btn     = document.getElementById('btn-toggle-video');
+  var embedEl        = document.getElementById('boutique-video-embed');
+  var titleEl        = document.getElementById('boutique-video-title');
+  var typeBadgeEl    = document.getElementById('boutique-video-type-badge');
+  var emptyEl        = document.getElementById('boutique-video-empty');
+  var btn            = document.getElementById('btn-toggle-video');
 
-  if(b.videoUrl && _buildVideoEmbed(b.videoUrl,'')){
-    if(embedEl) embedEl.innerHTML = _buildVideoEmbed(b.videoUrl,'width:100%;height:100%;border:none');
+  if(b.videoUrl){
+    if(embedEl){
+      if(b.videoType === 'upload'){
+        embedEl.innerHTML = '<video src="'+b.videoUrl+'" controls style="width:100%;height:100%;border:none" preload="metadata"></video>';
+      } else {
+        var embed = _buildVideoEmbed(b.videoUrl,'width:100%;height:100%;border:none');
+        embedEl.innerHTML = embed || '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;font-size:13px">Vidéo non disponible</div>';
+      }
+    }
     if(titleEl) titleEl.textContent = b.videoTitle||'';
-    if(previewSection) previewSection.style.display = 'block';
-    if(emptyEl) emptyEl.style.display = 'none';
-    if(btn) btn.textContent = '✏️ Modifier la vidéo';
+    if(typeBadgeEl) typeBadgeEl.textContent = b.videoType==='upload' ? '📁 Vidéo importée' : _videoTypeBadge(b.videoUrl);
+    if(previewSection) previewSection.style.display='block';
+    if(emptyEl) emptyEl.style.display='none';
+    if(btn){ btn.style.display=''; btn.textContent='✏️ Modifier la vidéo'; }
   } else {
-    if(previewSection) previewSection.style.display = 'none';
-    if(emptyEl) emptyEl.style.display = 'block';
-    if(btn) btn.textContent = '➕ Ajouter une vidéo';
+    if(previewSection) previewSection.style.display='none';
+    if(emptyEl) emptyEl.style.display='block';
+    if(btn){ btn.style.display=''; btn.textContent='➕ Ajouter une vidéo'; }
   }
 }
+
+// ── Affichage côté boutique publique ──
+function _renderMaBoutiqueVideo(b){
+  var section = document.getElementById('mab-video-section');
+  var embedEl = document.getElementById('mab-video-embed');
+  var titleEl = document.getElementById('mab-video-title-display');
+  if(!section || !embedEl) return;
+
+  var videoUrl  = b && (b.videoUrl || b.video_url || '');
+  var videoType = b && b.videoType;
+  if(!videoUrl){ section.style.display='none'; return; }
+
+  section.style.display = 'block';
+  if(videoType === 'upload'){
+    embedEl.innerHTML = '<video src="'+videoUrl+'" controls style="width:100%;height:100%;border:none" preload="metadata"></video>';
+  } else {
+    var embedHtml = _buildVideoEmbed(videoUrl,'width:100%;height:100%;border:none');
+    embedEl.innerHTML = embedHtml || '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;font-size:13px">Vidéo non disponible</div>';
+  }
+  if(titleEl) titleEl.textContent = b.videoTitle || '';
+}
+
+// ══════════════════════════════════════════════════════════
+//  FIN VIDÉO
+// ══════════════════════════════════════════════════════════
 
 // ══════════════════════════════════════════
 //  PAGE BOUTIQUES PUBLIQUES
@@ -10350,13 +10741,20 @@ function _pbpRenderFull(){
   var vidSec  = document.getElementById('pbp-video-section');
   var vidEmbed= document.getElementById('pbp-video-embed');
   var vidTitle= document.getElementById('pbp-video-title');
-  if(b.videoUrl && typeof _buildVideoEmbed === 'function' && vidEmbed){
-    var embedHtml = _buildVideoEmbed(b.videoUrl,'width:100%;height:100%;border:none');
-    if(embedHtml){
-      vidEmbed.innerHTML = embedHtml;
+  if(b.videoUrl && vidEmbed){
+    var vidHtml = '';
+    if(b.videoType === 'upload'){
+      // Lecteur HTML5 pour vidéo uploadée
+      vidHtml = '<video src="'+b.videoUrl+'" controls style="width:100%;height:100%;border:none" preload="metadata" '
+        + 'style="background:#000"></video>';
+    } else if(typeof _buildVideoEmbed === 'function'){
+      vidHtml = _buildVideoEmbed(b.videoUrl,'width:100%;height:100%;border:none');
+    }
+    if(vidHtml){
+      vidEmbed.innerHTML = vidHtml;
       if(vidSec) vidSec.style.display='block';
       if(vidTitle) vidTitle.textContent = b.videoTitle||'';
-    }
+    } else if(vidSec){ vidSec.style.display='none'; }
   } else if(vidSec){ vidSec.style.display='none'; }
 
   // ── Stats ──
