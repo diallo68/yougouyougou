@@ -383,6 +383,23 @@ AlertSchema.index({ userId: 1 });
 AlertSchema.index({ active: 1 });
 const Alert = mongoose.model('Alert', AlertSchema);
 
+// ── ★ ContactPayment — Paiement mise en relation (2%) ────────
+// Enregistre chaque mise en relation payée (ou gratuite si vendeur Pro)
+const ContactPaymentSchema = new mongoose.Schema({
+  buyerId:      { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  sellerId:     { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  adId:         { type: mongoose.Schema.Types.ObjectId, ref: 'Ad',   required: true },
+  amount:       { type: Number, required: true },          // 0 si Pro ou gratuit
+  status:       { type: String, enum: ['paid','free','free_monthly'], default: 'paid' },
+  reference:    { type: String },
+  buyerPhone:   { type: String },
+  freeMonth:    { type: String },                          // YYYY-MM pour le gratuit mensuel
+  createdAt:    { type: Date, default: Date.now },
+});
+ContactPaymentSchema.index({ buyerId: 1, adId: 1 }, { unique: true }); // 1 paiement par (acheteur, annonce)
+ContactPaymentSchema.index({ buyerId: 1, freeMonth: 1 });               // contrôle mise en relation gratuite/mois
+const ContactPayment = mongoose.model('ContactPayment', ContactPaymentSchema);
+
 // ── ★ NOUVEAU : Signalements ──────────────────────────────────
 const ReportSchema = new mongoose.Schema({
   reporterId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -1536,9 +1553,6 @@ app.post('/api/conversations', auth, async (req, res) => {
   try {
     const { adId, message, initContact } = req.body;
 
-    // initContact = true  → ouverture via bouton "Contacter le vendeur 3%"
-    //               (pas de message user obligatoire, message système auto injecté)
-    // message     = texte → ancien flux (compatibilité)
     if (!adId) return res.status(400).json({ error: 'adId requis' });
     if (!initContact && !message) return res.status(400).json({ error: 'adId et message requis' });
 
@@ -1548,10 +1562,60 @@ app.post('/api/conversations', auth, async (req, res) => {
     if (String(ad.seller) === req.user.id)
       return res.status(400).json({ error: 'Vous ne pouvez pas vous envoyer un message' });
 
-    const buyer  = await User.findById(req.user.id).select('prenom nom');
-    const seller = await User.findById(ad.seller).select('prenom nom');
+    // ── Vérification paiement mise en relation ──────────────────
+    const sellerUser = await User.findById(ad.seller).select('isPro proUntil proPlan prenom nom phone');
+    const sellerIsPro = sellerUser && sellerUser.isPro &&
+                        sellerUser.proUntil && new Date(sellerUser.proUntil) > new Date();
 
-    // Trouver ou créer la conversation unique (adId + buyerId)
+    if (!sellerIsPro) {
+      // Vérifier si déjà payé / débloqué pour cette annonce
+      const alreadyPaid = await ContactPayment.findOne({
+        buyerId: req.user.id,
+        adId:    adId,
+        status:  { $in: ['paid', 'free', 'free_monthly'] }
+      });
+
+      if (!alreadyPaid) {
+        // Vérifier la mise en relation gratuite mensuelle (1/mois)
+        const now = new Date();
+        const freeMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+        const usedFreeThisMonth = await ContactPayment.findOne({
+          buyerId:   req.user.id,
+          freeMonth: freeMonth,
+          status:    'free_monthly'
+        });
+
+        if (!usedFreeThisMonth) {
+          // Accorder la mise en relation gratuite du mois
+          await ContactPayment.create({
+            buyerId:   req.user.id,
+            sellerId:  ad.seller,
+            adId:      adId,
+            amount:    0,
+            status:    'free_monthly',
+            freeMonth: freeMonth,
+            reference: `FREE-${genRef()}`,
+          });
+        } else {
+          // Paiement requis — bloquer
+          const fee = Math.max(Math.round(ad.price * 0.02), 500);
+          return res.status(402).json({
+            error:        'payment_required',
+            message:      'Paiement de mise en relation requis',
+            fee:          fee,
+            adPrice:      ad.price,
+            adId:         String(adId),
+            sellerName:   `${sellerUser?.prenom||''} ${sellerUser?.nom||''}`.trim(),
+            sellerIsPro:  false,
+          });
+        }
+      }
+    }
+    // ── Fin vérification paiement ───────────────────────────────
+
+    const buyer  = await User.findById(req.user.id).select('prenom nom');
+    const seller = sellerUser || await User.findById(ad.seller).select('prenom nom');
+
     let conv = await Conversation.findOne({ adId, buyerId: req.user.id });
     const isNew = !conv;
 
@@ -1567,22 +1631,21 @@ app.post('/api/conversations', auth, async (req, res) => {
       });
     }
 
-    // ── Message système automatique (frais 3%) ──────────────────
-    // Injecté uniquement à la création d'une nouvelle conversation via "Contacter le vendeur"
     if (isNew) {
-      const sysText = 'Des frais de mise en relation de 3% s\'appliquent pour contacter ce vendeur via YouGouYou.';
+      const sysText = sellerIsPro
+        ? '✅ Ce vendeur est Pro — mise en relation gratuite sur YouGouYou.'
+        : '🔓 Mise en relation débloquée. Échangez en toute sécurité sur YouGouYou.';
       conv.messages.push({
-        senderId:  ad.seller,   // senderId = vendeur (ObjectId valide), isSystem=true pour le distinguer
+        senderId:  ad.seller,
         text:      sysText,
         isSystem:  true,
         createdAt: new Date(),
-        read:      true,        // jamais compté dans les non-lus
+        read:      true,
       });
       conv.lastMessage = sysText.substring(0, 100);
       conv.updatedAt   = new Date();
     }
 
-    // ── Message de l'utilisateur (si fourni) ────────────────────
     if (message && message.trim()) {
       const msgText = message.trim();
       conv.messages.push({ senderId: req.user.id, text: msgText });
@@ -1593,41 +1656,29 @@ app.post('/api/conversations', auth, async (req, res) => {
 
     await conv.save();
 
-    // Incrémenter contacts du vendeur (uniquement si nouvelle conv)
     if (isNew) {
       User.findByIdAndUpdate(ad.seller, { $inc: { totalContacts: 1 } }).catch(()=>{});
     }
 
-    // 🔔 Notification au vendeur — nouveau message
     if (message && message.trim() && ad.seller) {
       const buyerName = `${buyer?.prenom||''} ${buyer?.nom||''}`.trim() || 'Un acheteur';
-      await createNotif(
-        ad.seller,
-        'new_message',
-        '💬 Nouveau message',
+      await createNotif(ad.seller, 'new_message', '💬 Nouveau message',
         `${buyerName} vous a envoyé un message concernant "${ad.title}"`,
-        'dashboard/messages',
-        '💬',
+        'dashboard/messages', '💬',
         { conversationId: conv._id, adId, adTitle: ad.title, buyerName }
       );
     }
-    // 🔔 Notification au vendeur — nouvelle mise en contact (sans message)
     if (isNew && !message) {
       const buyerName = `${buyer?.prenom||''} ${buyer?.nom||''}`.trim() || 'Un acheteur';
-      await createNotif(
-        ad.seller,
-        'ad_reply',
-        '📞 Nouvelle demande de contact',
+      await createNotif(ad.seller, 'ad_reply', '📞 Nouvelle demande de contact',
         `${buyerName} souhaite vous contacter pour "${ad.title}"`,
-        'dashboard/messages',
-        '📞',
+        'dashboard/messages', '📞',
         { conversationId: conv._id, adId, adTitle: ad.title }
       );
     }
 
-    res.json({ success: true, conversationId: conv._id });
+    res.json({ success: true, conversationId: conv._id, sellerIsPro });
   } catch(err) {
-    // Gérer la violation d'unicité (race condition)
     if (err.code === 11000) {
       const conv = await Conversation.findOne({ adId: req.body.adId, buyerId: req.user.id });
       return res.json({ success: true, conversationId: conv?._id });
@@ -2023,6 +2074,132 @@ app.post('/api/payment/commission', auth, async (req, res) => {
 });
 
 // Mes paiements
+// ═══════════════════════════════════════════════════════════
+//  CONTACT PAYMENT — Mise en relation 2%
+// ═══════════════════════════════════════════════════════════
+
+// GET /api/contact-payment/status?adId=  — vérifier si débloqué
+app.get('/api/contact-payment/status', auth, async (req, res) => {
+  try {
+    const { adId } = req.query;
+    if (!adId) return res.status(400).json({ error: 'adId requis' });
+
+    // Charger l'annonce + vérifier statut Pro du vendeur
+    const ad = await Ad.findById(adId).select('seller price title');
+    if (!ad) return res.status(404).json({ error: 'Annonce introuvable' });
+
+    const seller = await User.findById(ad.seller).select('isPro proUntil prePlan prenom nom');
+    const sellerIsPro = seller && seller.isPro &&
+                        seller.proUntil && new Date(seller.proUntil) > new Date();
+
+    if (sellerIsPro) {
+      return res.json({ unlocked: true, reason: 'seller_pro', sellerIsPro: true, fee: 0 });
+    }
+
+    // Vérifier si déjà payé ou gratuit pour cette annonce
+    const paid = await ContactPayment.findOne({
+      buyerId: req.user.id,
+      adId,
+      status: { $in: ['paid', 'free', 'free_monthly'] }
+    });
+
+    if (paid) {
+      return res.json({ unlocked: true, reason: paid.status, sellerIsPro: false, fee: 0 });
+    }
+
+    // Vérifier droit au gratuit mensuel
+    const now = new Date();
+    const freeMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    const usedFree = await ContactPayment.findOne({
+      buyerId: req.user.id,
+      freeMonth,
+      status: 'free_monthly'
+    });
+
+    const fee = Math.max(Math.round(ad.price * 0.02), 500);
+    return res.json({
+      unlocked:       false,
+      sellerIsPro:    false,
+      fee,
+      adPrice:        ad.price,
+      adTitle:        ad.title,
+      hasFreeMonthly: !usedFree,
+      sellerName:     `${seller?.prenom||''} ${seller?.nom||''}`.trim(),
+    });
+  } catch(err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/contact-payment — payer la mise en relation (2%)
+app.post('/api/contact-payment', auth, async (req, res) => {
+  try {
+    const { adId, phone, pin } = req.body;
+    if (!adId || !phone) return res.status(400).json({ error: 'adId et phone requis' });
+
+    const ad = await Ad.findById(adId).select('seller price title');
+    if (!ad) return res.status(404).json({ error: 'Annonce introuvable' });
+
+    if (String(ad.seller) === req.user.id)
+      return res.status(400).json({ error: 'Vous ne pouvez pas payer pour votre propre annonce' });
+
+    // Vérifier si déjà payé (anti-double paiement)
+    const alreadyPaid = await ContactPayment.findOne({
+      buyerId: req.user.id,
+      adId,
+      status: { $in: ['paid', 'free', 'free_monthly'] }
+    });
+    if (alreadyPaid) {
+      return res.json({ success: true, alreadyPaid: true, message: 'Mise en relation déjà débloquée' });
+    }
+
+    // Vérifier statut Pro vendeur (sécurité côté serveur)
+    const seller = await User.findById(ad.seller).select('isPro proUntil');
+    const sellerIsPro = seller && seller.isPro &&
+                        seller.proUntil && new Date(seller.proUntil) > new Date();
+    if (sellerIsPro) {
+      return res.json({ success: true, free: true, sellerIsPro: true, message: 'Vendeur Pro — mise en relation gratuite' });
+    }
+
+    const fee = Math.max(Math.round(ad.price * 0.02), 500);
+    const ref = genRef();
+
+    // ── Orange Money Guinée ─────────────────────────────────────
+    // En production : remplacer par l'appel API Orange Money officiel
+    // const omResult = await callOrangeMoney(phone, pin, fee, ref);
+    // if (!omResult.success) return res.status(402).json({ error: omResult.message });
+    // ─────────────────────────────────────────────────────────────
+    console.log(`[CONTACT-PAYMENT] ${fee} GNF | ref=${ref} | buyer=${req.user.id} | ad=${adId}`);
+
+    // Enregistrer le paiement
+    await ContactPayment.create({
+      buyerId:    req.user.id,
+      sellerId:   ad.seller,
+      adId,
+      amount:     fee,
+      status:     'paid',
+      reference:  ref,
+      buyerPhone: phone,
+    });
+
+    // Stats vendeur
+    User.findByIdAndUpdate(ad.seller, { $inc: { totalContacts: 1 } }).catch(()=>{});
+
+    console.log(`[CONTACT-PAYMENT] ✅ Débloqué ref=${ref}`);
+    res.json({ success: true, fee, reference: ref, message: 'Mise en relation débloquée' });
+
+  } catch(err) {
+    if (err.code === 11000) {
+      return res.json({ success: true, alreadyPaid: true, message: 'Mise en relation déjà débloquée' });
+    }
+    console.error('[CONTACT-PAYMENT]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ──────────────────────────────────────────────────────────────
+
+// Mes paiements (original, remis en place)
 app.get('/api/my-payments', auth, async (req, res) => {
   try {
     const pays = await Payment.find({ buyer: req.user.id }).sort({ createdAt: -1 });
