@@ -506,7 +506,7 @@ footer{background:transparent;margin-top:0}
 .det-btns{display:flex;flex-direction:column;gap:8px}
 .btn-contact{background:var(--or);color:#fff;border:none;padding:11px;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);width:100%;transition:all .12s}
 .btn-contact:hover{background:var(--or2)}
-.btn-contact-msg{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px 11px;border-radius:10px;box-shadow:0 2px 8px rgba(255,92,0,.22)}
+.btn-contact-msg{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px 11px;border-radius:10px;box-shadow:0 2px 8px rgba(255,92,0,.22);transition:all .2s}
 .btn-contact-msg:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(255,92,0,.35)}
 .btn-fee-badge{background:rgba(255,255,255,.25);color:#fff;font-size:11px;font-weight:800;padding:2px 7px;border-radius:20px;border:1px solid rgba(255,255,255,.4)}
 .pmsg-system-msg{background:linear-gradient(135deg,#FFF7ED,#FFF3E8);border:1.5px solid #FFCAA0;border-radius:12px;padding:10px 14px;font-size:12px;color:#C05000;font-weight:600;text-align:center;margin:6px 0;display:flex;align-items:center;justify-content:center;gap:6px;line-height:1.5}
@@ -2370,7 +2370,11 @@ footer{background:transparent;margin-top:0}
         </div>
         <div class="det-btns">
           <button class="btn-contact btn-contact-msg" id="btn-contacter-vendeur" onclick="contacterVendeur3pct()">
-            💬 Contacter le vendeur <span class="btn-fee-badge">3%</span>
+            💬 Contacter le vendeur <span class="btn-fee-badge" id="btn-fee-label">2%</span>
+          </button>
+          <div id="seller-pro-badge-contact" style="display:none;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;color:#065F46;text-align:center;margin-top:6px">
+            ✅ Vendeur Pro — Mise en relation gratuite
+          </div>
           </button>
           <button class="btn-fav-det" onclick="addFav()">🤍 Ajouter aux favoris</button>
           <button class="btn-share" onclick="shareAd()">🔗 Partager l'annonce</button>
@@ -5276,6 +5280,45 @@ function viewAd(id){
 function viewAd_display(ad){
   curAd=ad;
 
+  // Reset bouton contact
+  var btnContact = document.getElementById('btn-contacter-vendeur');
+  var proBadge   = document.getElementById('seller-pro-badge-contact');
+  if(btnContact){
+    btnContact.style.background = '';
+    btnContact.innerHTML = '💬 Contacter le vendeur <span class="btn-fee-badge" id="btn-fee-label">2%</span>';
+    btnContact.disabled = false;
+    btnContact.id = 'btn-contacter-vendeur'; // reset id si changé
+  }
+  if(proBadge) proBadge.style.display = 'none';
+
+  // Vérifier statut Pro du vendeur pour afficher badge et adapter le bouton
+  var tok = localStorage.getItem('ygy_token');
+  var adId = ad._id || ad.id;
+  if(tok && adId && DB.user()){
+    fetch('/api/contact-payment/status?adId='+adId, {headers:{'Authorization':'Bearer '+tok}})
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(d){
+        if(!d) return;
+        var btn = document.getElementById('btn-contacter-vendeur');
+        var badge = document.getElementById('seller-pro-badge-contact');
+        if(d.sellerIsPro){
+          // Vendeur Pro — gratuit
+          if(badge) badge.style.display = 'block';
+          if(btn){
+            var lbl = btn.querySelector('#btn-fee-label,.btn-fee-badge');
+            if(lbl) lbl.textContent = 'GRATUIT';
+          }
+        } else if(d.unlocked){
+          // Déjà payé ou gratuit mensuel utilisé
+          if(btn){
+            btn.style.background = '#059669';
+            btn.innerHTML = '🔓 Mise en relation débloquée <span style="background:rgba(255,255,255,.2);font-size:10px;padding:2px 6px;border-radius:10px;margin-left:4px">✅</span>';
+          }
+        }
+        // Sinon : afficher 2% normalement
+      }).catch(function(){});
+  }
+
   // Enregistrer dans l'historique de navigation
   if(!DB._d.history) DB._d.history=[];
   DB._d.history=DB._d.history.filter(function(h){return h.id!==(ad._id||ad.id);}); // éviter doublons
@@ -7895,7 +7938,7 @@ function sendPageMsg(){
   .catch(function(){ toast('❌ Erreur réseau','err'); });
 }
 
-// ── Contacter le vendeur via messagerie (3% frais) ──────────
+// ── Contacter le vendeur — avec vérification paiement mise en relation ──
 async function contacterVendeur3pct(){
   var user = DB.user();
   if(!user){
@@ -7909,6 +7952,7 @@ async function contacterVendeur3pct(){
   var titre    = curAd.t   || curAd.title || 'Annonce';
   var vendeur  = curAd.sellerName || curAd.seller_name || 'Vendeur';
   var sellerId = curAd.seller || curAd.sellerId || curAd.sid;
+  var adPrice  = curAd.p || curAd.price || 0;
 
   if(!adId){ toast('ID annonce manquant','err'); return; }
   if(sellerId && String(sellerId) === String(user._id || user.id)){
@@ -7917,9 +7961,61 @@ async function contacterVendeur3pct(){
   }
 
   var btn = document.getElementById('btn-contacter-vendeur');
-  if(btn){ btn.disabled = true; btn.innerHTML = '⏳ Connexion...'; }
+  if(btn){ btn.disabled = true; btn.innerHTML = '⏳ Vérification...'; }
 
   var tok = localStorage.getItem('ygy_token');
+  try {
+    // 1. Vérifier statut paiement / Pro vendeur
+    var statusRes = await fetch('/api/contact-payment/status?adId='+adId, {
+      headers: {'Authorization':'Bearer '+tok}
+    });
+    var statusData = await statusRes.json();
+
+    if(!statusRes.ok){
+      if(statusRes.status === 401){
+        toast('🔒 Session expirée — reconnectez-vous','err');
+        localStorage.removeItem('ygy_token');
+        DB.logout(); updateNav();
+        setTimeout(function(){ openModal('auth'); }, 600);
+        return;
+      }
+      toast('❌ Erreur de vérification','err');
+      return;
+    }
+
+    // 2. Si paiement requis → afficher le modal
+    if(!statusData.unlocked){
+      openContactPaymentModal({
+        adId:           adId,
+        adTitle:        titre,
+        adPrice:        adPrice,
+        fee:            statusData.fee,
+        sellerName:     statusData.sellerName || vendeur,
+        hasFreeMonthly: statusData.hasFreeMonthly,
+      });
+      return;
+    }
+
+    // 3. Débloqué (Pro ou déjà payé) → créer la conversation
+    await _createConversationAndNavigate(adId, titre, vendeur, tok);
+
+  } catch(err){
+    toast('❌ Erreur réseau — vérifiez votre connexion','err');
+  } finally {
+    if(btn){
+      var isUnlocked = document.getElementById('btn-contacter-vendeur-unlocked');
+      if(!isUnlocked){
+        btn.disabled = false;
+        btn.innerHTML = '💬 Contacter le vendeur <span class="btn-fee-badge">2%</span>';
+      }
+    }
+  }
+}
+
+// Créer la conv et naviguer vers la messagerie
+async function _createConversationAndNavigate(adId, titre, vendeur, tok){
+  var btn = document.getElementById('btn-contacter-vendeur');
+  if(btn){ btn.disabled=true; btn.innerHTML='⏳ Connexion...'; }
   try {
     var res = await fetch('/api/conversations', {
       method: 'POST',
@@ -7929,39 +8025,222 @@ async function contacterVendeur3pct(){
     var data = await res.json();
 
     if(!res.ok){
+      if(res.status === 402){
+        // Double sécurité : paiement requis (race condition)
+        openContactPaymentModal({
+          adId:      adId,
+          adTitle:   titre,
+          adPrice:   curAd ? (curAd.p||curAd.price||0) : 0,
+          fee:       data.fee || 0,
+          sellerName:data.sellerName || vendeur,
+        });
+        return;
+      }
       if(res.status === 401){
-        toast('🔒 Session expirée — reconnectez-vous','err');
-        localStorage.removeItem('ygy_token');
+        toast('🔒 Session expirée','err');
         DB.logout(); updateNav();
         setTimeout(function(){ openModal('auth'); }, 600);
         return;
       }
-      toast('❌ ' + (data.error || 'Erreur'),'err');
+      toast('❌ '+(data.error||'Erreur'),'err');
       return;
     }
 
+    var user = DB.user();
     var convId = String(data.conversationId);
-    var convData = {
+    window._pendingOpenConvId   = convId;
+    window._pendingOpenConvData = {
       _id:        convId,
       adTitle:    titre,
       sellerName: vendeur,
-      adPhoto:    (curAd.photos&&curAd.photos[0])||(curAd.ph&&curAd.ph[0])||'',
-      adPrice:    curAd.p || curAd.price || 0,
+      adPhoto:    (curAd&&curAd.photos&&curAd.photos[0])||'',
+      adPrice:    curAd ? (curAd.p||curAd.price||0) : 0,
       adId:       adId,
       buyerId:    String(user._id || user.id || '')
     };
 
-    // Stocker la conv à ouvrir, puis naviguer
-    window._pendingOpenConvId   = convId;
-    window._pendingOpenConvData = convData;
-    navGoMessages();
+    // Badge "Relation débloquée" si vendeur Pro
+    if(data.sellerIsPro){
+      var btnEl = document.getElementById('btn-contacter-vendeur');
+      if(btnEl){
+        btnEl.innerHTML = '✅ Vendeur Pro — Gratuit';
+        btnEl.style.background = '#059669';
+        btnEl.id = 'btn-contacter-vendeur-unlocked';
+      }
+    }
 
-  } catch(err){
-    toast('❌ Erreur réseau — vérifiez votre connexion','err');
+    navGoMessages();
+  } catch(e){
+    toast('❌ Erreur réseau','err');
   } finally {
-    if(btn){ btn.disabled=false; btn.innerHTML='💬 Contacter le vendeur <span class="btn-fee-badge">3%</span>'; }
+    var b = document.getElementById('btn-contacter-vendeur');
+    if(b && b.id !== 'btn-contacter-vendeur-unlocked'){
+      b.disabled = false;
+      b.innerHTML = '💬 Contacter le vendeur <span class="btn-fee-badge">2%</span>';
+    }
   }
 }
+
+// ── Modal paiement mise en relation ──────────────────────────
+function openContactPaymentModal(opts){
+  var existing = document.getElementById('overlay-contact-payment');
+  if(existing) existing.remove();
+
+  var fee        = opts.fee || 0;
+  var adPrice    = opts.adPrice || 0;
+  var adTitle    = opts.adTitle || 'Annonce';
+  var adId       = opts.adId || '';
+  var freeOk     = opts.hasFreeMonthly;
+
+  // Champs PIN construits sans .map inline
+  var pinFields = '';
+  for(var pi=1; pi<=4; pi++){
+    pinFields += '<input id="cpm-pin'+pi+'" type="password" maxlength="1" inputmode="numeric" '
+      +'style="width:52px;height:52px;text-align:center;font-size:20px;font-weight:800;'
+      +'border:1.5px solid #E2E2E2;border-radius:8px;outline:none;font-family:inherit">';
+  }
+
+  var freeBtnHtml = freeOk
+    ? '<div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:10px;padding:10px 14px;'
+      +'margin-bottom:14px;display:flex;align-items:center;gap:8px">'
+      +'<span style="font-size:20px">🎁</span>'
+      +'<div style="flex:1"><div style="font-size:13px;font-weight:800;color:#065F46">Mise en relation gratuite du mois</div>'
+      +'<div style="font-size:11px;color:#059669">1 mise en relation offerte — disponible !</div></div>'
+      +'<button id="cpm-free-btn" style="background:#059669;color:#fff;border:none;border-radius:8px;'
+      +'padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Utiliser →</button>'
+      +'</div>'
+    : '';
+
+  var overlay = document.createElement('div');
+  overlay.id = 'overlay-contact-payment';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:3000;display:flex;align-items:center;justify-content:center;padding:16px';
+  overlay.onclick = function(e){ if(e.target===overlay){ overlay.remove(); document.body.style.overflow=''; } };
+
+  overlay.innerHTML =
+    '<div style="background:#fff;border-radius:16px;max-width:440px;width:100%;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.2)">'
+    +'<div style="background:linear-gradient(135deg,#1A1A2E,#2D1B0E);padding:20px 24px;display:flex;align-items:center;justify-content:space-between">'
+      +'<div><div style="font-size:16px;font-weight:800;color:#fff">🔓 Débloquer la mise en relation</div>'
+      +'<div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:2px">'+adTitle+'</div></div>'
+      +'<button id="cpm-close-btn" style="background:rgba(255,255,255,.1);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px">✕</button>'
+    +'</div>'
+    +'<div style="padding:20px 24px">'
+      +'<div style="background:#FFF5F0;border:1px solid #FFD4B0;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#8B5E3C;line-height:1.6">'
+        +'<strong style="display:block;margin-bottom:3px">ℹ️ Information</strong>'
+        +'Les vendeurs <strong>Pro</strong> sont contactables gratuitement. Des frais de 2% s\'appliquent pour ce vendeur.'
+      +'</div>'
+      +'<div style="background:linear-gradient(135deg,#FFF3EE,#FFE4D0);border-radius:12px;padding:16px;margin-bottom:16px;text-align:center">'
+        +'<div style="font-size:12px;color:#6F6F6F;margin-bottom:4px">Frais de mise en relation (2%)</div>'
+        +'<div style="font-size:28px;font-weight:900;color:#FF5C00">'+fee.toLocaleString('fr-FR')+' GNF</div>'
+        +'<div style="font-size:11px;color:#6F6F6F;margin-top:2px">Prix annonce : '+adPrice.toLocaleString('fr-FR')+' GNF</div>'
+      +'</div>'
+      +freeBtnHtml
+      +'<div id="cpm-form">'
+        +'<div style="margin-bottom:10px">'
+          +'<label style="font-size:11px;font-weight:700;color:#6F6F6F;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">📱 Numéro Orange Money</label>'
+          +'<input id="cpm-phone" type="tel" placeholder="Ex: 620 00 00 00" style="width:100%;border:1.5px solid #E2E2E2;border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;outline:none;box-sizing:border-box">'
+        +'</div>'
+        +'<div style="margin-bottom:14px">'
+          +'<label style="font-size:11px;font-weight:700;color:#6F6F6F;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">🔑 Code PIN (4 chiffres)</label>'
+          +'<div style="display:flex;gap:8px;justify-content:center">'+pinFields+'</div>'
+        +'</div>'
+        +'<button id="cpm-pay-btn" style="width:100%;background:#FF5C00;color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(255,92,0,.3);margin-bottom:8px">🟠 Payer '+fee.toLocaleString('fr-FR')+' GNF et contacter</button>'
+        +'<button id="cpm-cancel-btn" style="width:100%;background:#F1F5F9;color:#6F6F6F;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Annuler</button>'
+        +'<div style="font-size:11px;color:#6F6F6F;text-align:center;margin-top:10px">🔒 Paiement sécurisé · Activation immédiate</div>'
+      +'</div>'
+    +'</div>'
+    +'</div>';
+
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+
+  // Événements post-insertion (évite inline onclick avec guillemets imbriqués)
+  document.getElementById('cpm-close-btn').onclick = function(){ overlay.remove(); document.body.style.overflow=''; };
+  document.getElementById('cpm-cancel-btn').onclick = function(){ overlay.remove(); document.body.style.overflow=''; };
+  document.getElementById('cpm-pay-btn').onclick = function(){ submitContactPayment(adId); };
+  if(freeOk){
+    var fb = document.getElementById('cpm-free-btn');
+    if(fb) fb.onclick = function(){ overlay.remove(); document.body.style.overflow=''; useFreeMonthlyCPM(adId); };
+  }
+  // Auto-focus PIN suivant
+  for(var pj=1; pj<=3; pj++){
+    (function(j){
+      var inp = document.getElementById('cpm-pin'+j);
+      if(inp) inp.oninput = function(){
+        this.value = this.value.replace(/[^0-9]/,'');
+        if(this.value) document.getElementById('cpm-pin'+(j+1)).focus();
+      };
+    })(pj);
+  }
+  var lastPin = document.getElementById('cpm-pin4');
+  if(lastPin) lastPin.oninput = function(){ this.value = this.value.replace(/[^0-9]/,''); };
+  setTimeout(function(){ var p=document.getElementById('cpm-phone'); if(p) p.focus(); }, 100);
+}
+// Payer la mise en relation
+async function submitContactPayment(adId){
+  var phone = (document.getElementById('cpm-phone')||{}).value||'';
+  if(!phone||phone.length<8){ toast('📱 Entrez votre numéro Orange Money','err'); return; }
+  var pin = ['cpm-pin1','cpm-pin2','cpm-pin3','cpm-pin4'].map(function(id){
+    return (document.getElementById(id)||{}).value||'';
+  }).join('');
+  if(pin.length<4){ toast('🔑 Entrez votre code PIN (4 chiffres)','err'); return; }
+
+  var btn = document.getElementById('cpm-pay-btn');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Traitement...'; }
+
+  var tok = localStorage.getItem('ygy_token');
+  try {
+    var res = await fetch('/api/contact-payment', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Authorization':'Bearer '+tok},
+      body: JSON.stringify({ adId: adId, phone: '224'+phone.replace(/\s/g,''), pin: pin })
+    });
+    var data = await res.json();
+
+    if(data.success || data.alreadyPaid){
+      // Fermer le modal
+      var overlay = document.getElementById('overlay-contact-payment');
+      if(overlay){ overlay.remove(); document.body.style.overflow=''; }
+
+      // Badge débloqué sur le bouton
+      _showContactUnlockedBadge();
+      toast('✅ Mise en relation débloquée !','ok');
+
+      // Créer la conv et naviguer
+      var titre   = curAd ? (curAd.t||curAd.title||'Annonce') : 'Annonce';
+      var vendeur = curAd ? (curAd.sellerName||curAd.seller_name||'Vendeur') : 'Vendeur';
+      await _createConversationAndNavigate(adId, titre, vendeur, tok);
+    } else {
+      toast('❌ '+(data.error||'Paiement échoué'),'err');
+      if(btn){ btn.disabled=false; btn.textContent='🟠 Réessayer'; }
+    }
+  } catch(e){
+    toast('❌ Erreur réseau','err');
+    if(btn){ btn.disabled=false; btn.textContent='🟠 Réessayer'; }
+  }
+}
+
+// Utiliser le crédit gratuit mensuel
+async function useFreeMonthlyCPM(adId){
+  var tok = localStorage.getItem('ygy_token');
+  var overlay = document.getElementById('overlay-contact-payment');
+  if(overlay){ overlay.remove(); document.body.style.overflow=''; }
+
+  // Le serveur accordera automatiquement le gratuit mensuel
+  var titre   = curAd ? (curAd.t||curAd.title||'Annonce') : 'Annonce';
+  var vendeur = curAd ? (curAd.sellerName||curAd.seller_name||'Vendeur') : 'Vendeur';
+  toast('🎁 Mise en relation gratuite appliquée !','ok');
+  await _createConversationAndNavigate(adId, titre, vendeur, tok);
+}
+
+// Badge visuel "Relation débloquée" sur le bouton
+function _showContactUnlockedBadge(){
+  var btn = document.getElementById('btn-contacter-vendeur');
+  if(!btn) return;
+  btn.style.background = '#059669';
+  btn.innerHTML = '🔓 Mise en relation débloquée <span style="background:rgba(255,255,255,.2);font-size:10px;padding:2px 6px;border-radius:10px;margin-left:4px">✅</span>';
+  btn.disabled = false;
+}
+
 // Alias
 function contactVendeur(){ contacterVendeur3pct(); }
 function envoyerMessage(){ contacterVendeur3pct(); }
