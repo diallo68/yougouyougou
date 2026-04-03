@@ -906,7 +906,11 @@ app.post('/api/auth/resend-code', async (req, res) => {
       const smsSent = await sendSMS(phone, `Votre nouveau code YouGouYou : ${code}. Valable 15 min.`);
       if (!smsSent) console.warn(`[RESEND] SMS non livré → ${phone} code: ${code}`);
     }
-    res.json({ success: true, debug_code: code });
+    res.json({
+      success: true,
+      // debug_code uniquement en développement local — jamais en production
+      ...(process.env.NODE_ENV !== 'production' && { debug_code: code }),
+    });
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
