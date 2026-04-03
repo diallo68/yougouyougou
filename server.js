@@ -514,7 +514,13 @@ async function createNotif(userId, type, title, body, link, icon, data) {
 // ═══════════════════════════════════════════════════════════
 //  UTILITAIRES
 // ═══════════════════════════════════════════════════════════
-const JWT_SECRET = process.env.JWT_SECRET || 'ygy_secret_change_in_prod';
+// ── JWT_SECRET — obligatoire, pas de fallback ──────────────
+if (!process.env.JWT_SECRET) {
+  console.error('❌ FATAL: JWT_SECRET non défini dans les variables d\'environnement.');
+  console.error('   Ajoutez JWT_SECRET=<valeur_longue_aléatoire> dans votre .env ou sur Render.');
+  process.exit(1);
+}
+const JWT_SECRET = process.env.JWT_SECRET;
 
 function genRef() {
   return 'OM' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2,6).toUpperCase();
