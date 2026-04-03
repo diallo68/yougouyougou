@@ -86,11 +86,42 @@ async function sendSMS(phone, message) {
 try { app.use(require('compression')()); } catch(e) {}
 try {
   const rateLimit = require('express-rate-limit');
+
+  // Rate limit global — toutes les routes /api/
   app.use('/api/', rateLimit({ windowMs: 15*60*1000, max: 300, standardHeaders: true, legacyHeaders: false }));
-} catch(e) {}
+
+  // ── Rate limit strict sur /api/login — anti brute-force ──
+  // Max 10 tentatives par IP toutes les 15 minutes
+  const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,   // 15 minutes
+    max: 10,                     // 10 tentatives max par IP
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Trop de tentatives de connexion. Réessayez dans 15 minutes.' },
+    skipSuccessfulRequests: true, // Les connexions réussies ne comptent pas
+  });
+  app.use('/api/login', loginLimiter);
+  app.use('/api/auth/send-code', rateLimit({ windowMs: 15*60*1000, max: 5, standardHeaders: true, legacyHeaders: false, message: { error: 'Trop de demandes de code. Réessayez dans 15 minutes.' } }));
+  app.use('/api/auth/resend-code', rateLimit({ windowMs: 15*60*1000, max: 5, standardHeaders: true, legacyHeaders: false, message: { error: 'Trop de demandes de code. Réessayez dans 15 minutes.' } }));
+} catch(e) { console.error('[RATE LIMIT] Erreur chargement express-rate-limit:', e.message); }
 try { app.use(require('helmet')({ contentSecurityPolicy: false })); } catch(e) {}
 
-app.use(cors());
+// ── CORS — origines autorisées uniquement ──────────────────
+const allowedOrigins = [
+  'https://yougouyougou.net',
+  'https://www.yougouyougou.net',
+  ...(process.env.NODE_ENV !== 'production' ? ['http://localhost:3000', 'http://localhost:5173'] : []),
+];
+app.use(cors({
+  origin: (origin, callback) => {
+    // Autoriser les requêtes sans origin (Postman, apps mobiles, curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error(`Origine non autorisée par CORS : ${origin}`));
+  },
+  credentials: true,
+}));
+
 app.use(express.json({ limit: '2mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
