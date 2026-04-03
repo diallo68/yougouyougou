@@ -13159,6 +13159,34 @@ document.addEventListener('DOMContentLoaded',function(){
     }
   })();
 
+
+  // ── Auto-refresh token JWT — renouvellement silencieux avant expiration ──
+  // Le token dure 7 jours. On le renouvelle automatiquement s'il expire dans moins de 2 jours.
+  (function autoRefreshToken(){
+    var token = localStorage.getItem('ygy_token');
+    if(!token) return;
+    try {
+      var payload = JSON.parse(atob(token.split('.')[1]));
+      var expiresAt = payload.exp * 1000;
+      var now = Date.now();
+      var twoDays = 2 * 24 * 60 * 60 * 1000;
+      if(expiresAt - now < twoDays){
+        fetch('/api/auth/refresh', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token }
+        })
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(data){
+          if(data && data.token){
+            localStorage.setItem('ygy_token', data.token);
+            console.log('[Auth] Token renouvelé automatiquement ✅');
+          }
+        })
+        .catch(function(){});
+      }
+    } catch(e) {}
+  })();
+
   // Reset mdp via lien email
   (function(){
     var tok=new URLSearchParams(window.location.search).get('reset');
