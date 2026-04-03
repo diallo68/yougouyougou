@@ -9912,7 +9912,7 @@ function adminSetProUser(idx){
   fetch('/api/admin/users/'+id+'/pro', {
     method:'PATCH',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-    body: JSON.stringify({ isPro:true, proPlan:plan, months:months })
+    body: JSON.stringify({ isPro:true, plan:plan, proPlan:plan, months:months })
   }).then(function(r){ return r.json(); })
     .then(function(d){
       if(d.success){
@@ -9945,21 +9945,27 @@ function adminRemoveProUser(idx){
 
 function adminSetMyPro(plan){
   var days = _proPlanDurations[plan]||30;
+  var months = Math.round(days/30);
   var u = DB.user()||{};
   u.isPro = true;
   u.proPlan = plan;
   u.proUntil = new Date(Date.now()+days*24*3600*1000).toISOString();
   DB.login(u);
-  // Synchroniser avec le serveur si connecté
+  // Synchroniser avec le serveur
   var token = localStorage.getItem('ygy_token');
   if(token && u._id){
     fetch('/api/admin/users/'+u._id+'/pro', {
       method:'PATCH',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-      body: JSON.stringify({ isPro:true, proPlan:plan, proUntil:u.proUntil })
-    }).catch(function(){});
+      body: JSON.stringify({ isPro:true, plan:plan, proPlan:plan, months:months })
+    }).then(function(r){ return r.json(); })
+      .then(function(d){
+        if(d.success||d.user){
+          toast('⭐ Pro '+plan+' activé sur votre compte','ok');
+        }
+      }).catch(function(){});
   }
-  toast('⭐ Pro '+plan+' activé sur votre compte','ok');
+  toast('⭐ Pro '+plan+' activé','ok');
   updateNav();
   renderAdminPro();
 }
