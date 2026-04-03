@@ -13,6 +13,8 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
 <style>
 /* ═══════════════════════════════════════
    YOUGOUYOUGOU v13 — Design LeBonCoin
@@ -7015,7 +7017,7 @@ function verifyCode(){
       serverUser.name=serverUser.name||(serverUser.prenom+(serverUser.nom?' '+serverUser.nom:''));
       if(data.token) localStorage.setItem('ygy_token',data.token);
       DB.addUser(serverUser);DB.login(serverUser);updateNav();closeModal('auth');document.body.style.overflow='';
-      toast('🎉 Bienvenue '+u.prenom+' ! Compte créé 🇬🇳','ok'); resetInactivityTimer(); startNotifPolling();
+      toast('🎉 Bienvenue '+u.prenom+' ! Compte créé 🇬🇳','ok'); resetInactivityTimer(); initSocket();
       pendingUser=null;smsCode='';codeFromServer=false;
     })
     .catch(function(){
@@ -7204,7 +7206,7 @@ function doLogin(){
     closeModal('auth');
     document.body.style.overflow='';
     resetInactivityTimer();
-    startNotifPolling();
+    initSocket();
     toast('✅ Bienvenue '+(u.prenom||u.name||'').split(' ')[0]+' ! 🇬🇳','ok');
   })
   .catch(function(){
@@ -7269,7 +7271,7 @@ function saveProfile(){
   toast('✅ Profil mis à jour !','ok');
 }
 
-function logout(){DB.logout();localStorage.removeItem('ygy_token');updateNav();stopNotifPolling();goTo('home');toast('👋 Déconnecté');}
+function logout(){DB.logout();localStorage.removeItem('ygy_token');updateNav();stopNotifPolling(); disconnectSocket();goTo('home');toast('👋 Déconnecté');}
 
 /* ═══════════════════════════════════════
    MOT DE PASSE OUBLIÉ — RÉINITIALISATION
@@ -7683,7 +7685,7 @@ function renderPageConvList(convs){
       + '<div class="pmsg-conv-thumb">'+initials+'</div>'
       + '<div class="pmsg-conv-info">'
         + '<div class="pmsg-conv-header">'
-          + '<div class="pmsg-conv-title'+(isUnread?' unread':'')+'">'+( adTitle||name)+'</div>'
+          + '<div class="pmsg-conv-title'+(isUnread?' unread':'')+'">'+(conv.isDirect ? ('💬 '+name) : (adTitle||name))+'</div>'
           + '<span class="pmsg-conv-date'+(isUnread?' unread-date':'')+'">'+time+'</span>'
         + '</div>'
         + '<div class="pmsg-conv-preview'+(isUnread?' unread-preview':'')+'">'+last.substring(0,50)+'</div>'
@@ -8341,6 +8343,98 @@ function _pollNotifCount(){
     }
   })
   .catch(function(){});
+}
+
+
+// ═══════════════════════════════════════════════════════
+//  SOCKET.IO — Messagerie & Notifications temps réel
+// ═══════════════════════════════════════════════════════
+var _socket = null;
+
+function initSocket(){
+  var token = localStorage.getItem('ygy_token');
+  if(!token || _socket) return;
+
+  try {
+    _socket = io({ auth: { token: token }, transports: ['websocket','polling'] });
+
+    _socket.on('connect', function(){
+      console.log('[Socket] Connecté ✅', _socket.id);
+      // Rejoindre la conversation ouverte si applicable
+      if(window._activeConvId){
+        _socket.emit('join_conversation', window._activeConvId);
+      }
+    });
+
+    _socket.on('connect_error', function(err){
+      console.warn('[Socket] Erreur connexion:', err.message, '— fallback polling');
+      // Fallback : relancer le polling si socket échoue
+      startNotifPolling();
+    });
+
+    // ── Nouveau message temps réel ──
+    _socket.on('new_message', function(msg){
+      // Mettre à jour la vue messages si la conv est ouverte
+      if(window._activeConvId && String(msg.convId) === String(window._activeConvId)){
+        _appendRealtimeMessage(msg);
+      } else {
+        // Mettre à jour le badge non lus dans la liste conversations
+        _notifUnread = (_notifUnread||0) + 1;
+        _updateNotifBadge(_notifUnread);
+        loadConversations && loadConversations();
+      }
+    });
+
+    // ── Notification temps réel ──
+    _socket.on('notification', function(notif){
+      _notifUnread = (_notifUnread||0) + (notif.unreadCount||1);
+      _updateNotifBadge(_notifUnread);
+      var dashBadge = document.getElementById('dash-notif-badge');
+      if(dashBadge){ dashBadge.style.display='inline-block'; dashBadge.textContent=_notifUnread; }
+      // Si le panneau notifications est ouvert, le rafraîchir
+      var sec = document.getElementById('dsec-notifications');
+      if(sec && sec.offsetParent !== null){ loadNotifications && loadNotifications(renderNotifications); }
+    });
+
+    _socket.on('disconnect', function(reason){
+      console.log('[Socket] Déconnecté:', reason);
+      // Si déconnexion non volontaire, relancer le polling comme fallback
+      if(reason !== 'io client disconnect'){ startNotifPolling(); }
+    });
+
+  } catch(e){
+    console.warn('[Socket] Socket.io indisponible, fallback polling:', e.message);
+    startNotifPolling();
+  }
+}
+
+function disconnectSocket(){
+  if(_socket){ _socket.disconnect(); _socket = null; }
+}
+
+// Rejoindre la room d'une conversation (appeler quand on ouvre une conv)
+function joinConvRoom(convId){
+  window._activeConvId = convId;
+  if(_socket && _socket.connected){ _socket.emit('join_conversation', convId); }
+}
+
+// Quitter la room d'une conversation
+function leaveConvRoom(convId){
+  window._activeConvId = null;
+  if(_socket && _socket.connected){ _socket.emit('leave_conversation', convId); }
+}
+
+// Afficher un message reçu en temps réel dans l'UI
+function _appendRealtimeMessage(msg){
+  var container = document.getElementById('pmsg-messages-list');
+  if(!container) return;
+  var user = DB.user();
+  var isMine = String(msg.senderId) === String(user?._id||user?.id||'');
+  var div = document.createElement('div');
+  div.style.cssText = 'display:flex;justify-content:'+(isMine?'flex-end':'flex-start')+';margin-bottom:8px';
+  div.innerHTML = '<div style="max-width:70%;padding:10px 14px;border-radius:'+(isMine?'16px 16px 4px 16px':'16px 16px 16px 4px')+';background:'+(isMine?'var(--or)':'#F0F2F5')+';color:'+(isMine?'#fff':'#1C1E21')+';font-size:14px;line-height:1.5">'+msg.text+'</div>';
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
 }
 
 // ── Démarrer le polling toutes les 30s ──
@@ -11225,11 +11319,25 @@ function pbpContactWhatsapp(){
 
 function pbpContactMessage(){
   if(!_requireAuth('Connectez-vous pour envoyer un message au vendeur.')) return;
-  // Ouvrir la messagerie avec ce vendeur
-  if(_pbpData.sellerId){
-    window._pendingOpenConvData = { sellerId: _pbpData.sellerId, sellerName: _pbpData.sellerName };
+  if(!_pbpData||!_pbpData.sellerId){ toast('Vendeur non disponible','err'); return; }
+  var token = localStorage.getItem('ygy_token');
+  toast('⏳ Ouverture de la messagerie...','info');
+  fetch('/api/conversations/direct',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+    body: JSON.stringify({ sellerId: _pbpData.sellerId })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if(data.error){ toast(data.error,'err'); return; }
+    var conv = data.conversation || data;
+    var cid  = conv._id || conv.id;
+    if(!cid){ toast('Erreur ouverture conv','err'); return; }
+    window._pendingOpenConvId   = cid;
+    window._pendingOpenConvData = conv;
     navGoMessages();
-  }
+  })
+  .catch(function(){ toast('Erreur réseau, réessayez','err'); });
 }
 
 function pbpGoBack(){
@@ -13135,7 +13243,7 @@ document.addEventListener('DOMContentLoaded',function(){
   DB.load();
   // Démarrer le polling notifications si déjà connecté
   if(localStorage.getItem('ygy_token') && DB.user()){
-    startNotifPolling();
+    initSocket();
   }
   // Sync rôle depuis MongoDB au chargement
   (function(){
