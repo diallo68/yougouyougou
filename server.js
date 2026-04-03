@@ -11,9 +11,12 @@ const cors     = require('cors');
 const bcrypt   = require('bcryptjs');
 const jwt      = require('jsonwebtoken');
 const path     = require('path');
+const http     = require('http');
+const { Server } = require('socket.io');
 
-const app  = express();
-const PORT = process.env.PORT || 3000;
+const app    = express();
+const server = http.createServer(app);   // Serveur HTTP partagé Express + Socket.io
+const PORT   = process.env.PORT || 3000;
 // ── SMS via Africa's Talking ────────────────────────────────
 async function sendSMS(phone, message) {
   const username = process.env.AT_USERNAME || 'sandbox';
@@ -124,6 +127,60 @@ app.use(cors({
 
 app.use(express.json({ limit: '2mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// ── SOCKET.IO ───────────────────────────────────────────────
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
+  pingTimeout: 60000,
+});
+
+// Middleware auth Socket.io — vérifie le JWT à la connexion
+io.use((socket, next) => {
+  const token = socket.handshake.auth?.token || socket.handshake.query?.token;
+  if (!token) return next(new Error('Token manquant'));
+  try {
+    socket.user = jwt.verify(token, JWT_SECRET);
+    next();
+  } catch {
+    next(new Error('Token invalide'));
+  }
+});
+
+io.on('connection', (socket) => {
+  const userId = String(socket.user.id);
+
+  // Chaque utilisateur rejoint sa room personnelle (pour les notifications)
+  socket.join(`user:${userId}`);
+  console.log(`[SOCKET] Connecté: user=${userId} socket=${socket.id}`);
+
+  // Rejoindre une conversation spécifique
+  socket.on('join_conversation', (convId) => {
+    socket.join(`conv:${convId}`);
+  });
+
+  // Quitter une conversation
+  socket.on('leave_conversation', (convId) => {
+    socket.leave(`conv:${convId}`);
+  });
+
+  socket.on('disconnect', () => {
+    console.log(`[SOCKET] Déconnecté: user=${userId}`);
+  });
+});
+
+// Helper — émettre une notification temps réel à un utilisateur
+function emitNotif(userId, notif) {
+  io.to(`user:${String(userId)}`).emit('notification', notif);
+}
+
+// Helper — émettre un nouveau message dans une conversation
+function emitMessage(convId, message) {
+  io.to(`conv:${String(convId)}`).emit('new_message', message);
+}
 
 // ── CONNEXION MONGODB ATLAS ─────────────────────────────────
 mongoose.connect(process.env.MONGO_URI, {
@@ -366,8 +423,9 @@ const MessageSchema = new mongoose.Schema({
 });
 
 const ConversationSchema = new mongoose.Schema({
-  adId:       { type: mongoose.Schema.Types.ObjectId, ref: 'Ad', required: true },
+  adId:       { type: mongoose.Schema.Types.ObjectId, ref: 'Ad', required: false }, // optionnel pour messages directs Pro
   adTitle:    { type: String },
+  isDirect:   { type: Boolean, default: false },  // true = contact direct boutique Pro (sans annonce)
   buyerId:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   buyerName:  { type: String },
   sellerId:   { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -1783,20 +1841,106 @@ app.post('/api/conversations/:id', auth, async (req, res) => {
     // 🔔 Notification au destinataire
     const recipientId = isBuyer ? conv.sellerId : conv.buyerId;
     const senderName  = isBuyer ? conv.buyerName : conv.sellerName;
-    await createNotif(
-      recipientId,
-      'new_message',
-      '💬 Nouveau message',
-      `${senderName||'Quelqu\'un'} vous a envoyé un message : "${text.substring(0,60)}${text.length>60?'…':''}"`,
-      'dashboard/messages',
-      '💬',
-      { conversationId: conv._id, adTitle: conv.adTitle }
-    );
+    const notif = {
+      type:  'new_message',
+      title: '💬 Nouveau message',
+      body:  `${senderName||'Quelqu\'un'} vous a envoyé un message : "${text.substring(0,60)}${text.length>60?'…':''}"`,
+      link:  'dashboard/messages',
+      icon:  '💬',
+      data:  { conversationId: conv._id, adTitle: conv.adTitle },
+      createdAt: new Date(),
+    };
+    await createNotif(recipientId, notif.type, notif.title, notif.body, notif.link, notif.icon, notif.data);
 
-    // Renvoyer uniquement le dernier message (optimisation)
+    // ⚡ Temps réel — émettre le message dans la room de la conversation
     const last = conv.messages[conv.messages.length - 1];
+    emitMessage(conv._id, {
+      _id:       last._id,
+      senderId:  uid,
+      text:      last.text,
+      createdAt: last.createdAt,
+      convId:    String(conv._id),
+    });
+
+    // ⚡ Temps réel — notifier le destinataire (badge + popup)
+    emitNotif(recipientId, { ...notif, unreadCount: 1 });
+
     res.json({ success: true, message: last });
   } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── Contact direct vendeur Pro (sans annonce) ────────────────
+app.post('/api/conversations/direct', auth, async (req, res) => {
+  try {
+    const { sellerId, message } = req.body;
+    if (!sellerId) return res.status(400).json({ error: 'sellerId requis' });
+
+    // Vérifier que le vendeur est Pro actif
+    const seller = await User.findById(sellerId).select('prenom nom isPro proUntil role boutique boutiqueName');
+    if (!seller) return res.status(404).json({ error: 'Vendeur introuvable' });
+
+    const sellerIsPro = seller.isPro && seller.proUntil && new Date(seller.proUntil) > new Date();
+    if (!sellerIsPro && seller.role !== 'admin')
+      return res.status(403).json({ error: 'Ce vendeur n\'est pas Pro — utilisez le contact via annonce' });
+
+    if (String(sellerId) === String(req.user.id))
+      return res.status(400).json({ error: 'Vous ne pouvez pas vous envoyer un message' });
+
+    const buyer = await User.findById(req.user.id).select('prenom nom');
+    const buyerName  = `${buyer?.prenom||''} ${buyer?.nom||''}`.trim() || 'Acheteur';
+    const sellerName = `${seller.prenom||''} ${seller.nom||''}`.trim();
+    const boutiqueName = seller.boutique?.name || seller.boutiqueName || sellerName;
+
+    // Créer ou récupérer la conversation directe (1 seule par paire acheteur/vendeur)
+    let conv = await Conversation.findOne({ isDirect: true, buyerId: req.user.id, sellerId });
+    const isNew = !conv;
+
+    if (!conv) {
+      conv = await Conversation.create({
+        isDirect:   true,
+        adTitle:    `Boutique ${boutiqueName}`,
+        buyerId:    req.user.id,
+        buyerName,
+        sellerId,
+        sellerName,
+        messages:   [],
+        unreadBuyer: 0, unreadSeller: 0,
+      });
+    }
+
+    if (isNew) {
+      const sysText = `✅ Contact direct avec la boutique "${boutiqueName}" — Pro YouGouYou · Gratuit`;
+      conv.messages.push({ senderId: sellerId, text: sysText, isSystem: true, read: true });
+      conv.lastMessage = sysText.substring(0, 100);
+      conv.updatedAt   = new Date();
+    }
+
+    if (message && message.trim()) {
+      conv.messages.push({ senderId: req.user.id, text: message.trim() });
+      conv.lastMessage  = message.substring(0, 100);
+      conv.updatedAt    = new Date();
+      conv.unreadSeller += 1;
+
+      // ⚡ Socket — temps réel
+      const last = conv.messages[conv.messages.length - 1];
+      emitMessage(conv._id, { _id: last._id, senderId: String(req.user.id), text: last.text, createdAt: last.createdAt, convId: String(conv._id) });
+      emitNotif(sellerId, { type: 'new_message', title: '💬 Nouveau message', body: `${buyerName} vous a envoyé un message via votre boutique`, link: 'dashboard/messages', icon: '💬', data: { conversationId: conv._id } });
+
+      await createNotif(sellerId, 'new_message', '💬 Nouveau message',
+        `${buyerName} vous a envoyé un message via votre boutique "${boutiqueName}"`,
+        'dashboard/messages', '💬', { conversationId: conv._id, boutiqueName }
+      );
+    }
+
+    await conv.save();
+    res.json({ success: true, conversationId: conv._id, isDirect: true, sellerIsPro: true });
+  } catch(err) {
+    if (err.code === 11000) {
+      const conv = await Conversation.findOne({ isDirect: true, buyerId: req.user.id, sellerId: req.body.sellerId });
+      return res.json({ success: true, conversationId: conv?._id, isDirect: true });
+    }
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Marquer une conversation comme lue
@@ -3737,8 +3881,8 @@ app.get('*', (req, res) => {
 });
 
 // ── START ────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`🚀 YouGouYou API v3 démarrée sur le port ${PORT}`);
+server.listen(PORT, () => {
+  console.log(`🚀 YouGouYou API v3 + Socket.io démarrée sur le port ${PORT}`);
 
   // KEEP-ALIVE : ping toutes les 10 min (évite cold start Render free tier)
   const SELF_URL = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
