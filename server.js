@@ -807,7 +807,7 @@ app.post('/api/register', async (req, res) => {
 
     // Compte déjà vérifié → connexion directe
     if (pending.verified) {
-      const token = jwt.sign({ id: pending._id, role: pending.role }, JWT_SECRET, { expiresIn: '90d' });
+      const token = jwt.sign({ id: pending._id, role: pending.role }, JWT_SECRET, { expiresIn: '7d' });
       return res.json({
         success: true, token,
         user: { id: pending._id, name: `${pending.prenom} ${pending.nom||''}`.trim(),
@@ -833,7 +833,7 @@ app.post('/api/register', async (req, res) => {
     if (phone) pending.phone = phone;
     await pending.save();
 
-    const token = jwt.sign({ id: pending._id, role: pending.role }, JWT_SECRET, { expiresIn: '90d' });
+    const token = jwt.sign({ id: pending._id, role: pending.role }, JWT_SECRET, { expiresIn: '7d' });
     console.log(`[REGISTER] ✅ Compte créé: ${pending._id} pseudo=${cleanPseudo} email=${pending.email}`);
     res.json({
       success: true, token,
@@ -855,7 +855,7 @@ app.post('/api/auth/refresh', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password -verifyCode -codeExpiry');
     if (!user) return res.status(401).json({ error: 'Utilisateur introuvable' });
-    const newToken = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '90d' });
+    const newToken = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ token: newToken, user: {
       id: user._id, role: user.role,
       prenom: user.prenom, nom: user.nom||'',
@@ -896,7 +896,7 @@ app.post('/api/login', async (req, res) => {
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(400).json({ error: 'Mot de passe incorrect' });
 
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '90d' });
+    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
 
     console.log(`[LOGIN] ✅ user=${user._id} mode=${mode||'auto'} pseudo=${user.pseudo||'—'}`);
     res.json({
@@ -2547,11 +2547,30 @@ app.patch('/api/admin/users/:id/pro', auth, adminOnly, async (req, res) => {
 });
 
 // ── Route contact ─────────────────────────────────────────
+
+// Échappe les caractères HTML dangereux — protection injection HTML
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g,  '&amp;')
+    .replace(/</g,  '&lt;')
+    .replace(/>/g,  '&gt;')
+    .replace(/"/g,  '&quot;')
+    .replace(/'/g,  '&#039;');
+}
+
 app.post('/api/contact', async (req, res) => {
   try {
     const { name, email, phone, subject, message } = req.body;
     if (!name || !message) return res.status(400).json({ error: 'Nom et message requis' });
     if (!email && !phone)  return res.status(400).json({ error: 'Email ou téléphone requis' });
+
+    // Échapper toutes les valeurs utilisateur avant injection dans le HTML
+    const safeName    = escapeHtml(name);
+    const safeEmail   = escapeHtml(email);
+    const safePhone   = escapeHtml(phone);
+    const safeSubject = escapeHtml(subject);
+    const safeMessage = escapeHtml(message).replace(/\n/g, '<br>');
 
     const contactEmail = process.env.EMAIL_FROM || 'noreply@yougouyougou.net';
     const html = `<!DOCTYPE html>
@@ -2563,14 +2582,14 @@ app.post('/api/contact', async (req, res) => {
   </div>
   <div style="background:#fff;border:1px solid #eee;border-top:none;padding:24px;border-radius:0 0 10px 10px">
     <table style="width:100%;border-collapse:collapse">
-      <tr><td style="padding:8px 0;font-weight:700;width:120px;color:#555">Nom</td><td style="padding:8px 0">${name}</td></tr>
-      <tr><td style="padding:8px 0;font-weight:700;color:#555">Email</td><td style="padding:8px 0">${email||'—'}</td></tr>
-      <tr><td style="padding:8px 0;font-weight:700;color:#555">Téléphone</td><td style="padding:8px 0">${phone||'—'}</td></tr>
-      <tr><td style="padding:8px 0;font-weight:700;color:#555">Sujet</td><td style="padding:8px 0">${subject||'—'}</td></tr>
+      <tr><td style="padding:8px 0;font-weight:700;width:120px;color:#555">Nom</td><td style="padding:8px 0">${safeName}</td></tr>
+      <tr><td style="padding:8px 0;font-weight:700;color:#555">Email</td><td style="padding:8px 0">${safeEmail||'—'}</td></tr>
+      <tr><td style="padding:8px 0;font-weight:700;color:#555">Téléphone</td><td style="padding:8px 0">${safePhone||'—'}</td></tr>
+      <tr><td style="padding:8px 0;font-weight:700;color:#555">Sujet</td><td style="padding:8px 0">${safeSubject||'—'}</td></tr>
     </table>
     <hr style="border:none;border-top:1px solid #eee;margin:16px 0">
     <div style="font-weight:700;margin-bottom:8px;color:#333">Message :</div>
-    <div style="background:#f9f9f9;padding:14px;border-radius:8px;font-size:14px;line-height:1.7;color:#333">${message.replace(/\n/g,'<br>')}</div>
+    <div style="background:#f9f9f9;padding:14px;border-radius:8px;font-size:14px;line-height:1.7;color:#333">${safeMessage}</div>
     <div style="margin-top:16px;font-size:12px;color:#aaa">Reçu le ${new Date().toLocaleString('fr-FR')} — YouGouYou.net</div>
   </div>
 </body></html>`;
@@ -2579,7 +2598,7 @@ app.post('/api/contact', async (req, res) => {
 
     // Envoyer à l'adresse support
     await sendEmail('support.yougouyougou@gmail.com',
-      `[Contact YouGouYou] ${subject||'Nouveau message'} — ${name}`,
+      `[Contact YouGouYou] ${escapeHtml(subject)||'Nouveau message'} — ${safeName}`,
       html, text
     );
 
@@ -2593,10 +2612,10 @@ app.post('/api/contact', async (req, res) => {
     <h2 style="color:#fff;margin:4px 0 0">Message bien reçu !</h2>
   </div>
   <div style="background:#fff;border:1px solid #eee;border-top:none;padding:24px;border-radius:0 0 10px 10px">
-    <p>Bonjour <strong>${name}</strong>,</p>
+    <p>Bonjour <strong>${safeName}</strong>,</p>
     <p style="line-height:1.7">Nous avons bien reçu votre message et nous vous répondrons dans les <strong>24 heures ouvrées</strong>.</p>
     <div style="background:#FFF3EE;border-radius:8px;padding:12px;margin:16px 0;font-size:13px;color:#555">
-      <strong>Votre message :</strong><br>${message.replace(/\n/g,'<br>')}
+      <strong>Votre message :</strong><br>${safeMessage}
     </div>
     <p style="font-size:13px;color:#888">— L'équipe YouGouYou 🇬🇳</p>
   </div>
