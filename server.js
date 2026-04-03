@@ -2502,26 +2502,28 @@ app.patch('/api/admin/users/:id/role', auth, adminOnly, async (req, res) => {
 // ★ Admin — activer/retirer le Pro d'un utilisateur
 app.patch('/api/admin/users/:id/pro', auth, adminOnly, async (req, res) => {
   try {
-    const { isPro, months } = req.body;
+    const { isPro, plan, proPlan, months } = req.body;
+    const actualPlan = plan || proPlan || 'starter';
+    const planDays   = { starter: 30, business: 90, premium: 365 };
+    const planAnn    = { starter: 9,  business: 12, premium: 18  };
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
 
     if (!isPro) {
       // Retirer le Pro
-      await User.findByIdAndUpdate(req.params.id, { isPro: false, proUntil: null });
+      await User.findByIdAndUpdate(req.params.id, { isPro: false, proUntil: null, proPlan: null });
       console.log(`[ADMIN PRO] Retiré → ${req.params.id}`);
       return res.json({ success: true, isPro: false });
     }
 
-    // Activer le Pro
-    const validMonths = [1, 3, 12];
-    const m = validMonths.includes(Number(months)) ? Number(months) : 1;
-    const now = new Date();
+    // Activer le Pro — durée basée sur le plan
+    const days = planDays[actualPlan] || Number(months) * 30 || 30;
+    const now  = new Date();
     const base = (user.isPro && user.proUntil && user.proUntil > now) ? user.proUntil : now;
-    const proUntil = new Date(base);
-    proUntil.setMonth(proUntil.getMonth() + m);
+    const proUntil = new Date(base.getTime() + days * 24 * 3600 * 1000);
+    const m = Math.round(days / 30);
 
-    await User.findByIdAndUpdate(req.params.id, { isPro: true, proUntil });
+    await User.findByIdAndUpdate(req.params.id, { isPro: true, proUntil, proPlan: actualPlan });
 
     // Email de notification à l'utilisateur
     if (user.email && user.email.includes('@')) {
@@ -2672,23 +2674,7 @@ app.get('/api/admin/payments', auth, adminOnly, async (req, res) => {
 });
 
 // Activer/désactiver un compte pro (admin)
-app.patch('/api/admin/users/:id/pro', auth, adminOnly, async (req, res) => {
-  try {
-    const { isPro, months = 1, plan = 'starter' } = req.body;
-    const planMonths = { starter:1, business:3, premium:12 };
-    const actualMonths = planMonths[plan] || Number(months) || 1;
-    const update = { isPro };
-    if (isPro) {
-      update.proUntil = new Date(Date.now() + actualMonths * 30 * 24 * 3600 * 1000);
-      update.proPlan  = plan;
-    } else {
-      update.proPlan  = null;
-      update.proUntil = null;
-    }
-    const user = await User.findByIdAndUpdate(req.params.id, update, { new: true }).select('-password');
-    res.json({ success: true, user });
-  } catch(err) { res.status(500).json({ error: err.message }); }
-});
+// Route PATCH /api/admin/users/:id/pro — voir ci-dessus (dédoublonnée)
 
 // ── Route contact ─────────────────────────────────────────
 
