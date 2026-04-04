@@ -1933,11 +1933,43 @@ app.post('/api/conversations/direct', auth, async (req, res) => {
     }
 
     await conv.save();
-    res.json({ success: true, conversationId: conv._id, isDirect: true, sellerIsPro: true });
+    res.json({
+      success:      true,
+      conversationId: conv._id,
+      isDirect:     true,
+      sellerIsPro:  true,
+      conversation: {
+        _id:        conv._id,
+        adTitle:    conv.adTitle || ('Boutique ' + boutiqueName),
+        sellerName: conv.sellerName || sellerName,
+        buyerName:  conv.buyerName  || buyerName,
+        sellerId:   String(sellerId),
+        buyerId:    String(req.user.id),
+        isDirect:   true,
+        messages:   conv.messages || [],
+        updatedAt:  conv.updatedAt,
+      }
+    });
   } catch(err) {
     if (err.code === 11000) {
       const conv = await Conversation.findOne({ isDirect: true, buyerId: req.user.id, sellerId: req.body.sellerId });
-      return res.json({ success: true, conversationId: conv?._id, isDirect: true });
+      if(!conv) return res.status(404).json({ error: 'Conversation introuvable' });
+      return res.json({
+        success: true,
+        conversationId: conv._id,
+        isDirect: true,
+        conversation: {
+          _id:        conv._id,
+          adTitle:    conv.adTitle,
+          sellerName: conv.sellerName,
+          buyerName:  conv.buyerName,
+          sellerId:   String(conv.sellerId),
+          buyerId:    String(conv.buyerId),
+          isDirect:   true,
+          messages:   conv.messages || [],
+          updatedAt:  conv.updatedAt,
+        }
+      });
     }
     res.status(500).json({ error: err.message });
   }
