@@ -11,12 +11,9 @@ const cors     = require('cors');
 const bcrypt   = require('bcryptjs');
 const jwt      = require('jsonwebtoken');
 const path     = require('path');
-const http     = require('http');
-const { Server } = require('socket.io');
 
-const app    = express();
-const server = http.createServer(app);   // Serveur HTTP partagé Express + Socket.io
-const PORT   = process.env.PORT || 3000;
+const app  = express();
+const PORT = process.env.PORT || 3000;
 // ── SMS via Africa's Talking ────────────────────────────────
 async function sendSMS(phone, message) {
   const username = process.env.AT_USERNAME || 'sandbox';
@@ -89,98 +86,13 @@ async function sendSMS(phone, message) {
 try { app.use(require('compression')()); } catch(e) {}
 try {
   const rateLimit = require('express-rate-limit');
-
-  // Rate limit global — toutes les routes /api/
   app.use('/api/', rateLimit({ windowMs: 15*60*1000, max: 300, standardHeaders: true, legacyHeaders: false }));
-
-  // ── Rate limit strict sur /api/login — anti brute-force ──
-  // Max 10 tentatives par IP toutes les 15 minutes
-  const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,   // 15 minutes
-    max: 10,                     // 10 tentatives max par IP
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: { error: 'Trop de tentatives de connexion. Réessayez dans 15 minutes.' },
-    skipSuccessfulRequests: true, // Les connexions réussies ne comptent pas
-  });
-  app.use('/api/login', loginLimiter);
-  app.use('/api/auth/send-code', rateLimit({ windowMs: 15*60*1000, max: 5, standardHeaders: true, legacyHeaders: false, message: { error: 'Trop de demandes de code. Réessayez dans 15 minutes.' } }));
-  app.use('/api/auth/resend-code', rateLimit({ windowMs: 15*60*1000, max: 5, standardHeaders: true, legacyHeaders: false, message: { error: 'Trop de demandes de code. Réessayez dans 15 minutes.' } }));
-} catch(e) { console.error('[RATE LIMIT] Erreur chargement express-rate-limit:', e.message); }
+} catch(e) {}
 try { app.use(require('helmet')({ contentSecurityPolicy: false })); } catch(e) {}
 
-// ── CORS — origines autorisées uniquement ──────────────────
-const allowedOrigins = [
-  'https://yougouyougou.net',
-  'https://www.yougouyougou.net',
-  ...(process.env.NODE_ENV !== 'production' ? ['http://localhost:3000', 'http://localhost:5173'] : []),
-];
-app.use(cors({
-  origin: (origin, callback) => {
-    // Autoriser les requêtes sans origin (Postman, apps mobiles, curl)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    callback(new Error(`Origine non autorisée par CORS : ${origin}`));
-  },
-  credentials: true,
-}));
-
+app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
-
-// ── SOCKET.IO ───────────────────────────────────────────────
-const io = new Server(server, {
-  cors: {
-    origin: allowedOrigins,
-    methods: ['GET', 'POST'],
-    credentials: true,
-  },
-  pingTimeout: 60000,
-});
-
-// Middleware auth Socket.io — vérifie le JWT à la connexion
-io.use((socket, next) => {
-  const token = socket.handshake.auth?.token || socket.handshake.query?.token;
-  if (!token) return next(new Error('Token manquant'));
-  try {
-    socket.user = jwt.verify(token, JWT_SECRET);
-    next();
-  } catch {
-    next(new Error('Token invalide'));
-  }
-});
-
-io.on('connection', (socket) => {
-  const userId = String(socket.user.id);
-
-  // Chaque utilisateur rejoint sa room personnelle (pour les notifications)
-  socket.join(`user:${userId}`);
-  console.log(`[SOCKET] Connecté: user=${userId} socket=${socket.id}`);
-
-  // Rejoindre une conversation spécifique
-  socket.on('join_conversation', (convId) => {
-    socket.join(`conv:${convId}`);
-  });
-
-  // Quitter une conversation
-  socket.on('leave_conversation', (convId) => {
-    socket.leave(`conv:${convId}`);
-  });
-
-  socket.on('disconnect', () => {
-    console.log(`[SOCKET] Déconnecté: user=${userId}`);
-  });
-});
-
-// Helper — émettre une notification temps réel à un utilisateur
-function emitNotif(userId, notif) {
-  io.to(`user:${String(userId)}`).emit('notification', notif);
-}
-
-// Helper — émettre un nouveau message dans une conversation
-function emitMessage(convId, message) {
-  io.to(`conv:${String(convId)}`).emit('new_message', message);
-}
 
 // ── CONNEXION MONGODB ATLAS ─────────────────────────────────
 mongoose.connect(process.env.MONGO_URI, {
@@ -287,7 +199,6 @@ function emailAlertHTML(alert, ad) {
 const UserSchema = new mongoose.Schema({
   prenom:       { type: String, required: true, trim: true },
   nom:          { type: String, trim: true },
-  pseudo:       { type: String, trim: true, lowercase: true, unique: true, sparse: true, maxlength: 30 },
   phone:        { type: String, unique: true, sparse: true },
   email:        { type: String, trim: true, lowercase: true },
   password:     { type: String, required: true },
@@ -301,28 +212,6 @@ const UserSchema = new mongoose.Schema({
   codeExpiry:   { type: Date },
   isPro:        { type: Boolean, default: false },        // compte pro payant
   proUntil:     { type: Date },                           // expiration abonnement pro
-  proPlan:      { type: String, enum: ['starter','business','premium'], default: 'starter' },
-
-  // ── Boutique Pro (objet unifié — compatible frontend v31) ──
-  boutique: {
-    name:        { type: String, maxlength: 100 },
-    description: { type: String, maxlength: 1000 },
-    desc:        { type: String, maxlength: 1000 },      // alias description
-    logo:        { type: String },                        // base64 ou URL
-    banner:      { type: String },                        // image bannière (URL ou base64)
-    category:    { type: String },                        // catégorie principale
-    subcat:      { type: String },                        // sous-catégorie (niveau 2)
-    subsubcat:   { type: String },                        // sous-sous-catégorie (niveau 3)
-    whatsapp:    { type: String },
-    address:     { type: String },
-    videoUrl:    { type: String },                        // lien YouTube ou MP4
-    videoTitle:  { type: String },
-    videoType:   { type: String, enum: ['link','upload',''], default: '' }, // 'link' | 'upload'
-    createdAt:   { type: Date, default: Date.now },
-    updatedAt:   { type: Date, default: Date.now },
-  },
-
-  // Champs boutique legacy (compatibilité ascendante)
   boutiqueName:    { type: String, maxlength: 100 },
   boutiqueDesc:    { type: String, maxlength: 1000 },
   boutiqueSlogan:  { type: String, maxlength: 200 },
@@ -353,12 +242,10 @@ const UserSchema = new mongoose.Schema({
   ratingCount:  { type: Number, default: 0 },             // nb d'avis
   totalViews:   { type: Number, default: 0 },             // vues totales sur ses annonces
   totalContacts:{ type: Number, default: 0 },             // contacts reçus
-  favorites:    [{ type: mongoose.Schema.Types.ObjectId, ref: 'Ad' }], // annonces favorites
   createdAt:    { type: Date, default: Date.now },
 });
 UserSchema.index({ phone: 1 });
 UserSchema.index({ email: 1 });
-UserSchema.index({ pseudo: 1 }, { sparse: true });
 const User = mongoose.model('User', UserSchema);
 
 // ── Annonce ──────────────────────────────────────────────────
@@ -417,15 +304,13 @@ const Payment = mongoose.model('Payment', PaymentSchema);
 const MessageSchema = new mongoose.Schema({
   senderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   text:     { type: String, required: true, maxlength: 2000 },
-  isSystem: { type: Boolean, default: false },  // message système (frais, info auto)
   read:     { type: Boolean, default: false },
   createdAt:{ type: Date, default: Date.now },
 });
 
 const ConversationSchema = new mongoose.Schema({
-  adId:       { type: mongoose.Schema.Types.ObjectId, ref: 'Ad', required: false }, // optionnel pour messages directs Pro
+  adId:       { type: mongoose.Schema.Types.ObjectId, ref: 'Ad', required: true },
   adTitle:    { type: String },
-  isDirect:   { type: Boolean, default: false },  // true = contact direct boutique Pro (sans annonce)
   buyerId:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   buyerName:  { type: String },
   sellerId:   { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -472,23 +357,6 @@ AlertSchema.index({ userId: 1 });
 AlertSchema.index({ active: 1 });
 const Alert = mongoose.model('Alert', AlertSchema);
 
-// ── ★ ContactPayment — Paiement mise en relation (2%) ────────
-// Enregistre chaque mise en relation payée (ou gratuite si vendeur Pro)
-const ContactPaymentSchema = new mongoose.Schema({
-  buyerId:      { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  sellerId:     { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  adId:         { type: mongoose.Schema.Types.ObjectId, ref: 'Ad',   required: true },
-  amount:       { type: Number, required: true },          // 0 si Pro ou gratuit
-  status:       { type: String, enum: ['paid','free','free_monthly'], default: 'paid' },
-  reference:    { type: String },
-  buyerPhone:   { type: String },
-  freeMonth:    { type: String },                          // YYYY-MM pour le gratuit mensuel
-  createdAt:    { type: Date, default: Date.now },
-});
-ContactPaymentSchema.index({ buyerId: 1, adId: 1 }, { unique: true }); // 1 paiement par (acheteur, annonce)
-ContactPaymentSchema.index({ buyerId: 1, freeMonth: 1 });               // contrôle mise en relation gratuite/mois
-const ContactPayment = mongoose.model('ContactPayment', ContactPaymentSchema);
-
 // ── ★ NOUVEAU : Signalements ──────────────────────────────────
 const ReportSchema = new mongoose.Schema({
   reporterId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -511,105 +379,10 @@ const ResetTokenSchema = new mongoose.Schema({
 });
 const ResetToken = mongoose.model('ResetToken', ResetTokenSchema);
 
-// ── ★ NOUVEAU : Demandes de résiliation Pro ───────────────────
-const ResiliationSchema = new mongoose.Schema({
-  userId:      { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  email:       { type: String },
-  phone:       { type: String },
-  plan:        { type: String },
-  type:        { type: String, enum: ['suspension','resiliation'], default: 'suspension' },
-  reason:      { type: String },
-  details:     { type: String, maxlength: 2000 },
-  status:      { type: String, enum: ['pending','treated','refused'], default: 'pending' },
-  requestDate: { type: Date, default: Date.now },
-  treatedAt:   { type: Date },
-  treatedBy:   { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  note:        { type: String },
-  createdAt:   { type: Date, default: Date.now },
-});
-ResiliationSchema.index({ userId: 1, createdAt: -1 });
-ResiliationSchema.index({ status: 1, createdAt: -1 });
-const Resiliation = mongoose.model('Resiliation', ResiliationSchema);
-
-// ── ★ PANIER BOUTIQUE ─────────────────────────────────────
-const CartItemSchema = new mongoose.Schema({
-  adId:      { type: mongoose.Schema.Types.ObjectId, ref: 'Ad', required: true },
-  adTitle:   { type: String },
-  adPrice:   { type: Number },
-  adEmoji:   { type: String, default: '📦' },
-  adPhoto:   { type: String },              // première photo de l'annonce
-  quantity:  { type: Number, default: 1, min: 1, max: 99 },
-}, { _id: true });
-
-const CartSchema = new mongoose.Schema({
-  // Boutique / vendeur ciblé
-  sellerId:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-  sellerName:  { type: String },
-
-  // Acheteur
-  buyerId:     { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
-  buyerName:   { type: String },
-  buyerPhone:  { type: String },
-  buyerMessage:{ type: String, maxlength: 500 },
-
-  // Articles
-  items:       [CartItemSchema],
-
-  // Totaux
-  totalItems:  { type: Number, default: 0 },
-  totalAmount: { type: Number, default: 0 },
-
-  // Statut
-  status:      { type: String, enum: ['pending','confirmed','cancelled'], default: 'pending', index: true },
-  statusNote:  { type: String },            // note du vendeur (ex: raison annulation)
-
-  createdAt:   { type: Date, default: Date.now, index: true },
-  updatedAt:   { type: Date, default: Date.now },
-});
-CartSchema.index({ sellerId: 1, status: 1, createdAt: -1 });
-CartSchema.index({ buyerId: 1, createdAt: -1 });
-const Cart = mongoose.model('Cart', CartSchema);
-
-// ── ★ NOTIFICATIONS ─────────────────────────────────────────
-const NotificationSchema = new mongoose.Schema({
-  userId:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-  type:      { type: String, required: true, enum: [
-    'new_message',      // nouveau message reçu
-    'ad_reply',         // réponse à une annonce
-    'ad_favorited',     // quelqu'un a mis en favori
-    'pro_activated',    // abonnement Pro activé (admin → user)
-    'ad_featured',      // annonce mise à la une
-  ]},
-  title:     { type: String, required: true },
-  body:      { type: String },
-  link:      { type: String },             // route frontend cible
-  icon:      { type: String, default: '🔔' },
-  read:      { type: Boolean, default: false, index: true },
-  data:      { type: mongoose.Schema.Types.Mixed },  // données contextuelles
-  createdAt: { type: Date, default: Date.now, index: true },
-});
-NotificationSchema.index({ userId: 1, read: 1, createdAt: -1 });
-const Notification = mongoose.model('Notification', NotificationSchema);
-
-// Helper — créer une notification en base
-async function createNotif(userId, type, title, body, link, icon, data) {
-  try {
-    await Notification.create({ userId, type, title, body, link, icon: icon||'🔔', data: data||{} });
-  } catch(e) {
-    console.error('[NOTIF] Erreur création:', e.message);
-  }
-}
-
 // ═══════════════════════════════════════════════════════════
 //  UTILITAIRES
 // ═══════════════════════════════════════════════════════════
-// ── JWT_SECRET — obligatoire, pas de fallback ──────────────
-if (!process.env.JWT_SECRET) {
-  console.error('❌ FATAL: JWT_SECRET non défini dans les variables d\'environnement.');
-  console.error('   Ajoutez JWT_SECRET=<valeur_longue_aléatoire> dans votre .env ou sur Render.');
-  process.exit(1);
-}
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET || 'ygy_secret_change_in_prod';
 
 function genRef() {
   return 'OM' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2,6).toUpperCase();
@@ -618,12 +391,19 @@ function genRef() {
 // Middleware auth (requis)
 function auth(req, res, next) {
   const h = req.headers.authorization;
-  if (!h || !h.startsWith('Bearer ')) return res.status(401).json({ error: 'Non autorisé' });
+  if (!h || !h.startsWith('Bearer ')) {
+    console.warn('[AUTH] Header manquant:', req.method, req.path);
+    return res.status(401).json({ error: 'Non autorisé — connexion requise' });
+  }
+  const token = h.slice(7);
   try {
-    req.user = jwt.verify(h.slice(7), JWT_SECRET);
+    req.user = jwt.verify(token, JWT_SECRET);
     next();
-  } catch {
-    return res.status(401).json({ error: 'Token invalide ou expiré' });
+  } catch(err) {
+    console.warn('[AUTH] Token invalide:', err.message, '| path:', req.path);
+    console.warn('[AUTH] Token reçu (50 premiers chars):', token.substring(0,50));
+    console.warn('[AUTH] JWT_SECRET défini:', !!process.env.JWT_SECRET);
+    return res.status(401).json({ error: 'Token invalide ou expiré — reconnectez-vous' });
   }
 }
 
@@ -794,58 +574,11 @@ app.post('/api/auth/send-code', async (req, res) => {
 });
 
 // Étape 2 : vérifier le code et créer le compte
-// ── Vérifier la disponibilité d'un pseudo (public, sans auth) ──
-app.post('/api/auth/check-pseudo', async (req, res) => {
-  try {
-    const { pseudo } = req.body;
-    if (!pseudo || pseudo.trim().length < 3)
-      return res.json({ taken: false, valid: false, error: 'Pseudo trop court' });
-
-    const clean = pseudo.trim().toLowerCase().replace(/[^a-z0-9_.-]/g, '');
-    if (clean.length < 3)
-      return res.json({ taken: false, valid: false, error: 'Pseudo invalide' });
-
-    // Mots réservés
-    const reserved = ['admin','support','yougou','yougouyou','moderateur','system','api','help','guinee','conakry'];
-    if (reserved.includes(clean))
-      return res.json({ taken: true, valid: false, error: 'Pseudo réservé' });
-
-    const existing = await User.findOne({ pseudo: clean }).select('_id');
-    res.json({ taken: !!existing, valid: !existing, pseudo: clean });
-  } catch(err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 app.post('/api/register', async (req, res) => {
   try {
-    const { prenom, nom, pseudo, phone, email, password, city, code, method = 'sms', dob } = req.body;
+    const { prenom, nom, phone, email, password, city, code, method = 'sms' } = req.body;
     if (!prenom || !password || !code)
       return res.status(400).json({ error: 'Champs requis manquants' });
-
-    // ── Validation pseudo ─────────────────────────────────────
-    const cleanPseudo = pseudo ? pseudo.trim().toLowerCase().replace(/[^a-z0-9_.-]/g, '') : null;
-    if (!cleanPseudo || cleanPseudo.length < 3)
-      return res.status(400).json({ error: 'Pseudonyme requis (3 caractères minimum, lettres et chiffres uniquement)' });
-    if (cleanPseudo.length > 30)
-      return res.status(400).json({ error: 'Pseudonyme trop long (30 caractères maximum)' });
-
-    // Vérifier unicité du pseudo
-    const pseudoExists = await User.findOne({ pseudo: cleanPseudo }).select('_id');
-    if (pseudoExists)
-      return res.status(409).json({ error: `Le pseudo "@${cleanPseudo}" est déjà utilisé. Choisissez-en un autre.` });
-    // ─────────────────────────────────────────────────────────────
-
-    // ── Vérification âge minimum 18 ans ──────────────────────────
-    if (!dob) return res.status(400).json({ error: 'Date de naissance requise' });
-    const birthDate = new Date(dob);
-    if (isNaN(birthDate.getTime())) return res.status(400).json({ error: 'Date de naissance invalide' });
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
-    if (age < 18) return res.status(400).json({ error: 'Vous devez avoir au moins 18 ans pour créer un compte' });
-    // ─────────────────────────────────────────────────────────────
 
     // Chercher le user temporaire créé lors du send-code
     let pending = null;
@@ -865,7 +598,7 @@ app.post('/api/register', async (req, res) => {
 
     // Compte déjà vérifié → connexion directe
     if (pending.verified) {
-      const token = jwt.sign({ id: pending._id, role: pending.role }, JWT_SECRET, { expiresIn: '7d' });
+      const token = jwt.sign({ id: pending._id, role: pending.role }, JWT_SECRET, { expiresIn: '90d' });
       return res.json({
         success: true, token,
         user: { id: pending._id, name: `${pending.prenom} ${pending.nom||''}`.trim(),
@@ -879,10 +612,8 @@ app.post('/api/register', async (req, res) => {
     const hashed = await bcrypt.hash(password, 10);
     pending.prenom    = prenom;
     pending.nom       = nom || '';
-    pending.pseudo    = cleanPseudo;
     pending.password  = hashed;
     pending.city      = city || '';
-    pending.dob       = dob;
     pending.verified  = true;
     pending.verifyCode  = null;
     pending.codeExpiry  = null;
@@ -891,13 +622,12 @@ app.post('/api/register', async (req, res) => {
     if (phone) pending.phone = phone;
     await pending.save();
 
-    const token = jwt.sign({ id: pending._id, role: pending.role }, JWT_SECRET, { expiresIn: '7d' });
-    console.log(`[REGISTER] ✅ Compte créé: ${pending._id} pseudo=${cleanPseudo} email=${pending.email}`);
+    const token = jwt.sign({ id: pending._id, role: pending.role }, JWT_SECRET, { expiresIn: '90d' });
+    console.log(`[REGISTER] ✅ Compte créé: ${pending._id} email=${pending.email}`);
     res.json({
       success: true, token,
-      user: { id: pending._id, _id: pending._id,
-              name: `${prenom} ${nom||''}`.trim(),
-              prenom, nom: nom||'', pseudo: cleanPseudo,
+      user: { id: pending._id, name: `${prenom} ${nom||''}`.trim(),
+              prenom, nom: nom||'',
               phone: pending.phone||'', email: pending.email||'',
               city: city||'', role: pending.role }
     });
@@ -913,7 +643,7 @@ app.post('/api/auth/refresh', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password -verifyCode -codeExpiry');
     if (!user) return res.status(401).json({ error: 'Utilisateur introuvable' });
-    const newToken = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+    const newToken = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '90d' });
     res.json({ token: newToken, user: {
       id: user._id, role: user.role,
       prenom: user.prenom, nom: user.nom||'',
@@ -926,60 +656,27 @@ app.post('/api/auth/refresh', auth, async (req, res) => {
 // Connexion
 app.post('/api/login', async (req, res) => {
   try {
-    const { identifier, password, mode } = req.body;
+    const { identifier, password } = req.body;
     if (!identifier || !password)
       return res.status(400).json({ error: 'Identifiant et mot de passe requis' });
 
-    let user = null;
-
-    if (mode === 'pseudo' || identifier.startsWith('@')) {
-      // Connexion par pseudo
-      const cleanPseudo = identifier.replace(/^@/, '').trim().toLowerCase();
-      user = await User.findOne({ pseudo: cleanPseudo });
-      if (!user) return res.status(400).json({ error: `Aucun compte trouvé avec le pseudo "@${cleanPseudo}"` });
-    } else {
-      // Connexion par téléphone ou email (comportement existant)
-      const phoneVariants = [identifier, '+224'+identifier.replace(/^\+224/,''), identifier.replace(/^\+224/,'')];
-      user = await User.findOne({
-        $or: [
-          { phone: { $in: phoneVariants } },
-          { email: identifier.toLowerCase() },
-        ]
-      });
-      if (!user) return res.status(400).json({ error: 'Compte introuvable — vérifiez votre email ou téléphone' });
-    }
-
-    if (!user.verified) return res.status(400).json({ error: 'Compte non vérifié — vérifiez votre SMS ou email' });
+    const phoneVariants = [identifier, '+224'+identifier.replace(/^\+224/,''), identifier.replace(/^\+224/,'')];
+    const user = await User.findOne({
+      $or: [{ phone: { $in: phoneVariants } }, { email: identifier.toLowerCase() }]
+    });
+    if (!user) return res.status(400).json({ error: 'Compte introuvable' });
+    if (!user.verified) return res.status(400).json({ error: 'Compte non vérifié' });
 
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(400).json({ error: 'Mot de passe incorrect' });
 
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
-
-    console.log(`[LOGIN] ✅ user=${user._id} mode=${mode||'auto'} pseudo=${user.pseudo||'—'}`);
+    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '90d' });
     res.json({
       success: true, token,
-      user: {
-        id:     user._id,
-        _id:    user._id,
-        name:   `${user.prenom} ${user.nom||''}`.trim(),
-        prenom: user.prenom,
-        nom:    user.nom||'',
-        pseudo: user.pseudo||'',
-        phone:  user.phone||'',
-        email:  user.email||'',
-        city:   user.city||'',
-        role:   user.role,
-        isPro:  user.isPro && user.proUntil && user.proUntil > new Date() ? true : false,
-        proPlan: user.proPlan||null,
-        proUntil: user.proUntil||null,
-        boutique: user.boutique||null,
-      }
+      user: { id: user._id, name: `${user.prenom} ${user.nom||''}`.trim(),
+              phone: user.phone, email: user.email, city: user.city, role: user.role }
     });
-  } catch(err) {
-    console.error('[LOGIN]', err.message);
-    res.status(500).json({ error: err.message });
-  }
+  } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
 // Renvoyer un code
@@ -995,11 +692,7 @@ app.post('/api/auth/resend-code', async (req, res) => {
       const smsSent = await sendSMS(phone, `Votre nouveau code YouGouYou : ${code}. Valable 15 min.`);
       if (!smsSent) console.warn(`[RESEND] SMS non livré → ${phone} code: ${code}`);
     }
-    res.json({
-      success: true,
-      // debug_code uniquement en développement local — jamais en production
-      ...(process.env.NODE_ENV !== 'production' && { debug_code: code }),
-    });
+    res.json({ success: true, debug_code: code });
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -1084,20 +777,14 @@ app.get('/api/me', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password -verifyCode -codeExpiry');
     if (!user) return res.status(404).json({ error: 'Introuvable' });
-    const proActive = user.isPro && user.proUntil && user.proUntil > new Date();
     res.json({ user: {
-      id: user._id, _id: user._id,
-      name: `${user.prenom} ${user.nom||''}`.trim(),
+      id: user._id, name: `${user.prenom} ${user.nom||''}`.trim(),
       prenom: user.prenom, nom: user.nom, phone: user.phone,
       email: user.email, city: user.city,
-      pseudo: user.pseudo || '',
-      dob:    user.dob    || '',
-      role: user.role,
+      role: user.role,        // toujours depuis MongoDB (source de vérité)
       verified: user.verified,
-      isPro:    proActive ? true : false,
-      proPlan:  proActive ? (user.proPlan || 'starter') : null,
+      isPro: user.isPro && user.proUntil && user.proUntil > new Date() ? true : false,
       proUntil: user.proUntil || null,
-      boutique: user.boutique || null,
       avgRating: user.avgRating, ratingCount: user.ratingCount,
     }});
   } catch(err) { res.status(500).json({ error: err.message }); }
@@ -1174,149 +861,32 @@ app.get('/api/users/:id/public', authOptional, async (req, res) => {
 app.get('/api/boutiques', async (req, res) => {
   try {
     const now = new Date();
-    const { sector, search, category, limit = 100 } = req.query;
-
-    // Requête plus robuste : chercher tous les Pro actifs qui ont au moins un nom de boutique
+    const { sector, search, limit = 50 } = req.query;
     const filter = {
       isPro: true,
       proUntil: { $gt: now },
-      $or: [
-        { 'boutique.name': { $exists: true, $ne: '', $type: 'string' } },
-        { boutiqueName:     { $exists: true, $ne: '', $type: 'string' } },
-      ]
     };
-
-    // Filtres optionnels par catégorie
-    if (category || sector) {
-      const catVal = category || sector;
-      filter.$and = [
-        { $or: filter.$or },
-        { $or: [
-          { 'boutique.category': new RegExp(catVal, 'i') },
-          { boutiqueSector:       new RegExp(catVal, 'i') },
-        ]}
-      ];
-      delete filter.$or;
-    }
+    if (sector) filter.boutiqueSector = sector;
+    if (search) filter.$or = [
+      { boutiqueName:  new RegExp(search, 'i') },
+      { boutiqueDesc:  new RegExp(search, 'i') },
+      { boutiqueSector:new RegExp(search, 'i') },
+    ];
 
     const users = await User.find(filter)
-      .select('prenom nom city boutique boutiqueName boutiqueDesc boutiqueSector boutiqueSocial avgRating ratingCount totalViews proPlan isPro proUntil createdAt')
-      .sort({ totalViews: -1, createdAt: -1 })
+      .select('prenom nom city boutiqueName boutiqueSlogan boutiqueBanner boutiqueSector boutiqueSocial boutiqueDesc avgRating ratingCount totalViews createdAt')
+      .sort({ totalViews: -1 })
       .limit(Number(limit))
       .lean();
 
-    let filtered = users;
-    if (search) {
-      const q = search.toLowerCase();
-      filtered = users.filter(u =>
-        (u.boutique?.name || u.boutiqueName || '').toLowerCase().includes(q) ||
-        (u.boutique?.description || u.boutiqueDesc || '').toLowerCase().includes(q) ||
-        (`${u.prenom||''} ${u.nom||''}`).toLowerCase().includes(q)
-      );
-    }
-
-    // Compter les annonces pour chaque vendeur
-    const sellerIds = filtered.map(u => u._id);
-    const adCounts  = await Ad.aggregate([
-      { $match: { seller: { $in: sellerIds }, active: true } },
-      { $group: { _id: '$seller', count: { $sum: 1 }, totalViews: { $sum: '$views' } } }
-    ]);
-    const countMap = {};
-    adCounts.forEach(a => { countMap[String(a._id)] = { count: a.count, views: a.totalViews }; });
-
-    const boutiques = filtered.map(u => ({
-      _id:         u._id,
-      sellerId:    u._id,
-      name:        u.boutique?.name        || u.boutiqueName   || `${u.prenom||''} ${u.nom||''} Shop`.trim(),
-      description: u.boutique?.description || u.boutique?.desc || u.boutiqueDesc || '',
-      logo:        u.boutique?.logo        || '',
-      category:    u.boutique?.category    || u.boutiqueSector || '',
-      subcat:      u.boutique?.subcat      || '',
-      address:     u.boutique?.address     || u.city || '',
-      whatsapp:    u.boutique?.whatsapp    || u.boutiqueSocial?.whatsapp || '',
-      videoUrl:    u.boutique?.videoUrl    || '',
-      videoTitle:  u.boutique?.videoTitle  || '',
-      banner:      u.boutique?.banner       || '',
-      sellerName:  `${u.prenom||''} ${u.nom||''}`.trim(),
-      isPro:       true,
-      proPlan:     u.proPlan || 'starter',
-      avgRating:   u.avgRating  || 0,
-      ratingCount: u.ratingCount|| 0,
-      adCount:     countMap[String(u._id)]?.count || 0,
-      totalViews:  countMap[String(u._id)]?.views || u.totalViews || 0,
+    // Ajouter le nombre d'annonces pour chaque boutique
+    const boutiques = await Promise.all(users.map(async (u) => {
+      const adsCount = await Ad.countDocuments({ seller: u._id, active: true });
+      return { ...u, adsCount };
     }));
 
     res.json({ boutiques, total: boutiques.length });
-  } catch(err) {
-    console.error('[BOUTIQUES LIST]', err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Route alias : GET /api/boutique/:id (frontend v31 appelle cette forme aussi)
-app.get('/api/boutique/:id', async (req, res) => {
-  // Rediriger vers la route principale
-  req.params.sellerId = req.params.id;
-  // Chercher par _id (userId = sellerId)
-  try {
-    const mongoose = require('mongoose');
-    let userId = req.params.id;
-    const user = await User.findById(userId)
-      .select('prenom nom city boutique boutiqueName boutiqueDesc boutiqueSector boutiqueSocial proPlan isPro proUntil avgRating ratingCount totalViews createdAt')
-      .lean();
-    if (!user) return res.status(404).json({ error: 'Boutique introuvable' });
-
-    const ads = await Ad.find({ seller: user._id, active: true })
-      .sort({ featured: -1, createdAt: -1 })
-      .select('title description price category subCategory city photos views createdAt featured emoji')
-      .lean();
-
-    const planLabels = { starter:'PRO Starter', business:'PRO Business', premium:'PRO Gold' };
-    const boutique = {
-      _id:         user._id,
-      sellerId:    user._id,
-      name:        user.boutique?.name        || user.boutiqueName   || `${user.prenom||''} ${user.nom||''}`.trim()+' Shop',
-      description: user.boutique?.description || user.boutique?.desc || user.boutiqueDesc || '',
-      logo:        user.boutique?.logo        || '',
-      category:    user.boutique?.category    || user.boutiqueSector || '',
-      subcat:      user.boutique?.subcat      || '',
-      address:     user.boutique?.address     || user.city || '',
-      whatsapp:    user.boutique?.whatsapp    || user.boutiqueSocial?.whatsapp || '',
-      videoUrl:    user.boutique?.videoUrl    || '',
-      videoTitle:  user.boutique?.videoTitle  || '',
-      banner:      user.boutique?.banner       || '',
-      sellerName:  `${user.prenom||''} ${user.nom||''}`.trim(),
-      isPro:       user.isPro,
-      proPlan:     user.proPlan || 'starter',
-      badge:       planLabels[user.proPlan||'starter'] || 'PRO',
-      avgRating:   user.avgRating   || 0,
-      ratingCount: user.ratingCount || 0,
-      totalViews:  user.totalViews  || 0,
-      productsCount: ads.length,
-      ads,
-    };
-
-    res.json({
-      boutique,
-      products: ads.map(a => ({
-        id:     a._id,
-        title:  a.title,
-        price:  a.price,
-        images: a.photos || [],
-        category: a.category,
-        city:   a.city,
-        views:  a.views || 0,
-      })),
-      seller: {
-        name:  boutique.sellerName,
-        isPro: user.isPro,
-        plan:  user.proPlan,
-      }
-    });
-  } catch(err) {
-    console.error('[BOUTIQUE GET]', err.message);
-    res.status(500).json({ error: err.message });
-  }
+  } catch(err) { res.status(500).json({ error: err.message }); }
 });
 app.get('/api/my-stats', auth, async (req, res) => {
   try {
@@ -1504,65 +1074,6 @@ app.get('/api/my-ads', auth, async (req, res) => {
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
-// ═══════════════════════════════════════════════════════════
-//  ★ FAVORIS
-// ═══════════════════════════════════════════════════════════
-
-// Lister mes favoris
-app.get('/api/me/favorites', auth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select('favorites');
-    if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
-    const favIds = user.favorites || [];
-    const ads = await Ad.find({ _id: { $in: favIds }, active: true })
-      .select('-sellerPhone')
-      .populate('seller', 'prenom nom city avgRating verified');
-    res.json({ favorites: favIds.map(String), ads });
-  } catch(err) { res.status(500).json({ error: err.message }); }
-});
-
-// Ajouter / retirer un favori (toggle)
-app.post('/api/me/favorites/:adId', auth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select('favorites');
-    if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
-
-    const adId = req.params.adId;
-    const favs = (user.favorites || []).map(String);
-    const idx  = favs.indexOf(adId);
-    let action;
-
-    if (idx >= 0) {
-      // Retirer
-      await User.findByIdAndUpdate(req.user.id, { $pull: { favorites: adId } });
-      action = 'removed';
-    } else {
-      // Ajouter (max 200 favoris)
-      if (favs.length >= 200) return res.status(400).json({ error: 'Maximum 200 favoris' });
-      await User.findByIdAndUpdate(req.user.id, { $addToSet: { favorites: adId } });
-      action = 'added';
-      // 🔔 Notification au vendeur de l'annonce
-      const ad = await Ad.findById(adId).select('title seller sellerName');
-      if (ad && ad.seller && String(ad.seller) !== String(req.user.id)) {
-        const liker = await User.findById(req.user.id).select('prenom nom');
-        const likerName = liker ? `${liker.prenom||''} ${liker.nom||''}`.trim() : 'Un utilisateur';
-        await createNotif(
-          ad.seller,
-          'ad_favorited',
-          '❤️ Nouvelle mise en favori',
-          `${likerName} a ajouté votre annonce "${ad.title}" à ses favoris`,
-          `ad/${adId}`,
-          '❤️',
-          { adId, adTitle: ad.title, likerId: req.user.id }
-        );
-      }
-    }
-    // Retourner la liste à jour
-    const updated = await User.findById(req.user.id).select('favorites');
-    res.json({ success: true, action, favorites: (updated.favorites || []).map(String) });
-  } catch(err) { res.status(500).json({ error: err.message }); }
-});
-
 // ★ Boost / Mise en avant d'une annonce
 app.post('/api/ads/:id/boost', auth, async (req, res) => {
   try {
@@ -1593,31 +1104,6 @@ app.post('/api/ads/:id/boost', auth, async (req, res) => {
       ad: ad._id, adTitle: ad.title,
       amount, boostType: type, reference: ref, status: 'success'
     });
-
-    // 🔔 Notification au vendeur — annonce mise à la une
-    if (String(ad.seller) !== String(req.user.id)) {
-      // Admin/autre a mis l'annonce en avant
-      await createNotif(
-        ad.seller,
-        'ad_featured',
-        '🌟 Annonce mise à la une !',
-        `Votre annonce "${ad.title}" a été mise à la une. Elle sera plus visible pendant 7 jours.`,
-        `ad/${ad._id}`,
-        '🌟',
-        { adId: ad._id, adTitle: ad.title, type }
-      );
-    } else if (type === 'feature') {
-      // Le vendeur lui-même a boosté — confirmer
-      await createNotif(
-        req.user.id,
-        'ad_featured',
-        '🌟 Annonce mise à la une !',
-        `Votre annonce "${ad.title}" est maintenant à la une pendant 7 jours.`,
-        `ad/${ad._id}`,
-        '🌟',
-        { adId: ad._id, adTitle: ad.title }
-      );
-    }
 
     res.json({ success: true, reference: ref, type, amount, ad });
   } catch(err) { res.status(500).json({ error: err.message }); }
@@ -1650,10 +1136,8 @@ app.get('/api/conversations', auth, async (req, res) => {
 // Démarrer ou récupérer une conversation (depuis page détail annonce)
 app.post('/api/conversations', auth, async (req, res) => {
   try {
-    const { adId, message, initContact } = req.body;
-
-    if (!adId) return res.status(400).json({ error: 'adId requis' });
-    if (!initContact && !message) return res.status(400).json({ error: 'adId et message requis' });
+    const { adId, message } = req.body;
+    if (!adId || !message) return res.status(400).json({ error: 'adId et message requis' });
 
     const ad = await Ad.findById(adId);
     if (!ad) return res.status(404).json({ error: 'Annonce introuvable' });
@@ -1661,146 +1145,42 @@ app.post('/api/conversations', auth, async (req, res) => {
     if (String(ad.seller) === req.user.id)
       return res.status(400).json({ error: 'Vous ne pouvez pas vous envoyer un message' });
 
-    // ── Vérification paiement mise en relation ──────────────────
-    const sellerUser = await User.findById(ad.seller).select('isPro proUntil proPlan prenom nom phone');
-    const sellerIsPro = sellerUser && sellerUser.isPro &&
-                        sellerUser.proUntil && new Date(sellerUser.proUntil) > new Date();
+    const buyer = await User.findById(req.user.id).select('prenom nom');
+    const seller = await User.findById(ad.seller).select('prenom nom');
 
-    if (!sellerIsPro) {
-      // Vérifier si déjà payé / débloqué pour cette annonce
-      const alreadyPaid = await ContactPayment.findOne({
-        buyerId: req.user.id,
-        adId:    adId,
-        status:  { $in: ['paid', 'free', 'free_monthly'] }
-      });
-
-      if (!alreadyPaid) {
-        // Vérifier la mise en relation gratuite mensuelle (1/mois)
-        const now = new Date();
-        const freeMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-        const usedFreeThisMonth = await ContactPayment.findOne({
-          buyerId:   req.user.id,
-          freeMonth: freeMonth,
-          status:    'free_monthly'
-        });
-
-        if (!usedFreeThisMonth) {
-          // Accorder la mise en relation gratuite du mois
-          await ContactPayment.create({
-            buyerId:   req.user.id,
-            sellerId:  ad.seller,
-            adId:      adId,
-            amount:    0,
-            status:    'free_monthly',
-            freeMonth: freeMonth,
-            reference: `FREE-${genRef()}`,
-          });
-        } else {
-          // Paiement requis — bloquer
-          const fee = Math.max(Math.round(ad.price * 0.02), 500);
-          return res.status(402).json({
-            error:        'payment_required',
-            message:      'Paiement de mise en relation requis',
-            fee:          fee,
-            adPrice:      ad.price,
-            adId:         String(adId),
-            sellerName:   `${sellerUser?.prenom||''} ${sellerUser?.nom||''}`.trim(),
-            sellerIsPro:  false,
-          });
-        }
-      }
-    }
-    // ── Fin vérification paiement ───────────────────────────────
-
-    const buyer  = await User.findById(req.user.id).select('prenom nom');
-    const seller = sellerUser || await User.findById(ad.seller).select('prenom nom');
-
+    // Trouver ou créer la conversation unique (adId + buyerId)
     let conv = await Conversation.findOne({ adId, buyerId: req.user.id });
-    const isNew = !conv;
-
     if (!conv) {
       conv = await Conversation.create({
         adId, adTitle: ad.title,
-        buyerId:    req.user.id,
-        buyerName:  `${buyer?.prenom||''} ${buyer?.nom||''}`.trim(),
-        sellerId:   ad.seller,
+        buyerId: req.user.id,
+        buyerName: `${buyer?.prenom||''} ${buyer?.nom||''}`.trim(),
+        sellerId: ad.seller,
         sellerName: `${seller?.prenom||''} ${seller?.nom||''}`.trim(),
-        messages:   [],
+        messages: [],
         unreadBuyer: 0, unreadSeller: 0,
       });
     }
 
-    if (isNew) {
-      const sysText = sellerIsPro
-        ? '✅ Ce vendeur est Pro — mise en relation gratuite sur YouGouYou.'
-        : '🔓 Mise en relation débloquée. Échangez en toute sécurité sur YouGouYou.';
-      conv.messages.push({
-        senderId:  ad.seller,
-        text:      sysText,
-        isSystem:  true,
-        createdAt: new Date(),
-        read:      true,
-      });
-      conv.lastMessage = sysText.substring(0, 100);
-      conv.updatedAt   = new Date();
-    }
-
-    if (message && message.trim()) {
-      const msgText = message.trim();
-      conv.messages.push({ senderId: req.user.id, text: msgText });
-      conv.lastMessage  = msgText.substring(0, 100);
-      conv.updatedAt    = new Date();
-      conv.unreadSeller += 1;
-    }
-
+    // Ajouter le message
+    conv.messages.push({ senderId: req.user.id, text: message });
+    conv.lastMessage = message.substring(0,100);
+    conv.updatedAt   = new Date();
+    conv.unreadSeller += 1;   // le vendeur a un nouveau message non lu
     await conv.save();
 
-    if (isNew) {
-      User.findByIdAndUpdate(ad.seller, { $inc: { totalContacts: 1 } }).catch(()=>{});
-    }
+    // Incrémenter contacts du vendeur
+    User.findByIdAndUpdate(ad.seller, { $inc: { totalContacts: 1 } }).catch(()=>{});
 
-    if (message && message.trim() && ad.seller) {
-      const buyerName = `${buyer?.prenom||''} ${buyer?.nom||''}`.trim() || 'Un acheteur';
-      await createNotif(ad.seller, 'new_message', '💬 Nouveau message',
-        `${buyerName} vous a envoyé un message concernant "${ad.title}"`,
-        'dashboard/messages', '💬',
-        { conversationId: conv._id, adId, adTitle: ad.title, buyerName }
-      );
-    }
-    if (isNew && !message) {
-      const buyerName = `${buyer?.prenom||''} ${buyer?.nom||''}`.trim() || 'Un acheteur';
-      await createNotif(ad.seller, 'ad_reply', '📞 Nouvelle demande de contact',
-        `${buyerName} souhaite vous contacter pour "${ad.title}"`,
-        'dashboard/messages', '📞',
-        { conversationId: conv._id, adId, adTitle: ad.title }
-      );
-    }
-
-    res.json({ success: true, conversationId: conv._id, sellerIsPro });
+    res.json({ success: true, conversationId: conv._id });
   } catch(err) {
+    // Gérer la violation d'unicité (race condition)
     if (err.code === 11000) {
       const conv = await Conversation.findOne({ adId: req.body.adId, buyerId: req.user.id });
       return res.json({ success: true, conversationId: conv?._id });
     }
     res.status(500).json({ error: err.message });
   }
-});
-
-// Total messages non lus  ← DOIT être avant /:id pour éviter le conflit Express
-app.get('/api/conversations/unread', auth, async (req, res) => {
-  try {
-    const uid = req.user.id;
-    const asBuyer  = await Conversation.aggregate([
-      { $match: { buyerId: new mongoose.Types.ObjectId(uid) } },
-      { $group: { _id: null, total: { $sum: '$unreadBuyer' } } }
-    ]);
-    const asSeller = await Conversation.aggregate([
-      { $match: { sellerId: new mongoose.Types.ObjectId(uid) } },
-      { $group: { _id: null, total: { $sum: '$unreadSeller' } } }
-    ]);
-    const count = (asBuyer[0]?.total||0) + (asSeller[0]?.total||0);
-    res.json({ count });
-  } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
 // Lire les messages d'une conversation
@@ -1815,111 +1195,6 @@ app.get('/api/conversations/:id', auth, async (req, res) => {
 
     res.json({ conversation: conv, messages: conv.messages });
   } catch(err) { res.status(500).json({ error: err.message }); }
-});
-
-app.post('/api/conversations/direct', auth, async (req, res) => {
-  try {
-    const { sellerId, message } = req.body;
-    if (!sellerId) return res.status(400).json({ error: 'sellerId requis' });
-
-    // Vérifier que le vendeur est Pro actif
-    const seller = await User.findById(sellerId).select('prenom nom isPro proUntil role boutique boutiqueName');
-    if (!seller) return res.status(404).json({ error: 'Vendeur introuvable' });
-
-    const sellerIsPro = seller.isPro && seller.proUntil && new Date(seller.proUntil) > new Date();
-    if (!sellerIsPro && seller.role !== 'admin')
-      return res.status(403).json({ error: 'Ce vendeur n\'est pas Pro — utilisez le contact via annonce' });
-
-    if (String(sellerId) === String(req.user.id))
-      return res.status(400).json({ error: 'Vous ne pouvez pas vous envoyer un message' });
-
-    const buyer = await User.findById(req.user.id).select('prenom nom');
-    const buyerName  = `${buyer?.prenom||''} ${buyer?.nom||''}`.trim() || 'Acheteur';
-    const sellerName = `${seller.prenom||''} ${seller.nom||''}`.trim();
-    const boutiqueName = seller.boutique?.name || seller.boutiqueName || sellerName;
-
-    // Créer ou récupérer la conversation directe (1 seule par paire acheteur/vendeur)
-    let conv = await Conversation.findOne({ isDirect: true, buyerId: req.user.id, sellerId });
-    const isNew = !conv;
-
-    if (!conv) {
-      conv = await Conversation.create({
-        isDirect:   true,
-        adTitle:    `Boutique ${boutiqueName}`,
-        buyerId:    req.user.id,
-        buyerName,
-        sellerId,
-        sellerName,
-        messages:   [],
-        unreadBuyer: 0, unreadSeller: 0,
-      });
-    }
-
-    if (isNew) {
-      const sysText = `✅ Contact direct avec la boutique "${boutiqueName}" — Pro YouGouYou · Gratuit`;
-      conv.messages.push({ senderId: sellerId, text: sysText, isSystem: true, read: true });
-      conv.lastMessage = sysText.substring(0, 100);
-      conv.updatedAt   = new Date();
-    }
-
-    if (message && message.trim()) {
-      conv.messages.push({ senderId: req.user.id, text: message.trim() });
-      conv.lastMessage  = message.substring(0, 100);
-      conv.updatedAt    = new Date();
-      conv.unreadSeller += 1;
-
-      // ⚡ Socket — temps réel
-      const last = conv.messages[conv.messages.length - 1];
-      emitMessage(conv._id, { _id: last._id, senderId: String(req.user.id), text: last.text, createdAt: last.createdAt, convId: String(conv._id) });
-      emitNotif(sellerId, { type: 'new_message', title: '💬 Nouveau message', body: `${buyerName} vous a envoyé un message via votre boutique`, link: 'dashboard/messages', icon: '💬', data: { conversationId: conv._id } });
-
-      await createNotif(sellerId, 'new_message', '💬 Nouveau message',
-        `${buyerName} vous a envoyé un message via votre boutique "${boutiqueName}"`,
-        'dashboard/messages', '💬', { conversationId: conv._id, boutiqueName }
-      );
-    }
-
-    await conv.save();
-    res.json({
-      success:      true,
-      conversationId: conv._id,
-      isDirect:     true,
-      sellerIsPro:  true,
-      conversation: {
-        _id:        conv._id,
-        adTitle:    conv.adTitle || ('Boutique ' + boutiqueName),
-        sellerName: conv.sellerName || sellerName,
-        buyerName:  conv.buyerName  || buyerName,
-        sellerId:   String(sellerId),
-        buyerId:    String(req.user.id),
-        isDirect:   true,
-        messages:   conv.messages || [],
-        updatedAt:  conv.updatedAt,
-      }
-    });
-  } catch(err) {
-    if (err.code === 11000) {
-      const conv = await Conversation.findOne({ isDirect: true, buyerId: req.user.id, sellerId: req.body.sellerId });
-      if(!conv) return res.status(404).json({ error: 'Conversation introuvable' });
-      return res.json({
-        success: true,
-        conversationId: conv._id,
-        isDirect: true,
-        conversation: {
-          _id:        conv._id,
-          adTitle:    conv.adTitle,
-          sellerName: conv.sellerName,
-          buyerName:  conv.buyerName,
-          sellerId:   String(conv.sellerId),
-          buyerId:    String(conv.buyerId),
-          isDirect:   true,
-          messages:   conv.messages || [],
-          updatedAt:  conv.updatedAt,
-        }
-      });
-    }
-    res.status(500).json({ error: err.message });
-  }
 });
 
 // Envoyer un message dans une conversation
@@ -1943,38 +1218,11 @@ app.post('/api/conversations/:id', auth, async (req, res) => {
     else          conv.unreadBuyer  += 1;
     await conv.save();
 
-    // 🔔 Notification au destinataire
-    const recipientId = isBuyer ? conv.sellerId : conv.buyerId;
-    const senderName  = isBuyer ? conv.buyerName : conv.sellerName;
-    const notif = {
-      type:  'new_message',
-      title: '💬 Nouveau message',
-      body:  `${senderName||'Quelqu\'un'} vous a envoyé un message : "${text.substring(0,60)}${text.length>60?'…':''}"`,
-      link:  'dashboard/messages',
-      icon:  '💬',
-      data:  { conversationId: conv._id, adTitle: conv.adTitle },
-      createdAt: new Date(),
-    };
-    await createNotif(recipientId, notif.type, notif.title, notif.body, notif.link, notif.icon, notif.data);
-
-    // ⚡ Temps réel — émettre le message dans la room de la conversation
+    // Renvoyer uniquement le dernier message (optimisation)
     const last = conv.messages[conv.messages.length - 1];
-    emitMessage(conv._id, {
-      _id:       last._id,
-      senderId:  uid,
-      text:      last.text,
-      createdAt: last.createdAt,
-      convId:    String(conv._id),
-    });
-
-    // ⚡ Temps réel — notifier le destinataire (badge + popup)
-    emitNotif(recipientId, { ...notif, unreadCount: 1 });
-
     res.json({ success: true, message: last });
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
-
-// ── Contact direct vendeur Pro (sans annonce) ────────────────
 
 // Marquer une conversation comme lue
 app.patch('/api/conversations/:id/read', auth, async (req, res) => {
@@ -1996,6 +1244,23 @@ app.patch('/api/conversations/:id/read', auth, async (req, res) => {
     }
     await conv.save();
     res.json({ success: true });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// Total messages non lus
+app.get('/api/conversations/unread', auth, async (req, res) => {
+  try {
+    const uid = req.user.id;
+    const asBuyer  = await Conversation.aggregate([
+      { $match: { buyerId: new mongoose.Types.ObjectId(uid) } },
+      { $group: { _id: null, total: { $sum: '$unreadBuyer' } } }
+    ]);
+    const asSeller = await Conversation.aggregate([
+      { $match: { sellerId: new mongoose.Types.ObjectId(uid) } },
+      { $group: { _id: null, total: { $sum: '$unreadSeller' } } }
+    ]);
+    const count = (asBuyer[0]?.total||0) + (asSeller[0]?.total||0);
+    res.json({ count });
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -2292,132 +1557,6 @@ app.post('/api/payment/commission', auth, async (req, res) => {
 });
 
 // Mes paiements
-// ═══════════════════════════════════════════════════════════
-//  CONTACT PAYMENT — Mise en relation 2%
-// ═══════════════════════════════════════════════════════════
-
-// GET /api/contact-payment/status?adId=  — vérifier si débloqué
-app.get('/api/contact-payment/status', auth, async (req, res) => {
-  try {
-    const { adId } = req.query;
-    if (!adId) return res.status(400).json({ error: 'adId requis' });
-
-    // Charger l'annonce + vérifier statut Pro du vendeur
-    const ad = await Ad.findById(adId).select('seller price title');
-    if (!ad) return res.status(404).json({ error: 'Annonce introuvable' });
-
-    const seller = await User.findById(ad.seller).select('isPro proUntil prePlan prenom nom');
-    const sellerIsPro = seller && seller.isPro &&
-                        seller.proUntil && new Date(seller.proUntil) > new Date();
-
-    if (sellerIsPro) {
-      return res.json({ unlocked: true, reason: 'seller_pro', sellerIsPro: true, fee: 0 });
-    }
-
-    // Vérifier si déjà payé ou gratuit pour cette annonce
-    const paid = await ContactPayment.findOne({
-      buyerId: req.user.id,
-      adId,
-      status: { $in: ['paid', 'free', 'free_monthly'] }
-    });
-
-    if (paid) {
-      return res.json({ unlocked: true, reason: paid.status, sellerIsPro: false, fee: 0 });
-    }
-
-    // Vérifier droit au gratuit mensuel
-    const now = new Date();
-    const freeMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-    const usedFree = await ContactPayment.findOne({
-      buyerId: req.user.id,
-      freeMonth,
-      status: 'free_monthly'
-    });
-
-    const fee = Math.max(Math.round(ad.price * 0.02), 500);
-    return res.json({
-      unlocked:       false,
-      sellerIsPro:    false,
-      fee,
-      adPrice:        ad.price,
-      adTitle:        ad.title,
-      hasFreeMonthly: !usedFree,
-      sellerName:     `${seller?.prenom||''} ${seller?.nom||''}`.trim(),
-    });
-  } catch(err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// POST /api/contact-payment — payer la mise en relation (2%)
-app.post('/api/contact-payment', auth, async (req, res) => {
-  try {
-    const { adId, phone, pin } = req.body;
-    if (!adId || !phone) return res.status(400).json({ error: 'adId et phone requis' });
-
-    const ad = await Ad.findById(adId).select('seller price title');
-    if (!ad) return res.status(404).json({ error: 'Annonce introuvable' });
-
-    if (String(ad.seller) === req.user.id)
-      return res.status(400).json({ error: 'Vous ne pouvez pas payer pour votre propre annonce' });
-
-    // Vérifier si déjà payé (anti-double paiement)
-    const alreadyPaid = await ContactPayment.findOne({
-      buyerId: req.user.id,
-      adId,
-      status: { $in: ['paid', 'free', 'free_monthly'] }
-    });
-    if (alreadyPaid) {
-      return res.json({ success: true, alreadyPaid: true, message: 'Mise en relation déjà débloquée' });
-    }
-
-    // Vérifier statut Pro vendeur (sécurité côté serveur)
-    const seller = await User.findById(ad.seller).select('isPro proUntil');
-    const sellerIsPro = seller && seller.isPro &&
-                        seller.proUntil && new Date(seller.proUntil) > new Date();
-    if (sellerIsPro) {
-      return res.json({ success: true, free: true, sellerIsPro: true, message: 'Vendeur Pro — mise en relation gratuite' });
-    }
-
-    const fee = Math.max(Math.round(ad.price * 0.02), 500);
-    const ref = genRef();
-
-    // ── Orange Money Guinée ─────────────────────────────────────
-    // En production : remplacer par l'appel API Orange Money officiel
-    // const omResult = await callOrangeMoney(phone, pin, fee, ref);
-    // if (!omResult.success) return res.status(402).json({ error: omResult.message });
-    // ─────────────────────────────────────────────────────────────
-    console.log(`[CONTACT-PAYMENT] ${fee} GNF | ref=${ref} | buyer=${req.user.id} | ad=${adId}`);
-
-    // Enregistrer le paiement
-    await ContactPayment.create({
-      buyerId:    req.user.id,
-      sellerId:   ad.seller,
-      adId,
-      amount:     fee,
-      status:     'paid',
-      reference:  ref,
-      buyerPhone: phone,
-    });
-
-    // Stats vendeur
-    User.findByIdAndUpdate(ad.seller, { $inc: { totalContacts: 1 } }).catch(()=>{});
-
-    console.log(`[CONTACT-PAYMENT] ✅ Débloqué ref=${ref}`);
-    res.json({ success: true, fee, reference: ref, message: 'Mise en relation débloquée' });
-
-  } catch(err) {
-    if (err.code === 11000) {
-      return res.json({ success: true, alreadyPaid: true, message: 'Mise en relation déjà débloquée' });
-    }
-    console.error('[CONTACT-PAYMENT]', err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ──────────────────────────────────────────────────────────────
-
-// Mes paiements (original, remis en place)
 app.get('/api/my-payments', auth, async (req, res) => {
   try {
     const pays = await Payment.find({ buyer: req.user.id }).sort({ createdAt: -1 });
@@ -2535,28 +1674,26 @@ app.patch('/api/admin/users/:id/role', auth, adminOnly, async (req, res) => {
 // ★ Admin — activer/retirer le Pro d'un utilisateur
 app.patch('/api/admin/users/:id/pro', auth, adminOnly, async (req, res) => {
   try {
-    const { isPro, plan, proPlan, months } = req.body;
-    const actualPlan = plan || proPlan || 'starter';
-    const planDays   = { starter: 30, business: 90, premium: 365 };
-    const planAnn    = { starter: 9,  business: 12, premium: 18  };
+    const { isPro, months } = req.body;
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
 
     if (!isPro) {
       // Retirer le Pro
-      await User.findByIdAndUpdate(req.params.id, { isPro: false, proUntil: null, proPlan: null });
+      await User.findByIdAndUpdate(req.params.id, { isPro: false, proUntil: null });
       console.log(`[ADMIN PRO] Retiré → ${req.params.id}`);
       return res.json({ success: true, isPro: false });
     }
 
-    // Activer le Pro — durée basée sur le plan
-    const days = planDays[actualPlan] || Number(months) * 30 || 30;
-    const now  = new Date();
+    // Activer le Pro
+    const validMonths = [1, 3, 12];
+    const m = validMonths.includes(Number(months)) ? Number(months) : 1;
+    const now = new Date();
     const base = (user.isPro && user.proUntil && user.proUntil > now) ? user.proUntil : now;
-    const proUntil = new Date(base.getTime() + days * 24 * 3600 * 1000);
-    const m = Math.round(days / 30);
+    const proUntil = new Date(base);
+    proUntil.setMonth(proUntil.getMonth() + m);
 
-    await User.findByIdAndUpdate(req.params.id, { isPro: true, proUntil, proPlan: actualPlan });
+    await User.findByIdAndUpdate(req.params.id, { isPro: true, proUntil });
 
     // Email de notification à l'utilisateur
     if (user.email && user.email.includes('@')) {
@@ -2578,18 +1715,6 @@ app.patch('/api/admin/users/:id/pro', auth, adminOnly, async (req, res) => {
     }
 
     console.log(`[ADMIN PRO] Activé → ${req.params.id} (${m} mois, expire: ${proUntil.toISOString()})`);
-
-    // 🔔 Notification in-app à l'utilisateur
-    await createNotif(
-      req.params.id,
-      'pro_activated',
-      '⭐ Abonnement Pro activé !',
-      `Félicitations ! Votre abonnement YouGouYou Pro (${m} mois) est maintenant actif jusqu'au ${proUntil.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}.`,
-      'dashboard/pro',
-      '⭐',
-      { months: m, proUntil: proUntil.toISOString() }
-    );
-
     res.json({ success: true, isPro: true, proUntil: proUntil.toISOString(), months: m });
   } catch(err) {
     console.error('[ADMIN PRO]', err.message);
@@ -2707,33 +1832,22 @@ app.get('/api/admin/payments', auth, adminOnly, async (req, res) => {
 });
 
 // Activer/désactiver un compte pro (admin)
-// Route PATCH /api/admin/users/:id/pro — voir ci-dessus (dédoublonnée)
+app.patch('/api/admin/users/:id/pro', auth, adminOnly, async (req, res) => {
+  try {
+    const { isPro, months = 1 } = req.body;
+    const update = { isPro };
+    if (isPro) update.proUntil = new Date(Date.now() + months * 30 * 24 * 3600 * 1000);
+    const user = await User.findByIdAndUpdate(req.params.id, update, { new: true }).select('-password');
+    res.json({ success: true, user });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
 
 // ── Route contact ─────────────────────────────────────────
-
-// Échappe les caractères HTML dangereux — protection injection HTML
-function escapeHtml(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g,  '&amp;')
-    .replace(/</g,  '&lt;')
-    .replace(/>/g,  '&gt;')
-    .replace(/"/g,  '&quot;')
-    .replace(/'/g,  '&#039;');
-}
-
 app.post('/api/contact', async (req, res) => {
   try {
     const { name, email, phone, subject, message } = req.body;
     if (!name || !message) return res.status(400).json({ error: 'Nom et message requis' });
     if (!email && !phone)  return res.status(400).json({ error: 'Email ou téléphone requis' });
-
-    // Échapper toutes les valeurs utilisateur avant injection dans le HTML
-    const safeName    = escapeHtml(name);
-    const safeEmail   = escapeHtml(email);
-    const safePhone   = escapeHtml(phone);
-    const safeSubject = escapeHtml(subject);
-    const safeMessage = escapeHtml(message).replace(/\n/g, '<br>');
 
     const contactEmail = process.env.EMAIL_FROM || 'noreply@yougouyougou.net';
     const html = `<!DOCTYPE html>
@@ -2745,14 +1859,14 @@ app.post('/api/contact', async (req, res) => {
   </div>
   <div style="background:#fff;border:1px solid #eee;border-top:none;padding:24px;border-radius:0 0 10px 10px">
     <table style="width:100%;border-collapse:collapse">
-      <tr><td style="padding:8px 0;font-weight:700;width:120px;color:#555">Nom</td><td style="padding:8px 0">${safeName}</td></tr>
-      <tr><td style="padding:8px 0;font-weight:700;color:#555">Email</td><td style="padding:8px 0">${safeEmail||'—'}</td></tr>
-      <tr><td style="padding:8px 0;font-weight:700;color:#555">Téléphone</td><td style="padding:8px 0">${safePhone||'—'}</td></tr>
-      <tr><td style="padding:8px 0;font-weight:700;color:#555">Sujet</td><td style="padding:8px 0">${safeSubject||'—'}</td></tr>
+      <tr><td style="padding:8px 0;font-weight:700;width:120px;color:#555">Nom</td><td style="padding:8px 0">${name}</td></tr>
+      <tr><td style="padding:8px 0;font-weight:700;color:#555">Email</td><td style="padding:8px 0">${email||'—'}</td></tr>
+      <tr><td style="padding:8px 0;font-weight:700;color:#555">Téléphone</td><td style="padding:8px 0">${phone||'—'}</td></tr>
+      <tr><td style="padding:8px 0;font-weight:700;color:#555">Sujet</td><td style="padding:8px 0">${subject||'—'}</td></tr>
     </table>
     <hr style="border:none;border-top:1px solid #eee;margin:16px 0">
     <div style="font-weight:700;margin-bottom:8px;color:#333">Message :</div>
-    <div style="background:#f9f9f9;padding:14px;border-radius:8px;font-size:14px;line-height:1.7;color:#333">${safeMessage}</div>
+    <div style="background:#f9f9f9;padding:14px;border-radius:8px;font-size:14px;line-height:1.7;color:#333">${message.replace(/\n/g,'<br>')}</div>
     <div style="margin-top:16px;font-size:12px;color:#aaa">Reçu le ${new Date().toLocaleString('fr-FR')} — YouGouYou.net</div>
   </div>
 </body></html>`;
@@ -2761,7 +1875,7 @@ app.post('/api/contact', async (req, res) => {
 
     // Envoyer à l'adresse support
     await sendEmail('support.yougouyougou@gmail.com',
-      `[Contact YouGouYou] ${escapeHtml(subject)||'Nouveau message'} — ${safeName}`,
+      `[Contact YouGouYou] ${subject||'Nouveau message'} — ${name}`,
       html, text
     );
 
@@ -2775,10 +1889,10 @@ app.post('/api/contact', async (req, res) => {
     <h2 style="color:#fff;margin:4px 0 0">Message bien reçu !</h2>
   </div>
   <div style="background:#fff;border:1px solid #eee;border-top:none;padding:24px;border-radius:0 0 10px 10px">
-    <p>Bonjour <strong>${safeName}</strong>,</p>
+    <p>Bonjour <strong>${name}</strong>,</p>
     <p style="line-height:1.7">Nous avons bien reçu votre message et nous vous répondrons dans les <strong>24 heures ouvrées</strong>.</p>
     <div style="background:#FFF3EE;border-radius:8px;padding:12px;margin:16px 0;font-size:13px;color:#555">
-      <strong>Votre message :</strong><br>${safeMessage}
+      <strong>Votre message :</strong><br>${message.replace(/\n/g,'<br>')}
     </div>
     <p style="font-size:13px;color:#888">— L'équipe YouGouYou 🇬🇳</p>
   </div>
@@ -2796,331 +1910,6 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
-
-// ═══════════════════════════════════════════════════════════
-//  NOTIFICATIONS
-// ═══════════════════════════════════════════════════════════
-
-// GET  /api/notifications        — liste des notifs (50 dernières)
-app.get('/api/notifications', auth, async (req, res) => {
-  try {
-    const notifs = await Notification.find({ userId: req.user.id })
-      .sort({ createdAt: -1 })
-      .limit(50)
-      .lean();
-    const unread = await Notification.countDocuments({ userId: req.user.id, read: false });
-    res.json({ notifications: notifs, unread });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-// PATCH /api/notifications/read-all  — marquer tout comme lu
-app.patch('/api/notifications/read-all', auth, async (req, res) => {
-  try {
-    await Notification.updateMany({ userId: req.user.id, read: false }, { read: true });
-    res.json({ success: true });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-// PATCH /api/notifications/:id/read  — marquer une notif comme lue
-app.patch('/api/notifications/:id/read', auth, async (req, res) => {
-  try {
-    await Notification.findOneAndUpdate(
-      { _id: req.params.id, userId: req.user.id },
-      { read: true }
-    );
-    res.json({ success: true });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-// DELETE /api/notifications/:id  — supprimer une notif
-app.delete('/api/notifications/:id', auth, async (req, res) => {
-  try {
-    await Notification.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
-    res.json({ success: true });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-// GET /api/notifications/unread-count  — badge polling 30s
-app.get('/api/notifications/unread-count', auth, async (req, res) => {
-  try {
-    const count = await Notification.countDocuments({ userId: req.user.id, read: false });
-    res.json({ unread: count });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-
-// ═══════════════════════════════════════════════════════════
-// ═══════════════════════════════════════════════════════════
-//  PANIER BOUTIQUE
-// ═══════════════════════════════════════════════════════════
-
-// POST /api/cart  — créer un panier (acheteur → boutique)
-app.post('/api/cart', auth, async (req, res) => {
-  try {
-    const { sellerId, items, buyerPhone, buyerMessage } = req.body;
-    if (!sellerId) return res.status(400).json({ error: 'sellerId requis' });
-    if (!items || !items.length) return res.status(400).json({ error: 'Panier vide' });
-    if (String(req.user.id) === String(sellerId))
-      return res.status(400).json({ error: 'Vous ne pouvez pas commander dans votre propre boutique' });
-
-    const buyer  = await User.findById(req.user.id).select('prenom nom phone');
-    const seller = await User.findById(sellerId).select('prenom nom email boutique');
-    if (!seller) return res.status(404).json({ error: 'Boutique introuvable' });
-
-    // Enrichir les articles avec infos depuis la DB
-    const adIds    = items.map(i => i.adId);
-    const ads      = await Ad.find({ _id: { $in: adIds }, active: true }).select('title price emoji photos');
-    const adsMap   = {};
-    ads.forEach(a => { adsMap[String(a._id)] = a; });
-
-    const enrichedItems = items.map(item => {
-      const ad = adsMap[String(item.adId)];
-      if (!ad) return null;
-      return {
-        adId:     ad._id,
-        adTitle:  ad.title,
-        adPrice:  ad.price,
-        adEmoji:  ad.emoji || '📦',
-        adPhoto:  (ad.photos && ad.photos[0]) || '',
-        quantity: Math.max(1, Math.min(99, parseInt(item.quantity) || 1)),
-      };
-    }).filter(Boolean);
-
-    if (!enrichedItems.length) return res.status(400).json({ error: 'Aucun article valide' });
-
-    const totalAmount = enrichedItems.reduce((sum, i) => sum + (i.adPrice * i.quantity), 0);
-    const totalItems  = enrichedItems.reduce((sum, i) => sum + i.quantity, 0);
-
-    const buyerName = `${buyer?.prenom || ''} ${buyer?.nom || ''}`.trim() || 'Acheteur';
-
-    const cart = await Cart.create({
-      sellerId,
-      sellerName: `${seller.prenom || ''} ${seller.nom || ''}`.trim(),
-      buyerId:    req.user.id,
-      buyerName,
-      buyerPhone: buyerPhone || buyer?.phone || '',
-      buyerMessage: buyerMessage || '',
-      items:       enrichedItems,
-      totalItems,
-      totalAmount,
-      status: 'pending',
-    });
-
-    // 🔔 Notification in-app au vendeur
-    const boutiqueName = seller.boutique?.name || 'votre boutique';
-    await createNotif(
-      sellerId,
-      'new_message',
-      '🛒 Nouveau panier reçu !',
-      `${buyerName} a ajouté ${totalItems} article${totalItems > 1 ? 's' : ''} dans ${boutiqueName} — Total : ${totalAmount.toLocaleString('fr-FR')} GNF`,
-      'dashboard/cart',
-      '🛒',
-      { cartId: cart._id, buyerName, totalItems, totalAmount }
-    );
-
-    // 📧 Email au vendeur
-    if (seller.email && seller.email.includes('@')) {
-      const itemsList = enrichedItems.map(i =>
-        `<tr><td style="padding:6px 8px">${i.adEmoji} ${i.adTitle}</td><td style="padding:6px 8px;text-align:center">${i.quantity}</td><td style="padding:6px 8px;text-align:right">${(i.adPrice * i.quantity).toLocaleString('fr-FR')} GNF</td></tr>`
-      ).join('');
-      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
-      <body style="font-family:Arial,sans-serif;background:#f5f5f5;padding:20px">
-        <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden">
-          <div style="background:linear-gradient(135deg,#FF5C00,#FF9500);padding:24px;text-align:center">
-            <div style="font-size:36px">🛒</div>
-            <div style="font-size:20px;font-weight:900;color:#fff;margin-top:8px">Nouveau panier reçu !</div>
-            <div style="color:rgba(255,255,255,.85);font-size:13px;margin-top:4px">${boutiqueName}</div>
-          </div>
-          <div style="padding:24px">
-            <p>Bonjour <strong>${seller.prenom || 'Commerçant'}</strong>,</p>
-            <p><strong>${buyerName}</strong> a passé une commande dans votre boutique.</p>
-            <table style="width:100%;border-collapse:collapse;margin:16px 0;font-size:13px">
-              <thead><tr style="background:#F8FAFC">
-                <th style="padding:8px;text-align:left">Article</th>
-                <th style="padding:8px">Qté</th>
-                <th style="padding:8px;text-align:right">Prix</th>
-              </tr></thead>
-              <tbody>${itemsList}</tbody>
-              <tfoot><tr style="background:#FFF0E8;font-weight:900">
-                <td colspan="2" style="padding:8px">TOTAL</td>
-                <td style="padding:8px;text-align:right">${totalAmount.toLocaleString('fr-FR')} GNF</td>
-              </tr></tfoot>
-            </table>
-            ${buyerPhone ? `<p>📱 <strong>Téléphone :</strong> ${buyerPhone}</p>` : ''}
-            ${buyerMessage ? `<p>💬 <strong>Message :</strong> ${buyerMessage}</p>` : ''}
-            <div style="text-align:center;margin-top:20px">
-              <a href="https://yougouyougou.net" style="background:#FF5C00;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:800;font-size:14px">Gérer mes paniers →</a>
-            </div>
-          </div>
-        </div>
-      </body></html>`;
-      sendEmail(seller.email, `🛒 Nouveau panier — ${boutiqueName}`, html,
-        `${buyerName} a commandé ${totalItems} article(s) pour ${totalAmount.toLocaleString('fr-FR')} GNF`)
-        .catch(e => console.error('[CART EMAIL]', e.message));
-    }
-
-    console.log(`[CART] ✅ Nouveau panier → seller=${sellerId} buyer=${req.user.id} items=${totalItems}`);
-    res.json({ success: true, cartId: cart._id, totalItems, totalAmount });
-  } catch(err) {
-    console.error('[CART POST]', err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// GET /api/cart/seller  — paniers reçus par le vendeur connecté
-app.get('/api/cart/seller', auth, async (req, res) => {
-  try {
-    const { status, page = 1, limit = 20 } = req.query;
-    const filter = { sellerId: req.user.id };
-    if (status && ['pending','confirmed','cancelled'].includes(status)) filter.status = status;
-
-    const total = await Cart.countDocuments(filter);
-    const carts = await Cart.find(filter)
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(Number(limit))
-      .lean();
-
-    // Compteurs par statut
-    const [pendingCount, confirmedCount, cancelledCount] = await Promise.all([
-      Cart.countDocuments({ sellerId: req.user.id, status: 'pending' }),
-      Cart.countDocuments({ sellerId: req.user.id, status: 'confirmed' }),
-      Cart.countDocuments({ sellerId: req.user.id, status: 'cancelled' }),
-    ]);
-
-    res.json({ carts, total, pendingCount, confirmedCount, cancelledCount });
-  } catch(err) { res.status(500).json({ error: err.message }); }
-});
-
-// GET /api/cart/buyer  — paniers passés par l'acheteur connecté
-app.get('/api/cart/buyer', auth, async (req, res) => {
-  try {
-    const carts = await Cart.find({ buyerId: req.user.id })
-      .sort({ createdAt: -1 }).limit(50).lean();
-    res.json({ carts });
-  } catch(err) { res.status(500).json({ error: err.message }); }
-});
-
-// PATCH /api/cart/:id/status  — vendeur change le statut d'un panier
-app.patch('/api/cart/:id/status', auth, async (req, res) => {
-  try {
-    const { status, statusNote } = req.body;
-    if (!['confirmed','cancelled'].includes(status))
-      return res.status(400).json({ error: 'Statut invalide (confirmed | cancelled)' });
-
-    const cart = await Cart.findOne({ _id: req.params.id, sellerId: req.user.id });
-    if (!cart) return res.status(404).json({ error: 'Panier introuvable' });
-    if (cart.status !== 'pending')
-      return res.status(400).json({ error: 'Ce panier a déjà été traité' });
-
-    cart.status    = status;
-    cart.statusNote= statusNote || '';
-    cart.updatedAt = new Date();
-    await cart.save();
-
-    // 🔔 Notification à l'acheteur
-    const seller = await User.findById(req.user.id).select('prenom nom boutique');
-    const boutiqueName = seller?.boutique?.name || 'la boutique';
-    const icons = { confirmed: '✅', cancelled: '❌' };
-    const msgs  = {
-      confirmed: `Votre panier dans ${boutiqueName} a été confirmé ! Le vendeur vous contactera.`,
-      cancelled: `Votre panier dans ${boutiqueName} a été annulé${statusNote ? ' : ' + statusNote : ''}.`,
-    };
-    if (cart.buyerId) {
-      await createNotif(
-        cart.buyerId,
-        status === 'confirmed' ? 'pro_activated' : 'ad_reply',
-        icons[status] + ' Panier ' + (status === 'confirmed' ? 'confirmé' : 'annulé'),
-        msgs[status],
-        'dashboard',
-        icons[status],
-        { cartId: cart._id, status, boutiqueName }
-      );
-    }
-
-    res.json({ success: true, status, cart });
-  } catch(err) { res.status(500).json({ error: err.message }); }
-});
-
-// DELETE /api/cart/:id  — vendeur supprime un panier traité
-app.delete('/api/cart/:id', auth, async (req, res) => {
-  try {
-    const cart = await Cart.findOneAndDelete({ _id: req.params.id, sellerId: req.user.id });
-    if (!cart) return res.status(404).json({ error: 'Panier introuvable' });
-    res.json({ success: true });
-  } catch(err) { res.status(500).json({ error: err.message }); }
-});
-
-// GET /api/cart/seller/stats  — statistiques paniers du vendeur
-app.get('/api/cart/seller/stats', auth, async (req, res) => {
-  try {
-    const [pending, confirmed, cancelled, totalRevenue] = await Promise.all([
-      Cart.countDocuments({ sellerId: req.user.id, status: 'pending' }),
-      Cart.countDocuments({ sellerId: req.user.id, status: 'confirmed' }),
-      Cart.countDocuments({ sellerId: req.user.id, status: 'cancelled' }),
-      Cart.aggregate([
-        { $match: { sellerId: new mongoose.Types.ObjectId(req.user.id), status: 'confirmed' }},
-        { $group: { _id: null, total: { $sum: '$totalAmount' }}},
-      ]),
-    ]);
-    res.json({
-      pending, confirmed, cancelled,
-      totalRevenue: totalRevenue[0]?.total || 0,
-    });
-  } catch(err) { res.status(500).json({ error: err.message }); }
-});
-
-//  CLOUDINARY — Upload signé sécurisé
-// ═══════════════════════════════════════════════════════════
-
-// POST /api/upload/sign  — génère une signature pour l'upload direct Cloudinary
-app.post('/api/upload/sign', auth, (req, res) => {
-  const cloudName  = process.env.CLOUDINARY_CLOUD_NAME;
-  const apiKey     = process.env.CLOUDINARY_API_KEY;
-  const apiSecret  = process.env.CLOUDINARY_API_SECRET;
-  const uploadPreset = process.env.CLOUDINARY_PRESET || 'yougouyougou';
-
-  if (!cloudName || !apiKey || !apiSecret) {
-    return res.status(503).json({ error: 'Cloudinary non configuré' });
-  }
-
-  const { folder = 'yougouyougou', type = 'ad' } = req.body;
-  const timestamp = Math.round(Date.now() / 1000);
-
-  // Dossier selon le type d'upload
-  const folders = {
-    ad:     `yougouyougou/ads/${req.user.id}`,
-    avatar: `yougouyougou/avatars`,
-    logo:   `yougouyougou/boutiques/${req.user.id}/logo`,
-    banner: `yougouyougou/boutiques/${req.user.id}/banner`,
-  };
-  const uploadFolder = folders[type] || folders.ad;
-
-  // Paramètres à signer
-  const params = {
-    folder:    uploadFolder,
-    timestamp: timestamp,
-  };
-
-  // Générer la signature HMAC-SHA1
-  const crypto   = require('crypto');
-  const paramStr = Object.keys(params).sort()
-    .map(k => `${k}=${params[k]}`)
-    .join('&');
-  const signature = crypto
-    .createHash('sha1')
-    .update(paramStr + apiSecret)
-    .digest('hex');
-
-  res.json({
-    signature,
-    timestamp,
-    apiKey,
-    cloudName,
-    folder:     uploadFolder,
-    uploadPreset,
-  });
-});
 
 // ═══════════════════════════════════════════════════════════
 //  HEALTH CHECK + SPA FALLBACK
@@ -3219,83 +2008,7 @@ app.post('/api/subscribe-pro', auth, async (req, res) => {
   }
 });
 
-// ★ Boutique Pro — GET profil boutique de l'utilisateur connecté
-app.get('/api/me/boutique', auth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id)
-      .select('boutique boutiqueName boutiqueDesc boutiqueSector boutiqueSocial boutiquePinned proPlan isPro proUntil');
-    if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
-
-    // Construire l'objet boutique en fusionnant ancien et nouveau schéma
-    const b = {
-      name:        user.boutique?.name       || user.boutiqueName   || '',
-      description: user.boutique?.description|| user.boutiqueDesc   || '',
-      desc:        user.boutique?.desc        || user.boutiqueDesc   || '',
-      logo:        user.boutique?.logo        || '',
-      category:    user.boutique?.category    || user.boutiqueSector || '',
-      subcat:      user.boutique?.subcat      || '',
-      subsubcat:   user.boutique?.subsubcat   || '',
-      whatsapp:    user.boutique?.whatsapp    || user.boutiqueSocial?.whatsapp || '',
-      address:     user.boutique?.address     || '',
-      videoUrl:    user.boutique?.videoUrl    || '',
-      videoTitle:  user.boutique?.videoTitle  || '',
-      banner:      user.boutique?.banner       || '',
-    };
-    res.json({ boutique: b, proPlan: user.proPlan, isPro: user.isPro, proUntil: user.proUntil });
-  } catch(err) { res.status(500).json({ error: err.message }); }
-});
-
-// ★ Boutique Pro — PUT (créer/mettre à jour — compatible frontend v31)
-app.put('/api/me/boutique', auth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select('isPro proUntil role boutique');
-    const isAdmin = user?.role === 'admin';
-    const isProActive = user?.isPro && user.proUntil && user.proUntil > new Date();
-    if (!isAdmin && !isProActive)
-      return res.status(403).json({ error: 'Réservé aux membres Pro' });
-
-    const { name, description, desc, logo, banner, category, subcat, subsubcat,
-            whatsapp, address, videoUrl, videoTitle, videoType } = req.body;
-
-    // Construire l'update boutique (merge avec l'existant)
-    const boutiqueUpdate = { ...(user.boutique?.toObject?.() || user.boutique || {}) };
-    if (name        !== undefined) boutiqueUpdate.name        = name;
-    if (description !== undefined) boutiqueUpdate.description = description;
-    if (desc        !== undefined) boutiqueUpdate.desc        = desc || description;
-    if (logo        !== undefined) boutiqueUpdate.logo        = logo;
-    if (banner      !== undefined) boutiqueUpdate.banner      = banner;
-    if (category    !== undefined) boutiqueUpdate.category    = category;
-    if (subcat      !== undefined) boutiqueUpdate.subcat      = subcat;
-    if (subsubcat   !== undefined) boutiqueUpdate.subsubcat   = subsubcat;
-    if (whatsapp    !== undefined) boutiqueUpdate.whatsapp    = whatsapp;
-    if (address     !== undefined) boutiqueUpdate.address     = address;
-    if (videoUrl    !== undefined) boutiqueUpdate.videoUrl    = videoUrl;
-    if (videoTitle  !== undefined) boutiqueUpdate.videoTitle  = videoTitle;
-    if (videoType   !== undefined) boutiqueUpdate.videoType   = videoType;
-    boutiqueUpdate.updatedAt = new Date();
-
-    // Mise à jour aussi des champs legacy pour la compatibilité
-    const legacyUpdate = {};
-    if (name)        legacyUpdate.boutiqueName = name;
-    if (description) legacyUpdate.boutiqueDesc = description;
-    if (whatsapp)    legacyUpdate['boutiqueSocial.whatsapp'] = whatsapp;
-    if (category)    legacyUpdate.boutiqueSector = category;
-
-    const updated = await User.findByIdAndUpdate(
-      req.user.id,
-      { $set: { boutique: boutiqueUpdate, ...legacyUpdate } },
-      { new: true }
-    ).select('boutique proPlan isPro proUntil');
-
-    console.log(`[BOUTIQUE] ✅ Mis à jour pour user ${req.user.id} — boutique="${boutiqueUpdate.name||'—'}"`);
-    res.json({ success: true, boutique: updated?.boutique || boutiqueUpdate });
-  } catch(err) {
-    console.error('[BOUTIQUE PUT]', err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ★ Boutique Pro — PATCH (compatibilité ascendante avec ancien endpoint)
+// ★ Boutique Pro — sauvegarder description
 app.patch('/api/me/boutique', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('isPro proUntil role');
@@ -3309,431 +2022,10 @@ app.patch('/api/me/boutique', auth, async (req, res) => {
     const update = {};
     allowed.forEach(k => { if (req.body[k] !== undefined) update[k] = req.body[k]; });
 
-    // Aussi mettre à jour l'objet boutique unifié
-    const boutiqueFields = {};
-    if (req.body.boutiqueName) boutiqueFields['boutique.name'] = req.body.boutiqueName;
-    if (req.body.boutiqueDesc) boutiqueFields['boutique.description'] = req.body.boutiqueDesc;
-    if (req.body.boutiqueSector) boutiqueFields['boutique.category'] = req.body.boutiqueSector;
-    if (req.body.boutiqueSocial?.whatsapp) boutiqueFields['boutique.whatsapp'] = req.body.boutiqueSocial.whatsapp;
-
-    const updated = await User.findByIdAndUpdate(req.user.id,
-      { $set: { ...update, ...boutiqueFields } },
-      { new: true }
-    ).select(allowed.join(' ') + ' boutique');
+    const updated = await User.findByIdAndUpdate(req.user.id, update, { new: true })
+      .select(allowed.join(' '));
     res.json({ success: true, boutique: updated });
   } catch(err) { res.status(500).json({ error: err.message }); }
-});
-
-// ★ Boutiques publiques — liste de toutes les boutiques Pro actives
-app.get('/api/boutiques', authOptional, async (req, res) => {
-  try {
-    const { category, search, limit = 50 } = req.query;
-    const now = new Date();
-
-    // Chercher tous les utilisateurs Pro actifs avec une boutique configurée
-    const filter = {
-      isPro: true,
-      proUntil: { $gt: now },
-      'boutique.name': { $exists: true, $ne: '' },
-    };
-    if (category) filter['boutique.category'] = category;
-
-    let users = await User.find(filter)
-      .select('prenom nom boutique proPlan isPro proUntil totalViews totalContacts avgRating ratingCount createdAt')
-      .sort({ 'boutique.updatedAt': -1, createdAt: -1 })
-      .limit(Number(limit))
-      .lean();
-
-    // Filtre de recherche textuelle
-    if (search) {
-      const q = search.toLowerCase();
-      users = users.filter(u =>
-        (u.boutique?.name||'').toLowerCase().includes(q) ||
-        (u.boutique?.description||'').toLowerCase().includes(q) ||
-        (`${u.prenom||''} ${u.nom||''}`).toLowerCase().includes(q)
-      );
-    }
-
-    // Compter les annonces de chaque vendeur
-    const sellerIds = users.map(u => u._id);
-    const adCounts  = await Ad.aggregate([
-      { $match: { seller: { $in: sellerIds }, active: true } },
-      { $group: { _id: '$seller', count: { $sum: 1 }, totalViews: { $sum: '$views' } } }
-    ]);
-    const countMap = {};
-    adCounts.forEach(a => { countMap[String(a._id)] = { count: a.count, views: a.totalViews }; });
-
-    const boutiques = users.map(u => ({
-      _id:         u._id,
-      name:        u.boutique?.name        || '',
-      description: u.boutique?.description || u.boutique?.desc || '',
-      logo:        u.boutique?.logo        || '',
-      category:    u.boutique?.category    || '',
-      subcat:      u.boutique?.subcat      || '',
-      address:     u.boutique?.address     || '',
-      whatsapp:    u.boutique?.whatsapp    || '',
-      videoUrl:    u.boutique?.videoUrl    || '',
-      videoTitle:  u.boutique?.videoTitle  || '',
-      banner:      u.boutique?.banner       || '',
-      sellerName:  `${u.prenom||''} ${u.nom||''}`.trim(),
-      sellerId:    u._id,
-      isPro:       u.isPro,
-      proPlan:     u.proPlan || 'starter',
-      avgRating:   u.avgRating  || 0,
-      ratingCount: u.ratingCount|| 0,
-      adCount:     countMap[String(u._id)]?.count || 0,
-      totalViews:  countMap[String(u._id)]?.views || 0,
-    }));
-
-    res.json({ boutiques, total: boutiques.length });
-  } catch(err) {
-    console.error('[BOUTIQUES]', err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ★ Boutique publique d'un vendeur (par sellerId)
-app.get('/api/boutiques/:sellerId', authOptional, async (req, res) => {
-  try {
-    const user = await User.findById(req.params.sellerId)
-      .select('prenom nom boutique proPlan isPro proUntil avgRating ratingCount totalViews createdAt')
-      .lean();
-    if (!user) return res.status(404).json({ error: 'Boutique introuvable' });
-
-    // Annonces du vendeur
-    const ads = await Ad.find({ seller: user._id, active: true })
-      .sort({ createdAt: -1 })
-      .select('title price category subCategory city photos views createdAt featured')
-      .lean();
-
-    const boutique = {
-      _id:         user._id,
-      name:        user.boutique?.name        || `${user.prenom||''} ${user.nom||''}`.trim()+' Shop',
-      description: user.boutique?.description || user.boutique?.desc || '',
-      logo:        user.boutique?.logo        || '',
-      category:    user.boutique?.category    || '',
-      subcat:      user.boutique?.subcat      || '',
-      address:     user.boutique?.address     || '',
-      whatsapp:    user.boutique?.whatsapp    || '',
-      videoUrl:    user.boutique?.videoUrl    || '',
-      videoTitle:  user.boutique?.videoTitle  || '',
-      banner:      user.boutique?.banner       || '',
-      sellerName:  `${user.prenom||''} ${user.nom||''}`.trim(),
-      sellerId:    user._id,
-      isPro:       user.isPro,
-      proPlan:     user.proPlan || 'starter',
-      avgRating:   user.avgRating  || 0,
-      ratingCount: user.ratingCount|| 0,
-      totalViews:  user.totalViews || 0,
-      ads,
-    };
-    res.json({ boutique });
-  } catch(err) {
-    console.error('[BOUTIQUE GET]', err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ★ Paiement Pro — souscrire via le frontend v31 (POST /api/payment/pro)
-app.post('/api/payment/pro', auth, async (req, res) => {
-  try {
-    const { phone, pin, amount, plan = 'starter' } = req.body;
-    if (!phone) return res.status(400).json({ error: 'Numéro Orange Money requis' });
-    if (!pin || pin.length < 4) return res.status(400).json({ error: 'Code PIN requis (4 chiffres)' });
-
-    const user = await User.findById(req.user.id);
-    if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
-
-    // Vérifier abonnement actif unique
-    if (user.isPro && user.proUntil && user.proUntil > new Date()) {
-      return res.status(409).json({
-        error: 'Vous avez déjà un abonnement Pro actif',
-        currentPlan: user.proPlan,
-        proUntil: user.proUntil,
-      });
-    }
-
-    // Calculer durée selon plan
-    const planConfig = {
-      starter:  { months: 1,  amount: 50000  },
-      business: { months: 3,  amount: 120000 },
-      premium:  { months: 12, amount: 360000 },
-    };
-    const cfg = planConfig[plan] || planConfig.starter;
-
-    const now = new Date();
-    const proUntil = new Date(now);
-    proUntil.setMonth(proUntil.getMonth() + cfg.months);
-
-    // Activer le Pro
-    await User.findByIdAndUpdate(req.user.id, {
-      isPro:    true,
-      proPlan:  plan,
-      proUntil: proUntil,
-    });
-
-    // Enregistrer le paiement
-    const ref = genRef();
-    await Payment.create({
-      type:       'boost',
-      buyer:      req.user.id,
-      buyerPhone: phone,
-      adTitle:    `Abonnement Pro ${plan} (${cfg.months} mois)`,
-      amount:     amount || cfg.amount,
-      boostType:  'pro_' + plan,
-      reference:  ref,
-      status:     'success',
-    });
-
-    // Email de confirmation
-    if (user.email && user.email.includes('@')) {
-      const planLabel = { starter:'Starter', business:'Business', premium:'Premium' }[plan] || plan;
-      const expiryStr = proUntil.toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
-      const annonces  = { starter:9, business:12, premium:18 }[plan] || 9;
-      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
-      <body style="font-family:Arial,sans-serif;background:#f5f5f5;padding:20px">
-        <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden">
-          <div style="background:linear-gradient(135deg,#FF5C00,#FF9500);padding:28px;text-align:center">
-            <div style="font-size:40px">⭐</div>
-            <div style="font-size:22px;font-weight:900;color:#fff;margin-top:8px">Bienvenue dans Pro ${planLabel} !</div>
-          </div>
-          <div style="padding:28px">
-            <p>Bonjour <strong>${user.prenom||'Commerçant'}</strong>,</p>
-            <p>Votre abonnement <strong>YouGouYou Pro ${planLabel}</strong> est activé.</p>
-            <div style="background:#FFF0E8;border:1px solid #FFCBB0;border-radius:10px;padding:16px;margin:16px 0">
-              <ul style="margin:0;padding-left:16px;font-size:13px;line-height:2.2">
-                <li>⭐ Badge PRO visible sur vos annonces</li>
-                <li>📋 Jusqu'à <strong>${annonces} annonces</strong> simultanées</li>
-                <li>📈 Priorité dans les résultats</li>
-                <li>🏪 Boutique personnalisée</li>
-                <li>📊 Statistiques avancées</li>
-              </ul>
-            </div>
-            <p style="font-size:13px;color:#666">Expire le : <strong>${expiryStr}</strong></p>
-            <p style="font-size:12px;color:#999">Référence : ${ref}</p>
-            <div style="text-align:center;margin-top:20px">
-              <a href="https://yougouyougou.net" style="background:#FF5C00;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:800;font-size:14px">Créer ma boutique →</a>
-            </div>
-          </div>
-        </div>
-      </body></html>`;
-      sendEmail(user.email, `⭐ YouGouYou Pro ${planLabel} activé !`, html,
-        `Bonjour ${user.prenom||''}, votre Pro ${planLabel} est actif jusqu'au ${expiryStr}. Réf: ${ref}`)
-        .catch(e => console.error('[PRO EMAIL]', e.message));
-    }
-
-    console.log(`[PAYMENT PRO] ✅ user=${req.user.id} plan=${plan} expires=${proUntil.toISOString()} ref=${ref}`);
-
-    // 🔔 Notification in-app — Pro activé
-    const planLabels2 = { starter:'Starter', business:'Business', premium:'Premium' };
-    await createNotif(
-      req.user.id,
-      'pro_activated',
-      '⭐ Abonnement Pro activé !',
-      `Votre YouGouYou Pro ${planLabels2[plan]||plan} est actif pour ${cfg.months} mois. Créez votre boutique !`,
-      'dashboard/pro',
-      '⭐',
-      { plan, months: cfg.months, proUntil: proUntil.toISOString(), reference: ref }
-    );
-
-    res.json({ success: true, reference: ref, proUntil: proUntil.toISOString(), plan, months: cfg.months });
-
-  } catch(err) {
-    console.error('[PAYMENT PRO]', err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ★ Résiliation/Suspension abonnement Pro
-app.post('/api/pro/resiliation', auth, async (req, res) => {
-  try {
-    const { type, reason, details, phone, plan, requestDate } = req.body;
-
-    if (!reason)  return res.status(400).json({ error: 'Motif requis' });
-    if (!details || details.trim().length < 10)
-      return res.status(400).json({ error: 'Veuillez détailler votre demande' });
-
-    const user = await User.findById(req.user.id).select('email prenom nom isPro proPlan proUntil');
-    if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
-
-    // Enregistrer la demande
-    const resil = await Resiliation.create({
-      userId:      req.user.id,
-      email:       user.email || '',
-      phone:       phone || '',
-      plan:        plan || user.proPlan || 'starter',
-      type:        type || 'suspension',
-      reason,
-      details,
-      requestDate: requestDate ? new Date(requestDate) : new Date(),
-      status:      'pending',
-    });
-
-    // Email à l'équipe support
-    const typeLabel = type === 'suspension' ? 'SUSPENSION' : 'RÉSILIATION';
-    const reasonLabels = {
-      prix: 'Prix trop élevé',
-      fonctionnalites: 'Fonctionnalités insuffisantes',
-      activite: "Pause d'activité",
-      changement: 'Changement de formule',
-      autre: 'Autre raison',
-    };
-    const planLabel = { starter:'Starter', business:'Business', premium:'Premium' }[plan||user.proPlan||'starter'];
-    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
-    <body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
-      <div style="background:#EF4444;padding:20px;border-radius:10px 10px 0 0;text-align:center">
-        <h2 style="color:#fff;margin:0">⏸ Demande de ${typeLabel}</h2>
-        <p style="color:rgba(255,255,255,.8);margin:4px 0 0">Abonnement Pro ${planLabel}</p>
-      </div>
-      <div style="background:#fff;border:1px solid #eee;border-top:none;padding:24px;border-radius:0 0 10px 10px">
-        <table style="width:100%;border-collapse:collapse">
-          <tr><td style="padding:6px 0;font-weight:700;width:130px;color:#555">Utilisateur</td><td>${user.prenom||''} ${user.nom||''}</td></tr>
-          <tr><td style="padding:6px 0;font-weight:700;color:#555">Email</td><td>${user.email||'—'}</td></tr>
-          <tr><td style="padding:6px 0;font-weight:700;color:#555">Téléphone</td><td>${phone||'—'}</td></tr>
-          <tr><td style="padding:6px 0;font-weight:700;color:#555">Formule</td><td>Pro ${planLabel}</td></tr>
-          <tr><td style="padding:6px 0;font-weight:700;color:#555">Type</td><td><strong style="color:#EF4444">${typeLabel}</strong></td></tr>
-          <tr><td style="padding:6px 0;font-weight:700;color:#555">Motif</td><td>${reasonLabels[reason]||reason}</td></tr>
-        </table>
-        <hr style="border:none;border-top:1px solid #eee;margin:14px 0">
-        <div style="font-weight:700;margin-bottom:6px">Justificatif :</div>
-        <div style="background:#FFF5F5;border:1px solid #FECACA;border-radius:8px;padding:14px;font-size:13px;line-height:1.7;color:#333">${details.replace(/\n/g,'<br>')}</div>
-        <div style="margin-top:14px;font-size:11px;color:#aaa">ID demande : ${resil._id} — ${new Date().toLocaleString('fr-FR')}</div>
-      </div>
-    </body></html>`;
-
-    sendEmail(process.env.EMAIL_SUPPORT || 'support.yougouyougou@gmail.com',
-      `[YouGouYou] ${typeLabel} Pro ${planLabel} — ${user.prenom||''} ${user.nom||''}`,
-      html, `Demande ${typeLabel} Pro ${planLabel} de ${user.prenom||''} ${user.nom||''}\nMotif: ${reasonLabels[reason]||reason}\n\n${details}`)
-      .catch(e => console.error('[RESIL EMAIL SUPPORT]', e.message));
-
-    // Email de confirmation à l'utilisateur
-    if (user.email && user.email.includes('@')) {
-      const confirmHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
-      <body style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:20px">
-        <div style="background:linear-gradient(135deg,#1E3A5F,#1D4ED8);padding:24px;border-radius:10px 10px 0 0;text-align:center">
-          <div style="font-size:36px">📨</div>
-          <div style="font-size:18px;font-weight:900;color:#fff;margin-top:6px">Demande reçue !</div>
-        </div>
-        <div style="background:#fff;border:1px solid #eee;border-top:none;padding:24px;border-radius:0 0 10px 10px">
-          <p>Bonjour <strong>${user.prenom||'Commerçant'}</strong>,</p>
-          <p>Votre demande de <strong>${typeLabel.toLowerCase()}</strong> de l'abonnement Pro ${planLabel} a bien été enregistrée.</p>
-          <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:14px;margin:16px 0;font-size:13px;line-height:1.7">
-            ⏰ Délai de traitement : <strong>48h ouvrées</strong><br>
-            📧 Vous recevrez une réponse sur cet email<br>
-            ✅ Vos avantages Pro restent actifs jusqu'au traitement
-          </div>
-          <p style="font-size:12px;color:#999">Référence : ${resil._id}</p>
-          <p style="font-size:12px;color:#666">Pour toute urgence : <a href="mailto:support.yougouyougou@gmail.com" style="color:#1D4ED8">support.yougouyougou@gmail.com</a></p>
-        </div>
-      </body></html>`;
-      sendEmail(user.email, `✅ Demande de ${typeLabel.toLowerCase()} Pro reçue — YouGouYou`, confirmHtml,
-        `Bonjour ${user.prenom||''}, votre demande de ${typeLabel.toLowerCase()} Pro a été reçue. Traitement sous 48h.`)
-        .catch(e => console.error('[RESIL EMAIL USER]', e.message));
-    }
-
-    console.log(`[RESILIATION] ✅ user=${req.user.id} type=${type} reason=${reason}`);
-    res.json({ success: true, id: resil._id, message: 'Demande enregistrée — traitement sous 48h ouvrées' });
-
-  } catch(err) {
-    console.error('[RESILIATION]', err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ★ Admin — liste des demandes de résiliation
-app.get('/api/admin/resiliations', auth, adminOnly, async (req, res) => {
-  try {
-    const { status, limit = 100 } = req.query;
-    const filter = status ? { status } : {};
-    const resils = await Resiliation.find(filter)
-      .populate('userId', 'prenom nom email')
-      .sort({ createdAt: -1 })
-      .limit(Number(limit))
-      .lean();
-    res.json({ resiliations: resils, total: resils.length });
-  } catch(err) { res.status(500).json({ error: err.message }); }
-});
-
-// ★ Admin — traiter une demande de résiliation
-app.patch('/api/admin/resiliations/:id', auth, adminOnly, async (req, res) => {
-  try {
-    const { status, note } = req.body;
-    if (!['treated','refused'].includes(status))
-      return res.status(400).json({ error: 'Status invalide (treated|refused)' });
-
-    const resil = await Resiliation.findByIdAndUpdate(req.params.id,
-      { status, note, treatedAt: new Date(), treatedBy: req.user.id },
-      { new: true }
-    ).populate('userId', 'prenom nom email isPro proUntil');
-
-    if (!resil) return res.status(404).json({ error: 'Demande introuvable' });
-
-    // Si accordée : désactiver le Pro
-    if (status === 'treated' && resil.type === 'resiliation') {
-      await User.findByIdAndUpdate(resil.userId._id, { isPro: false, proUntil: new Date() });
-    }
-
-    console.log(`[RESIL ADMIN] id=${req.params.id} status=${status} by=${req.user.id}`);
-    res.json({ success: true, resiliation: resil });
-  } catch(err) { res.status(500).json({ error: err.message }); }
-});
-
-// ★ Annonces boutique — enregistrer plusieurs articles en une seule requête (panier boutique)
-app.post('/api/ads/batch', auth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select('isPro proUntil proPlan role prenom nom');
-    const isAdmin = user?.role === 'admin';
-    const isProActive = user?.isPro && user.proUntil && user.proUntil > new Date();
-    if (!isAdmin && !isProActive)
-      return res.status(403).json({ error: 'Réservé aux membres Pro' });
-
-    const { ads } = req.body;
-    if (!Array.isArray(ads) || !ads.length)
-      return res.status(400).json({ error: 'Tableau ads[] requis' });
-
-    // Limite selon plan
-    const planLimits = { starter:9, business:12, premium:18 };
-    const limit = planLimits[user.proPlan||'starter'] || 9;
-
-    // Compter les annonces actives actuelles
-    const currentCount = await Ad.countDocuments({ seller: req.user.id, active: true });
-    const available = Math.max(0, limit - currentCount);
-    const toInsert  = ads.slice(0, available);
-
-    if (!toInsert.length)
-      return res.status(409).json({ error: `Limite de ${limit} annonces atteinte`, limit, currentCount });
-
-    const sellerName = `${user.prenom||''} ${user.nom||''}`.trim();
-    const docs = toInsert.map(ad => ({
-      title:       ad.title,
-      description: ad.description || '',
-      price:       Number(ad.price) || 0,
-      category:    ad.category || '',
-      subCategory: ad.subCategory || '',
-      subItem:     ad.subItem || '',
-      city:        ad.city || '',
-      quartier:    ad.quartier || '',
-      etat:        ad.etat || '',
-      photos:      Array.isArray(ad.photos) ? ad.photos.slice(0,8) : [],
-      seller:      req.user.id,
-      sellerName,
-      active:      true,
-      createdAt:   new Date(),
-    }));
-
-    const inserted = await Ad.insertMany(docs);
-    console.log(`[ADS BATCH] ✅ user=${req.user.id} inserted=${inserted.length}/${ads.length}`);
-
-    res.json({
-      success:  true,
-      inserted: inserted.length,
-      skipped:  ads.length - inserted.length,
-      ids:      inserted.map(a => a._id),
-    });
-  } catch(err) {
-    console.error('[ADS BATCH]', err.message);
-    res.status(500).json({ error: err.message });
-  }
 });
 
 // Épingler / désépingler une annonce dans la boutique
@@ -3900,8 +2192,22 @@ app.get('*', (req, res) => {
 });
 
 // ── START ────────────────────────────────────────────────────
-server.listen(PORT, () => {
-  console.log(`🚀 YouGouYou API v3 + Socket.io démarrée sur le port ${PORT}`);
+
+// ── DEBUG TEMPORAIRE : vérifier le token ──
+app.get('/api/auth/debug-token', (req, res) => {
+  const h = req.headers.authorization;
+  if (!h) return res.json({ error: 'Pas de header Authorization' });
+  const token = h.replace('Bearer ', '');
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    res.json({ ok: true, decoded, secretDefined: !!process.env.JWT_SECRET });
+  } catch(err) {
+    res.json({ ok: false, error: err.message, secretDefined: !!process.env.JWT_SECRET, tokenFirst50: token.substring(0,50) });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`🚀 YouGouYou API v3 démarrée sur le port ${PORT}`);
 
   // KEEP-ALIVE : ping toutes les 10 min (évite cold start Render free tier)
   const SELF_URL = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
