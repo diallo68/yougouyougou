@@ -12819,6 +12819,20 @@ function sendQuickMessage(){
       setTimeout(function(){ openModal('auth'); }, 400);
       return;
     }
+    if(data._status===402 || data.error==='payment_required'){
+      closeModal('message');
+      toast('⚠️ Vous avez déjà utilisé votre mise en relation gratuite ce mois-ci','warn',4000);
+      // Afficher modal de paiement
+      if(typeof openPaymentModal==='function'){
+        openPaymentModal(data);
+      } else {
+        // Fallback : message informatif
+        var fee = data.fee ? data.fee.toLocaleString('fr-FR')+' GNF' : '';
+        var fee = data.fee ? data.fee.toLocaleString('fr-FR')+' GNF' : '500 GNF';
+        toast('Contact gratuit du mois déjà utilisé. Frais requis: '+fee,'warn',5000);
+      }
+      return;
+    }
     if(data.error){ toast('❌ '+data.error,'err'); return; }
     var convId = data.conversationId || data._id || data.id;
     closeModal('message');
