@@ -14275,6 +14275,34 @@ document.addEventListener('mouseover', function(e){
   dd.style.left = rect.left + 'px';
   dd.style.zIndex = '99999';
 });
+
+// ── Refresh silencieux du token au chargement ──
+(function(){
+  var tok = localStorage.getItem('ygy_token');
+  if(!tok) return;
+  // Décoder le token pour voir quand il expire (sans bibliothèque)
+  try {
+    var payload = JSON.parse(atob(tok.split('.')[1]));
+    var expiresIn = payload.exp * 1000 - Date.now(); // ms restantes
+    var twoDays = 2 * 24 * 60 * 60 * 1000;
+    // Renouveler si expire dans moins de 2 jours
+    if(expiresIn < twoDays){
+      fetch('/api/auth/refresh', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + tok }
+      })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(d){
+        if(d && d.token){
+          localStorage.setItem('ygy_token', d.token);
+          console.log('[TOKEN] Renouvelé automatiquement');
+        }
+      })
+      .catch(function(){});
+    }
+  } catch(e) {}
+})();
+
 </script>
 </body>
 </html>
