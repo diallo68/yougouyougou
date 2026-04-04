@@ -1817,59 +1817,6 @@ app.get('/api/conversations/:id', auth, async (req, res) => {
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
-// Envoyer un message dans une conversation
-app.post('/api/conversations/:id', auth, async (req, res) => {
-  try {
-    const { text } = req.body;
-    if (!text || !text.trim()) return res.status(400).json({ error: 'Message vide' });
-
-    const conv = await Conversation.findById(req.params.id);
-    if (!conv) return res.status(404).json({ error: 'Conversation introuvable' });
-
-    const uid = req.user.id;
-    if (String(conv.buyerId) !== uid && String(conv.sellerId) !== uid)
-      return res.status(403).json({ error: 'Accès refusé' });
-
-    const isBuyer = String(conv.buyerId) === uid;
-    conv.messages.push({ senderId: uid, text: text.trim() });
-    conv.lastMessage = text.substring(0,100);
-    conv.updatedAt   = new Date();
-    if (isBuyer)  conv.unreadSeller += 1;
-    else          conv.unreadBuyer  += 1;
-    await conv.save();
-
-    // 🔔 Notification au destinataire
-    const recipientId = isBuyer ? conv.sellerId : conv.buyerId;
-    const senderName  = isBuyer ? conv.buyerName : conv.sellerName;
-    const notif = {
-      type:  'new_message',
-      title: '💬 Nouveau message',
-      body:  `${senderName||'Quelqu\'un'} vous a envoyé un message : "${text.substring(0,60)}${text.length>60?'…':''}"`,
-      link:  'dashboard/messages',
-      icon:  '💬',
-      data:  { conversationId: conv._id, adTitle: conv.adTitle },
-      createdAt: new Date(),
-    };
-    await createNotif(recipientId, notif.type, notif.title, notif.body, notif.link, notif.icon, notif.data);
-
-    // ⚡ Temps réel — émettre le message dans la room de la conversation
-    const last = conv.messages[conv.messages.length - 1];
-    emitMessage(conv._id, {
-      _id:       last._id,
-      senderId:  uid,
-      text:      last.text,
-      createdAt: last.createdAt,
-      convId:    String(conv._id),
-    });
-
-    // ⚡ Temps réel — notifier le destinataire (badge + popup)
-    emitNotif(recipientId, { ...notif, unreadCount: 1 });
-
-    res.json({ success: true, message: last });
-  } catch(err) { res.status(500).json({ error: err.message }); }
-});
-
-// ── Contact direct vendeur Pro (sans annonce) ────────────────
 app.post('/api/conversations/direct', auth, async (req, res) => {
   try {
     const { sellerId, message } = req.body;
@@ -1974,6 +1921,60 @@ app.post('/api/conversations/direct', auth, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Envoyer un message dans une conversation
+app.post('/api/conversations/:id', auth, async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text || !text.trim()) return res.status(400).json({ error: 'Message vide' });
+
+    const conv = await Conversation.findById(req.params.id);
+    if (!conv) return res.status(404).json({ error: 'Conversation introuvable' });
+
+    const uid = req.user.id;
+    if (String(conv.buyerId) !== uid && String(conv.sellerId) !== uid)
+      return res.status(403).json({ error: 'Accès refusé' });
+
+    const isBuyer = String(conv.buyerId) === uid;
+    conv.messages.push({ senderId: uid, text: text.trim() });
+    conv.lastMessage = text.substring(0,100);
+    conv.updatedAt   = new Date();
+    if (isBuyer)  conv.unreadSeller += 1;
+    else          conv.unreadBuyer  += 1;
+    await conv.save();
+
+    // 🔔 Notification au destinataire
+    const recipientId = isBuyer ? conv.sellerId : conv.buyerId;
+    const senderName  = isBuyer ? conv.buyerName : conv.sellerName;
+    const notif = {
+      type:  'new_message',
+      title: '💬 Nouveau message',
+      body:  `${senderName||'Quelqu\'un'} vous a envoyé un message : "${text.substring(0,60)}${text.length>60?'…':''}"`,
+      link:  'dashboard/messages',
+      icon:  '💬',
+      data:  { conversationId: conv._id, adTitle: conv.adTitle },
+      createdAt: new Date(),
+    };
+    await createNotif(recipientId, notif.type, notif.title, notif.body, notif.link, notif.icon, notif.data);
+
+    // ⚡ Temps réel — émettre le message dans la room de la conversation
+    const last = conv.messages[conv.messages.length - 1];
+    emitMessage(conv._id, {
+      _id:       last._id,
+      senderId:  uid,
+      text:      last.text,
+      createdAt: last.createdAt,
+      convId:    String(conv._id),
+    });
+
+    // ⚡ Temps réel — notifier le destinataire (badge + popup)
+    emitNotif(recipientId, { ...notif, unreadCount: 1 });
+
+    res.json({ success: true, message: last });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── Contact direct vendeur Pro (sans annonce) ────────────────
 
 // Marquer une conversation comme lue
 app.patch('/api/conversations/:id/read', auth, async (req, res) => {
